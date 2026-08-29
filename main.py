@@ -9,15 +9,11 @@ GMAIL_USER = os.environ.get("GMAIL_USER")
 GMAIL_PASS = os.environ.get("GMAIL_APP_PASS")
 
 BASE_URL = "https://v3.football.api-sports.io"
-
-# Ispravljeno zaglavlje za direktne API-Sports ključeve
 HEADERS = {
     'x-apisports-key': API_KEY
 }
 
-# Lige koje skeniramo (Top 5 + Balkanske i popularne lige da ostanemo unutar 100 API poziva)
-# 39: Premier League, 140: La Liga, 135: Serie A, 78: Bundesliga, 61: Ligue 1, 
-# 283: SuperLiga (SRB), 218: Eredivisie, 94: Primeir League, 203: Süper Lig, 2: Champions League
+# Top lige (ID-jevi)
 TOP_LEAGUES = [39, 140, 135, 78, 61, 283, 218, 94, 203, 2]
 
 def send_email(subject, body):
@@ -36,19 +32,25 @@ def send_email(subject, body):
 
 def get_todays_fixtures():
     today = datetime.now().strftime('%Y-%m-%d')
-    res = requests.get(f"{BASE_URL}/fixtures?date={today}", headers=HEADERS)
+    url = f"{BASE_URL}/fixtures?date={today}"
+    res = requests.get(url, headers=HEADERS)
     data = res.json()
-    fixtures = data.get('response', [])
     
-    # Filtriramo utakmice: prvo tražimo mečeve iz TOP_LEAGUES
+    # Debug provera grešaka sa API-ja
+    api_errors = data.get('errors', {})
+    if api_errors:
+        print(f"⚠️ API Greška: {api_errors}")
+    
+    fixtures = data.get('response', [])
+    print(f"Ukupno pronađeno utakmica na API-ju za danas ({today}): {len(fixtures)}")
+    
     popular_fixtures = [f for f in fixtures if f.get('league', {}).get('id') in TOP_LEAGUES]
     
-    # Ako u top ligama nema dovoljno mečeva, dodajemo ostale do max 80 utakmica ukupno
     if len(popular_fixtures) < 80:
         other_fixtures = [f for f in fixtures if f.get('league', {}).get('id') not in TOP_LEAGUES]
         popular_fixtures.extend(other_fixtures[:80 - len(popular_fixtures)])
         
-    return popular_fixtures
+    return popular_fixtures, api_errors
 
 def get_h2h(team1_id, team2_id):
     res = requests.get(f"{BASE_URL}/fixtures/headtohead?h2h={team1_id}-{team2_id}", headers=HEADERS)
@@ -57,7 +59,7 @@ def get_h2h(team1_id, team2_id):
 
 def evaluate_h2h(h2h_list):
     total = len(h2h_list)
-    if total < 5:  # Uslov: Minimum 5 H2H utakmica
+    if total < 5:
         return []
 
     stats = {
@@ -92,12 +94,11 @@ def evaluate_h2h(h2h_list):
         if 1 <= st_goals <= 3: stats["1-3 II pol"] += 1
         if ht_goals >= 2: stats["2+ I pol"] += 1
 
-    # Zadržava SAMO markete sa 100% prolaznošću
     perfect = [f"{market} (100% - {total}/{total})" for market, count in stats.items() if count == total]
     return perfect
 
 def main():
-    fixtures = get_todays_fixtures()
+    fixtures, api_errors = get_todays_fixtures()
     report = []
     scanned_count = 0
 
@@ -118,8 +119,11 @@ def main():
 
     today_str = datetime.now().strftime('%d.%m.%Y')
     
-    status_header = f"📊 Skenirano utakmica: {scanned_count}\n\n"
-    
+    status_header = f"📊 Skenirano utakmica: {scanned_count}\n"
+    if api_errors:
+        status_header += f"⚠️ API Status/Greške: {api_errors}\n"
+    status_header += "\n"
+
     if report:
         email_body = f"Dnevni izveštaj H2H 100% tradicije golova ({today_str}):\n\n" + status_header + "\n\n".join(report)
         send_email(f"🎯 Fudbal H2H 100% Tipovi - {today_str}", email_body)
