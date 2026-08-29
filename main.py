@@ -66,11 +66,9 @@ def get_fixture_odds(fixture_id):
     if not bookmakers:
         return odds_dict
         
-    # Uzimamo prvu dostupnu kladionicu (npr. Bet365 ili slično)
     bets = bookmakers[0].get('bets', [])
     for bet in bets:
         name = bet.get('name')
-        # Goals Over/Under (Ukupno golova)
         if name in ["Goals Over/Under", "Match Goals"]:
             for val in bet.get('values', []):
                 if val.get('value') == "Over 2.5":
@@ -79,8 +77,15 @@ def get_fixture_odds(fixture_id):
     return odds_dict
 
 def evaluate_h2h(h2h_list):
-    total = len(h2h_list)
-    if total < 5:
+    # Sortiramo mečeve od najnovijeg ka najstarijem
+    sorted_h2h = sorted(h2h_list, key=lambda x: x['fixture']['date'], reverse=True)
+    
+    # Uzimamo tačno poslednje 3 utakmice
+    last_3 = sorted_h2h[:3]
+    total = len(last_3)
+    
+    # Ako nemaju bar 3 međusobna meča u istoriji, preskačemo
+    if total < 3:
         return []
 
     stats = {
@@ -93,7 +98,7 @@ def evaluate_h2h(h2h_list):
         "2+ I pol": 0
     }
 
-    for match in h2h_list:
+    for match in last_3:
         score = match.get('score', {})
         ht_home = score.get('halftime', {}).get('home')
         ht_away = score.get('halftime', {}).get('away')
@@ -115,12 +120,13 @@ def evaluate_h2h(h2h_list):
         if 1 <= st_goals <= 3: stats["1-3 II pol"] += 1
         if ht_goals >= 2: stats["2+ I pol"] += 1
 
+    # Proveravamo šta je došlo 3 od 3 puta (100%)
     perfect = []
     for market, count in stats.items():
-        if count == total:
+        if count == 3:
             perfect.append({
                 "market": market,
-                "text": f"{market} (100% - {total}/{total})"
+                "text": f"{market} (100% - 3/3)"
             })
     return perfect
 
@@ -142,7 +148,6 @@ def main():
         picks = evaluate_h2h(h2h_matches)
 
         if picks:
-            # Povlačimo kvote samo za mečeve koji prođu filter
             odds = get_fixture_odds(fixture_id)
             
             picks_fmt = []
@@ -165,10 +170,10 @@ def main():
     status_header += "\n"
 
     if report:
-        email_body = f"Dnevni izveštaj H2H 100% tradicije golova sa kvotama ({today_str}):\n\n" + status_header + "\n\n".join(report)
-        send_email(f"🎯 Fudbal H2H 100% Tipovi + Kvote - {today_str}", email_body)
+        email_body = f"Dnevni izveštaj H2H (Zadnje 3 utakmice = 100%) sa kvotama ({today_str}):\n\n" + status_header + "\n\n".join(report)
+        send_email(f"🎯 Fudbal H2H (3/3) Tipovi - {today_str}", email_body)
     else:
-        email_body = f"{status_header}Danas nema utakmica sa 100% H2H prolaznošću (min 5 mečeva)."
+        email_body = f"{status_header}Danas nema utakmica sa 100% prolaznošću u zadnja 3 H2H meča."
         send_email(f"ℹ️ Fudbal H2H Tipovi - {today_str}", email_body)
 
 if __name__ == "__main__":
