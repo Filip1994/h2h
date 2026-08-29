@@ -1,4 +1,5 @@
 import os
+import time
 import requests
 import smtplib
 from datetime import datetime
@@ -13,10 +14,12 @@ HEADERS = {
     'x-apisports-key': API_KEY
 }
 
-# Top lige (ID-jevi)
 TOP_LEAGUES = [39, 140, 135, 78, 61, 283, 218, 94, 203, 2]
 
 def send_email(subject, body):
+    if not GMAIL_USER or not GMAIL_PASS:
+        print("❌ Nedostaju Gmail podešavanja.")
+        return
     msg = MIMEText(body, 'plain', 'utf-8')
     msg['Subject'] = subject
     msg['From'] = GMAIL_USER
@@ -25,7 +28,7 @@ def send_email(subject, body):
     try:
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
             server.login(GMAIL_USER, GMAIL_PASS)
-            server.sendmail(GMAIL_USER, GMAIL_PASS, msg.as_string())
+            server.sendmail(GMAIL_USER, GMAIL_USER, msg.as_string())
         print("Mejl uspešno poslat!")
     except Exception as e:
         print(f"Greška pri slanju mejla: {e}")
@@ -33,58 +36,79 @@ def send_email(subject, body):
 def get_todays_fixtures():
     today = datetime.now().strftime('%Y-%m-%d')
     url = f"{BASE_URL}/fixtures?date={today}"
-    res = requests.get(url, headers=HEADERS)
-    data = res.json()
+    try:
+        res = requests.get(url, headers=HEADERS, timeout=15)
+        data = res.json()
+    except Exception as e:
+        print(f"Greška pri pozivu API-ja: {e}")
+        return [], {"error": str(e)}
     
     api_errors = data.get('errors', {})
-    fixtures = data.get('response', [])
+    response = data.get('response')
+    fixtures = response if isinstance(response, list) else []
     
-    popular_fixtures = [f for f in fixtures if f.get('league', {}).get('id') in TOP_LEAGUES]
+    popular_fixtures = [f for f in fixtures if isinstance(f, dict) and f.get('league', {}).get('id') in TOP_LEAGUES]
     
-    if len(popular_fixtures) < 70:
-        other_fixtures = [f for f in fixtures if f.get('league', {}).get('id') not in TOP_LEAGUES]
-        popular_fixtures.extend(other_fixtures[:70 - len(popular_fixtures)])
+    if len(popular_fixtures) < 50:
+        other_fixtures = [f for f in fixtures if isinstance(f, dict) and f.get('league', {}).get('id') not in TOP_LEAGUES]
+        popular_fixtures.extend(other_fixtures[:50 - len(popular_fixtures)])
         
     return popular_fixtures, api_errors
 
 def get_h2h(team1_id, team2_id):
-    res = requests.get(f"{BASE_URL}/fixtures/headtohead?h2h={team1_id}-{team2_id}", headers=HEADERS)
-    data = res.json()
-    return data.get('response', [])
+    try:
+        res = requests.get(f"{BASE_URL}/fixtures/headtohead?h2h={team1_id}-{team2_id}", headers=HEADERS, timeout=15)
+        data = res.json()
+        response = data.get('response')
+        return response if isinstance(response, list) else []
+    except Exception as e:
+        print(f"Greška u H2H: {e}")
+        return []
 
 def get_fixture_odds(fixture_id):
-    """Izvlači kvote za golove za datu utakmicu"""
-    res = requests.get(f"{BASE_URL}/odds?fixture={fixture_id}", headers=HEADERS)
-    data = res.json()
-    response = data.get('response', [])
-    
-    odds_dict = {}
-    if not response:
+    try:
+        res = requests.get(f"{BASE_URL}/odds?fixture={fixture_id}", headers=HEADERS, timeout=15)
+        data = res.json()
+        response = data.get('response')
+        if not isinstance(response, list) or not response:
+            return {}
+            
+        bookmakers = response[0].get('bookmakers', [])
+        if not bookmakers or not isinstance(bookmakers, list):
+            return {}
+            
+        bets = bookmakers[0].get('bets', [])
+        if not isinstance(bets, list):
+            return {}
+
+        odds_dict = {}
+        for bet in bets:
+            if not isinstance(bet, dict): continue
+            name = bet.get('name')
+            if name in ["Goals Over/Under", "Match Goals"]:
+                vals = bet.get('values', [])
+                if isinstance(vals, list):
+                    for val in vals:
+                        if isinstance(val, dict) and val.get('value') == "Over 2.5":
+                            odds_dict["3+ Ukupno"] = val.get('odd')
+                        
         return odds_dict
-        
-    bookmakers = response[0].get('bookmakers', [])
-    if not bookmakers:
-        return odds_dict
-        
-    bets = bookmakers[0].get('bets', [])
-    for bet in bets:
-        name = bet.get('name')
-        if name in ["Goals Over/Under", "Match Goals"]:
-            for val in bet.get('values', []):
-                if val.get('value') == "Over 2.5":
-                    odds_dict["3+ Ukupno"] = val.get('odd')
-                    
-    return odds_dict
+    except Exception:
+        return {}
 
 def evaluate_h2h(h2h_list):
-    # Sortiramo mečeve od najnovijeg ka najstarijem
-    sorted_h2h = sorted(h2h_list, key=lambda x: x['fixture']['date'], reverse=True)
-    
-    # Uzimamo tačno poslednje 3 utakmice
+    if not isinstance(h2h_list, list) or not h2h_list:
+        return []
+
+    def extract_date(match):
+        if isinstance(match, dict):
+            return match.get('fixture', {}).get('date', '') or ''
+        return ''
+
+    sorted_h2h = sorted(h2h_list, key=extract_date, reverse=True)
     last_3 = sorted_h2h[:3]
     total = len(last_3)
     
-    # Ako nemaju bar 3 međusobna meča u istoriji, preskačemo
     if total < 3:
         return []
 
@@ -99,18 +123,27 @@ def evaluate_h2h(h2h_list):
     }
 
     for match in last_3:
-        score = match.get('score', {})
-        ht_home = score.get('halftime', {}).get('home')
-        ht_away = score.get('halftime', {}).get('away')
-        ft_home = score.get('fulltime', {}).get('home')
-        ft_away = score.get('fulltime', {}).get('away')
+        if not isinstance(match, dict):
+            continue
+            
+        score = match.get('score') or {}
+        halftime = score.get('halftime') or {}
+        fulltime = score.get('fulltime') or {}
+
+        ht_home = halftime.get('home')
+        ht_away = halftime.get('away')
+        ft_home = fulltime.get('home')
+        ft_away = fulltime.get('away')
 
         if None in (ht_home, ht_away, ft_home, ft_away):
             continue
 
-        ft_goals = ft_home + ft_away
-        ht_goals = ht_home + ht_away
-        st_goals = ft_goals - ht_goals
+        try:
+            ft_goals = int(ft_home) + int(ft_away)
+            ht_goals = int(ht_home) + int(ht_away)
+            st_goals = ft_goals - ht_goals
+        except (ValueError, TypeError):
+            continue
 
         if 1 <= ft_goals <= 3: stats["1-3 Golova"] += 1
         if 2 <= ft_goals <= 4: stats["2-4 Golova"] += 1
@@ -120,7 +153,6 @@ def evaluate_h2h(h2h_list):
         if 1 <= st_goals <= 3: stats["1-3 II pol"] += 1
         if ht_goals >= 2: stats["2+ I pol"] += 1
 
-    # Proveravamo šta je došlo 3 od 3 puta (100%)
     perfect = []
     for market, count in stats.items():
         if count == 3:
@@ -136,31 +168,41 @@ def main():
     scanned_count = 0
 
     for item in fixtures:
-        fixture_id = item['fixture']['id']
-        home = item['teams']['home']['name']
-        away = item['teams']['away']['name']
-        home_id = item['teams']['home']['id']
-        away_id = item['teams']['away']['id']
-        league_name = item['league']['name']
+        if not isinstance(item, dict): continue
+        
+        try:
+            fixture_id = item.get('fixture', {}).get('id')
+            home = item.get('teams', {}).get('home', {}).get('name', 'Home')
+            away = item.get('teams', {}).get('away', {}).get('name', 'Away')
+            home_id = item.get('teams', {}).get('home', {}).get('id')
+            away_id = item.get('teams', {}).get('away', {}).get('id')
+            league_name = item.get('league', {}).get('name', 'League')
 
-        h2h_matches = get_h2h(home_id, away_id)
-        scanned_count += 1
-        picks = evaluate_h2h(h2h_matches)
+            if not home_id or not away_id:
+                continue
 
-        if picks:
-            odds = get_fixture_odds(fixture_id)
-            
-            picks_fmt = []
-            for p in picks:
-                market_name = p['market']
-                odd_val = odds.get(market_name)
-                if odd_val:
-                    picks_fmt.append(f"   👉 {p['text']} | Kvota: {odd_val}")
-                else:
-                    picks_fmt.append(f"   👉 {p['text']}")
+            h2h_matches = get_h2h(home_id, away_id)
+            scanned_count += 1
+            picks = evaluate_h2h(h2h_matches)
 
-            match_str = f"⚽ [{league_name}] {home} vs {away}\n" + "\n".join(picks_fmt)
-            report.append(match_str)
+            if picks:
+                odds = get_fixture_odds(fixture_id) if fixture_id else {}
+                picks_fmt = []
+                for p in picks:
+                    market_name = p['market']
+                    odd_val = odds.get(market_name)
+                    if odd_val:
+                        picks_fmt.append(f"   👉 {p['text']} | Kvota: {odd_val}")
+                    else:
+                        picks_fmt.append(f"   👉 {p['text']}")
+
+                match_str = f"⚽ [{league_name}] {home} vs {away}\n" + "\n".join(picks_fmt)
+                report.append(match_str)
+                
+            time.sleep(0.1)
+        except Exception as e:
+            print(f"Greška pri obradi utakmice: {e}")
+            continue
 
     today_str = datetime.now().strftime('%d.%m.%Y')
     
