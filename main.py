@@ -25,7 +25,7 @@ def send_email(subject, body):
     try:
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
             server.login(GMAIL_USER, GMAIL_PASS)
-            server.sendmail(GMAIL_USER, GMAIL_USER, msg.as_string())
+            server.sendmail(GMAIL_USER, GMAIL_PASS, msg.as_string())
         print("Mejl uspešno poslat!")
     except Exception as e:
         print(f"Greška pri slanju mejla: {e}")
@@ -36,19 +36,14 @@ def get_todays_fixtures():
     res = requests.get(url, headers=HEADERS)
     data = res.json()
     
-    # Debug provera grešaka sa API-ja
     api_errors = data.get('errors', {})
-    if api_errors:
-        print(f"⚠️ API Greška: {api_errors}")
-    
     fixtures = data.get('response', [])
-    print(f"Ukupno pronađeno utakmica na API-ju za danas ({today}): {len(fixtures)}")
     
     popular_fixtures = [f for f in fixtures if f.get('league', {}).get('id') in TOP_LEAGUES]
     
-    if len(popular_fixtures) < 80:
+    if len(popular_fixtures) < 70:
         other_fixtures = [f for f in fixtures if f.get('league', {}).get('id') not in TOP_LEAGUES]
-        popular_fixtures.extend(other_fixtures[:80 - len(popular_fixtures)])
+        popular_fixtures.extend(other_fixtures[:70 - len(popular_fixtures)])
         
     return popular_fixtures, api_errors
 
@@ -56,6 +51,32 @@ def get_h2h(team1_id, team2_id):
     res = requests.get(f"{BASE_URL}/fixtures/headtohead?h2h={team1_id}-{team2_id}", headers=HEADERS)
     data = res.json()
     return data.get('response', [])
+
+def get_fixture_odds(fixture_id):
+    """Izvlači kvote za golove za datu utakmicu"""
+    res = requests.get(f"{BASE_URL}/odds?fixture={fixture_id}", headers=HEADERS)
+    data = res.json()
+    response = data.get('response', [])
+    
+    odds_dict = {}
+    if not response:
+        return odds_dict
+        
+    bookmakers = response[0].get('bookmakers', [])
+    if not bookmakers:
+        return odds_dict
+        
+    # Uzimamo prvu dostupnu kladionicu (npr. Bet365 ili slično)
+    bets = bookmakers[0].get('bets', [])
+    for bet in bets:
+        name = bet.get('name')
+        # Goals Over/Under (Ukupno golova)
+        if name in ["Goals Over/Under", "Match Goals"]:
+            for val in bet.get('values', []):
+                if val.get('value') == "Over 2.5":
+                    odds_dict["3+ Ukupno"] = val.get('odd')
+                    
+    return odds_dict
 
 def evaluate_h2h(h2h_list):
     total = len(h2h_list)
@@ -94,7 +115,13 @@ def evaluate_h2h(h2h_list):
         if 1 <= st_goals <= 3: stats["1-3 II pol"] += 1
         if ht_goals >= 2: stats["2+ I pol"] += 1
 
-    perfect = [f"{market} (100% - {total}/{total})" for market, count in stats.items() if count == total]
+    perfect = []
+    for market, count in stats.items():
+        if count == total:
+            perfect.append({
+                "market": market,
+                "text": f"{market} (100% - {total}/{total})"
+            })
     return perfect
 
 def main():
@@ -103,6 +130,7 @@ def main():
     scanned_count = 0
 
     for item in fixtures:
+        fixture_id = item['fixture']['id']
         home = item['teams']['home']['name']
         away = item['teams']['away']['name']
         home_id = item['teams']['home']['id']
@@ -114,7 +142,19 @@ def main():
         picks = evaluate_h2h(h2h_matches)
 
         if picks:
-            match_str = f"⚽ [{league_name}] {home} vs {away}\n" + "\n".join([f"   👉 {p}" for p in picks])
+            # Povlačimo kvote samo za mečeve koji prođu filter
+            odds = get_fixture_odds(fixture_id)
+            
+            picks_fmt = []
+            for p in picks:
+                market_name = p['market']
+                odd_val = odds.get(market_name)
+                if odd_val:
+                    picks_fmt.append(f"   👉 {p['text']} | Kvota: {odd_val}")
+                else:
+                    picks_fmt.append(f"   👉 {p['text']}")
+
+            match_str = f"⚽ [{league_name}] {home} vs {away}\n" + "\n".join(picks_fmt)
             report.append(match_str)
 
     today_str = datetime.now().strftime('%d.%m.%Y')
@@ -125,8 +165,8 @@ def main():
     status_header += "\n"
 
     if report:
-        email_body = f"Dnevni izveštaj H2H 100% tradicije golova ({today_str}):\n\n" + status_header + "\n\n".join(report)
-        send_email(f"🎯 Fudbal H2H 100% Tipovi - {today_str}", email_body)
+        email_body = f"Dnevni izveštaj H2H 100% tradicije golova sa kvotama ({today_str}):\n\n" + status_header + "\n\n".join(report)
+        send_email(f"🎯 Fudbal H2H 100% Tipovi + Kvote - {today_str}", email_body)
     else:
         email_body = f"{status_header}Danas nema utakmica sa 100% H2H prolaznošću (min 5 mečeva)."
         send_email(f"ℹ️ Fudbal H2H Tipovi - {today_str}", email_body)
