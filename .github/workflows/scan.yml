@@ -1,13 +1,18 @@
-name: Daily H2H Scanner
+name: H2H Multi-Key Scanner & Tracker
 
 on:
   schedule:
-    - cron: '0 6 * * *'
+    - cron: '22 6 * * *'   # 08:22h - Jutarnje skeniranje
+    - cron: '30 21 * * *'  # 23:30h - Večernja provera rezultata
+    - cron: '50 21 * * 0'  # Nedelja 23:50h - Nedeljni P&L izveštaj
   workflow_dispatch:
 
 jobs:
-  run-scanner:
+  run-tracker:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
     steps:
       - name: Checkout kod
         uses: actions/checkout@v3
@@ -20,9 +25,40 @@ jobs:
       - name: Instaliraj biblioteke
         run: pip install requests
 
-      - name: Pokreni skriptu
+      - name: Pokreni Jutarnje Skeniranje
+        if: github.event.schedule == '22 6 * * *' || github.event_name == 'workflow_dispatch'
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+          API_KEY_2: ${{ secrets.API_KEY_2 }}
+          API3: ${{ secrets.API3 }}
           GMAIL_USER: ${{ secrets.GMAIL_USER }}
           GMAIL_APP_PASS: ${{ secrets.GMAIL_APP_PASS }}
-        run: python main.py
+        run: python main.py morning
+
+      - name: Pokreni Večernju Proveru
+        if: github.event.schedule == '30 21 * * *'
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+          API_KEY_2: ${{ secrets.API_KEY_2 }}
+          API3: ${{ secrets.API3 }}
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASS: ${{ secrets.GMAIL_APP_PASS }}
+        run: python main.py evening
+
+      - name: Pokreni Nedeljni Izveštaj
+        if: github.event.schedule == '50 21 * * 0'
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+          API_KEY_2: ${{ secrets.API_KEY_2 }}
+          API3: ${{ secrets.API3 }}
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASS: ${{ secrets.GMAIL_APP_PASS }}
+        run: python main.py weekly
+
+      - name: Sačuvaj bazu opklada na GitHub (Auto Commit)
+        run: |
+          git config --global user.name "H2H Tracker Bot"
+          git config --global user.email "bot@github.com"
+          git add bets.json
+          git commit -m "Auto update bets.json [skip ci]" || exit 0
+          git push
