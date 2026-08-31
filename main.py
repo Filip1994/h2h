@@ -57,22 +57,21 @@ class APIRotator:
 
 api = APIRotator(KEYS)
 
-# ==================== KONFIGURACIJA & FILTERI ====================
+# ==================== STRATEGIJA & FILTERI ====================
 GMAIL_USER = os.environ.get("GMAIL_USER")
 GMAIL_PASS = os.environ.get("GMAIL_APP_PASS")
 BETS_FILE = "bets.json"
 
 MIN_H2H_MATCHES = 4
 MIN_ACCURACY_PCT = 75.0
+MIN_ODD = 1.35  # Strogi filter: Preskače sve kvote manje od 1.35!
 
-# Izbacujemo Južnu Ameriku i Afriku
 EXCLUDED_COUNTRIES = [
     "Brazil", "Argentina", "Colombia", "Chile", "Uruguay", "Paraguay", "Peru",
     "Ecuador", "Bolivia", "Venezuela", "Egypt", "Morocco", "Tunisia", "Algeria",
     "South Africa", "Nigeria", "Ghana", "Senegal", "Cameroon", "Kenya", "Ivory Coast"
 ]
 
-# Izbacujemo omladince, amatere i B timove (MLS Next Pro, rezerve...)
 EXCLUDED_LEAGUE_KEYWORDS = [
     "U19", "U20", "U21", "U23", "Sub-19", "Sub-20", "Reserve", "Reserves",
     "Amateur", "Oberliga", "Regional", "District", "5th Division", "6th Division",
@@ -117,7 +116,6 @@ def save_bets(bets):
         json.dump(bets, f, ensure_ascii=False, indent=4)
 
 def fetch_real_odds(fixture_id):
-    """Povlači ISKLJUČIVO stvarne kvote iz kladionice bez ikakvih pretpostavki"""
     url = f"https://v3.football.api-sports.io/odds?fixture={fixture_id}"
     data = api.fetch(url)
     odds_dict = {}
@@ -130,7 +128,7 @@ def fetch_real_odds(fixture_id):
                 for b in bets:
                     name = b.get('name', '')
                     values = b.get('values', [])
-                    
+
                     if name == "Goals Over/Under":
                         for v in values:
                             if v.get('value') == "Over 2.5":
@@ -145,6 +143,14 @@ def fetch_real_odds(fixture_id):
                         for v in values:
                             if v.get('value') == "Over 0.5":
                                 odds_dict["1+ I pol"] = float(v.get('odd'))
+                    elif "Second Half" in name and "Over/Under" in name:
+                        for v in values:
+                            if v.get('value') == "Over 0.5":
+                                odds_dict["1+ II pol"] = float(v.get('odd'))
+                    elif name in ["Exact Goals Number", "Total Goals"]:
+                        for v in values:
+                            if v.get('value') in ["2-3", "2 - 3"]:
+                                odds_dict["2-3 Golova"] = float(v.get('odd'))
     except Exception:
         pass
     return odds_dict
@@ -166,7 +172,7 @@ def morning_scan():
         fixture_id = fixture.get('id')
         status_short = fixture.get('status', {}).get('short')
 
-        # STROGA PROVERA 1: Preskačemo utakmice koje su počele ili se završile!
+        # PROVERA 1: Preskače mečeve koji su počeli ili završeni
         if status_short not in ['NS', 'TBD']:
             continue
 
@@ -180,7 +186,7 @@ def morning_scan():
         league = league_info.get('name', 'Liga')
         country = league_info.get('country', 'Nacionalno')
 
-        # STROGA PROVERA 2: Filter liga i država
+        # PROVERA 2: Filter liga i država
         if not is_allowed_league(country, league):
             continue
 
@@ -190,7 +196,16 @@ def morning_scan():
         if total < MIN_H2H_MATCHES:
             continue
 
-        stats = {"3+ Ukupno": 0, "GG": 0, "1-3 Golova": 0, "2-4 Golova": 0, "1+ I pol": 0}
+        stats = {
+            "3+ Ukupno": 0, 
+            "GG": 0, 
+            "1-3 Golova": 0, 
+            "2-4 Golova": 0,
+            "2-3 Golova": 0, 
+            "1+ I pol": 0,
+            "1+ II pol": 0,
+            "1-3 I pol & 1-3 II pol": 0
+        }
         history_lines = []
 
         for m in h2h_matches:
@@ -203,12 +218,16 @@ def morning_scan():
 
             ft_g = ft_h + ft_a
             ht_g = ht_h + ht_a
+            sh_g = ft_g - ht_g
 
             if ft_g >= 3: stats["3+ Ukupno"] += 1
             if ft_h > 0 and ft_a > 0: stats["GG"] += 1
             if 1 <= ft_g <= 3: stats["1-3 Golova"] += 1
             if 2 <= ft_g <= 4: stats["2-4 Golova"] += 1
+            if 2 <= ft_g <= 3: stats["2-3 Golova"] += 1
             if ht_g >= 1: stats["1+ I pol"] += 1
+            if sh_g >= 1: stats["1+ II pol"] += 1
+            if (1 <= ht_g <= 3) and (1 <= sh_g <= 3): stats["1-3 I pol & 1-3 II pol"] += 1
 
             history_lines.append(f"   • {home} {ft_h}:{ft_a} ({ht_h}:{ht_a}) {away}")
 
@@ -218,9 +237,10 @@ def morning_scan():
         for market, count in stats.items():
             pct = (count / total) * 100
             if pct >= MIN_ACCURACY_PCT:
-                # STROGA PROVERA 3: NEMA LAŽNIH KVOTA! Ako nema prave kvote na API-ju, preskači!
                 real_odd = odds.get(market)
-                if not real_odd or real_odd <= 1.0:
+                
+                # PROVERA 3: Nema lažnih kvota i mora biti >= 1.35!
+                if not real_odd or real_odd < MIN_ODD:
                     continue
 
                 pick_str = f"{market} -> {pct:.0f}% ({count}/{total}) | Kvota: {real_odd:.2f}"
@@ -256,7 +276,7 @@ def morning_scan():
     # Slanje mejla
     body = f"🚀 JUTARNJI H2H SKENER & KVOTE ({today_formatted})\n\n"
     body += "==== ⚽ FUDBAL ====\n\n" + ("\n\n------------------------\n\n".join(fb_picks_lines) if fb_picks_lines else "Nema parova koji ispunjavaju sve kriterijume danas.")
-    body += f"\n\n📌 Sve opklade su sačuvane sa ulogom od 1.000 RSD u bets.json bazu."
+    body += f"\n\n📌 Sve prihvaćene opklade su sačuvane sa ulogom od 1.000 RSD u bazu."
 
     send_email(f"🎯 Dnevni H2H Skener - {today_formatted}", body)
 
@@ -284,6 +304,7 @@ def evening_settle():
 
                     ft_goals = ft_h + ft_a
                     ht_goals = ht_h + ht_a
+                    sh_goals = ft_goals - ht_goals
                     market = b['market']
                     is_win = False
 
@@ -291,7 +312,10 @@ def evening_settle():
                     elif market == "GG" and ft_h > 0 and ft_a > 0: is_win = True
                     elif market == "1-3 Golova" and 1 <= ft_goals <= 3: is_win = True
                     elif market == "2-4 Golova" and 2 <= ft_goals <= 4: is_win = True
+                    elif market == "2-3 Golova" and 2 <= ft_goals <= 3: is_win = True
                     elif market == "1+ I pol" and ht_goals >= 1: is_win = True
+                    elif market == "1+ II pol" and sh_goals >= 1: is_win = True
+                    elif market == "1-3 I pol & 1-3 II pol" and (1 <= ht_goals <= 3) and (1 <= sh_goals <= 3): is_win = True
 
                     if is_win:
                         b['status'] = 'WIN'
@@ -304,7 +328,7 @@ def evening_settle():
 
     if updated:
         save_bets(bets)
-        print("Večernja provera kompletirana. bets.json ažuriran!")
+        print("Večernja provera kompletirana. bets.json je ažuriran!")
 
 # ==================== NEDELJNI P&L IZVEŠTAJ ====================
 def weekly_report():
