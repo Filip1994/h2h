@@ -1,23 +1,91 @@
 import os
+import sys
+import json
 import requests
 import smtplib
 from datetime import datetime
 from email.mime.text import MIMEText
 
-API_KEY = os.environ.get("API_FOOTBALL_KEY")
+# ==================== ROTATOR API KLJUČEVA ====================
+KEYS = [
+    os.environ.get("API_FOOTBALL_KEY"),
+    os.environ.get("API_KEY_2"),
+    os.environ.get("API3")
+]
+KEYS = [k for k in KEYS if k]
+
+class APIRotator:
+    def __init__(self, keys):
+        self.keys = keys
+        self.current_idx = 0
+
+    def get_headers(self):
+        if not self.keys:
+            return {}
+        return {'x-apisports-key': self.keys[self.current_idx]}
+
+    def rotate(self):
+        if len(self.keys) > 1:
+            self.current_idx = (self.current_idx + 1) % len(self.keys)
+            print(f"🔄 Prebačeno na API ključ #{self.current_idx + 1}")
+
+    def fetch(self, url, params=None):
+        attempts = 0
+        max_attempts = len(self.keys) * 2 if self.keys else 1
+        
+        while attempts < max_attempts:
+            try:
+                res = requests.get(url, headers=self.get_headers(), params=params, timeout=10)
+                if res.status_code in [429, 403]:
+                    self.rotate()
+                    attempts += 1
+                    continue
+                
+                data = res.json()
+                if isinstance(data, dict) and data.get("errors"):
+                    errs = data.get("errors")
+                    if isinstance(errs, dict) and ("requests" in errs or "rateLimit" in errs):
+                        self.rotate()
+                        attempts += 1
+                        continue
+                return data
+            except Exception as e:
+                print(f"Greška na mreži: {e}")
+                self.rotate()
+                attempts += 1
+        return {}
+
+api = APIRotator(KEYS)
+
+# ==================== KONFIGURACIJA & FILTERI ====================
 GMAIL_USER = os.environ.get("GMAIL_USER")
 GMAIL_PASS = os.environ.get("GMAIL_APP_PASS")
+BETS_FILE = "bets.json"
 
-HEADERS_FOOTBALL = {
-    'x-rapidapi-host': "v3.football.api-sports.io",
-    'x-rapidapi-key': API_KEY
-}
+MIN_H2H_MATCHES = 4
+MIN_ACCURACY_PCT = 75.0
 
-HEADERS_HANDBALL = {
-    'x-rapidapi-host': "v1.handball.api-sports.io",
-    'x-rapidapi-key': API_KEY
-}
+EXCLUDED_COUNTRIES = [
+    "Brazil", "Argentina", "Colombia", "Chile", "Uruguay", "Paraguay", "Peru",
+    "Ecuador", "Bolivia", "Venezuela", "Egypt", "Morocco", "Tunisia", "Algeria",
+    "South Africa", "Nigeria", "Ghana", "Senegal", "Cameroon", "Kenya", "Ivory Coast"
+]
 
+EXCLUDED_LEAGUE_KEYWORDS = [
+    "U19", "U20", "U21", "U23", "Sub-19", "Sub-20", "Reserve", "Reserves",
+    "Amateur", "Oberliga", "Regional", "District", "5th Division", "6th Division"
+]
+
+def is_allowed_league(country_name, league_name):
+    for country in EXCLUDED_COUNTRIES:
+        if country.lower() in country_name.lower():
+            return False
+    for kw in EXCLUDED_LEAGUE_KEYWORDS:
+        if kw.lower() in league_name.lower():
+            return False
+    return True
+
+# ==================== POMOĆNE FUNKCIJE ====================
 def send_email(subject, body):
     msg = MIMEText(body, 'plain', 'utf-8')
     msg['Subject'] = subject
@@ -32,192 +100,221 @@ def send_email(subject, body):
     except Exception as e:
         print(f"Greška pri slanju mejla: {e}")
 
-# ==================== FUDBAL ====================
-def scan_football():
-    today = datetime.now().strftime('%Y-%m-%d')
-    url = f"https://v3.football.api-sports.io/fixtures?date={today}"
-    res = requests.get(url, headers=HEADERS_FOOTBALL)
-    data = res.json()
+def load_bets():
+    if os.path.exists(BETS_FILE):
+        try:
+            with open(BETS_FILE, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception:
+            return []
+    return []
 
-    # Provera grešaka u API odzivu
-    if data.get('errors'):
-        return [f"⚠️ API Greška (Fudbal): {data['errors']}"], 0
+def save_bets(bets):
+    with open(BETS_FILE, 'w', encoding='utf-8') as f:
+        json.dump(bets, f, ensure_ascii=False, indent=4)
 
-    fixtures = data.get('response', [])
-    report = []
+def fetch_football_odds(fixture_id):
+    url = f"https://v3.football.api-sports.io/odds?fixture={fixture_id}&bookmaker=1"
+    data = api.fetch(url)
+    odds_dict = {}
+    try:
+        response = data.get('response', [])
+        if response:
+            bookmakers = response[0].get('bookmakers', [])
+            if bookmakers:
+                bets = bookmakers[0].get('bets', [])
+                for b in bets:
+                    name = b.get('name')
+                    for v in b.get('values', []):
+                        odds_dict[f"{name} - {v.get('value')}"] = float(v.get('odd', 1.0))
+    except Exception:
+        pass
+    return odds_dict
+
+# ==================== JUTARNJE SKENIRANJE ====================
+def morning_scan():
+    today_str = datetime.now().strftime('%Y-%m-%d')
+    today_formatted = datetime.now().strftime('%d.%m.%Y')
     
-    # Skeniramo prvih 30 neodigranih mečeva radi štednje limita
-    fixtures_to_scan = [f for f in fixtures if f['fixture']['status']['short'] == 'NS'][:30]
-    api_calls_used = 1
+    saved_bets = load_bets()
+    new_bets = []
 
-    for item in fixtures_to_scan:
-        home = item['teams']['home']['name']
-        away = item['teams']['away']['name']
-        home_id = item['teams']['home']['id']
-        away_id = item['teams']['away']['id']
-        league_name = item['league']['name']
+    # 1. FUDBAL
+    fb_data = api.fetch(f"https://v3.football.api-sports.io/fixtures?date={today_str}")
+    fb_events = fb_data.get('response', [])
 
-        h2h_res = requests.get(f"https://v3.football.api-sports.io/fixtures/headtohead?h2h={home_id}-{away_id}", headers=HEADERS_FOOTBALL)
-        api_calls_used += 1
+    fb_picks_lines = []
+    for event in fb_events:
+        fixture = event.get('fixture', {})
+        fixture_id = fixture.get('id')
+        teams = event.get('teams', {})
+        home = teams.get('home', {}).get('name', 'Home')
+        away = teams.get('away', {}).get('name', 'Away')
+        home_id = teams.get('home', {}).get('id')
+        away_id = teams.get('away', {}).get('id')
         
-        h2h_data = h2h_res.json()
-        if h2h_data.get('errors'):
-            report.append(f"⚠️ API Limit dostignut tokom skeniranja meča {home} vs {away}")
-            break
+        league_info = event.get('league', {})
+        league = league_info.get('name', 'Liga')
+        country = league_info.get('country', 'Nacionalno')
 
-        h2h_list = h2h_data.get('response', [])
-        total = len(h2h_list)
-
-        if total < 3:
+        if not is_allowed_league(country, league):
             continue
 
-        stats = {
-            "3+ Ukupno": 0, "GG (Oba daju)": 0, "1-3 Golova": 0,
-            "2-4 Golova": 0, "1+ I pol": 0, "1-3 I pol": 0
-        }
+        h2h_data = api.fetch(f"https://v3.football.api-sports.io/fixtures/headtohead?h2h={home_id}-{away_id}")
+        h2h_matches = h2h_data.get('response', [])
+        total = len(h2h_matches)
+        if total < MIN_H2H_MATCHES:
+            continue
 
+        stats = {"3+ Ukupno": 0, "GG": 0, "1-3 Golova": 0, "2-4 Golova": 0, "1+ I pol": 0}
         history_lines = []
 
-        for match in h2h_list:
-            score = match.get('score', {})
-            ht_home, ht_away = score.get('halftime', {}).get('home'), score.get('halftime', {}).get('away')
-            ft_home, ft_away = score.get('fulltime', {}).get('home'), score.get('fulltime', {}).get('away')
+        for m in h2h_matches:
+            goals = m.get('goals', {})
+            score = m.get('score', {})
+            ft_h = goals.get('home') or 0
+            ft_a = goals.get('away') or 0
+            ht_h = score.get('halftime', {}).get('home') or 0
+            ht_a = score.get('halftime', {}).get('away') or 0
 
-            if None in (ht_home, ht_away, ft_home, ft_away):
-                continue
+            ft_g = ft_h + ft_a
+            ht_g = ht_h + ht_a
 
-            ft_goals = ft_home + ft_away
-            ht_goals = ht_home + ht_away
+            if ft_g >= 3: stats["3+ Ukupno"] += 1
+            if ft_h > 0 and ft_a > 0: stats["GG"] += 1
+            if 1 <= ft_g <= 3: stats["1-3 Golova"] += 1
+            if 2 <= ft_g <= 4: stats["2-4 Golova"] += 1
+            if ht_g >= 1: stats["1+ I pol"] += 1
 
-            if ft_goals >= 3: stats["3+ Ukupno"] += 1
-            if ft_home > 0 and ft_away > 0: stats["GG (Oba daju)"] += 1
-            if 1 <= ft_goals <= 3: stats["1-3 Golova"] += 1
-            if 2 <= ft_goals <= 4: stats["2-4 Golova"] += 1
-            if ht_goals >= 1: stats["1+ I pol"] += 1
-            if 1 <= ht_goals <= 3: stats["1-3 I pol"] += 1
+            history_lines.append(f"   • {home} {ft_h}:{ft_a} ({ht_h}:{ht_a}) {away}")
 
-            m_date = match['fixture']['date'][:10]
-            m_home = match['teams']['home']['name']
-            m_away = match['teams']['away']['name']
-            history_lines.append(f"   • {m_date}: {m_home} {ft_home}:{ft_away} ({ht_home}:{ht_away}) {m_away}")
+        odds = fetch_football_odds(fixture_id)
+        match_picks = []
 
-        picks = []
         for market, count in stats.items():
             pct = (count / total) * 100
-            if pct >= 65.0:  # Spušten prag na 65% prolaznosti za više parova
-                picks.append(f"{market} -> {pct:.0f}% ({count}/{total})")
+            if pct >= MIN_ACCURACY_PCT:
+                approx_odd = odds.get(market, 1.70)
+                pick_str = f"{market} -> {pct:.0f}% ({count}/{total}) | Kvota: {approx_odd}"
+                match_picks.append(pick_str)
 
-        if picks:
-            match_str = f"⚽ {home} vs {away}\n🏆 Liga: {league_name}\n"
-            match_str += "🎯 Prepoznati trendovi:\n" + "\n".join([f"   👉 {p}" for p in picks]) + "\n"
-            match_str += "📋 Istorija mečeva:\n" + "\n".join(history_lines)
-            report.append(match_str)
+                new_bets.append({
+                    "id": f"{fixture_id}_{market}",
+                    "event_id": fixture_id,
+                    "date": today_str,
+                    "sport": "Football",
+                    "match": f"{home} vs {away}",
+                    "league": f"{country} - {league}",
+                    "market": market,
+                    "stake": 1000,
+                    "odd": approx_odd,
+                    "status": "PENDING",
+                    "profit": 0
+                })
 
-    return report, api_calls_used
+        if match_picks:
+            block = f"⚽ {home} vs {away}\n🏆 Liga: {country} - {league}\n🎯 Predlozi:\n"
+            block += "\n".join([f"   👉 {p}" for p in match_picks]) + "\n"
+            block += "📋 Istorija H2H:\n" + "\n".join(history_lines[:5])
+            fb_picks_lines.append(block)
 
-# ==================== RUKOMET ====================
-def scan_handball():
-    today = datetime.now().strftime('%Y-%m-%d')
-    url = f"https://v1.handball.api-sports.io/games?date={today}"
-    res = requests.get(url, headers=HEADERS_HANDBALL)
-    data = res.json()
+    # Sačuvaj opklade
+    existing_ids = {b['id'] for b in saved_bets}
+    for nb in new_bets:
+        if nb['id'] not in existing_ids:
+            saved_bets.append(nb)
+    save_bets(saved_bets)
 
-    if data.get('errors'):
-        return [f"⚠️ API Greška (Rukomet): {data['errors']}"], 0
+    # Slanje mejla
+    body = f"🚀 JUTARNJI H2H SKENER & KVOTE ({today_formatted})\n\n"
+    body += "==== ⚽ FUDBAL ====\n\n" + ("\n\n------------------------\n\n".join(fb_picks_lines) if fb_picks_lines else "Nema parova danas.")
+    body += f"\n\n📌 Sve opklade su zabeležene sa ulogom od 1.000 RSD."
 
-    games = data.get('response', [])
-    report = []
-    
-    games_to_scan = [g for g in games if g['status']['short'] == 'NS'][:20]
-    api_calls_used = 1
+    send_email(f"🎯 Dnevni H2H Skener - {today_formatted}", body)
 
-    for item in games_to_scan:
-        home = item['teams']['home']['name']
-        away = item['teams']['away']['name']
-        home_id = item['teams']['home']['id']
-        away_id = item['teams']['away']['id']
-        league_name = item['league']['name']
+# ==================== VEČERNJA PROVERA REZULTATA ====================
+def evening_settle():
+    bets = load_bets()
+    updated = False
 
-        h2h_res = requests.get(f"https://v1.handball.api-sports.io/games/headtohead?h2h={home_id}-{away_id}", headers=HEADERS_HANDBALL)
-        api_calls_used += 1
+    for b in bets:
+        if b['status'] == 'PENDING':
+            fixture_id = b['event_id']
+            data = api.fetch(f"https://v3.football.api-sports.io/fixtures?id={fixture_id}")
+            response = data.get('response', [])
+            if response:
+                fixture_data = response[0]
+                status_short = fixture_data.get('fixture', {}).get('status', {}).get('short')
 
-        h2h_data = h2h_res.json()
-        if h2h_data.get('errors'):
-            report.append(f"⚠️ API Limit dostignut tokom skeniranja rukometa ({home} vs {away})")
-            break
+                if status_short in ['FT', 'AET', 'PEN']:
+                    goals = fixture_data.get('goals', {})
+                    score = fixture_data.get('score', {})
+                    ft_h = goals.get('home') or 0
+                    ft_a = goals.get('away') or 0
+                    ht_h = score.get('halftime', {}).get('home') or 0
+                    ht_a = score.get('halftime', {}).get('away') or 0
 
-        h2h_list = h2h_data.get('response', [])
-        total = len(h2h_list)
+                    ft_goals = ft_h + ft_a
+                    ht_goals = ht_h + ht_a
+                    market = b['market']
+                    is_win = False
 
-        if total < 3:
-            continue
+                    if market == "3+ Ukupno" and ft_goals >= 3: is_win = True
+                    elif market == "GG" and ft_h > 0 and ft_a > 0: is_win = True
+                    elif market == "1-3 Golova" and 1 <= ft_goals <= 3: is_win = True
+                    elif market == "2-4 Golova" and 2 <= ft_goals <= 4: is_win = True
+                    elif market == "1+ I pol" and ht_goals >= 1: is_win = True
 
-        ft_goals_list = []
-        ht_goals_list = []
-        history_lines = []
+                    if is_win:
+                        b['status'] = 'WIN'
+                        b['profit'] = round((b['stake'] * b['odd']) - b['stake'], 2)
+                    else:
+                        b['status'] = 'LOSS'
+                        b['profit'] = -b['stake']
 
-        for match in h2h_list:
-            scores = match.get('scores', {})
-            ht_home, ht_away = scores.get('halftime', {}).get('home'), scores.get('halftime', {}).get('away')
-            ft_home, ft_away = scores.get('fulltime', {}).get('home'), scores.get('fulltime', {}).get('away')
+                    updated = True
 
-            if None in (ht_home, ht_away, ft_home, ft_away):
-                continue
+    if updated:
+        save_bets(bets)
+        print("Večernja provera kompletirana. bets.json ažuriran!")
 
-            ft_goals = ft_home + ft_away
-            ht_goals = ht_home + ht_away
-            ft_goals_list.append(ft_goals)
-            ht_goals_list.append(ht_goals)
+# ==================== NEDELJNI P&L IZVEŠTAJ ====================
+def weekly_report():
+    bets = load_bets()
+    if not bets:
+        return
 
-            m_date = match['date'][:10]
-            m_home = match['teams']['home']['name']
-            m_away = match['teams']['away']['name']
-            history_lines.append(f"   • {m_date}: {m_home} {ft_home}:{ft_away} ({ht_home}:{ht_away}) {m_away}")
+    wins = sum(1 for b in bets if b['status'] == 'WIN')
+    losses = sum(1 for b in bets if b['status'] == 'LOSS')
+    pending = sum(1 for b in bets if b['status'] == 'PENDING')
 
-        if not ft_goals_list:
-            continue
+    total_stake = sum(b['stake'] for b in bets if b['status'] != 'PENDING')
+    net_profit = sum(b['profit'] for b in bets if b['status'] != 'PENDING')
+    roi = (net_profit / total_stake * 100) if total_stake > 0 else 0.0
+    win_rate = (wins / (wins + losses) * 100) if (wins + losses) > 0 else 0.0
 
-        avg_ft = sum(ft_goals_list) / len(ft_goals_list)
-        avg_ht = sum(ht_goals_list) / len(ht_goals_list)
+    report_str = f"📊 NEDELJNI P&L IZVEŠTAJ O PROFITU\n"
+    report_str += "="*40 + "\n\n"
+    report_str += f"💰 Ukupno Uloženo: {total_stake:,.0f} RSD\n"
+    report_str += f"📈 Neto Profit/Gubitak: {net_profit:+,.0f} RSD\n"
+    report_str += f"🎯 ROI (Povrat investicije): {roi:+.2f}%\n"
+    report_str += f"✅ Uspešnost (Win Rate): {win_rate:.1f}% ({wins}W / {losses}L)\n"
+    report_str += f"⏳ Opklade u toku: {pending}\n\n"
+    report_str += "📋 Tabela poslednjih opklada:\n"
 
-        picks = [
-            f"Prosek ukupno golova: {avg_ft:.1f}",
-            f"Prosek I poluvreme: {avg_ht:.1f} golova",
-            f"Preporučena granica (OVER): Preko {round(avg_ft - 4.5, 1)}",
-            f"Preporučena granica (UNDER): Ispod {round(avg_ft + 4.5, 1)}"
-        ]
+    for b in bets[-20:]:
+        status_icon = "✅" if b['status'] == 'WIN' else ("❌" if b['status'] == 'LOSS' else "⏳")
+        report_str += f"{status_icon} {b['match']} | {b['market']} | Kvota: {b['odd']} | Profit: {b['profit']:+} RSD\n"
 
-        match_str = f"🤾 {home} vs {away}\n🏆 Liga: {league_name}\n"
-        match_str += "🎯 Matematička analitika:\n" + "\n".join([f"   👉 {p}" for p in picks]) + "\n"
-        match_str += "📋 Istorija mečeva:\n" + "\n".join(history_lines)
-        report.append(match_str)
+    send_email(f"📈 Nedeljni Izveštaj Profita (ROI: {roi:+.1f}%)", report_str)
 
-    return report, api_calls_used
-
-# ==================== MAIN ====================
-def main():
-    today_str = datetime.now().strftime('%d.%m.%Y')
-    
-    football_picks, fb_calls = scan_football()
-    handball_picks, hb_calls = scan_handball()
-
-    total_calls = fb_calls + hb_calls
-    email_sections = [f"📊 Potrošeno API poziva u ovom pokretanju: {total_calls}\n"]
-
-    if football_picks:
-        email_sections.append("⚽ FUDBAL ANALITIKA:\n\n" + "\n\n----------------------------------------\n\n".join(football_picks))
-    else:
-        email_sections.append("⚽ FUDBAL: Nema pronađenih parova za danas.")
-
-    if handball_picks:
-        email_sections.append("🤾 RUKOMET ANALITIKA:\n\n" + "\n\n----------------------------------------\n\n".join(handball_picks))
-    else:
-        email_sections.append("🤾 RUKOMET: Nema pronađenih parova za danas.")
-
-    final_email_body = f"Dnevni H2H Skener V3 za {today_str}\n\n" + "="*40 + "\n\n" + "\n\n".join(email_sections)
-    
-    # NOV NASLOV KOJI JE DOKAZ DA RADI NOVI KOD:
-    send_email(f"🚀 NOVI H2H SKENER V3 - {today_str}", final_email_body)
-
+# ==================== GLAVNI DISPEČER ====================
 if __name__ == "__main__":
-    main()
+    mode = sys.argv[1] if len(sys.argv) > 1 else "morning"
+
+    if mode == "morning":
+        morning_scan()
+    elif mode == "evening":
+        evening_settle()
+    elif mode == "weekly":
+        weekly_report()
