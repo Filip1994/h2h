@@ -65,15 +65,18 @@ BETS_FILE = "bets.json"
 MIN_H2H_MATCHES = 4
 MIN_ACCURACY_PCT = 75.0
 
+# Izbacujemo Južnu Ameriku i Afriku
 EXCLUDED_COUNTRIES = [
     "Brazil", "Argentina", "Colombia", "Chile", "Uruguay", "Paraguay", "Peru",
     "Ecuador", "Bolivia", "Venezuela", "Egypt", "Morocco", "Tunisia", "Algeria",
     "South Africa", "Nigeria", "Ghana", "Senegal", "Cameroon", "Kenya", "Ivory Coast"
 ]
 
+# Izbacujemo omladince, amatere i B timove (MLS Next Pro, rezerve...)
 EXCLUDED_LEAGUE_KEYWORDS = [
     "U19", "U20", "U21", "U23", "Sub-19", "Sub-20", "Reserve", "Reserves",
-    "Amateur", "Oberliga", "Regional", "District", "5th Division", "6th Division"
+    "Amateur", "Oberliga", "Regional", "District", "5th Division", "6th Division",
+    "Next Pro", "MLS Next Pro", "II", "B team"
 ]
 
 def is_allowed_league(country_name, league_name):
@@ -113,8 +116,9 @@ def save_bets(bets):
     with open(BETS_FILE, 'w', encoding='utf-8') as f:
         json.dump(bets, f, ensure_ascii=False, indent=4)
 
-def fetch_football_odds(fixture_id):
-    url = f"https://v3.football.api-sports.io/odds?fixture={fixture_id}&bookmaker=1"
+def fetch_real_odds(fixture_id):
+    """Povlači ISKLJUČIVO stvarne kvote iz kladionice bez ikakvih pretpostavki"""
+    url = f"https://v3.football.api-sports.io/odds?fixture={fixture_id}"
     data = api.fetch(url)
     odds_dict = {}
     try:
@@ -124,9 +128,23 @@ def fetch_football_odds(fixture_id):
             if bookmakers:
                 bets = bookmakers[0].get('bets', [])
                 for b in bets:
-                    name = b.get('name')
-                    for v in b.get('values', []):
-                        odds_dict[f"{name} - {v.get('value')}"] = float(v.get('odd', 1.0))
+                    name = b.get('name', '')
+                    values = b.get('values', [])
+                    
+                    if name == "Goals Over/Under":
+                        for v in values:
+                            if v.get('value') == "Over 2.5":
+                                odds_dict["3+ Ukupno"] = float(v.get('odd'))
+                            elif v.get('value') == "Over 1.5":
+                                odds_dict["2-4 Golova"] = float(v.get('odd'))
+                    elif name == "Both Teams Score":
+                        for v in values:
+                            if v.get('value') == "Yes":
+                                odds_dict["GG"] = float(v.get('odd'))
+                    elif "First Half" in name and "Over/Under" in name:
+                        for v in values:
+                            if v.get('value') == "Over 0.5":
+                                odds_dict["1+ I pol"] = float(v.get('odd'))
     except Exception:
         pass
     return odds_dict
@@ -139,7 +157,6 @@ def morning_scan():
     saved_bets = load_bets()
     new_bets = []
 
-    # 1. FUDBAL
     fb_data = api.fetch(f"https://v3.football.api-sports.io/fixtures?date={today_str}")
     fb_events = fb_data.get('response', [])
 
@@ -147,6 +164,12 @@ def morning_scan():
     for event in fb_events:
         fixture = event.get('fixture', {})
         fixture_id = fixture.get('id')
+        status_short = fixture.get('status', {}).get('short')
+
+        # STROGA PROVERA 1: Preskačemo utakmice koje su počele ili se završile!
+        if status_short not in ['NS', 'TBD']:
+            continue
+
         teams = event.get('teams', {})
         home = teams.get('home', {}).get('name', 'Home')
         away = teams.get('away', {}).get('name', 'Away')
@@ -157,6 +180,7 @@ def morning_scan():
         league = league_info.get('name', 'Liga')
         country = league_info.get('country', 'Nacionalno')
 
+        # STROGA PROVERA 2: Filter liga i država
         if not is_allowed_league(country, league):
             continue
 
@@ -188,14 +212,18 @@ def morning_scan():
 
             history_lines.append(f"   • {home} {ft_h}:{ft_a} ({ht_h}:{ht_a}) {away}")
 
-        odds = fetch_football_odds(fixture_id)
+        odds = fetch_real_odds(fixture_id)
         match_picks = []
 
         for market, count in stats.items():
             pct = (count / total) * 100
             if pct >= MIN_ACCURACY_PCT:
-                approx_odd = odds.get(market, 1.70)
-                pick_str = f"{market} -> {pct:.0f}% ({count}/{total}) | Kvota: {approx_odd}"
+                # STROGA PROVERA 3: NEMA LAŽNIH KVOTA! Ako nema prave kvote na API-ju, preskači!
+                real_odd = odds.get(market)
+                if not real_odd or real_odd <= 1.0:
+                    continue
+
+                pick_str = f"{market} -> {pct:.0f}% ({count}/{total}) | Kvota: {real_odd:.2f}"
                 match_picks.append(pick_str)
 
                 new_bets.append({
@@ -207,7 +235,7 @@ def morning_scan():
                     "league": f"{country} - {league}",
                     "market": market,
                     "stake": 1000,
-                    "odd": approx_odd,
+                    "odd": real_odd,
                     "status": "PENDING",
                     "profit": 0
                 })
@@ -218,7 +246,7 @@ def morning_scan():
             block += "📋 Istorija H2H:\n" + "\n".join(history_lines[:5])
             fb_picks_lines.append(block)
 
-    # Sačuvaj opklade
+    # Sačuvaj opklade u bazu
     existing_ids = {b['id'] for b in saved_bets}
     for nb in new_bets:
         if nb['id'] not in existing_ids:
@@ -227,8 +255,8 @@ def morning_scan():
 
     # Slanje mejla
     body = f"🚀 JUTARNJI H2H SKENER & KVOTE ({today_formatted})\n\n"
-    body += "==== ⚽ FUDBAL ====\n\n" + ("\n\n------------------------\n\n".join(fb_picks_lines) if fb_picks_lines else "Nema parova danas.")
-    body += f"\n\n📌 Sve opklade su zabeležene sa ulogom od 1.000 RSD."
+    body += "==== ⚽ FUDBAL ====\n\n" + ("\n\n------------------------\n\n".join(fb_picks_lines) if fb_picks_lines else "Nema parova koji ispunjavaju sve kriterijume danas.")
+    body += f"\n\n📌 Sve opklade su sačuvane sa ulogom od 1.000 RSD u bets.json bazu."
 
     send_email(f"🎯 Dnevni H2H Skener - {today_formatted}", body)
 
