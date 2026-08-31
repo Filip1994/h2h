@@ -64,7 +64,7 @@ BETS_FILE = "bets.json"
 
 MIN_H2H_MATCHES = 4
 MIN_ACCURACY_PCT = 75.0
-MIN_ODD = 1.35  # Strogi filter: Preskače sve kvote manje od 1.35!
+MIN_ODD = 1.35  # Filter za neisplative kvote
 
 EXCLUDED_COUNTRIES = [
     "Brazil", "Argentina", "Colombia", "Chile", "Uruguay", "Paraguay", "Peru",
@@ -80,15 +80,19 @@ EXCLUDED_LEAGUE_KEYWORDS = [
 
 def is_allowed_league(country_name, league_name):
     for country in EXCLUDED_COUNTRIES:
-        if country.lower() in country_name.lower():
+        if country and country.lower() in country_name.lower():
             return False
     for kw in EXCLUDED_LEAGUE_KEYWORDS:
-        if kw.lower() in league_name.lower():
+        if kw and kw.lower() in league_name.lower():
             return False
     return True
 
 # ==================== POMOĆNE FUNKCIJE ====================
 def send_email(subject, body):
+    if not GMAIL_USER or not GMAIL_PASS:
+        print("⚠️ Gmail kredencijali nisu podešeni u Secrets!")
+        return
+
     msg = MIMEText(body, 'plain', 'utf-8')
     msg['Subject'] = subject
     msg['From'] = GMAIL_USER
@@ -120,14 +124,14 @@ def fetch_real_odds(fixture_id):
     data = api.fetch(url)
     odds_dict = {}
     try:
-        response = data.get('response', [])
+        response = data.get('response') or []
         if response:
-            bookmakers = response[0].get('bookmakers', [])
+            bookmakers = response[0].get('bookmakers') or []
             if bookmakers:
-                bets = bookmakers[0].get('bets', [])
+                bets = bookmakers[0].get('bets') or []
                 for b in bets:
-                    name = b.get('name', '')
-                    values = b.get('values', [])
+                    name = b.get('name') or ''
+                    values = b.get('values') or []
 
                     if name == "Goals Over/Under":
                         for v in values:
@@ -151,8 +155,8 @@ def fetch_real_odds(fixture_id):
                         for v in values:
                             if v.get('value') in ["2-3", "2 - 3"]:
                                 odds_dict["2-3 Golova"] = float(v.get('odd'))
-    except Exception:
-        pass
+    except Exception as e:
+        print(f"Greška pri citiranju kvota za {fixture_id}: {e}")
     return odds_dict
 
 # ==================== JUTARNJE SKENIRANJE ====================
@@ -164,116 +168,121 @@ def morning_scan():
     new_bets = []
 
     fb_data = api.fetch(f"https://v3.football.api-sports.io/fixtures?date={today_str}")
-    fb_events = fb_data.get('response', [])
+    fb_events = fb_data.get('response') or []
 
     fb_picks_lines = []
     for event in fb_events:
-        fixture = event.get('fixture', {})
-        fixture_id = fixture.get('id')
-        status_short = fixture.get('status', {}).get('short')
+        try:
+            fixture = event.get('fixture') or {}
+            fixture_id = fixture.get('id')
+            status_short = (fixture.get('status') or {}).get('short')
 
-        # PROVERA 1: Preskače mečeve koji su počeli ili završeni
-        if status_short not in ['NS', 'TBD']:
+            if status_short not in ['NS', 'TBD']:
+                continue
+
+            teams = event.get('teams') or {}
+            home = (teams.get('home') or {}).get('name', 'Home')
+            away = (teams.get('away') or {}).get('name', 'Away')
+            home_id = (teams.get('home') or {}).get('id')
+            away_id = (teams.get('away') or {}).get('id')
+            
+            league_info = event.get('league') or {}
+            league = league_info.get('name', 'Liga')
+            country = league_info.get('country', 'Nacionalno')
+
+            if not is_allowed_league(country, league):
+                continue
+
+            if not home_id or not away_id:
+                continue
+
+            h2h_data = api.fetch(f"https://v3.football.api-sports.io/fixtures/headtohead?h2h={home_id}-{away_id}")
+            h2h_matches = h2h_data.get('response') or []
+            total = len(h2h_matches)
+            if total < MIN_H2H_MATCHES:
+                continue
+
+            stats = {
+                "3+ Ukupno": 0, 
+                "GG": 0, 
+                "1-3 Golova": 0, 
+                "2-4 Golova": 0,
+                "2-3 Golova": 0, 
+                "1+ I pol": 0,
+                "1+ II pol": 0,
+                "1-3 I pol & 1-3 II pol": 0
+            }
+            history_lines = []
+
+            for m in h2h_matches:
+                goals = m.get('goals') or {}
+                score = m.get('score') or {}
+                halftime = score.get('halftime') or {}
+
+                ft_h = goals.get('home') if goals.get('home') is not None else 0
+                ft_a = goals.get('away') if goals.get('away') is not None else 0
+                ht_h = halftime.get('home') if halftime.get('home') is not None else 0
+                ht_a = halftime.get('away') if halftime.get('away') is not None else 0
+
+                ft_g = ft_h + ft_a
+                ht_g = ht_h + ht_a
+                sh_g = ft_g - ht_g
+
+                if ft_g >= 3: stats["3+ Ukupno"] += 1
+                if ft_h > 0 and ft_a > 0: stats["GG"] += 1
+                if 1 <= ft_g <= 3: stats["1-3 Golova"] += 1
+                if 2 <= ft_g <= 4: stats["2-4 Golova"] += 1
+                if 2 <= ft_g <= 3: stats["2-3 Golova"] += 1
+                if ht_g >= 1: stats["1+ I pol"] += 1
+                if sh_g >= 1: stats["1+ II pol"] += 1
+                if (1 <= ht_g <= 3) and (1 <= sh_g <= 3): stats["1-3 I pol & 1-3 II pol"] += 1
+
+                history_lines.append(f"   • {home} {ft_h}:{ft_a} ({ht_h}:{ht_a}) {away}")
+
+            odds = fetch_real_odds(fixture_id)
+            match_picks = []
+
+            for market, count in stats.items():
+                pct = (count / total) * 100
+                if pct >= MIN_ACCURACY_PCT:
+                    real_odd = odds.get(market)
+                    
+                    if not real_odd or real_odd < MIN_ODD:
+                        continue
+
+                    pick_str = f"{market} -> {pct:.0f}% ({count}/{total}) | Kvota: {real_odd:.2f}"
+                    match_picks.append(pick_str)
+
+                    new_bets.append({
+                        "id": f"{fixture_id}_{market}",
+                        "event_id": fixture_id,
+                        "date": today_str,
+                        "sport": "Football",
+                        "match": f"{home} vs {away}",
+                        "league": f"{country} - {league}",
+                        "market": market,
+                        "stake": 1000,
+                        "odd": real_odd,
+                        "status": "PENDING",
+                        "profit": 0
+                    })
+
+            if match_picks:
+                block = f"⚽ {home} vs {away}\n🏆 Liga: {country} - {league}\n🎯 Predlozi:\n"
+                block += "\n".join([f"   👉 {p}" for p in match_picks]) + "\n"
+                block += "📋 Istorija H2H:\n" + "\n".join(history_lines[:5])
+                fb_picks_lines.append(block)
+
+        except Exception as err:
+            print(f"Preskočen meč zbog greške u obradi: {err}")
             continue
 
-        teams = event.get('teams', {})
-        home = teams.get('home', {}).get('name', 'Home')
-        away = teams.get('away', {}).get('name', 'Away')
-        home_id = teams.get('home', {}).get('id')
-        away_id = teams.get('away', {}).get('id')
-        
-        league_info = event.get('league', {})
-        league = league_info.get('name', 'Liga')
-        country = league_info.get('country', 'Nacionalno')
-
-        # PROVERA 2: Filter liga i država
-        if not is_allowed_league(country, league):
-            continue
-
-        h2h_data = api.fetch(f"https://v3.football.api-sports.io/fixtures/headtohead?h2h={home_id}-{away_id}")
-        h2h_matches = h2h_data.get('response', [])
-        total = len(h2h_matches)
-        if total < MIN_H2H_MATCHES:
-            continue
-
-        stats = {
-            "3+ Ukupno": 0, 
-            "GG": 0, 
-            "1-3 Golova": 0, 
-            "2-4 Golova": 0,
-            "2-3 Golova": 0, 
-            "1+ I pol": 0,
-            "1+ II pol": 0,
-            "1-3 I pol & 1-3 II pol": 0
-        }
-        history_lines = []
-
-        for m in h2h_matches:
-            goals = m.get('goals', {})
-            score = m.get('score', {})
-            ft_h = goals.get('home') or 0
-            ft_a = goals.get('away') or 0
-            ht_h = score.get('halftime', {}).get('home') or 0
-            ht_a = score.get('halftime', {}).get('away') or 0
-
-            ft_g = ft_h + ft_a
-            ht_g = ht_h + ht_a
-            sh_g = ft_g - ht_g
-
-            if ft_g >= 3: stats["3+ Ukupno"] += 1
-            if ft_h > 0 and ft_a > 0: stats["GG"] += 1
-            if 1 <= ft_g <= 3: stats["1-3 Golova"] += 1
-            if 2 <= ft_g <= 4: stats["2-4 Golova"] += 1
-            if 2 <= ft_g <= 3: stats["2-3 Golova"] += 1
-            if ht_g >= 1: stats["1+ I pol"] += 1
-            if sh_g >= 1: stats["1+ II pol"] += 1
-            if (1 <= ht_g <= 3) and (1 <= sh_g <= 3): stats["1-3 I pol & 1-3 II pol"] += 1
-
-            history_lines.append(f"   • {home} {ft_h}:{ft_a} ({ht_h}:{ht_a}) {away}")
-
-        odds = fetch_real_odds(fixture_id)
-        match_picks = []
-
-        for market, count in stats.items():
-            pct = (count / total) * 100
-            if pct >= MIN_ACCURACY_PCT:
-                real_odd = odds.get(market)
-                
-                # PROVERA 3: Nema lažnih kvota i mora biti >= 1.35!
-                if not real_odd or real_odd < MIN_ODD:
-                    continue
-
-                pick_str = f"{market} -> {pct:.0f}% ({count}/{total}) | Kvota: {real_odd:.2f}"
-                match_picks.append(pick_str)
-
-                new_bets.append({
-                    "id": f"{fixture_id}_{market}",
-                    "event_id": fixture_id,
-                    "date": today_str,
-                    "sport": "Football",
-                    "match": f"{home} vs {away}",
-                    "league": f"{country} - {league}",
-                    "market": market,
-                    "stake": 1000,
-                    "odd": real_odd,
-                    "status": "PENDING",
-                    "profit": 0
-                })
-
-        if match_picks:
-            block = f"⚽ {home} vs {away}\n🏆 Liga: {country} - {league}\n🎯 Predlozi:\n"
-            block += "\n".join([f"   👉 {p}" for p in match_picks]) + "\n"
-            block += "📋 Istorija H2H:\n" + "\n".join(history_lines[:5])
-            fb_picks_lines.append(block)
-
-    # Sačuvaj opklade u bazu
     existing_ids = {b['id'] for b in saved_bets}
     for nb in new_bets:
         if nb['id'] not in existing_ids:
             saved_bets.append(nb)
     save_bets(saved_bets)
 
-    # Slanje mejla
     body = f"🚀 JUTARNJI H2H SKENER & KVOTE ({today_formatted})\n\n"
     body += "==== ⚽ FUDBAL ====\n\n" + ("\n\n------------------------\n\n".join(fb_picks_lines) if fb_picks_lines else "Nema parova koji ispunjavaju sve kriterijume danas.")
     body += f"\n\n📌 Sve prihvaćene opklade su sačuvane sa ulogom od 1.000 RSD u bazu."
@@ -289,18 +298,20 @@ def evening_settle():
         if b['status'] == 'PENDING':
             fixture_id = b['event_id']
             data = api.fetch(f"https://v3.football.api-sports.io/fixtures?id={fixture_id}")
-            response = data.get('response', [])
+            response = data.get('response') or []
             if response:
                 fixture_data = response[0]
-                status_short = fixture_data.get('fixture', {}).get('status', {}).get('short')
+                status_short = (fixture_data.get('fixture') or {}).get('status', {}).get('short')
 
                 if status_short in ['FT', 'AET', 'PEN']:
-                    goals = fixture_data.get('goals', {})
-                    score = fixture_data.get('score', {})
-                    ft_h = goals.get('home') or 0
-                    ft_a = goals.get('away') or 0
-                    ht_h = score.get('halftime', {}).get('home') or 0
-                    ht_a = score.get('halftime', {}).get('away') or 0
+                    goals = fixture_data.get('goals') or {}
+                    score = fixture_data.get('score') or {}
+                    halftime = score.get('halftime') or {}
+
+                    ft_h = goals.get('home') if goals.get('home') is not None else 0
+                    ft_a = goals.get('away') if goals.get('away') is not None else 0
+                    ht_h = halftime.get('home') if halftime.get('home') is not None else 0
+                    ht_a = halftime.get('away') if halftime.get('away') is not None else 0
 
                     ft_goals = ft_h + ft_a
                     ht_goals = ht_h + ht_a
