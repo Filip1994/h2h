@@ -7,12 +7,13 @@ from datetime import datetime
 from email.mime.text import MIMEText
 
 # ==================== ROTATOR API KLJUČEVA ====================
-KEYS = [
+RAW_KEYS = [
     os.environ.get("API_FOOTBALL_KEY"),
     os.environ.get("API_KEY_2"),
     os.environ.get("API3")
 ]
-KEYS = [k for k in KEYS if k]
+# Automatsko čišćenje razmaka i novih redova u ključevima (.strip())
+KEYS = [k.strip() for k in RAW_KEYS if k and k.strip()]
 
 class APIRotator:
     def __init__(self, keys):
@@ -110,7 +111,8 @@ def load_bets():
     if os.path.exists(BETS_FILE):
         try:
             with open(BETS_FILE, 'r', encoding='utf-8') as f:
-                return json.load(f)
+                data = json.load(f)
+                return data if isinstance(data, list) else []
         except Exception:
             return []
     return []
@@ -156,7 +158,7 @@ def fetch_real_odds(fixture_id):
                             if v.get('value') in ["2-3", "2 - 3"]:
                                 odds_dict["2-3 Golova"] = float(v.get('odd'))
     except Exception as e:
-        print(f"Greška pri citiranju kvota za {fixture_id}: {e}")
+        print(f"Greška pri čitanju kvota za {fixture_id}: {e}")
     return odds_dict
 
 # ==================== JUTARNJE SKENIRANJE ====================
@@ -277,7 +279,8 @@ def morning_scan():
             print(f"Preskočen meč zbog greške u obradi: {err}")
             continue
 
-    existing_ids = {b['id'] for b in saved_bets}
+    # BEZBEDNO PROVERAVANJE POSTOJEĆIH ID-eva:
+    existing_ids = {b.get('id') for b in saved_bets if isinstance(b, dict) and b.get('id')}
     for nb in new_bets:
         if nb['id'] not in existing_ids:
             saved_bets.append(nb)
@@ -295,8 +298,11 @@ def evening_settle():
     updated = False
 
     for b in bets:
-        if b['status'] == 'PENDING':
-            fixture_id = b['event_id']
+        if isinstance(b, dict) and b.get('status') == 'PENDING':
+            fixture_id = b.get('event_id')
+            if not fixture_id:
+                continue
+
             data = api.fetch(f"https://v3.football.api-sports.io/fixtures?id={fixture_id}")
             response = data.get('response') or []
             if response:
@@ -316,7 +322,7 @@ def evening_settle():
                     ft_goals = ft_h + ft_a
                     ht_goals = ht_h + ht_a
                     sh_goals = ft_goals - ht_goals
-                    market = b['market']
+                    market = b.get('market')
                     is_win = False
 
                     if market == "3+ Ukupno" and ft_goals >= 3: is_win = True
@@ -330,10 +336,10 @@ def evening_settle():
 
                     if is_win:
                         b['status'] = 'WIN'
-                        b['profit'] = round((b['stake'] * b['odd']) - b['stake'], 2)
+                        b['profit'] = round((b.get('stake', 1000) * b.get('odd', 1.0)) - b.get('stake', 1000), 2)
                     else:
                         b['status'] = 'LOSS'
-                        b['profit'] = -b['stake']
+                        b['profit'] = -b.get('stake', 1000)
 
                     updated = True
 
@@ -347,12 +353,13 @@ def weekly_report():
     if not bets:
         return
 
-    wins = sum(1 for b in bets if b['status'] == 'WIN')
-    losses = sum(1 for b in bets if b['status'] == 'LOSS')
-    pending = sum(1 for b in bets if b['status'] == 'PENDING')
+    valid_bets = [b for b in bets if isinstance(b, dict)]
+    wins = sum(1 for b in valid_bets if b.get('status') == 'WIN')
+    losses = sum(1 for b in valid_bets if b.get('status') == 'LOSS')
+    pending = sum(1 for b in valid_bets if b.get('status') == 'PENDING')
 
-    total_stake = sum(b['stake'] for b in bets if b['status'] != 'PENDING')
-    net_profit = sum(b['profit'] for b in bets if b['status'] != 'PENDING')
+    total_stake = sum(b.get('stake', 0) for b in valid_bets if b.get('status') != 'PENDING')
+    net_profit = sum(b.get('profit', 0) for b in valid_bets if b.get('status') != 'PENDING')
     roi = (net_profit / total_stake * 100) if total_stake > 0 else 0.0
     win_rate = (wins / (wins + losses) * 100) if (wins + losses) > 0 else 0.0
 
@@ -365,9 +372,9 @@ def weekly_report():
     report_str += f"⏳ Opklade u toku: {pending}\n\n"
     report_str += "📋 Tabela poslednjih opklada:\n"
 
-    for b in bets[-20:]:
-        status_icon = "✅" if b['status'] == 'WIN' else ("❌" if b['status'] == 'LOSS' else "⏳")
-        report_str += f"{status_icon} {b['match']} | {b['market']} | Kvota: {b['odd']} | Profit: {b['profit']:+} RSD\n"
+    for b in valid_bets[-20:]:
+        status_icon = "✅" if b.get('status') == 'WIN' else ("❌" if b.get('status') == 'LOSS' else "⏳")
+        report_str += f"{status_icon} {b.get('match')} | {b.get('market')} | Kvota: {b.get('odd')} | Profit: {b.get('profit'):+} RSD\n"
 
     send_email(f"📈 Nedeljni Izveštaj Profita (ROI: {roi:+.1f}%)", report_str)
 
