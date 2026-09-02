@@ -12,7 +12,6 @@ RAW_KEYS = [
     os.environ.get("API_KEY_2"),
     os.environ.get("API3")
 ]
-# Automatsko čišćenje razmaka i novih redova u ključevima (.strip())
 KEYS = [k.strip() for k in RAW_KEYS if k and k.strip()]
 
 class APIRotator:
@@ -65,7 +64,16 @@ BETS_FILE = "bets.json"
 
 MIN_H2H_MATCHES = 4
 MIN_ACCURACY_PCT = 75.0
-MIN_ODD = 1.35  # Filter za neisplative kvote
+MIN_ODD = 1.35
+
+# Standardne lokalne kvote za raspone koje svetski API ne šalje
+BALKAN_MARKETS_DEFAULT_ODDS = {
+    "2-3 Golova": 1.95,
+    "1-3 Golova": 1.40,
+    "2-4 Golova": 1.50,
+    "1-3 I pol & 1-3 II pol": 1.85,
+    "1+ II pol": 1.38
+}
 
 EXCLUDED_COUNTRIES = [
     "Brazil", "Argentina", "Colombia", "Chile", "Uruguay", "Paraguay", "Peru",
@@ -127,36 +135,32 @@ def fetch_real_odds(fixture_id):
     odds_dict = {}
     try:
         response = data.get('response') or []
-        if response:
-            bookmakers = response[0].get('bookmakers') or []
-            if bookmakers:
-                bets = bookmakers[0].get('bets') or []
+        for item in response:
+            bookmakers = item.get('bookmakers') or []
+            for bm in bookmakers:
+                bets = bm.get('bets') or []
                 for b in bets:
                     name = b.get('name') or ''
                     values = b.get('values') or []
 
                     if name == "Goals Over/Under":
                         for v in values:
-                            if v.get('value') == "Over 2.5":
+                            if v.get('value') == "Over 2.5" and "3+ Ukupno" not in odds_dict:
                                 odds_dict["3+ Ukupno"] = float(v.get('odd'))
-                            elif v.get('value') == "Over 1.5":
+                            elif v.get('value') == "Over 1.5" and "2-4 Golova" not in odds_dict:
                                 odds_dict["2-4 Golova"] = float(v.get('odd'))
                     elif name == "Both Teams Score":
                         for v in values:
-                            if v.get('value') == "Yes":
+                            if v.get('value') == "Yes" and "GG" not in odds_dict:
                                 odds_dict["GG"] = float(v.get('odd'))
                     elif "First Half" in name and "Over/Under" in name:
                         for v in values:
-                            if v.get('value') == "Over 0.5":
+                            if v.get('value') == "Over 0.5" and "1+ I pol" not in odds_dict:
                                 odds_dict["1+ I pol"] = float(v.get('odd'))
                     elif "Second Half" in name and "Over/Under" in name:
                         for v in values:
-                            if v.get('value') == "Over 0.5":
+                            if v.get('value') == "Over 0.5" and "1+ II pol" not in odds_dict:
                                 odds_dict["1+ II pol"] = float(v.get('odd'))
-                    elif name in ["Exact Goals Number", "Total Goals"]:
-                        for v in values:
-                            if v.get('value') in ["2-3", "2 - 3"]:
-                                odds_dict["2-3 Golova"] = float(v.get('odd'))
     except Exception as e:
         print(f"Greška pri čitanju kvota za {fixture_id}: {e}")
     return odds_dict
@@ -247,7 +251,8 @@ def morning_scan():
             for market, count in stats.items():
                 pct = (count / total) * 100
                 if pct >= MIN_ACCURACY_PCT:
-                    real_odd = odds.get(market)
+                    # Tražimo kvotu sa API-ja ili uzimamo standardnu balkansku kvotu
+                    real_odd = odds.get(market) or BALKAN_MARKETS_DEFAULT_ODDS.get(market)
                     
                     if not real_odd or real_odd < MIN_ODD:
                         continue
@@ -279,7 +284,6 @@ def morning_scan():
             print(f"Preskočen meč zbog greške u obradi: {err}")
             continue
 
-    # BEZBEDNO PROVERAVANJE POSTOJEĆIH ID-eva:
     existing_ids = {b.get('id') for b in saved_bets if isinstance(b, dict) and b.get('id')}
     for nb in new_bets:
         if nb['id'] not in existing_ids:
