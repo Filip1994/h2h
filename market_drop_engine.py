@@ -24,13 +24,16 @@ def calculate_detailed_metrics(home_id, away_id):
     m_home = fetch_api("fixtures", {"team": home_id, "last": 10})
     m_away = fetch_api("fixtures", {"team": away_id, "last": 10})
     
-    if not m_home or not m_away: return None
+    completed_h = [m for m in m_home if (m.get('fixture') or {}).get('status', {}).get('short') in ['FT', 'AET', 'PEN']]
+    completed_a = [m for m in m_away if (m.get('fixture') or {}).get('status', {}).get('short') in ['FT', 'AET', 'PEN']]
 
-    h_sc = sum((m.get('goals', {}).get('home') or 0) if m.get('teams', {}).get('home', {}).get('id') == home_id else (m.get('goals', {}).get('away') or 0) for m in m_home) / len(m_home)
-    h_con = sum((m.get('goals', {}).get('away') or 0) if m.get('teams', {}).get('home', {}).get('id') == home_id else (m.get('goals', {}).get('home') or 0) for m in m_home) / len(m_home)
+    if not completed_h or not completed_a: return None
+
+    h_sc = sum((m.get('goals', {}).get('home') or 0) if m.get('teams', {}).get('home', {}).get('id') == home_id else (m.get('goals', {}).get('away') or 0) for m in completed_h) / len(completed_h)
+    h_con = sum((m.get('goals', {}).get('away') or 0) if m.get('teams', {}).get('home', {}).get('id') == home_id else (m.get('goals', {}).get('home') or 0) for m in completed_h) / len(completed_h)
     
-    a_sc = sum((m.get('goals', {}).get('home') or 0) if m.get('teams', {}).get('away', {}).get('id') == away_id else (m.get('goals', {}).get('away') or 0) for m in m_away) / len(m_away)
-    a_con = sum((m.get('goals', {}).get('away') or 0) if m.get('teams', {}).get('away', {}).get('id') == away_id else (m.get('goals', {}).get('home') or 0) for m in m_away) / len(m_away)
+    a_sc = sum((m.get('goals', {}).get('home') or 0) if m.get('teams', {}).get('away', {}).get('id') == away_id else (m.get('goals', {}).get('away') or 0) for m in completed_a) / len(completed_a)
+    a_con = sum((m.get('goals', {}).get('away') or 0) if m.get('teams', {}).get('away', {}).get('id') == away_id else (m.get('goals', {}).get('home') or 0) for m in completed_a) / len(completed_a)
 
     lh, la = (h_sc + a_con) / 2.0, (a_sc + h_con) / 2.0
     tot_xg = lh + la
@@ -109,7 +112,7 @@ def get_market_drops_and_single_tip(current_bank=50000.0, max_budget=500.0):
         for r in rejection_reasons[:5]:
             rejection_html += f"<li>{r}</li>"
         rejection_html += "</ul></div>"
-        return rejection_html, 0.0
+        return rejection_html, 0.0, None
 
     best = potential_singles[0]
     m = best['metrics']
@@ -121,9 +124,8 @@ def get_market_drops_and_single_tip(current_bank=50000.0, max_budget=500.0):
     spent = stake
 
     bet_id = f"{best['fixture_id']}_SINGLE"
-    direct_web_skip = f"https://webhook.site/YOUR-UNIQUE-ID?skip={bet_id}"
+    direct_web_skip = f"https://github.com/filipmaric994/QuantBet/issues/new?title=SKIP_{bet_id}"
 
-    # ELEGANTAN I LUKSUZAN INDIGO/ZLATNI DIZAJN (BEZ CRVENE BOJE)
     analysis_html = f"""
     <div style="background:#ffffff; border:1px solid #6366f1; border-left:5px solid #4338ca; border-radius:8px; padding:15px; margin-bottom:20px; box-shadow:0 4px 12px rgba(67, 56, 202, 0.08);">
         <div style="float:right;">
@@ -154,4 +156,4 @@ def get_market_drops_and_single_tip(current_bank=50000.0, max_budget=500.0):
         saved_bets.append(new_single)
         main.save_bets(saved_bets)
 
-    return analysis_html, spent
+    return analysis_html, spent, best['fixture_id']
