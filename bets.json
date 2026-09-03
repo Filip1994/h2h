@@ -40,5 +40,19 @@
         "odd": 1.91,
         "status": "PENDING",
         "profit": 0
+    },
+    {
+        "id": "1628956_SINGLE",
+        "type": "SINGLE_TIP",
+        "event_id": 1628956,
+        "date": "2026-09-03",
+        "sport": "Football",
+        "match": "(H) Cagliari vs Hellas Verona (A)",
+        "league": "Italy - Coppa Italia",
+        "market": "Više 2.5 Golova",
+        "stake": 500.0,
+        "odd": 2.1,
+        "status": "PENDING",
+        "profit": 0
     }
 ]
