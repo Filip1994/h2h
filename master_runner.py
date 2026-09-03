@@ -12,7 +12,7 @@ import market_drop_engine
 GMAIL_USER = os.environ.get("GMAIL_USER")
 GMAIL_PASS = os.environ.get("GMAIL_APP_PASS")
 INITIAL_BANK = 50000.0
-GITHUB_REPO = "Filip1994/h2h"
+SKIP_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbw2tBRDpX1Jw6yvBCwM6VFf0b5HwH9A6Jw1oGyxU8hdrWd8PZAR2yUyQJn8QLccGy7VZA/exec"
 
 def calculate_analytics():
     bets = main.load_bets()
@@ -55,7 +55,7 @@ def send_master_daily_email():
     if single_fixture_id:
         used_fixture_ids.add(single_fixture_id)
 
-    # 2. VIP H2H ZICERI
+    # 2. VIP H2H ZICERI (Samo mečevi koji nisu izabrani kao Single Tip)
     h2h_picks = main.get_h2h_raw_picks()
     filtered_h2h_picks = [p for p in h2h_picks if p['fixture_id'] not in used_fixture_ids]
 
@@ -74,7 +74,7 @@ def send_master_daily_email():
 
         bet_id = f"{p['fixture_id']}_{p['market']}"
         badge = "🔥 <b>SUPER ZICER</b> " if p['pct'] >= 95.0 else ""
-        direct_web_skip = f"https://github.com/{GITHUB_REPO}/issues/new?title=SKIP_{bet_id}"
+        direct_web_skip = f"{SKIP_WEBHOOK_URL}?skip={bet_id}"
 
         pick_str = f"{badge}<b>{p['market']}</b> -> <b style='color:#007bff;'>{p['pct']:.0f}%</b> ({p['count']}/{p['total']}) | Kvota: <b>{p['odd']:.2f}</b> <span style='color:#6c757d; font-size:11px;'>(Izvor: {p['bm_source']})</span> | Ulog: <b style='color:#28a745;'>{stake:,.0f} RSD</b>"
         
@@ -99,7 +99,7 @@ def send_master_daily_email():
         if not any(b.get('id') == bet_id for b in saved_bets if isinstance(b, dict)):
             saved_bets.append(new_bet)
 
-    # 3. POISSON VALUE BETS
+    # 3. POISSON VALUE BETS (Isključuje sve mečeve koji su već u H2H ili Single sekciji)
     value_content, value_spent = value_engine.get_value_html_blocks(current_bank, value_max_budget, used_fixture_ids)
 
     main.save_bets(saved_bets)
