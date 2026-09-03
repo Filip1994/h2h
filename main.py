@@ -3,6 +3,7 @@ import sys
 import json
 import requests
 from datetime import datetime
+from urllib.parse import quote
 
 API_KEY = os.environ.get("API_FOOTBALL_KEY", "").strip()
 BETS_FILE = "bets.json"
@@ -46,7 +47,10 @@ def save_bets(bets):
     with open(BETS_FILE, 'w', encoding='utf-8') as f: json.dump(bets, f, ensure_ascii=False, indent=4)
 
 def generate_superbet_search_link(home_team, away_team):
-    query = f"{home_team} {away_team}".replace(" ", "%20")
+    """Pravilno URL enkodiranje za Superbet pretragu"""
+    clean_home = home_team.split()[0] # Prva reč kluba radi preciznije pretrage
+    clean_away = away_team.split()[0]
+    query = quote(f"{clean_home} {clean_away}")
     return f"https://superbet.rs/sr-latn/pretraga?query={query}"
 
 def fetch_recent_form(team_id):
@@ -106,13 +110,20 @@ def get_h2h_html_blocks(current_bank=50000.0, max_daily_budget=4000.0):
             home_form = fetch_recent_form(home_id)
             away_form = fetch_recent_form(away_id)
 
+            # Sakupljanje istorijskih mečeva
+            h2h_history = []
             stats = {"Ukupno Golova - Više 2.5": 0, "Oba Tima Daju Gol (GG)": 0, "Raspon Golova - 1-3": 0, "Raspon Golova - 2-4": 0, "Raspon Golova - 2-3": 0, "I Poluvreme - Više 0.5": 0, "II Poluvreme - Više 0.5": 0}
-            for m in h2h_matches:
-                goals, score = m.get('goals') or {}, m.get('score') or {}
-                halftime = score.get('halftime') or {}
+            
+            for m in h2h_matches[:5]: # Poslednjih 5 međusobnih duela
+                goals = m.get('goals') or {}
                 ft_h, ft_a = goals.get('home') or 0, goals.get('away') or 0
+                h2h_history.append(f"{ft_h}:{ft_a}")
+
+                ft_g = ft_h + ft_a
+                score = m.get('score') or {}
+                halftime = score.get('halftime') or {}
                 ht_h, ht_a = halftime.get('home') or 0, halftime.get('away') or 0
-                ft_g, ht_g, sh_g = ft_h + ft_a, ht_h + ht_a, (ft_h + ft_a) - (ht_h + ht_a)
+                ht_g, sh_g = ht_h + ht_a, ft_g - (ht_h + ht_a)
 
                 if ft_g >= 3: stats["Ukupno Golova - Više 2.5"] += 1
                 if ft_h > 0 and ft_a > 0: stats["Oba Tima Daju Gol (GG)"] += 1
@@ -133,8 +144,9 @@ def get_h2h_html_blocks(current_bank=50000.0, max_daily_budget=4000.0):
                     if not real_odd or real_odd < MIN_ODD: continue
                     raw_picks.append({
                         "fixture_id": fixture_id, "home": home, "away": away, "league": f"{country} - {league}",
-                        "market": market, "pct": pct, "odd": real_odd,
+                        "market": market, "pct": pct, "odd": real_odd, "count": count, "total": total,
                         "home_form": home_form['avg_goals'], "away_form": away_form['avg_goals'],
+                        "h2h_history": ", ".join(h2h_history),
                         "link": generate_superbet_search_link(home, away)
                     })
         except Exception as e: print(f"Greška na meču: {e}")
@@ -158,12 +170,13 @@ def get_h2h_html_blocks(current_bank=50000.0, max_daily_budget=4000.0):
         p['stake'] = stake
         total_spent += stake
 
-        pick_str = f"<b>{p['market']}</b> -> {p['pct']:.0f}% | Kvota: <b>{p['odd']:.2f}</b> | Ulog: <b style='color:#28a745;'>{stake:,.0f} RSD</b> [<a href='{p['link']}' target='_blank' style='color:#28a745; font-weight:bold;'>Uplati 🎟️</a>]"
+        pick_str = f"<b>{p['market']}</b> -> {p['pct']:.0f}% ({p['count']}/{p['total']}) | Kvota: <b>{p['odd']:.2f}</b> | Ulog: <b style='color:#28a745;'>{stake:,.0f} RSD</b> [<a href='{p['link']}' target='_blank' style='color:#28a745; font-weight:bold;'>Uplati 🎟️</a>]"
         
         block = f"""
         <div style="background:#ffffff; border-left:4px solid #28a745; padding:12px; margin-bottom:12px; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
             <h3 style="margin:0 0 5px 0; color:#1a2a3a;">⚽ {p['home']} vs {p['away']}</h3>
-            <p style="margin:0 0 8px 0; color:#6c757d; font-size:12px;">🏆 Liga: {p['league']} | Forma: {p['home_form']:.1f} vs {p['away_form']:.1f}</p>
+            <p style="margin:0 0 4px 0; color:#6c757d; font-size:12px;">🏆 Liga: {p['league']} | Forma: {p['home_form']:.1f} vs {p['away_form']:.1f} gol/meču</p>
+            <p style="margin:0 0 8px 0; color:#495057; font-size:11px; font-style:italic;">📜 Poslednji dueli: [{p['h2h_history']}]</p>
             <p style="margin:0; font-size:13px;">👉 {pick_str}</p>
         </div>
         """
@@ -228,7 +241,7 @@ def evening_settle():
 
     if updated:
         save_bets(bets)
-        print("Večernja provera kompletirana. bets.json je ažuriran!")
+        print("Večernja provera kompletirana!")
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "evening":
