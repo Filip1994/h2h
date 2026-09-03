@@ -1,8 +1,9 @@
 import os
 import sys
 import json
+import time
 import requests
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 
 API_KEY = os.environ.get("API_FOOTBALL_KEY", "").strip()
 BETS_FILE = "bets.json"
@@ -13,6 +14,9 @@ MIN_H2H_MATCHES = 4
 MIN_ACCURACY_PCT = 75.0
 MIN_ODD = 1.45
 MAX_DAILY_H2H_PICKS = 5
+
+# TAČAN GITHUB REPO sa tvog naloga za "Preskoči tip"
+GITHUB_REPO = "Filip1994/h2h"
 
 EXCLUDED_COUNTRIES = ["Brazil", "Argentina", "Colombia", "Chile", "Uruguay", "Paraguay", "Peru", "Ecuador", "Bolivia", "Venezuela", "Egypt", "Morocco", "Tunisia", "Algeria", "South Africa", "Nigeria", "Ghana", "Senegal", "Cameroon", "Kenya", "Ivory Coast"]
 EXCLUDED_LEAGUE_KEYWORDS = ["U19", "U20", "U21", "U23", "Sub-19", "Sub-20", "Reserve", "Reserves", "Amateur", "Oberliga", "Regional", "District", "5th Division", "6th Division", "Next Pro", "MLS Next Pro", "II", "B team"]
@@ -90,6 +94,7 @@ def get_h2h_raw_picks():
     today_str = datetime.now().strftime('%Y-%m-%d')
     current_year = datetime.now().year
     min_year = current_year - 10
+    now_ts = int(time.time())
 
     raw_picks = []
     seen_fixtures = set()
@@ -100,7 +105,14 @@ def get_h2h_raw_picks():
         try:
             fixture = event.get('fixture') or {}
             fixture_id = fixture.get('id')
+            match_ts = fixture.get('timestamp', 0)
+
+            # STRIKTAN VREMENSKI FILTER: Samo mečevi koji počinju ZA NAJMANJE 15 MINUTA!
+            if match_ts <= (now_ts + 900): continue
             if (fixture.get('status') or {}).get('short') not in ['NS', 'TBD']: continue
+
+            # Prevarzija u CEST (Lokalno vreme u Srbiji)
+            match_time_str = datetime.fromtimestamp(match_ts, tz=timezone.utc).astimezone(timezone(timedelta(hours=2))).strftime('%H:%M')
 
             teams = event.get('teams') or {}
             home, away = (teams.get('home') or {}).get('name', 'Home'), (teams.get('away') or {}).get('name', 'Away')
@@ -191,6 +203,7 @@ def get_h2h_raw_picks():
                 
                 raw_picks.append({
                     "fixture_id": fixture_id, "home": home, "away": away, "league": f"{country} - {league}",
+                    "match_time": match_time_str,
                     "market": m_name, "pct": m_pct, "odd": m_odd, "bm_source": m_source, "count": m_cnt, "total": m_tot,
                     "home_form": home_form['avg_goals'], "away_form": away_form['avg_goals'],
                     "h2h_history": " • ".join(formatted_h2h_history[:5])
@@ -199,40 +212,6 @@ def get_h2h_raw_picks():
 
     raw_picks.sort(key=lambda x: (x['pct'], x['odd']), reverse=True)
     return raw_picks[:MAX_DAILY_H2H_PICKS]
-
-def get_h2h_html_blocks(current_bank=50000.0, max_daily_budget=4000.0):
-    picks = get_h2h_raw_picks()
-    if not picks: return "", 0.0
-    
-    html_blocks = []
-    total_spent = 0.0
-    today_str = datetime.now().strftime('%Y-%m-%d')
-    saved_bets = load_bets()
-    
-    base_stake = current_bank * 0.015
-    scaling = max_daily_budget / (len(picks) * base_stake) if (len(picks) * base_stake) > max_daily_budget else 1.0
-
-    for p in picks:
-        stake = max(100.0, round((base_stake * scaling) / 50.0) * 50)
-        total_spent += stake
-        bet_id = f"{p['fixture_id']}_{p['market']}"
-        badge = "🔥 <b>SUPER ZICER</b> " if p['pct'] >= 95.0 else ""
-        direct_web_skip = f"https://github.com/filipmaric994/QuantBet/issues/new?title=SKIP_{bet_id}"
-
-        block = f"""
-        <div style="background:#ffffff; border-left:4px solid #28a745; padding:12px; margin-bottom:12px; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
-            <div style="float:right;">
-                <a href="{direct_web_skip}" target="_blank" style="background:#dc3545; color:#ffffff; padding:4px 10px; border-radius:4px; font-size:11px; text-decoration:none; font-weight:bold;">❌ Preskoči tip</a>
-            </div>
-            <h3 style="margin:0 0 5px 0; color:#1a2a3a;">⚽ (H) {p['home']} vs {p['away']} (A)</h3>
-            <p style="margin:0 0 4px 0; color:#6c757d; font-size:12px;">🏆 Liga: {p['league']} | Forma: {p['home_form']:.1f} vs {p['away_form']:.1f} gol/meču</p>
-            <p style="margin:0 0 8px 0; color:#495057; font-size:11px; font-style:italic;">📜 Poslednji dueli: {p['h2h_history']}</p>
-            <p style="margin:0; font-size:13px;">👉 {badge}<b>{p['market']}</b> -> <b style='color:#007bff;'>{p['pct']:.0f}%</b> ({p['count']}/{p['total']}) | Kvota: <b>{p['odd']:.2f}</b> | Ulog: <b style='color:#28a745;'>{stake:,.0f} RSD</b></p>
-        </div>
-        """
-        html_blocks.append(block)
-
-    return "".join(html_blocks), total_spent
 
 def skip_bet(keyword):
     bets = load_bets()
