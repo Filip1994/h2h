@@ -39,8 +39,11 @@ def calculate_detailed_metrics(home_id, away_id):
     a_sc = sum((m.get('goals', {}).get('home') or 0) if m.get('teams', {}).get('away', {}).get('id') == away_id else (m.get('goals', {}).get('away') or 0) for m in m_away) / len(m_away)
     a_con = sum((m.get('goals', {}).get('away') or 0) if m.get('teams', {}).get('away', {}).get('id') == away_id else (m.get('goals', {}).get('home') or 0) for m in m_away) / len(m_away)
 
-    lh, la = (h_sc + a_con) / 2.0, (a_sc + h_con) / 2.0
-    tot_xg = lh + la
+    # TAČNA xG MATHEMATIKA
+    lh = (h_sc + a_con) / 2.0  # Očekivani golovi domaćina
+    la = (a_sc + h_con) / 2.0  # Očekivani golovi gosta
+    tot_xg = lh + la           # UKUPNI xG MEČA
+
     prob_over_2_5 = sum(poisson_prob(lh, h) * poisson_prob(la, a) for h in range(8) for a in range(8) if (h + a) >= 3) * 100.0
 
     return {"lh": lh, "la": la, "tot_xg": tot_xg, "prob_25": prob_over_2_5, "h_sc": h_sc, "h_con": h_con, "a_sc": a_sc, "a_con": a_con}
@@ -67,8 +70,7 @@ def get_market_drops_and_single_tip(current_bank=50000.0, max_budget=500.0):
                 continue
 
             odds_data = fetch_api("odds", {"fixture": fixture_id, "bookmaker": 8})
-            if not odds_data:
-                odds_data = fetch_api("odds", {"fixture": fixture_id})
+            if not odds_data: odds_data = fetch_api("odds", {"fixture": fixture_id})
             if not odds_data: continue
 
             metrics = calculate_detailed_metrics(home_id, away_id)
@@ -122,9 +124,9 @@ def get_market_drops_and_single_tip(current_bank=50000.0, max_budget=500.0):
         
         <div style="background:#fff5f5; border-left:3px solid #ff416c; padding:10px; margin-top:10px; font-size:12px; color:#4a4a4a;">
             <b>📊 Ekspertska Analiza i Kretanje Tržišta:</b><br>
-            • <b>xG Projekcija:</b> Domaćin napada sa xG {m['lh']:.2f}, dok gost prima prosečno {m['a_con']:.2f} gola. Ukupno projektovano <b>{m['tot_xg']:.2f} golova</b>.<br>
-            • <b>Pritisak na Kvotu:</b> Zabeležen pametan priliv kapitala. Implicirana verovatnoća kladionice od {(1/best['odd'])*100:.1f}% podcenjuje realno stanje modela koje iznosi <b>{best['prob']:.1f}%</b>.<br>
-            • <b>Upravljanje Rizikom:</b> Ulog je srazmerno smanjen/povećan po Kelijevom modelu (+{best['edge']:.1f}% prednosti) radi zaštite kapitala.
+            • <b>xG Projekcija:</b> Domaćin ima napadački xG od {m['lh']:.2f}, dok gost ima projektovani xG od {m['la']:.2f}. Ukupno očekivano na meču: <b>{m['tot_xg']:.2f} golova</b>.<br>
+            • <b>Pritisak na Kvotu:</b> Implicirana verovatnoća kladionice iznosi {(1/best['odd'])*100:.1f}%, dok naš model procenjuje realnu šansu na <b>{best['prob']:.1f}%</b> (Prednost: +{best['edge']:.1f}%).<br>
+            • <b>Upravljanje Rizikom:</b> Dinamički 1/4 Kelly ulog za maksimalnu zaštitu kapitala.
         </div>
         
         <div style="text-align:center; margin-top:12px;">
