@@ -28,29 +28,22 @@ def poisson_prob(lmbda, k):
     return (math.pow(lmbda, k) * math.exp(-lmbda)) / math.factorial(k)
 
 def calculate_detailed_metrics(home_id, away_id):
-    """Računa xG, forme i verovatnoće za analitičko obrazloženje"""
     m_home = fetch_api("fixtures", {"team": home_id, "last": 10})
     m_away = fetch_api("fixtures", {"team": away_id, "last": 10})
     
-    if not m_home or not m_away:
-        return None
+    if not m_home or not m_away: return None
 
     h_sc = sum((m.get('goals', {}).get('home') or 0) if m.get('teams', {}).get('home', {}).get('id') == home_id else (m.get('goals', {}).get('away') or 0) for m in m_home) / len(m_home)
     h_con = sum((m.get('goals', {}).get('away') or 0) if m.get('teams', {}).get('home', {}).get('id') == home_id else (m.get('goals', {}).get('home') or 0) for m in m_home) / len(m_home)
     
-    a_sc = sum((m.get('goals', {}).get('home') or 0) if m.get('teams', {}).get('home', {}).get('id') == away_id else (m.get('goals', {}).get('away') or 0) for m in m_away) / len(m_away)
-    a_con = sum((m.get('goals', {}).get('away') or 0) if m.get('teams', {}).get('home', {}).get('id') == away_id else (m.get('goals', {}).get('home') or 0) for m in m_away) / len(m_away)
+    a_sc = sum((m.get('goals', {}).get('home') or 0) if m.get('teams', {}).get('away', {}).get('id') == away_id else (m.get('goals', {}).get('away') or 0) for m in m_away) / len(m_away)
+    a_con = sum((m.get('goals', {}).get('away') or 0) if m.get('teams', {}).get('away', {}).get('id') == away_id else (m.get('goals', {}).get('home') or 0) for m in m_away) / len(m_away)
 
-    lh = (h_sc + a_con) / 2.0
-    la = (a_sc + h_con) / 2.0
+    lh, la = (h_sc + a_con) / 2.0, (a_sc + h_con) / 2.0
     tot_xg = lh + la
-
     prob_over_2_5 = sum(poisson_prob(lh, h) * poisson_prob(la, a) for h in range(8) for a in range(8) if (h + a) >= 3) * 100.0
 
-    return {
-        "lh": lh, "la": la, "tot_xg": tot_xg, "prob_25": prob_over_2_5,
-        "h_sc": h_sc, "h_con": h_con, "a_sc": a_sc, "a_con": a_con
-    }
+    return {"lh": lh, "la": la, "tot_xg": tot_xg, "prob_25": prob_over_2_5, "h_sc": h_sc, "h_con": h_con, "a_sc": a_sc, "a_con": a_con}
 
 def get_market_drops_and_single_tip(current_bank=50000.0, max_budget=500.0):
     today_str = datetime.now().strftime('%Y-%m-%d')
@@ -73,14 +66,19 @@ def get_market_drops_and_single_tip(current_bank=50000.0, max_budget=500.0):
             if not main.is_allowed_league(country, league) or not main.is_top_league(league) or not home_id or not away_id: 
                 continue
 
-            odds_data = fetch_api("odds", {"fixture": fixture_id})
+            odds_data = fetch_api("odds", {"fixture": fixture_id, "bookmaker": 8})
+            if not odds_data:
+                odds_data = fetch_api("odds", {"fixture": fixture_id})
             if not odds_data: continue
 
             metrics = calculate_detailed_metrics(home_id, away_id)
             if not metrics: continue
 
-            for bm in (odds_data[0].get('bookmakers') or []):
-                for b in (bm.get('bets') or []):
+            bookmakers = odds_data[0].get('bookmakers') or []
+            target_bm = next((bm for bm in bookmakers if bm.get('id') in [8, 11, 6]), bookmakers[0] if bookmakers else None)
+
+            if target_bm:
+                for b in (target_bm.get('bets') or []):
                     name, values = b.get('name') or '', b.get('values') or []
                     if name in ["Match Winner", "Goals Over/Under"]:
                         for v in values:
@@ -97,31 +95,23 @@ def get_market_drops_and_single_tip(current_bank=50000.0, max_budget=500.0):
                                         "league": f"{country} - {league}", "market": f"{name} - {val_name}",
                                         "odd": current_odd, "edge": edge, "prob": prob, "metrics": metrics
                                     })
-        except Exception as e: 
-            print(f"Greška na Single tipu: {e}")
+        except Exception as e: print(f"Greška na Single tipu: {e}")
 
     potential_singles.sort(key=lambda x: (x['edge'], x['metrics']['tot_xg']), reverse=True)
 
-    if not potential_singles:
-        return "", 0.0
+    if not potential_singles: return "", 0.0
 
     best = potential_singles[0]
     m = best['metrics']
 
-    # FRACTIONAL KELLY PRORAČUN ULOGA
-    p = best['prob'] / 100.0
-    b = best['odd'] - 1.0
+    p, b = best['prob'] / 100.0, best['odd'] - 1.0
     kelly_fraction = (p * b - (1.0 - p)) / b if b > 0 else 0.0
-    
-    # Prilagođavamo ulog: Ako je edge slabiji, smanjujemo ulog na 0.25%-0.5% banke
     stake_pct = max(0.0025, min(0.015, kelly_fraction * 0.25))
-    calculated_stake = round((current_bank * stake_pct) / 50.0) * 50
-    stake = min(max_budget, max(100.0, calculated_stake))
+    stake = min(max_budget, max(100.0, round((current_bank * stake_pct) / 50.0) * 50))
     spent = stake
 
     superbet_link = generate_superbet_search_link(best['home'], best['away'])
 
-    # PROFESIONALNO OBRAZLOŽENJE ZA MEJL
     analysis_html = f"""
     <div style="background:#ffffff; border:1px solid #ff416c; border-radius:8px; padding:15px; margin-bottom:20px; box-shadow:0 2px 8px rgba(0,0,0,0.05);">
         <div style="background:linear-gradient(135deg, #ff416c, #ff4b2b); color:#ffffff; padding:10px; border-radius:6px; text-align:center; font-weight:bold; font-size:15px; margin-bottom:12px;">
