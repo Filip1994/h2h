@@ -141,11 +141,9 @@ def get_h2h_html_blocks(current_bank=50000.0, max_daily_budget=4000.0):
 
     if not raw_picks: return "", 0.0
 
-    # Proračun uloga po utakmici: Bazno 1.5% Banke po meču
-    base_stake_per_match = current_bank * 0.015  # npr. 750 RSD
+    base_stake_per_match = current_bank * 0.015  # 1.5% Banke po meču
     total_requested = len(raw_picks) * base_stake_per_match
 
-    # Ako vikendom ima previše utakmica, skališemo da ne pređemo Dnevni Stop-Loss
     scaling_factor = 1.0
     if total_requested > max_daily_budget:
         scaling_factor = max_daily_budget / total_requested
@@ -230,7 +228,7 @@ def evening_settle():
 
     if updated:
         save_bets(bets)
-        print("Večernja provera kompletirana. bets.json ažuriran!")
+        print("Večernja provera kompletirana. bets.json je ažuriran!")
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "evening":
