@@ -47,15 +47,14 @@ def send_master_daily_email():
     single_max_budget = max_daily_risk * 0.10
     value_max_budget = max_daily_risk * 0.10
 
-    # PRATI SE SVE ZAUZETE MEČEVE
     used_fixture_ids = set()
 
-    # 1. SEKCIJA: SINGLE TIP DANA
+    # 1. SINGLE TIP DANA
     single_content, single_spent, single_fixture_id = market_drop_engine.get_market_drops_and_single_tip(current_bank, single_max_budget)
     if single_fixture_id:
         used_fixture_ids.add(single_fixture_id)
 
-    # 2. SEKCIJA: VIP H2H ZICERI (Samo za mečeve koji nisu Single Tip)
+    # 2. VIP H2H ZICERI
     h2h_picks = main.get_h2h_raw_picks()
     filtered_h2h_picks = [p for p in h2h_picks if p['fixture_id'] not in used_fixture_ids]
 
@@ -65,7 +64,7 @@ def send_master_daily_email():
 
     base_stake_per_match = current_bank * 0.015
     total_requested = len(filtered_h2h_picks) * base_stake_per_match
-    scaling_factor = max_daily_budget / total_requested if total_requested > max_daily_budget else 1.0
+    scaling_factor = h2h_max_budget / total_requested if total_requested > h2h_max_budget else 1.0
 
     for p in filtered_h2h_picks:
         used_fixture_ids.add(p['fixture_id'])
@@ -99,7 +98,7 @@ def send_master_daily_email():
         if not any(b.get('id') == bet_id for b in saved_bets if isinstance(b, dict)):
             saved_bets.append(new_bet)
 
-    # 3. SEKCIJA: POISSON VALUE BETS (STROGO ISKLJUČUJE SVE MEČEVE KOJI SU VEĆ U H2H ILI SINGLE TIPU!)
+    # 3. POISSON VALUE BETS
     value_content, value_spent = value_engine.get_value_html_blocks(current_bank, value_max_budget, used_fixture_ids)
 
     main.save_bets(saved_bets)
