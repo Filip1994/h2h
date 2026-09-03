@@ -4,9 +4,9 @@ import json
 import requests
 import math
 from datetime import datetime
+from urllib.parse import quote
 
 API_KEY = os.environ.get("API_FOOTBALL_KEY", "").strip()
-VALUE_BETS_FILE = "value_bets.json"
 BASE_URL = "https://v3.football.api-sports.io"
 HEADERS = {'x-apisports-key': API_KEY}
 
@@ -22,7 +22,9 @@ def fetch_api(endpoint, params=None):
         return []
 
 def generate_superbet_search_link(home_team, away_team):
-    query = f"{home_team} {away_team}".replace(" ", "%20")
+    clean_home = home_team.split()[0]
+    clean_away = away_team.split()[0]
+    query = quote(f"{clean_home} {clean_away}")
     return f"https://superbet.rs/sr-latn/pretraga?query={query}"
 
 def poisson_prob(lmbda, k):
@@ -77,7 +79,7 @@ def get_value_html_blocks(current_bank=50000.0, max_budget=500.0):
     email_blocks = []
     total_spent = 0.0
 
-    base_stake = max(100.0, round((current_bank * 0.005) / 50.0) * 50) # 0.5% Banke
+    base_stake = max(100.0, round((current_bank * 0.005) / 50.0) * 50)
 
     for event in fixtures:
         try:
@@ -113,8 +115,11 @@ def get_value_html_blocks(current_bank=50000.0, max_budget=500.0):
                     block = f"""
                     <div style="background:#ffffff; border-left:4px solid #6f42c1; padding:12px; margin-bottom:12px; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
                         <h3 style="margin:0 0 5px 0; color:#2c3e50;">⚽ {home} vs {away}</h3>
-                        <p style="margin:0 0 8px 0; color:#7f8c8d; font-size:12px;">🏆 {league}</p>
-                        <p style="margin:0; font-size:13px;">💎 <b>{market}</b> | Kvota: <b>{real_odd:.2f}</b> (Prednost: +{edge:.1f}%) | Ulog: <b style='color:#6f42c1;'>{base_stake:,.0f} RSD</b> [<a href='{superbet_link}' target='_blank' style='color:#6f42c1; font-weight:bold;'>Uplati 🎟️</a>]</p>
+                        <p style="margin:0 0 4px 0; color:#7f8c8d; font-size:12px;">🏆 {league} | Očekivani golovi (xG): <b>{lh+la:.2f}</b></p>
+                        <p style="margin:0 0 6px 0; color:#495057; font-size:11px; font-style:italic;">
+                            💡 <b>Math Obrazloženje:</b> Poisson model procenjuje verovatnoću na <b>{model_prob:.1f}%</b>, dok kvota {real_odd:.2f} implicira tek <b>{implied_prob:.1f}%</b> (Prednost: <b style='color:#6f42c1;'>+{edge:.1f}%</b>).
+                        </p>
+                        <p style="margin:0; font-size:13px;">💎 <b>{market}</b> | Kvota: <b>{real_odd:.2f}</b> | Ulog: <b style='color:#6f42c1;'>{base_stake:,.0f} RSD</b> [<a href='{superbet_link}' target='_blank' style='color:#6f42c1; font-weight:bold;'>Uplati 🎟️</a>]</p>
                     </div>
                     """
                     email_blocks.append(block)
