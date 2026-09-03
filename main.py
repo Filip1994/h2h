@@ -14,6 +14,9 @@ MIN_ACCURACY_PCT = 75.0
 MIN_ODD = 1.45
 MAX_DAILY_H2H_PICKS = 5  # Striktan limit na top 5 zicera dana
 
+# ZAMENI SA TVOJIM WEBHOOK LINKOM ILI GITHUB REPO-OM (Otvara veb pregledač, ne mejl!)
+WEBHOOK_BASE_URL = "https://webhook.site/YOUR-UNIQUE-ID" 
+
 EXCLUDED_COUNTRIES = ["Brazil", "Argentina", "Colombia", "Chile", "Uruguay", "Paraguay", "Peru", "Ecuador", "Bolivia", "Venezuela", "Egypt", "Morocco", "Tunisia", "Algeria", "South Africa", "Nigeria", "Ghana", "Senegal", "Cameroon", "Kenya", "Ivory Coast"]
 EXCLUDED_LEAGUE_KEYWORDS = ["U19", "U20", "U21", "U23", "Sub-19", "Sub-20", "Reserve", "Reserves", "Amateur", "Oberliga", "Regional", "District", "5th Division", "6th Division", "Next Pro", "MLS Next Pro", "II", "B team"]
 
@@ -87,6 +90,9 @@ def fetch_real_odds(fixture_id):
 
 def get_h2h_html_blocks(current_bank=50000.0, max_daily_budget=4000.0):
     today_str = datetime.now().strftime('%Y-%m-%d')
+    current_year = datetime.now().year
+    min_year = current_year - 10  # SKENIRANJE POSLEDNJIH 10 GODINA
+
     saved_bets = load_bets()
     raw_picks = []
     seen_fixtures = set()
@@ -108,9 +114,21 @@ def get_h2h_html_blocks(current_bank=50000.0, max_daily_budget=4000.0):
             if not is_allowed_league(country, league) or not home_id or not away_id: continue
 
             h2h_all = fetch_api("fixtures/headtohead", {"h2h": f"{home_id}-{away_id}"})
-            if len(h2h_all) < MIN_H2H_MATCHES: continue
+            
+            # Filtriranje mečeva u poslednjih 10 godina
+            recent_h2h = []
+            for m in h2h_all:
+                raw_date = (m.get('fixture') or {}).get('date', '')
+                if raw_date:
+                    try:
+                        m_year = int(raw_date[:4])
+                        if m_year >= min_year:
+                            recent_h2h.append(m)
+                    except Exception: recent_h2h.append(m)
+                else: recent_h2h.append(m)
 
-            recent_h2h = h2h_all[:8]
+            if len(recent_h2h) < MIN_H2H_MATCHES: continue
+
             total = len(recent_h2h)
 
             home_form = fetch_recent_form(home_id)
@@ -136,7 +154,8 @@ def get_h2h_html_blocks(current_bank=50000.0, max_daily_budget=4000.0):
                 date_str = ""
                 if raw_date:
                     try:
-                        date_str = datetime.strptime(raw_date[:10], '%Y-%m-%d').strftime('%d.%m.')
+                        # UKLJUČENA GODINA (PUN FORMAT)
+                        date_str = datetime.strptime(raw_date[:10], '%Y-%m-%d').strftime('%d.%m.%Y.')
                     except Exception: date_str = ""
 
                 match_res_str = f"[{date_str}] <b>{ft_h}:{ft_a}</b> (HT {ht_h}:{ht_a})" if date_str else f"<b>{ft_h}:{ft_a}</b> (HT {ht_h}:{ht_a})"
@@ -179,7 +198,8 @@ def get_h2h_html_blocks(current_bank=50000.0, max_daily_budget=4000.0):
                     "fixture_id": fixture_id, "home": home, "away": away, "league": f"{country} - {league}",
                     "market": m_name, "pct": m_pct, "odd": m_odd, "bm_source": m_source, "count": m_cnt, "total": m_tot,
                     "home_form": home_form['avg_goals'], "away_form": away_form['avg_goals'],
-                    "h2h_history": " • ".join(formatted_h2h_history[:4])
+                    # ISPISUJE SAMO POSLEDNJIH 5 POSLE SKENIRANJA CELIH 10 GODINA
+                    "h2h_history": " • ".join(formatted_h2h_history[:5])
                 })
         except Exception as e: print(f"Greška na meču: {e}")
 
@@ -206,20 +226,23 @@ def get_h2h_html_blocks(current_bank=50000.0, max_daily_budget=4000.0):
         total_spent += stake
 
         bet_id = f"{p['fixture_id']}_{p['market']}"
-        badge = "🔥 <b>SUPER ZICER</b> " if p['pct'] >= 87.5 else ""
+        
+        # PROMENJENO: SUPER ZICER samo za 95%+
+        badge = "🔥 <b>SUPER ZICER</b> " if p['pct'] >= 95.0 else ""
 
-        mailto_skip = f"mailto:filip.maric994@gmail.com?subject=SKIP:{bet_id}&body=Preskacem%20tip%20{p['home']}%20vs%20{p['away']}"
+        # OTVARA BROWSER WEB STRANICU (NE SLANJE MEJLA!)
+        direct_web_skip = f"https://webhook.site/YOUR-UNIQUE-ID?skip={bet_id}"
 
         pick_str = f"{badge}<b>{p['market']}</b> -> <b style='color:#007bff;'>{p['pct']:.0f}%</b> ({p['count']}/{p['total']}) | Kvota: <b>{p['odd']:.2f}</b> <span style='color:#6c757d; font-size:11px;'>(Izvor: {p['bm_source']})</span> | Ulog: <b style='color:#28a745;'>{stake:,.0f} RSD</b>"
         
         block = f"""
         <div style="background:#ffffff; border-left:4px solid #28a745; padding:12px; margin-bottom:12px; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
             <div style="float:right;">
-                <a href="{mailto_skip}" style="background:#dc3545; color:#ffffff; padding:4px 10px; border-radius:4px; font-size:11px; text-decoration:none; font-weight:bold;">❌ Preskoči tip</a>
+                <a href="{direct_web_skip}" target="_blank" style="background:#dc3545; color:#ffffff; padding:4px 10px; border-radius:4px; font-size:11px; text-decoration:none; font-weight:bold;">❌ Preskoči tip</a>
             </div>
             <h3 style="margin:0 0 5px 0; color:#1a2a3a;">⚽ (H) {p['home']} vs {p['away']} (A)</h3>
             <p style="margin:0 0 4px 0; color:#6c757d; font-size:12px;">🏆 Liga: {p['league']} | Forma: {p['home_form']:.1f} vs {p['away_form']:.1f} gol/meču</p>
-            <p style="margin:0 0 8px 0; color:#495057; font-size:11px; font-style:italic;">📜 Poslednji dueli: {p['h2h_history']}</p>
+            <p style="margin:0 0 8px 0; color:#495057; font-size:11px; font-style:italic;">📜 Poslednji dueli (zadnjih 5): {p['h2h_history']}</p>
             <p style="margin:0; font-size:13px;">👉 {pick_str}</p>
         </div>
         """
