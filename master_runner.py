@@ -12,6 +12,7 @@ import market_drop_engine
 GMAIL_USER = os.environ.get("GMAIL_USER")
 GMAIL_PASS = os.environ.get("GMAIL_APP_PASS")
 INITIAL_BANK = 50000.0
+GITHUB_REPO = "Filip1994/h2h"
 
 def calculate_analytics():
     bets = main.load_bets()
@@ -73,7 +74,7 @@ def send_master_daily_email():
 
         bet_id = f"{p['fixture_id']}_{p['market']}"
         badge = "🔥 <b>SUPER ZICER</b> " if p['pct'] >= 95.0 else ""
-        direct_web_skip = f"https://github.com/filipmaric994/QuantBet/issues/new?title=SKIP_{bet_id}"
+        direct_web_skip = f"https://github.com/{GITHUB_REPO}/issues/new?title=SKIP_{bet_id}"
 
         pick_str = f"{badge}<b>{p['market']}</b> -> <b style='color:#007bff;'>{p['pct']:.0f}%</b> ({p['count']}/{p['total']}) | Kvota: <b>{p['odd']:.2f}</b> <span style='color:#6c757d; font-size:11px;'>(Izvor: {p['bm_source']})</span> | Ulog: <b style='color:#28a745;'>{stake:,.0f} RSD</b>"
         
@@ -83,7 +84,7 @@ def send_master_daily_email():
                 <a href="{direct_web_skip}" target="_blank" style="background:#dc3545; color:#ffffff; padding:4px 10px; border-radius:4px; font-size:11px; text-decoration:none; font-weight:bold;">❌ Preskoči tip</a>
             </div>
             <h3 style="margin:0 0 5px 0; color:#1a2a3a;">⚽ (H) {p['home']} vs {p['away']} (A)</h3>
-            <p style="margin:0 0 4px 0; color:#6c757d; font-size:12px;">🏆 Liga: {p['league']} | Forma: {p['home_form']:.1f} vs {p['away_form']:.1f} gol/meču</p>
+            <p style="margin:0 0 4px 0; color:#6c757d; font-size:12px;"><b>⏰ Početak:</b> <b style="color:#28a745;">{p['match_time']}h</b> | 🏆 Liga: {p['league']} | Forma: {p['home_form']:.1f} vs {p['away_form']:.1f} gol/meču</p>
             <p style="margin:0 0 8px 0; color:#495057; font-size:11px; font-style:italic;">📜 Poslednji dueli: {p['h2h_history']}</p>
             <p style="margin:0; font-size:13px;">👉 {pick_str}</p>
         </div>
