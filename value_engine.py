@@ -77,8 +77,7 @@ def get_value_html_blocks(current_bank=50000.0, max_budget=500.0):
     email_blocks = []
     total_spent = 0.0
 
-    # Za visoke kvote ulog je oprezan: 0.5% Banke po meču
-    base_stake = max(100.0, round((current_bank * 0.005) / 50.0) * 50)
+    base_stake = max(100.0, round((current_bank * 0.005) / 50.0) * 50) # 0.5% Banke
 
     for event in fixtures:
         try:
