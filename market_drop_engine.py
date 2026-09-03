@@ -121,20 +121,21 @@ def get_market_drops_and_single_tip(current_bank=50000.0, max_budget=500.0):
     spent = stake
 
     bet_id = f"{best['fixture_id']}_SINGLE"
-    mailto_skip = f"mailto:filip.maric994@gmail.com?subject=SKIP:{bet_id}&body=Preskacem%20tip%20{best['home']}%20vs%20{best['away']}"
+    direct_web_skip = f"https://webhook.site/YOUR-UNIQUE-ID?skip={bet_id}"
 
+    # ELEGANTAN I LUKSUZAN INDIGO/ZLATNI DIZAJN (BEZ CRVENE BOJE)
     analysis_html = f"""
-    <div style="background:#ffffff; border:1px solid #ff416c; border-radius:8px; padding:15px; margin-bottom:20px; box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+    <div style="background:#ffffff; border:1px solid #6366f1; border-left:5px solid #4338ca; border-radius:8px; padding:15px; margin-bottom:20px; box-shadow:0 4px 12px rgba(67, 56, 202, 0.08);">
         <div style="float:right;">
-            <a href="{mailto_skip}" style="background:#dc3545; color:#ffffff; padding:4px 10px; border-radius:4px; font-size:11px; text-decoration:none; font-weight:bold;">❌ Preskoči tip</a>
+            <a href="{direct_web_skip}" target="_blank" style="background:#dc3545; color:#ffffff; padding:4px 10px; border-radius:4px; font-size:11px; text-decoration:none; font-weight:bold;">❌ Preskoči tip</a>
         </div>
-        <div style="background:linear-gradient(135deg, #ff416c, #ff4b2b); color:#ffffff; padding:10px; border-radius:6px; text-align:center; font-weight:bold; font-size:15px; margin-bottom:12px;">
-            🔥 EKSKLUZIVNI SINGLE TIP DANA: {best['match']}
+        <div style="background:linear-gradient(135deg, #1e1b4b, #4338ca); color:#ffffff; padding:10px; border-radius:6px; text-align:center; font-weight:bold; font-size:15px; margin-bottom:12px; letter-spacing:0.5px;">
+            ⭐ EKSKLUZIVNI SINGLE TIP DANA: {best['match']}
         </div>
-        <p style="margin:0 0 8px 0; font-size:13px; color:#333;"><b>🏆 Takmičenje:</b> {best['league']}</p>
-        <p style="margin:0 0 8px 0; font-size:13px; color:#333;">🎯 <b>Predlog:</b> {best['market']} | Kvota: <b>{best['odd']:.2f}</b> <span style='color:#6c757d; font-size:11px;'>(Izvor: {best['bm_source']})</span> | Ulog: <b style="color:#ff416c;">{stake:,.0f} RSD</b> ({stake_pct*100:.2f}% banke)</p>
+        <p style="margin:0 0 8px 0; font-size:13px; color:#1e293b;"><b>🏆 Takmičenje:</b> {best['league']}</p>
+        <p style="margin:0 0 8px 0; font-size:13px; color:#1e293b;">🎯 <b>Predlog:</b> {best['market']} | Kvota: <b>{best['odd']:.2f}</b> <span style='color:#64748b; font-size:11px;'>(Izvor: {best['bm_source']})</span> | Ulog: <b style="color:#4338ca;">{stake:,.0f} RSD</b> ({stake_pct*100:.2f}% banke)</p>
         
-        <div style="background:#fff5f5; border-left:3px solid #ff416c; padding:10px; margin-top:10px; font-size:12px; color:#4a4a4a;">
+        <div style="background:#f5f3ff; border-left:3px solid #6366f1; padding:10px; margin-top:10px; font-size:12px; color:#334155;">
             <b>📊 Ekspertska Analiza i Kretanje Tržišta:</b><br>
             • <b>xG Projekcija:</b> Domaćin napada sa xG {m['lh']:.2f}, dok gost ima projektovani xG od {m['la']:.2f}. Ukupno očekivano: <b>{m['tot_xg']:.2f} golova</b>.<br>
             • <b>Pritisak na Kvotu:</b> Implicirana verovatnoća kladionice od {(1/best['odd'])*100:.1f}% podcenjuje realno stanje modela od <b>{best['prob']:.1f}%</b> (Prednost: +{best['edge']:.1f}%).<br>
