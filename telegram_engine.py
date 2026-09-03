@@ -7,7 +7,7 @@ GITHUB_REPO = "Filip1994/h2h"
 
 def send_telegram_message(text, bet_id=None):
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
-        print("⚠️ Telegram token ili Chat ID nisu podešeni u Secrets.")
+        print("⚠️ Telegram Secrets (TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID) nisu podešeni. Preskačem slanje.")
         return False
 
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
