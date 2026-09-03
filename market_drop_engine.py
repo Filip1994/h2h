@@ -2,6 +2,7 @@ import os
 import sys
 import requests
 from datetime import datetime
+from urllib.parse import quote
 
 API_KEY = os.environ.get("API_FOOTBALL_KEY", "").strip()
 BASE_URL = "https://v3.football.api-sports.io"
@@ -16,7 +17,9 @@ def fetch_api(endpoint, params=None):
         return []
 
 def generate_superbet_search_link(home_team, away_team):
-    query = f"{home_team} {away_team}".replace(" ", "%20")
+    clean_home = home_team.split()[0]
+    clean_away = away_team.split()[0]
+    query = quote(f"{clean_home} {clean_away}")
     return f"https://superbet.rs/sr-latn/pretraga?query={query}"
 
 def get_market_drops_and_single_tip(current_bank=50000.0, max_budget=500.0):
@@ -56,13 +59,16 @@ def get_market_drops_and_single_tip(current_bank=50000.0, max_budget=500.0):
     if potential_singles:
         best_single = potential_singles[0]
         superbet_link = generate_superbet_search_link(best_single['home'], best_single['away'])
-        stake = min(max_budget, max(100.0, round((current_bank * 0.01) / 50.0) * 50)) # 1% Banke
+        stake = min(max_budget, max(100.0, round((current_bank * 0.01) / 50.0) * 50))
         spent = stake
 
         single_html = f"""
         <div style="background:linear-gradient(135deg, #ff416c, #ff4b2b); color:#ffffff; padding:16px; border-radius:8px; margin-bottom:20px; text-align:center;">
             <h3 style="margin:0 0 6px 0;">🔥 EKSKLUZIVNI SINGLE TIP DANA (Kvota {best_single['odd']:.2f})</h3>
-            <p style="margin:0 0 8px 0; font-size:14px;">⚽ <b>{best_single['match']}</b> ({best_single['league']})</p>
+            <p style="margin:0 0 6px 0; font-size:14px;">⚽ <b>{best_single['match']}</b> ({best_single['league']})</p>
+            <p style="margin:0 0 10px 0; font-size:11px; opacity:0.9; font-style:italic;">
+                💡 <b>Market Analiza:</b> Zabeležen pametan priliv novca i pritisak uplatne mase na ovu kvotu.
+            </p>
             <div style="background:rgba(255,255,255,0.2); display:inline-block; padding:6px 16px; border-radius:20px; font-weight:bold; font-size:13px; margin-bottom:8px;">
                 🎯 {best_single['market']} | Kvota: {best_single['odd']:.2f} | Ulog: <b>{stake:,.0f} RSD</b>
             </div><br>
