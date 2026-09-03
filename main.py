@@ -2,301 +2,188 @@ import os
 import sys
 import json
 import requests
-import smtplib
 from datetime import datetime
-from email.mime.text import MIMEText
 
-# ==================== ROTATOR API KLJUČEVA ====================
-RAW_KEYS = [
-    os.environ.get("API_FOOTBALL_KEY"),
-    os.environ.get("API_KEY_2"),
-    os.environ.get("API3")
-]
-KEYS = [k.strip() for k in RAW_KEYS if k and k.strip()]
-
-class APIRotator:
-    def __init__(self, keys):
-        self.keys = keys
-        self.current_idx = 0
-
-    def get_headers(self):
-        if not self.keys:
-            return {}
-        return {'x-apisports-key': self.keys[self.current_idx]}
-
-    def rotate(self):
-        if len(self.keys) > 1:
-            self.current_idx = (self.current_idx + 1) % len(self.keys)
-            print(f"🔄 Prebačeno na API ključ #{self.current_idx + 1}")
-
-    def fetch(self, url, params=None):
-        attempts = 0
-        max_attempts = len(self.keys) * 2 if self.keys else 1
-        
-        while attempts < max_attempts:
-            try:
-                res = requests.get(url, headers=self.get_headers(), params=params, timeout=10)
-                if res.status_code in [429, 403]:
-                    self.rotate()
-                    attempts += 1
-                    continue
-                
-                data = res.json()
-                if isinstance(data, dict) and data.get("errors"):
-                    errs = data.get("errors")
-                    if isinstance(errs, dict) and ("requests" in errs or "rateLimit" in errs):
-                        self.rotate()
-                        attempts += 1
-                        continue
-                return data
-            except Exception as e:
-                print(f"Greška na mreži: {e}")
-                self.rotate()
-                attempts += 1
-        return {}
-
-api = APIRotator(KEYS)
-
-# ==================== STRATEGIJA & FILTERI ====================
-GMAIL_USER = os.environ.get("GMAIL_USER")
-GMAIL_PASS = os.environ.get("GMAIL_APP_PASS")
+API_KEY = os.environ.get("API_FOOTBALL_KEY", "").strip()
 BETS_FILE = "bets.json"
+BASE_URL = "https://v3.football.api-sports.io"
+HEADERS = {'x-apisports-key': API_KEY}
 
 MIN_H2H_MATCHES = 4
 MIN_ACCURACY_PCT = 75.0
 MIN_ODD = 1.35
 
-# Standardne lokalne kvote za raspone koje svetski API ne šalje
-BALKAN_MARKETS_DEFAULT_ODDS = {
-    "2-3 Golova": 1.95,
-    "1-3 Golova": 1.40,
-    "2-4 Golova": 1.50,
-    "1-3 I pol & 1-3 II pol": 1.85,
-    "1+ II pol": 1.38
-}
+EXCLUDED_COUNTRIES = ["Brazil", "Argentina", "Colombia", "Chile", "Uruguay", "Paraguay", "Peru", "Ecuador", "Bolivia", "Venezuela", "Egypt", "Morocco", "Tunisia", "Algeria", "South Africa", "Nigeria", "Ghana", "Senegal", "Cameroon", "Kenya", "Ivory Coast"]
+EXCLUDED_LEAGUE_KEYWORDS = ["U19", "U20", "U21", "U23", "Sub-19", "Sub-20", "Reserve", "Reserves", "Amateur", "Oberliga", "Regional", "District", "5th Division", "6th Division", "Next Pro", "MLS Next Pro", "II", "B team"]
+TOP_SUPERBET_LEAGUES = ["Premier League", "Championship", "League One", "La Liga", "Segunda Division", "Serie A", "Serie B", "Bundesliga", "2. Bundesliga", "3. Liga", "Ligue 1", "Ligue 2", "Primeira Liga", "Liga Portugal 2", "Eredivisie", "Eerste Divisie", "Pro League", "Super League", "Bundesliga - Austria", "Premiership", "Superliga", "Allsvenskan", "Eliteserien", "HNL", "1. HNL", "SuperLiga", "Premier League - Russia", "Russian Premier League", "MLS", "Major League Soccer", "UEFA Champions League", "UEFA Europa League", "UEFA Conference League"]
 
-EXCLUDED_COUNTRIES = [
-    "Brazil", "Argentina", "Colombia", "Chile", "Uruguay", "Paraguay", "Peru",
-    "Ecuador", "Bolivia", "Venezuela", "Egypt", "Morocco", "Tunisia", "Algeria",
-    "South Africa", "Nigeria", "Ghana", "Senegal", "Cameroon", "Kenya", "Ivory Coast"
-]
-
-EXCLUDED_LEAGUE_KEYWORDS = [
-    "U19", "U20", "U21", "U23", "Sub-19", "Sub-20", "Reserve", "Reserves",
-    "Amateur", "Oberliga", "Regional", "District", "5th Division", "6th Division",
-    "Next Pro", "MLS Next Pro", "II", "B team"
-]
+def fetch_api(endpoint, params=None):
+    try:
+        res = requests.get(f"{BASE_URL}/{endpoint}", headers=HEADERS, params=params, timeout=12)
+        return res.json().get('response') or []
+    except Exception as e:
+        print(f"Greška na API [{endpoint}]: {e}")
+        return []
 
 def is_allowed_league(country_name, league_name):
     for country in EXCLUDED_COUNTRIES:
-        if country and country.lower() in country_name.lower():
-            return False
+        if country and country.lower() in country_name.lower(): return False
     for kw in EXCLUDED_LEAGUE_KEYWORDS:
-        if kw and kw.lower() in league_name.lower():
-            return False
+        if kw and kw.lower() in league_name.lower(): return False
     return True
 
-# ==================== POMOĆNE FUNKCIJE ====================
-def send_email(subject, body):
-    if not GMAIL_USER or not GMAIL_PASS:
-        print("⚠️ Gmail kredencijali nisu podešeni u Secrets!")
-        return
-
-    msg = MIMEText(body, 'plain', 'utf-8')
-    msg['Subject'] = subject
-    msg['From'] = GMAIL_USER
-    msg['To'] = GMAIL_USER
-
-    try:
-        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
-            server.login(GMAIL_USER, GMAIL_PASS)
-            server.sendmail(GMAIL_USER, GMAIL_USER, msg.as_string())
-        print("Mejl uspešno poslat!")
-    except Exception as e:
-        print(f"Greška pri slanju mejla: {e}")
+def is_top_league(league_name):
+    return any(top.lower() in league_name.lower() for top in TOP_SUPERBET_LEAGUES)
 
 def load_bets():
     if os.path.exists(BETS_FILE):
         try:
-            with open(BETS_FILE, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-                return data if isinstance(data, list) else []
-        except Exception:
-            return []
+            with open(BETS_FILE, 'r', encoding='utf-8') as f: return json.load(f)
+        except Exception: return []
     return []
 
 def save_bets(bets):
-    with open(BETS_FILE, 'w', encoding='utf-8') as f:
-        json.dump(bets, f, ensure_ascii=False, indent=4)
+    with open(BETS_FILE, 'w', encoding='utf-8') as f: json.dump(bets, f, ensure_ascii=False, indent=4)
+
+def generate_superbet_search_link(home_team, away_team):
+    query = f"{home_team} {away_team}".replace(" ", "%20")
+    return f"https://superbet.rs/sr-latn/pretraga?query={query}"
+
+def fetch_recent_form(team_id):
+    res = fetch_api("fixtures", {"team": team_id, "last": 10})
+    if not res: return {"avg_goals": 0.0}
+    goals_scored = sum((m.get('goals', {}).get('home') or 0) if m.get('teams', {}).get('home', {}).get('id') == team_id else (m.get('goals', {}).get('away') or 0) for m in res)
+    return {"avg_goals": goals_scored / len(res)}
 
 def fetch_real_odds(fixture_id):
-    url = f"https://v3.football.api-sports.io/odds?fixture={fixture_id}"
-    data = api.fetch(url)
+    res = fetch_api("odds", {"fixture": fixture_id})
     odds_dict = {}
+    if not res: return odds_dict
     try:
-        response = data.get('response') or []
-        for item in response:
-            bookmakers = item.get('bookmakers') or []
-            for bm in bookmakers:
-                bets = bm.get('bets') or []
-                for b in bets:
-                    name = b.get('name') or ''
-                    values = b.get('values') or []
-
-                    if name == "Goals Over/Under":
-                        for v in values:
-                            if v.get('value') == "Over 2.5" and "3+ Ukupno" not in odds_dict:
-                                odds_dict["3+ Ukupno"] = float(v.get('odd'))
-                            elif v.get('value') == "Over 1.5" and "2-4 Golova" not in odds_dict:
-                                odds_dict["2-4 Golova"] = float(v.get('odd'))
-                    elif name == "Both Teams Score":
-                        for v in values:
-                            if v.get('value') == "Yes" and "GG" not in odds_dict:
-                                odds_dict["GG"] = float(v.get('odd'))
-                    elif "First Half" in name and "Over/Under" in name:
-                        for v in values:
-                            if v.get('value') == "Over 0.5" and "1+ I pol" not in odds_dict:
-                                odds_dict["1+ I pol"] = float(v.get('odd'))
-                    elif "Second Half" in name and "Over/Under" in name:
-                        for v in values:
-                            if v.get('value') == "Over 0.5" and "1+ II pol" not in odds_dict:
-                                odds_dict["1+ II pol"] = float(v.get('odd'))
-    except Exception as e:
-        print(f"Greška pri čitanju kvota za {fixture_id}: {e}")
+        for bm in (res[0].get('bookmakers') or []):
+            for b in (bm.get('bets') or []):
+                name, values = b.get('name') or '', b.get('values') or []
+                if name == "Goals Over/Under":
+                    for v in values:
+                        if v.get('value') == "Over 2.5" and "Ukupno Golova - Više 2.5" not in odds_dict: odds_dict["Ukupno Golova - Više 2.5"] = float(v.get('odd'))
+                        elif v.get('value') == "Over 1.5" and "Raspon Golova - 2-4" not in odds_dict: odds_dict["Raspon Golova - 2-4"] = float(v.get('odd'))
+                elif name == "Both Teams Score":
+                    for v in values:
+                        if v.get('value') == "Yes" and "Oba Tima Daju Gol (GG)" not in odds_dict: odds_dict["Oba Tima Daju Gol (GG)"] = float(v.get('odd'))
+                elif "First Half" in name and "Over/Under" in name:
+                    for v in values:
+                        if v.get('value') == "Over 0.5" and "I Poluvreme - Više 0.5" not in odds_dict: odds_dict["I Poluvreme - Više 0.5"] = float(v.get('odd'))
+                elif "Second Half" in name and "Over/Under" in name:
+                    for v in values:
+                        if v.get('value') == "Over 0.5" and "II Poluvreme - Više 0.5" not in odds_dict: odds_dict["II Poluvreme - Više 0.5"] = float(v.get('odd'))
+    except Exception: pass
     return odds_dict
 
-# ==================== JUTARNJE SKENIRANJE ====================
-def morning_scan():
+def get_h2h_html_blocks(current_bank=50000.0, max_daily_budget=4000.0):
     today_str = datetime.now().strftime('%Y-%m-%d')
-    today_formatted = datetime.now().strftime('%d.%m.%Y')
-    
     saved_bets = load_bets()
-    new_bets = []
+    raw_picks = []
+    fb_events = fetch_api("fixtures", {"date": today_str})
 
-    fb_data = api.fetch(f"https://v3.football.api-sports.io/fixtures?date={today_str}")
-    fb_events = fb_data.get('response') or []
-
-    fb_picks_lines = []
     for event in fb_events:
         try:
             fixture = event.get('fixture') or {}
             fixture_id = fixture.get('id')
-            status_short = (fixture.get('status') or {}).get('short')
-
-            if status_short not in ['NS', 'TBD']:
-                continue
+            if (fixture.get('status') or {}).get('short') not in ['NS', 'TBD']: continue
 
             teams = event.get('teams') or {}
-            home = (teams.get('home') or {}).get('name', 'Home')
-            away = (teams.get('away') or {}).get('name', 'Away')
-            home_id = (teams.get('home') or {}).get('id')
-            away_id = (teams.get('away') or {}).get('id')
-            
+            home, away = (teams.get('home') or {}).get('name', 'Home'), (teams.get('away') or {}).get('name', 'Away')
+            home_id, away_id = (teams.get('home') or {}).get('id'), (teams.get('away') or {}).get('id')
             league_info = event.get('league') or {}
-            league = league_info.get('name', 'Liga')
-            country = league_info.get('country', 'Nacionalno')
+            league, country = league_info.get('name', 'Liga'), league_info.get('country', 'Nacionalno')
 
-            if not is_allowed_league(country, league):
-                continue
+            if not is_allowed_league(country, league) or not home_id or not away_id: continue
 
-            if not home_id or not away_id:
-                continue
-
-            h2h_data = api.fetch(f"https://v3.football.api-sports.io/fixtures/headtohead?h2h={home_id}-{away_id}")
-            h2h_matches = h2h_data.get('response') or []
+            h2h_matches = fetch_api("fixtures/headtohead", {"h2h": f"{home_id}-{away_id}"})
             total = len(h2h_matches)
-            if total < MIN_H2H_MATCHES:
-                continue
+            if total < MIN_H2H_MATCHES: continue
 
-            stats = {
-                "3+ Ukupno": 0, 
-                "GG": 0, 
-                "1-3 Golova": 0, 
-                "2-4 Golova": 0,
-                "2-3 Golova": 0, 
-                "1+ I pol": 0,
-                "1+ II pol": 0,
-                "1-3 I pol & 1-3 II pol": 0
-            }
-            history_lines = []
+            home_form = fetch_recent_form(home_id)
+            away_form = fetch_recent_form(away_id)
 
+            stats = {"Ukupno Golova - Više 2.5": 0, "Oba Tima Daju Gol (GG)": 0, "Raspon Golova - 1-3": 0, "Raspon Golova - 2-4": 0, "Raspon Golova - 2-3": 0, "I Poluvreme - Više 0.5": 0, "II Poluvreme - Više 0.5": 0}
             for m in h2h_matches:
-                goals = m.get('goals') or {}
-                score = m.get('score') or {}
+                goals, score = m.get('goals') or {}, m.get('score') or {}
                 halftime = score.get('halftime') or {}
+                ft_h, ft_a = goals.get('home') or 0, goals.get('away') or 0
+                ht_h, ht_a = halftime.get('home') or 0, halftime.get('away') or 0
+                ft_g, ht_g, sh_g = ft_h + ft_a, ht_h + ht_a, (ft_h + ft_a) - (ht_h + ht_a)
 
-                ft_h = goals.get('home') if goals.get('home') is not None else 0
-                ft_a = goals.get('away') if goals.get('away') is not None else 0
-                ht_h = halftime.get('home') if halftime.get('home') is not None else 0
-                ht_a = halftime.get('away') if halftime.get('away') is not None else 0
-
-                ft_g = ft_h + ft_a
-                ht_g = ht_h + ht_a
-                sh_g = ft_g - ht_g
-
-                if ft_g >= 3: stats["3+ Ukupno"] += 1
-                if ft_h > 0 and ft_a > 0: stats["GG"] += 1
-                if 1 <= ft_g <= 3: stats["1-3 Golova"] += 1
-                if 2 <= ft_g <= 4: stats["2-4 Golova"] += 1
-                if 2 <= ft_g <= 3: stats["2-3 Golova"] += 1
-                if ht_g >= 1: stats["1+ I pol"] += 1
-                if sh_g >= 1: stats["1+ II pol"] += 1
-                if (1 <= ht_g <= 3) and (1 <= sh_g <= 3): stats["1-3 I pol & 1-3 II pol"] += 1
-
-                history_lines.append(f"   • {home} {ft_h}:{ft_a} ({ht_h}:{ht_a}) {away}")
+                if ft_g >= 3: stats["Ukupno Golova - Više 2.5"] += 1
+                if ft_h > 0 and ft_a > 0: stats["Oba Tima Daju Gol (GG)"] += 1
+                if 1 <= ft_g <= 3: stats["Raspon Golova - 1-3"] += 1
+                if 2 <= ft_g <= 4: stats["Raspon Golova - 2-4"] += 1
+                if 2 <= ft_g <= 3: stats["Raspon Golova - 2-3"] += 1
+                if ht_g >= 1: stats["I Poluvreme - Više 0.5"] += 1
+                if sh_g >= 1: stats["II Poluvreme - Više 0.5"] += 1
 
             odds = fetch_real_odds(fixture_id)
-            match_picks = []
+            allowed_markets = ["Ukupno Golova - Više 2.5", "Oba Tima Daju Gol (GG)", "Raspon Golova - 1-3", "Raspon Golova - 2-4", "Raspon Golova - 2-3", "I Poluvreme - Više 0.5", "II Poluvreme - Više 0.5"] if is_top_league(league) else ["Ukupno Golova - Više 2.5", "Oba Tima Daju Gol (GG)"]
 
             for market, count in stats.items():
+                if market not in allowed_markets: continue
                 pct = (count / total) * 100
                 if pct >= MIN_ACCURACY_PCT:
-                    # Tražimo kvotu sa API-ja ili uzimamo standardnu balkansku kvotu
-                    real_odd = odds.get(market) or BALKAN_MARKETS_DEFAULT_ODDS.get(market)
-                    
-                    if not real_odd or real_odd < MIN_ODD:
-                        continue
-
-                    pick_str = f"{market} -> {pct:.0f}% ({count}/{total}) | Kvota: {real_odd:.2f}"
-                    match_picks.append(pick_str)
-
-                    new_bets.append({
-                        "id": f"{fixture_id}_{market}",
-                        "event_id": fixture_id,
-                        "date": today_str,
-                        "sport": "Football",
-                        "match": f"{home} vs {away}",
-                        "league": f"{country} - {league}",
-                        "market": market,
-                        "stake": 1000,
-                        "odd": real_odd,
-                        "status": "PENDING",
-                        "profit": 0
+                    real_odd = odds.get(market)
+                    if not real_odd or real_odd < MIN_ODD: continue
+                    raw_picks.append({
+                        "fixture_id": fixture_id, "home": home, "away": away, "league": f"{country} - {league}",
+                        "market": market, "pct": pct, "odd": real_odd,
+                        "home_form": home_form['avg_goals'], "away_form": away_form['avg_goals'],
+                        "link": generate_superbet_search_link(home, away)
                     })
+        except Exception as e: print(f"Greška na meču: {e}")
 
-            if match_picks:
-                block = f"⚽ {home} vs {away}\n🏆 Liga: {country} - {league}\n🎯 Predlozi:\n"
-                block += "\n".join([f"   👉 {p}" for p in match_picks]) + "\n"
-                block += "📋 Istorija H2H:\n" + "\n".join(history_lines[:5])
-                fb_picks_lines.append(block)
+    if not raw_picks: return "", 0.0
 
-        except Exception as err:
-            print(f"Preskočen meč zbog greške u obradi: {err}")
-            continue
+    # Proračun uloga po utakmici: Bazno 1.5% Banke po meču
+    base_stake_per_match = current_bank * 0.015  # npr. 750 RSD
+    total_requested = len(raw_picks) * base_stake_per_match
 
-    existing_ids = {b.get('id') for b in saved_bets if isinstance(b, dict) and b.get('id')}
+    # Ako vikendom ima previše utakmica, skališemo da ne pređemo Dnevni Stop-Loss
+    scaling_factor = 1.0
+    if total_requested > max_daily_budget:
+        scaling_factor = max_daily_budget / total_requested
+
+    fb_picks_lines = []
+    new_bets = []
+    total_spent = 0.0
+
+    for p in raw_picks:
+        calculated_stake = round((base_stake_per_match * scaling_factor) / 50.0) * 50
+        stake = max(100.0, calculated_stake)
+        p['stake'] = stake
+        total_spent += stake
+
+        pick_str = f"<b>{p['market']}</b> -> {p['pct']:.0f}% | Kvota: <b>{p['odd']:.2f}</b> | Ulog: <b style='color:#28a745;'>{stake:,.0f} RSD</b> [<a href='{p['link']}' target='_blank' style='color:#28a745; font-weight:bold;'>Uplati 🎟️</a>]"
+        
+        block = f"""
+        <div style="background:#ffffff; border-left:4px solid #28a745; padding:12px; margin-bottom:12px; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+            <h3 style="margin:0 0 5px 0; color:#1a2a3a;">⚽ {p['home']} vs {p['away']}</h3>
+            <p style="margin:0 0 8px 0; color:#6c757d; font-size:12px;">🏆 Liga: {p['league']} | Forma: {p['home_form']:.1f} vs {p['away_form']:.1f}</p>
+            <p style="margin:0; font-size:13px;">👉 {pick_str}</p>
+        </div>
+        """
+        fb_picks_lines.append(block)
+
+        new_bets.append({
+            "id": f"{p['fixture_id']}_{p['market']}", "event_id": p['fixture_id'], "date": today_str,
+            "sport": "Football", "match": f"{p['home']} vs {p['away']}", "league": p['league'],
+            "market": p['market'], "stake": stake, "odd": p['odd'], "status": "PENDING", "profit": 0
+        })
+
+    existing_ids = {b.get('id') for b in saved_bets if isinstance(b, dict)}
     for nb in new_bets:
-        if nb['id'] not in existing_ids:
-            saved_bets.append(nb)
+        if nb['id'] not in existing_ids: saved_bets.append(nb)
     save_bets(saved_bets)
 
-    body = f"🚀 JUTARNJI H2H SKENER & KVOTE ({today_formatted})\n\n"
-    body += "==== ⚽ FUDBAL ====\n\n" + ("\n\n------------------------\n\n".join(fb_picks_lines) if fb_picks_lines else "Nema parova koji ispunjavaju sve kriterijume danas.")
-    body += f"\n\n📌 Sve prihvaćene opklade su sačuvane sa ulogom od 1.000 RSD u bazu."
+    return "".join(fb_picks_lines), total_spent
 
-    send_email(f"🎯 Dnevni H2H Skener - {today_formatted}", body)
-
-# ==================== VEČERNJA PROVERA REZULTATA ====================
 def evening_settle():
     bets = load_bets()
     updated = False
@@ -304,91 +191,47 @@ def evening_settle():
     for b in bets:
         if isinstance(b, dict) and b.get('status') == 'PENDING':
             fixture_id = b.get('event_id')
-            if not fixture_id:
-                continue
+            if not fixture_id: continue
 
-            data = api.fetch(f"https://v3.football.api-sports.io/fixtures?id={fixture_id}")
-            response = data.get('response') or []
-            if response:
-                fixture_data = response[0]
+            data = fetch_api("fixtures", {"id": fixture_id})
+            if data:
+                fixture_data = data[0]
                 status_short = (fixture_data.get('fixture') or {}).get('status', {}).get('short')
 
                 if status_short in ['FT', 'AET', 'PEN']:
-                    goals = fixture_data.get('goals') or {}
-                    score = fixture_data.get('score') or {}
+                    goals, score = fixture_data.get('goals') or {}, fixture_data.get('score') or {}
                     halftime = score.get('halftime') or {}
+                    ft_h, ft_a = goals.get('home') or 0, goals.get('away') or 0
+                    ht_h, ht_a = halftime.get('home') or 0, halftime.get('away') or 0
+                    ft_goals, ht_goals, sh_goals = ft_h + ft_a, ht_h + ht_a, (ft_h + ft_a) - (ht_h + ht_a)
 
-                    ft_h = goals.get('home') if goals.get('home') is not None else 0
-                    ft_a = goals.get('away') if goals.get('away') is not None else 0
-                    ht_h = halftime.get('home') if halftime.get('home') is not None else 0
-                    ht_a = halftime.get('away') if halftime.get('away') is not None else 0
-
-                    ft_goals = ft_h + ft_a
-                    ht_goals = ht_h + ht_a
-                    sh_goals = ft_goals - ht_goals
                     market = b.get('market')
                     is_win = False
 
-                    if market == "3+ Ukupno" and ft_goals >= 3: is_win = True
-                    elif market == "GG" and ft_h > 0 and ft_a > 0: is_win = True
-                    elif market == "1-3 Golova" and 1 <= ft_goals <= 3: is_win = True
-                    elif market == "2-4 Golova" and 2 <= ft_goals <= 4: is_win = True
-                    elif market == "2-3 Golova" and 2 <= ft_goals <= 3: is_win = True
-                    elif market == "1+ I pol" and ht_goals >= 1: is_win = True
-                    elif market == "1+ II pol" and sh_goals >= 1: is_win = True
-                    elif market == "1-3 I pol & 1-3 II pol" and (1 <= ht_goals <= 3) and (1 <= sh_goals <= 3): is_win = True
+                    if market == "Ukupno Golova - Više 2.5" and ft_goals >= 3: is_win = True
+                    elif market == "Oba Tima Daju Gol (GG)" and ft_h > 0 and ft_a > 0: is_win = True
+                    elif market == "Raspon Golova - 1-3" and 1 <= ft_goals <= 3: is_win = True
+                    elif market == "Raspon Golova - 2-4" and 2 <= ft_goals <= 4: is_win = True
+                    elif market == "Raspon Golova - 2-3" and 2 <= ft_goals <= 3: is_win = True
+                    elif market == "I Poluvreme - Više 0.5" and ht_goals >= 1: is_win = True
+                    elif market == "II Poluvreme - Više 0.5" and sh_goals >= 1: is_win = True
+
+                    stake = b.get('stake', 750)
+                    odd = b.get('odd', 1.0)
 
                     if is_win:
                         b['status'] = 'WIN'
-                        b['profit'] = round((b.get('stake', 1000) * b.get('odd', 1.0)) - b.get('stake', 1000), 2)
+                        b['profit'] = round((stake * odd) - stake, 2)
                     else:
                         b['status'] = 'LOSS'
-                        b['profit'] = -b.get('stake', 1000)
+                        b['profit'] = -stake
 
                     updated = True
 
     if updated:
         save_bets(bets)
-        print("Večernja provera kompletirana. bets.json je ažuriran!")
+        print("Večernja provera kompletirana. bets.json ažuriran!")
 
-# ==================== NEDELJNI P&L IZVEŠTAJ ====================
-def weekly_report():
-    bets = load_bets()
-    if not bets:
-        return
-
-    valid_bets = [b for b in bets if isinstance(b, dict)]
-    wins = sum(1 for b in valid_bets if b.get('status') == 'WIN')
-    losses = sum(1 for b in valid_bets if b.get('status') == 'LOSS')
-    pending = sum(1 for b in valid_bets if b.get('status') == 'PENDING')
-
-    total_stake = sum(b.get('stake', 0) for b in valid_bets if b.get('status') != 'PENDING')
-    net_profit = sum(b.get('profit', 0) for b in valid_bets if b.get('status') != 'PENDING')
-    roi = (net_profit / total_stake * 100) if total_stake > 0 else 0.0
-    win_rate = (wins / (wins + losses) * 100) if (wins + losses) > 0 else 0.0
-
-    report_str = f"📊 NEDELJNI P&L IZVEŠTAJ O PROFITU\n"
-    report_str += "="*40 + "\n\n"
-    report_str += f"💰 Ukupno Uloženo: {total_stake:,.0f} RSD\n"
-    report_str += f"📈 Neto Profit/Gubitak: {net_profit:+,.0f} RSD\n"
-    report_str += f"🎯 ROI (Povrat investicije): {roi:+.2f}%\n"
-    report_str += f"✅ Uspešnost (Win Rate): {win_rate:.1f}% ({wins}W / {losses}L)\n"
-    report_str += f"⏳ Opklade u toku: {pending}\n\n"
-    report_str += "📋 Tabela poslednjih opklada:\n"
-
-    for b in valid_bets[-20:]:
-        status_icon = "✅" if b.get('status') == 'WIN' else ("❌" if b.get('status') == 'LOSS' else "⏳")
-        report_str += f"{status_icon} {b.get('match')} | {b.get('market')} | Kvota: {b.get('odd')} | Profit: {b.get('profit'):+} RSD\n"
-
-    send_email(f"📈 Nedeljni Izveštaj Profita (ROI: {roi:+.1f}%)", report_str)
-
-# ==================== GLAVNI DISPEČER ====================
 if __name__ == "__main__":
-    mode = sys.argv[1] if len(sys.argv) > 1 else "morning"
-
-    if mode == "morning":
-        morning_scan()
-    elif mode == "evening":
+    if len(sys.argv) > 1 and sys.argv[1] == "evening":
         evening_settle()
-    elif mode == "weekly":
-        weekly_report()
