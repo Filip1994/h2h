@@ -15,8 +15,7 @@ MIN_ACCURACY_PCT = 75.0
 MIN_ODD = 1.45
 MAX_DAILY_H2H_PICKS = 5
 
-# TAČAN GITHUB REPO sa tvog naloga za "Preskoči tip"
-GITHUB_REPO = "Filip1994/h2h"
+SKIP_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbw2tBRDpX1Jw6yvBCwM6VFf0b5HwH9A6Jw1oGyxU8hdrWd8PZAR2yUyQJn8QLccGy7VZA/exec"
 
 EXCLUDED_COUNTRIES = ["Brazil", "Argentina", "Colombia", "Chile", "Uruguay", "Paraguay", "Peru", "Ecuador", "Bolivia", "Venezuela", "Egypt", "Morocco", "Tunisia", "Algeria", "South Africa", "Nigeria", "Ghana", "Senegal", "Cameroon", "Kenya", "Ivory Coast"]
 EXCLUDED_LEAGUE_KEYWORDS = ["U19", "U20", "U21", "U23", "Sub-19", "Sub-20", "Reserve", "Reserves", "Amateur", "Oberliga", "Regional", "District", "5th Division", "6th Division", "Next Pro", "MLS Next Pro", "II", "B team"]
@@ -107,11 +106,10 @@ def get_h2h_raw_picks():
             fixture_id = fixture.get('id')
             match_ts = fixture.get('timestamp', 0)
 
-            # STRIKTAN VREMENSKI FILTER: Samo mečevi koji počinju ZA NAJMANJE 15 MINUTA!
+            # STRIKTNO: Samo utakmice koje počinju za najmanje 15 minuta
             if match_ts <= (now_ts + 900): continue
             if (fixture.get('status') or {}).get('short') not in ['NS', 'TBD']: continue
 
-            # Prevarzija u CEST (Lokalno vreme u Srbiji)
             match_time_str = datetime.fromtimestamp(match_ts, tz=timezone.utc).astimezone(timezone(timedelta(hours=2))).strftime('%H:%M')
 
             teams = event.get('teams') or {}
