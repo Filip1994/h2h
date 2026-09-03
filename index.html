@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuantBet Capital | Algoritamski Model Kladjenja</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --card-bg: #161b22;
+            --border-color: #30363d;
+            --accent-green: #238636;
+            --accent-blue: #2f81f7;
+            --accent-purple: #8957e5;
+            --text-main: #f0f6fc;
+            --text-muted: #8b949e;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* HEADER */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-badge {
+            background: var(--accent-green);
+            color: #fff;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+
+        /* HERO SECTION */
+        .hero {
+            text-align: center;
+            padding: 60px 20px 40px;
+        }
+
+        .hero h1 {
+            font-size: 42px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 15px;
+            background: linear-gradient(180deg, #ffffff 0%, #8b949e 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 18px;
+            color: var(--text-muted);
+            max-width: 650px;
+            margin: 0 auto 30px;
+        }
+
+        /* STATS METRICS BAR */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 50px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-card .label {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .stat-card .value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 26px;
+            font-weight: 700;
+            margin-top: 5px;
+        }
+
+        .val-green { color: #3fb950; }
+        .val-blue { color: var(--accent-blue); }
+
+        /* LIVE BULLETIN SECTION */
+        .section-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .bulletin-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .pick-badge {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .badge-h2h { background: rgba(35, 134, 54, 0.2); color: #3fb950; border: 1px solid #238636; }
+        .badge-value { background: rgba(137, 87, 229, 0.2); color: #a371f7; border: 1px solid #8957e5; }
+
+        .pick-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .match-title { font-size: 18px; font-weight: 700; }
+        .odds-tag { font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 700; color: #fff; }
+
+        /* RESULTS TABLE */
+        .table-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            text-align: left;
+        }
+
+        th {
+            background: #21262d;
+            padding: 12px 15px;
+            color: var(--text-muted);
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .status-win { color: #3fb950; font-weight: 700; }
+        .status-loss { color: #f85149; font-weight: 700; }
+
+        /* CTA FOOTER */
+        .cta-box {
+            background: linear-gradient(135deg, #161b22, #1f242d);
+            border: 1px solid var(--accent-blue);
+            padding: 40px;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 60px;
+        }
+
+        .btn-primary {
+            background: var(--accent-blue);
+            color: #fff;
+            padding: 12px 28px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-block;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- HEADER -->
+        <header>
+            <div class="logo">
+                ⚡ QUANTBET <span class="logo-badge">VERIFIED MODEL</span>
+            </div>
+            <div>
+                <a href="#results" style="color: var(--text-muted); text-decoration: none; font-size: 14px;">Arhiva Rezultata</a>
+            </div>
+        </header>
+
+        <!-- HERO -->
+        <div class="hero">
+            <h1>Matematička Prednost Između Kvote i Realnosti</h1>
+            <p>Kvantitativni model zasnovan na Dixon-Coles verovatnoći, Kelly Criterion alokaciji i CLV praćenju rasta banke.</p>
+        </div>
+
+        <!-- METRICS BAR (DYNAMIČKI POPUNJENO IZ BETS.JSON) -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="label">Ukupna Banka</div>
+                <div class="value" id="stat-bank">50,000 RSD</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Dugoročni ROI</div>
+                <div class="value val-green" id="stat-roi">+0.00%</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Prolaznost</div>
+                <div class="value val-blue" id="stat-winrate">0.0%</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Verifikovane Opklade</div>
+                <div class="value" id="stat-count">0</div>
+            </div>
+        </div>
+
+        <!-- LIVE BILTEN SECTION -->
+        <div class="section-title">
+            ⚽ Današnji Aktivni Bilten
+        </div>
+
+        <div id="bulletin-container">
+            <!-- JavaScript ce ovde ubaciti aktivne meceve direktno iz bets.json -->
+            <p style="color: var(--text-muted);">Učitavam današnje analize sa servera...</p>
+        </div>
+
+        <!-- RESULTS HISTORY ARCHIVE -->
+        <div class="section-title" id="results" style="margin-top: 50px;">
+            📊 Verifikovani Istorijat Opklada
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Datum</th>
+                        <th>Meč & Liga</th>
+                        <th>Tržište</th>
+                        <th>Kvota</th>
+                        <th>Ulog</th>
+                        <th>Status</th>
+                        <th>Profit</th>
+                    </tr>
+                </thead>
+                <tbody id="results-table-body">
+                    <!-- JavaScript ce popuniti zavrsene opklade -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- CALL TO ACTION -->
+        <div class="cta-box">
+            <h2>Želiš da primaš analize u sekundi na Email?</h2>
+            <p style="color: var(--text-muted);">Postani deo algoritamske distribucije. Bez dojava, bez emocija — čista statistika.</p>
+            <a href="mailto:filip@example.com?subject=Prijava%20za%20Quant%20Bilten" class="btn-primary">Zatraži Pristup Modelu</a>
+        </div>
+    </div>
+
+    <!-- SCRIPT ZA AUTOMATSKO POPUNJAVANJE SA GITHUB-A -->
+    <script>
+        const BETS_JSON_URL = 'https://raw.githubusercontent.com/Filip1994/h2h/main/bets.json';
+
+        async function loadDashboardData() {
+            try {
+                const response = await fetch(BETS_JSON_URL);
+                const bets = await response.json();
+
+                let completed = bets.filter(b => b.status === 'WIN' || b.status === 'LOSS');
+                let pending = bets.filter(b => b.status === 'PENDING');
+
+                // CALCULATE METRICS
+                let initialBank = 50000;
+                let totalProfit = completed.reduce((acc, b) => acc + (b.profit || 0), 0);
+                let totalStake = completed.reduce((acc, b) => acc + (b.stake || 0), 0);
+                let wins = completed.filter(b => b.status === 'WIN').length;
+
+                let currentBank = initialBank + totalProfit;
+                let roi = totalStake > 0 ? (totalProfit / totalStake) * 100 : 0;
+                let winRate = completed.length > 0 ? (wins / completed.length) * 100 : 0;
+
+                // UPDATE STATS BAR
+                document.getElementById('stat-bank').innerText = `${currentBank.toLocaleString()} RSD`;
+                document.getElementById('stat-roi').innerText = `${roi >= 0 ? '+' : ''}${roi.toFixed(2)}%`;
+                document.getElementById('stat-winrate').innerText = `${winRate.toFixed(1)}%`;
+                document.getElementById('stat-count').innerText = completed.length;
+
+                // RENDER PENDING BULLETIN
+                const bulletinContainer = document.getElementById('bulletin-container');
+                bulletinContainer.innerHTML = '';
+
+                if (pending.length === 0) {
+                    bulletinContainer.innerHTML = '<div class="bulletin-card" style="color:var(--text-muted);">Trenutno nema aktivnih opklada na čekanju za danas.</div>';
+                } else {
+                    pending.forEach(b => {
+                        const badgeClass = b.type === 'H2H' ? 'badge-h2h' : 'badge-value';
+                        const cardHtml = `
+                            <div class="bulletin-card">
+                                <span class="pick-badge ${badgeClass}">${b.type} MODEL</span>
+                                <div class="pick-header">
+                                    <div class="match-title">${b.match}</div>
+                                    <div class="odds-tag">Kvota ${b.odd.toFixed(2)}</div>
+                                </div>
+                                <div style="color: var(--text-muted); font-size: 14px;">
+                                    🏆 ${b.league} | Predlog: <b style="color: #fff;">${b.market}</b> | Ulog: <b style="color: #3fb950;">${b.stake.toLocaleString()} RSD</b>
+                                </div>
+                            </div>
+                        `;
+                        bulletinContainer.innerHTML += cardHtml;
+                    });
+                }
+
+                // RENDER RESULTS TABLE
+                const tableBody = document.getElementById('results-table-body');
+                tableBody.innerHTML = '';
+
+                completed.slice().reverse().forEach(b => {
+                    const statusClass = b.status === 'WIN' ? 'status-win' : 'status-loss';
+                    const profitSign = b.profit > 0 ? '+' : '';
+                    const rowHtml = `
+                        <tr>
+                            <td>${b.date || '-'}</td>
+                            <td><b>${b.match}</b><br><small style="color:var(--text-muted);">${b.league}</small></td>
+                            <td>${b.market}</td>
+                            <td>${b.odd.toFixed(2)}</td>
+                            <td>${b.stake.toLocaleString()} RSD</td>
+                            <td class="${statusClass}">${b.status}</td>
+                            <td class="${statusClass}">${profitSign}${b.profit.toLocaleString()} RSD</td>
+                        </tr>
+                    `;
+                    tableBody.innerHTML += rowHtml;
+                });
+
+            } catch (error) {
+                console.error("Greška pri učitavanju bets.json:", error);
+            }
+        }
+
+        loadDashboardData();
+    </script>
+</body>
+</html>
