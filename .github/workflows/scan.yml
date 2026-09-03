@@ -2,9 +2,8 @@ name: H2H Multi-Key Scanner & Tracker
 
 on:
   schedule:
-    - cron: '22 6 * * *'   # 08:22h - Jutarnje skeniranje
+    - cron: '0 5 * * *'    # 07:00h ujutru po našem vremenu (05:00 UTC)
     - cron: '30 21 * * *'  # 23:30h - Večernja provera rezultata
-    - cron: '50 21 * * 0'  # Nedelja 23:50h - Nedeljni P&L izveštaj
   workflow_dispatch:
 
 jobs:
@@ -25,35 +24,21 @@ jobs:
       - name: Instaliraj biblioteke
         run: pip install requests
 
-      - name: Pokreni Jutarnje Skeniranje
-        if: github.event.schedule == '22 6 * * *' || github.event_name == 'workflow_dispatch'
+      - name: Pokreni Master Jutarnji Bilten
+        if: github.event.schedule == '0 5 * * *' || github.event_name == 'workflow_dispatch'
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
-          API_KEY_2: ${{ secrets.API_KEY_2 }}
-          API3: ${{ secrets.API3 }}
           GMAIL_USER: ${{ secrets.GMAIL_USER }}
           GMAIL_APP_PASS: ${{ secrets.GMAIL_APP_PASS }}
-        run: python main.py morning
+        run: python master_runner.py
 
-      - name: Pokreni Večernju Proveru
+      - name: Pokreni Večernju Proveru Rezultata
         if: github.event.schedule == '30 21 * * *'
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
-          API_KEY_2: ${{ secrets.API_KEY_2 }}
-          API3: ${{ secrets.API3 }}
           GMAIL_USER: ${{ secrets.GMAIL_USER }}
           GMAIL_APP_PASS: ${{ secrets.GMAIL_APP_PASS }}
         run: python main.py evening
-
-      - name: Pokreni Nedeljni Izveštaj
-        if: github.event.schedule == '50 21 * * 0'
-        env:
-          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
-          API_KEY_2: ${{ secrets.API_KEY_2 }}
-          API3: ${{ secrets.API3 }}
-          GMAIL_USER: ${{ secrets.GMAIL_USER }}
-          GMAIL_APP_PASS: ${{ secrets.GMAIL_APP_PASS }}
-        run: python main.py weekly
 
       - name: Sačuvaj bazu opklada na GitHub (Auto Commit)
         run: |
