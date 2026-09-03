@@ -1,13 +1,15 @@
 import os
 import sys
+import time
 import requests
 import math
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 import main
 
 API_KEY = os.environ.get("API_FOOTBALL_KEY", "").strip()
 BASE_URL = "https://v3.football.api-sports.io"
 HEADERS = {'x-apisports-key': API_KEY}
+GITHUB_REPO = "Filip1994/h2h"
 
 def fetch_api(endpoint, params=None):
     try:
@@ -43,6 +45,7 @@ def calculate_detailed_metrics(home_id, away_id):
 
 def get_market_drops_and_single_tip(current_bank=50000.0, max_budget=500.0):
     today_str = datetime.now().strftime('%Y-%m-%d')
+    now_ts = int(time.time())
     saved_bets = main.load_bets()
     fixtures = fetch_api("fixtures", {"date": today_str})
     potential_singles = []
@@ -52,7 +55,13 @@ def get_market_drops_and_single_tip(current_bank=50000.0, max_budget=500.0):
         try:
             fixture = event.get('fixture') or {}
             fixture_id = fixture.get('id')
+            match_ts = fixture.get('timestamp', 0)
+
+            # STRIKTAN VREMENSKI FILTER (MINIMUN 15 MINUTA UNAPRED)
+            if match_ts <= (now_ts + 900): continue
             if (fixture.get('status') or {}).get('short') not in ['NS', 'TBD']: continue
+
+            match_time_str = datetime.fromtimestamp(match_ts, tz=timezone.utc).astimezone(timezone(timedelta(hours=2))).strftime('%H:%M')
 
             teams = event.get('teams') or {}
             home_id, away_id = (teams.get('home') or {}).get('id'), (teams.get('away') or {}).get('id')
@@ -97,6 +106,7 @@ def get_market_drops_and_single_tip(current_bank=50000.0, max_budget=500.0):
                                         "fixture_id": fixture_id,
                                         "match": f"(H) {home} vs {away} (A)", "home": home, "away": away,
                                         "league": full_league_name, "market": f"{name} - {val_name}",
+                                        "match_time": match_time_str,
                                         "odd": current_odd, "bm_source": bm_name, "edge": edge, "prob": prob, "metrics": metrics
                                     })
                                 else:
@@ -124,7 +134,7 @@ def get_market_drops_and_single_tip(current_bank=50000.0, max_budget=500.0):
     spent = stake
 
     bet_id = f"{best['fixture_id']}_SINGLE"
-    direct_web_skip = f"https://github.com/filipmaric994/QuantBet/issues/new?title=SKIP_{bet_id}"
+    direct_web_skip = f"https://github.com/{GITHUB_REPO}/issues/new?title=SKIP_{bet_id}"
 
     analysis_html = f"""
     <div style="background:#ffffff; border:1px solid #6366f1; border-left:5px solid #4338ca; border-radius:8px; padding:15px; margin-bottom:20px; box-shadow:0 4px 12px rgba(67, 56, 202, 0.08);">
@@ -134,7 +144,7 @@ def get_market_drops_and_single_tip(current_bank=50000.0, max_budget=500.0):
         <div style="background:linear-gradient(135deg, #1e1b4b, #4338ca); color:#ffffff; padding:10px; border-radius:6px; text-align:center; font-weight:bold; font-size:15px; margin-bottom:12px; letter-spacing:0.5px;">
             ⭐ EKSKLUZIVNI SINGLE TIP DANA: {best['match']}
         </div>
-        <p style="margin:0 0 8px 0; font-size:13px; color:#1e293b;"><b>🏆 Takmičenje:</b> {best['league']}</p>
+        <p style="margin:0 0 8px 0; font-size:13px; color:#1e293b;"><b>⏰ Početak:</b> <b style="color:#4338ca;">{best['match_time']}h</b> | <b>🏆 Takmičenje:</b> {best['league']}</p>
         <p style="margin:0 0 8px 0; font-size:13px; color:#1e293b;">🎯 <b>Predlog:</b> {best['market']} | Kvota: <b>{best['odd']:.2f}</b> <span style='color:#64748b; font-size:11px;'>(Izvor: {best['bm_source']})</span> | Ulog: <b style="color:#4338ca;">{stake:,.0f} RSD</b> ({stake_pct*100:.2f}% banke)</p>
         
         <div style="background:#f5f3ff; border-left:3px solid #6366f1; padding:10px; margin-top:10px; font-size:12px; color:#334155;">
