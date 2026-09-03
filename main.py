@@ -11,7 +11,8 @@ HEADERS = {'x-apisports-key': API_KEY}
 
 MIN_H2H_MATCHES = 4
 MIN_ACCURACY_PCT = 75.0
-MIN_ODD = 1.35
+MIN_ODD = 1.45
+MAX_DAILY_H2H_PICKS = 5  # Striktan limit na top 5 zicera dana
 
 EXCLUDED_COUNTRIES = ["Brazil", "Argentina", "Colombia", "Chile", "Uruguay", "Paraguay", "Peru", "Ecuador", "Bolivia", "Venezuela", "Egypt", "Morocco", "Tunisia", "Algeria", "South Africa", "Nigeria", "Ghana", "Senegal", "Cameroon", "Kenya", "Ivory Coast"]
 EXCLUDED_LEAGUE_KEYWORDS = ["U19", "U20", "U21", "U23", "Sub-19", "Sub-20", "Reserve", "Reserves", "Amateur", "Oberliga", "Regional", "District", "5th Division", "6th Division", "Next Pro", "MLS Next Pro", "II", "B team"]
@@ -88,6 +89,7 @@ def get_h2h_html_blocks(current_bank=50000.0, max_daily_budget=4000.0):
     today_str = datetime.now().strftime('%Y-%m-%d')
     saved_bets = load_bets()
     raw_picks = []
+    seen_fixtures = set()
 
     fb_events = fetch_api("fixtures", {"date": today_str})
 
@@ -114,17 +116,12 @@ def get_h2h_html_blocks(current_bank=50000.0, max_daily_budget=4000.0):
             home_form = fetch_recent_form(home_id)
             away_form = fetch_recent_form(away_id)
 
-            h2h_history_ft, h2h_history_ht = [], []
+            formatted_h2h_history = []
             stats = {
-                "Ukupno Golova - Više 2.5": 0,
-                "Ukupno Golova - Manje 2.5": 0,
-                "Oba Tima Daju Gol (GG)": 0,
-                "I Poluvreme - Više 0.5": 0,
-                "Gol u oba poluvremena (1+I & 1+II)": 0,
-                "Raspon Golova - 1-3": 0,
-                "Raspon Golova - 2-3": 0,
-                "Raspon Golova - 2-4": 0,
-                "Raspon Golova - 3-5": 0
+                "Ukupno Golova - Više 2.5": 0, "Ukupno Golova - Manje 2.5": 0,
+                "Oba Tima Daju Gol (GG)": 0, "I Poluvreme - Više 0.5": 0,
+                "Gol u oba poluvremena (1+I & 1+II)": 0, "Raspon Golova - 1-3": 0,
+                "Raspon Golova - 2-3": 0, "Raspon Golova - 2-4": 0, "Raspon Golova - 3-5": 0
             }
 
             for m in recent_h2h:
@@ -135,8 +132,15 @@ def get_h2h_html_blocks(current_bank=50000.0, max_daily_budget=4000.0):
                 ft_goals, ht_goals = ft_h + ft_a, ht_h + ht_a
                 sh_goals = ft_goals - ht_goals
 
-                h2h_history_ft.append(f"{ft_h}:{ft_a}")
-                h2h_history_ht.append(f"{ht_h}:{ht_a}")
+                raw_date = (m.get('fixture') or {}).get('date', '')
+                date_str = ""
+                if raw_date:
+                    try:
+                        date_str = datetime.strptime(raw_date[:10], '%Y-%m-%d').strftime('%d.%m.')
+                    except Exception: date_str = ""
+
+                match_res_str = f"[{date_str}] <b>{ft_h}:{ft_a}</b> (HT {ht_h}:{ht_a})" if date_str else f"<b>{ft_h}:{ft_a}</b> (HT {ht_h}:{ht_a})"
+                formatted_h2h_history.append(match_res_str)
 
                 if ft_goals >= 3: stats["Ukupno Golova - Više 2.5"] += 1
                 if ft_goals <= 2: stats["Ukupno Golova - Manje 2.5"] += 1
@@ -148,7 +152,7 @@ def get_h2h_html_blocks(current_bank=50000.0, max_daily_budget=4000.0):
                 if 2 <= ft_goals <= 4: stats["Raspon Golova - 2-4"] += 1
                 if 3 <= ft_goals <= 5: stats["Raspon Golova - 3-5"] += 1
 
-            # TREND FILTER: Eliminacija poluvremenskih igara ako zadnja 2 meča nisu imala gol u 1. pol
+            # TREND FILTER
             last_2_ht = [ (m.get('score', {}).get('halftime', {}).get('home') or 0) + (m.get('score', {}).get('halftime', {}).get('away') or 0) for m in recent_h2h[:2] ]
             if len(last_2_ht) >= 2 and last_2_ht[0] == 0 and last_2_ht[1] == 0:
                 stats["I Poluvreme - Više 0.5"] = 0
@@ -156,27 +160,33 @@ def get_h2h_html_blocks(current_bank=50000.0, max_daily_budget=4000.0):
 
             odds = fetch_real_odds(fixture_id)
 
+            best_market_for_match = None
+            best_pct_for_match = 0.0
+
             for market, count in stats.items():
                 pct = (count / total) * 100.0
-                if pct >= MIN_ACCURACY_PCT:
+                if pct >= MIN_ACCURACY_PCT and pct > best_pct_for_match:
                     odd_tuple = odds.get(market)
-                    if not odd_tuple or odd_tuple[0] < MIN_ODD: continue
-                    
-                    real_odd, bm_source = odd_tuple
-                    history_str = f"Poluvremena (HT): [{', '.join(h2h_history_ht[:5])}] | Kraj (FT): [{', '.join(h2h_history_ft[:5])}]"
-                    
-                    raw_picks.append({
-                        "fixture_id": fixture_id, "home": home, "away": away, "league": f"{country} - {league}",
-                        "market": market, "pct": pct, "odd": real_odd, "bm_source": bm_source, "count": count, "total": total,
-                        "home_form": home_form['avg_goals'], "away_form": away_form['avg_goals'],
-                        "h2h_history": history_str
-                    })
+                    if odd_tuple and odd_tuple[0] >= MIN_ODD:
+                        best_pct_for_match = pct
+                        best_market_for_match = (market, pct, odd_tuple[0], odd_tuple[1], count, total)
+
+            if best_market_for_match and fixture_id not in seen_fixtures:
+                seen_fixtures.add(fixture_id)
+                m_name, m_pct, m_odd, m_source, m_cnt, m_tot = best_market_for_match
+                
+                raw_picks.append({
+                    "fixture_id": fixture_id, "home": home, "away": away, "league": f"{country} - {league}",
+                    "market": m_name, "pct": m_pct, "odd": m_odd, "bm_source": m_source, "count": m_cnt, "total": m_tot,
+                    "home_form": home_form['avg_goals'], "away_form": away_form['avg_goals'],
+                    "h2h_history": " • ".join(formatted_h2h_history[:4])
+                })
         except Exception as e: print(f"Greška na meču: {e}")
 
     if not raw_picks: return "", 0.0
 
-    # Sortiranje: Prvo idu ZICERI sa najvišom prolaznošću (90%+ pa 80%+...)
     raw_picks.sort(key=lambda x: (x['pct'], x['odd']), reverse=True)
+    raw_picks = raw_picks[:MAX_DAILY_H2H_PICKS]
 
     base_stake_per_match = current_bank * 0.015
     total_requested = len(raw_picks) * base_stake_per_match
@@ -196,20 +206,20 @@ def get_h2h_html_blocks(current_bank=50000.0, max_daily_budget=4000.0):
         total_spent += stake
 
         bet_id = f"{p['fixture_id']}_{p['market']}"
-        
-        # Vizuelno isticanje ako je meč 90%+ Zicer
         badge = "🔥 <b>SUPER ZICER</b> " if p['pct'] >= 87.5 else ""
+
+        mailto_skip = f"mailto:filip.maric994@gmail.com?subject=SKIP:{bet_id}&body=Preskacem%20tip%20{p['home']}%20vs%20{p['away']}"
 
         pick_str = f"{badge}<b>{p['market']}</b> -> <b style='color:#007bff;'>{p['pct']:.0f}%</b> ({p['count']}/{p['total']}) | Kvota: <b>{p['odd']:.2f}</b> <span style='color:#6c757d; font-size:11px;'>(Izvor: {p['bm_source']})</span> | Ulog: <b style='color:#28a745;'>{stake:,.0f} RSD</b>"
         
         block = f"""
         <div style="background:#ffffff; border-left:4px solid #28a745; padding:12px; margin-bottom:12px; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
             <div style="float:right;">
-                <a href="https://github.com/filipmaric994/QuantBet/issues/new?title=SKIP_{bet_id}&body=Preskaci_meč" target="_blank" style="background:#dc3545; color:#ffffff; padding:4px 10px; border-radius:4px; font-size:11px; text-decoration:none; font-weight:bold;">❌ Preskoči tip</a>
+                <a href="{mailto_skip}" style="background:#dc3545; color:#ffffff; padding:4px 10px; border-radius:4px; font-size:11px; text-decoration:none; font-weight:bold;">❌ Preskoči tip</a>
             </div>
             <h3 style="margin:0 0 5px 0; color:#1a2a3a;">⚽ (H) {p['home']} vs {p['away']} (A)</h3>
             <p style="margin:0 0 4px 0; color:#6c757d; font-size:12px;">🏆 Liga: {p['league']} | Forma: {p['home_form']:.1f} vs {p['away_form']:.1f} gol/meču</p>
-            <p style="margin:0 0 8px 0; color:#495057; font-size:11px; font-style:italic;">📜 {p['h2h_history']}</p>
+            <p style="margin:0 0 8px 0; color:#495057; font-size:11px; font-style:italic;">📜 Poslednji dueli: {p['h2h_history']}</p>
             <p style="margin:0; font-size:13px;">👉 {pick_str}</p>
         </div>
         """
