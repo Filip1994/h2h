@@ -1,20 +1,14 @@
 import os
 import sys
-import traceback
 import smtplib
 from datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-try:
-    import main
-    import value_engine
-    import market_drop_engine
-    import quant_math
-except Exception as e:
-    print(f"❌ KRAH PRI UVOZU MODULA: {e}")
-    traceback.print_exc()
-    sys.exit(1)
+import main
+import value_engine
+import market_drop_engine
+import quant_math
 
 GMAIL_USER = os.environ.get("GMAIL_USER", "").strip()
 GMAIL_PASS = os.environ.get("GMAIL_APP_PASS", "").strip()
@@ -72,6 +66,7 @@ def send_master_daily_email():
             s_text, single_spent, s_fixture_id = res
             if s_fixture_id:
                 used_fixture_ids.add(s_fixture_id)
+                s_text_html = s_text.replace('\n', '<br>')
                 skip_url = f"https://github.com/{GITHUB_REPO}/issues/new?title=SKIP_{s_fixture_id}_SINGLE"
                 single_html = f"""
                 <div style="background:#ffffff; border:1px solid #6366f1; border-left:5px solid #4338ca; border-radius:8px; padding:15px; margin-bottom:20px;">
@@ -79,7 +74,7 @@ def send_master_daily_email():
                         <a href="{skip_url}" target="_blank" style="background:#dc3545; color:#ffffff; padding:5px 10px; border-radius:4px; font-size:11px; text-decoration:none; font-weight:bold;">❌ Preskoči tip</a>
                     </div>
                     <div style="background:#4338ca; color:#ffffff; padding:6px 10px; border-radius:4px; font-weight:bold; font-size:13px; margin-bottom:10px; display:inline-block;">⭐ EKSKLUZIVNI SINGLE TIP DANA</div>
-                    <p style="margin:5px 0; font-size:13px;">{s_text.replace('\n', '<br>')}</p>
+                    <p style="margin:5px 0; font-size:13px;">{s_text_html}</p>
                 </div>
                 """
     except Exception as e:
@@ -136,13 +131,14 @@ def send_master_daily_email():
         if res_v and len(res_v) == 2:
             v_picks, value_spent = res_v
             for text, bet_id in v_picks:
+                text_html = text.replace('\n', '<br>')
                 skip_url = f"https://github.com/{GITHUB_REPO}/issues/new?title=SKIP_{bet_id}"
                 block = f"""
                 <div style="background:#ffffff; border-left:4px solid #6f42c1; padding:12px; margin-bottom:12px; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
                     <div style="float:right;">
                         <a href="{skip_url}" target="_blank" style="background:#dc3545; color:#ffffff; padding:4px 10px; border-radius:4px; font-size:11px; text-decoration:none; font-weight:bold;">❌ Preskoči tip</a>
                     </div>
-                    <p style="margin:0; font-size:13px;">{text.replace('\n', '<br>')}</p>
+                    <p style="margin:0; font-size:13px;">{text_html}</p>
                 </div>
                 """
                 value_blocks.append(block)
