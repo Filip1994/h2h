@@ -43,6 +43,7 @@ def get_market_drops_and_single_tip(current_bank=50000.0, max_budget=500.0):
     saved_bets = main.load_bets()
     fixtures = fetch_api("fixtures", {"date": today_str})
     potential_singles = []
+    rejection_reasons = []
 
     for event in fixtures:
         try:
@@ -55,13 +56,16 @@ def get_market_drops_and_single_tip(current_bank=50000.0, max_budget=500.0):
             home, away = (teams.get('home') or {}).get('name', 'Home'), (teams.get('away') or {}).get('name', 'Away')
             league_info = event.get('league') or {}
             league, country = league_info.get('name', ''), league_info.get('country', '')
+            full_league_name = f"{country} - {league}"
 
-            if not main.is_allowed_league(country, league) or not main.is_top_league(league) or not home_id or not away_id: 
+            if not main.is_allowed_league(country, league) or not home_id or not away_id: 
                 continue
 
             odds_data = fetch_api("odds", {"fixture": fixture_id, "bookmaker": 8})
             if not odds_data: odds_data = fetch_api("odds", {"fixture": fixture_id})
-            if not odds_data: continue
+            if not odds_data:
+                rejection_reasons.append(f"<b>{home} vs {away}</b> ({full_league_name}): Nema dostupnih kvota.")
+                continue
 
             metrics = calculate_detailed_metrics(home_id, away_id)
             if not metrics: continue
@@ -76,23 +80,36 @@ def get_market_drops_and_single_tip(current_bank=50000.0, max_budget=500.0):
                     if name in ["Match Winner", "Goals Over/Under"]:
                         for v in values:
                             val_name, current_odd = v.get('value'), float(v.get('odd'))
-                            if 2.00 <= current_odd <= 3.20 and val_name in ["Home", "Away", "Over 2.5"]:
+                            if val_name in ["Home", "Away", "Over 2.5"]:
                                 implied_prob = (1.0 / current_odd) * 100.0
                                 prob = metrics['prob_25'] if val_name == "Over 2.5" else (50.0 if val_name == "Home" else 45.0)
                                 edge = prob - implied_prob
+
+                                if not (2.00 <= current_odd <= 3.20):
+                                    rejection_reasons.append(f"<b>{home} vs {away}</b> ({val_name}): Kvota {current_odd:.2f} van opsega [2.00 - 3.20].")
+                                    continue
 
                                 if (val_name == "Over 2.5" and edge >= 8.0) or (val_name in ["Home", "Away"] and metrics['tot_xg'] >= 2.50):
                                     potential_singles.append({
                                         "fixture_id": fixture_id,
                                         "match": f"(H) {home} vs {away} (A)", "home": home, "away": away,
-                                        "league": f"{country} - {league}", "market": f"{name} - {val_name}",
-                                        "odd": current_odd, "bm_source": bm_source, "edge": edge, "prob": prob, "metrics": metrics
+                                        "league": full_league_name, "market": f"{name} - {val_name}",
+                                        "odd": current_odd, "bm_source": bm_name, "edge": edge, "prob": prob, "metrics": metrics
                                     })
+                                else:
+                                    rejection_reasons.append(f"<b>{home} vs {away}</b> ({val_name}): Nedovoljan Edge (+{edge:.1f}%) ili xG ({metrics['tot_xg']:.2f} < 2.50).")
+
         except Exception as e: print(f"Greška na Single tipu: {e}")
 
     potential_singles.sort(key=lambda x: (x['edge'], x['metrics']['tot_xg']), reverse=True)
 
-    if not potential_singles: return "", 0.0
+    if not potential_singles:
+        rejection_html = "<div style='background:#fff3cd; border:1px solid #ffeeba; color:#856404; padding:12px; border-radius:8px; margin-bottom:20px; font-size:12px;'>"
+        rejection_html += "<b>⚠️ Danas nema Single Tipa Dana. Razlozi odbijanja kandidata:</b><ul style='margin:5px 0 0 15px; padding:0;'>"
+        for r in rejection_reasons[:5]:
+            rejection_html += f"<li>{r}</li>"
+        rejection_html += "</ul></div>"
+        return rejection_html, 0.0
 
     best = potential_singles[0]
     m = best['metrics']
@@ -103,8 +120,14 @@ def get_market_drops_and_single_tip(current_bank=50000.0, max_budget=500.0):
     stake = min(max_budget, max(100.0, round((current_bank * stake_pct) / 50.0) * 50))
     spent = stake
 
+    bet_id = f"{best['fixture_id']}_SINGLE"
+    mailto_skip = f"mailto:filip.maric994@gmail.com?subject=SKIP:{bet_id}&body=Preskacem%20tip%20{best['home']}%20vs%20{best['away']}"
+
     analysis_html = f"""
     <div style="background:#ffffff; border:1px solid #ff416c; border-radius:8px; padding:15px; margin-bottom:20px; box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+        <div style="float:right;">
+            <a href="{mailto_skip}" style="background:#dc3545; color:#ffffff; padding:4px 10px; border-radius:4px; font-size:11px; text-decoration:none; font-weight:bold;">❌ Preskoči tip</a>
+        </div>
         <div style="background:linear-gradient(135deg, #ff416c, #ff4b2b); color:#ffffff; padding:10px; border-radius:6px; text-align:center; font-weight:bold; font-size:15px; margin-bottom:12px;">
             🔥 EKSKLUZIVNI SINGLE TIP DANA: {best['match']}
         </div>
@@ -113,15 +136,15 @@ def get_market_drops_and_single_tip(current_bank=50000.0, max_budget=500.0):
         
         <div style="background:#fff5f5; border-left:3px solid #ff416c; padding:10px; margin-top:10px; font-size:12px; color:#4a4a4a;">
             <b>📊 Ekspertska Analiza i Kretanje Tržišta:</b><br>
-            • <b>xG Projekcija:</b> Domaćin napada sa xG {m['lh']:.2f}, dok gost ima projektovani xG od {m['la']:.2f}. Ukupno očekivano na meču: <b>{m['tot_xg']:.2f} golova</b>.<br>
-            • <b>Pritisak na Kvotu:</b> Implicirana verovatnoća kladionice od {(1/best['odd'])*100:.1f}% podcenjuje realno stanje modela koje iznosi <b>{best['prob']:.1f}%</b> (Prednost: +{best['edge']:.1f}%).<br>
-            • <b>Upravljanje Rizikom:</b> Dinamički 1/4 Kelly ulog za maksimalnu zaštitu kapitala.
+            • <b>xG Projekcija:</b> Domaćin napada sa xG {m['lh']:.2f}, dok gost ima projektovani xG od {m['la']:.2f}. Ukupno očekivano: <b>{m['tot_xg']:.2f} golova</b>.<br>
+            • <b>Pritisak na Kvotu:</b> Implicirana verovatnoća kladionice od {(1/best['odd'])*100:.1f}% podcenjuje realno stanje modela od <b>{best['prob']:.1f}%</b> (Prednost: +{best['edge']:.1f}%).<br>
+            • <b>Upravljanje Rizikom:</b> Dinamički 1/4 Kelly ulog.
         </div>
     </div>
     """
 
     new_single = {
-        "id": f"{best['fixture_id']}_SINGLE", "type": "SINGLE_TIP", "event_id": best['fixture_id'], "date": today_str,
+        "id": bet_id, "type": "SINGLE_TIP", "event_id": best['fixture_id'], "date": today_str,
         "sport": "Football", "match": best['match'], "league": best['league'],
         "market": best['market'], "stake": stake, "odd": best['odd'], "status": "PENDING", "profit": 0
     }
