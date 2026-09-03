@@ -4,7 +4,6 @@ import json
 import requests
 import math
 from datetime import datetime
-from urllib.parse import quote
 import main
 
 API_KEY = os.environ.get("API_FOOTBALL_KEY", "").strip()
@@ -21,12 +20,6 @@ def fetch_api(endpoint, params=None):
     except Exception as e:
         print(f"Greška na API [{endpoint}]: {e}")
         return []
-
-def generate_superbet_search_link(home_team, away_team):
-    clean_home = home_team.split()[0] if home_team else ""
-    clean_away = away_team.split()[0] if away_team else ""
-    query = quote(f"{clean_home} {clean_away}".strip())
-    return f"https://superbet.rs/sr-latn/pretraga?query={query}"
 
 def poisson_prob(lmbda, k):
     return (math.pow(lmbda, k) * math.exp(-lmbda)) / math.factorial(k)
@@ -59,22 +52,22 @@ def get_team_form_stats(team_id):
 
 def get_match_odds(fixture_id):
     odds_data = fetch_api("odds", {"fixture": fixture_id, "bookmaker": 8})
-    if not odds_data:
-        odds_data = fetch_api("odds", {"fixture": fixture_id})
+    if not odds_data: odds_data = fetch_api("odds", {"fixture": fixture_id})
     odds_dict = {}
     if not odds_data: return odds_dict
     try:
         bookmakers = odds_data[0].get('bookmakers') or []
         target_bm = next((bm for bm in bookmakers if bm.get('id') in [8, 11, 6]), bookmakers[0] if bookmakers else None)
         if target_bm:
+            bm_name = target_bm.get('name', 'API Market')
             for b in (target_bm.get('bets') or []):
                 name, values = b.get('name') or '', b.get('values') or []
                 if name == "Goals Over/Under":
                     for v in values:
-                        if v.get('value') == "Over 2.5": odds_dict["Ukupno Golova - Više 2.5"] = float(v.get('odd'))
+                        if v.get('value') == "Over 2.5": odds_dict["Ukupno Golova - Više 2.5"] = (float(v.get('odd')), bm_name)
                 elif name == "Both Teams Score":
                     for v in values:
-                        if v.get('value') == "Yes": odds_dict["Oba Tima Daju Gol (GG)"] = float(v.get('odd'))
+                        if v.get('value') == "Yes": odds_dict["Oba Tima Daju Gol (GG)"] = (float(v.get('odd')), bm_name)
     except Exception: pass
     return odds_dict
 
@@ -106,12 +99,12 @@ def get_value_html_blocks(current_bank=50000.0, max_budget=500.0):
             prob_3plus, prob_gg = calculate_market_probabilities(lh, la)
 
             odds = get_match_odds(fixture_id)
-            superbet_link = generate_superbet_search_link(home, away)
 
             for market, model_prob in {"Ukupno Golova - Više 2.5": prob_3plus, "Oba Tima Daju Gol (GG)": prob_gg}.items():
-                real_odd = odds.get(market)
-                if not real_odd or real_odd < MIN_HIGH_ODD: continue
+                odd_tuple = odds.get(market)
+                if not odd_tuple or odd_tuple[0] < MIN_HIGH_ODD: continue
 
+                real_odd, bm_source = odd_tuple
                 implied_prob = (1.0 / real_odd) * 100.0
                 edge = model_prob - implied_prob
 
@@ -127,12 +120,12 @@ def get_value_html_blocks(current_bank=50000.0, max_budget=500.0):
                         total_spent += stake
                         block = f"""
                         <div style="background:#ffffff; border-left:4px solid #6f42c1; padding:12px; margin-bottom:12px; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
-                            <h3 style="margin:0 0 5px 0; color:#2c3e50;">⚽ {home} vs {away}</h3>
+                            <h3 style="margin:0 0 5px 0; color:#2c3e50;">⚽ (H) {home} vs {away} (A)</h3>
                             <p style="margin:0 0 4px 0; color:#7f8c8d; font-size:12px;">🏆 {country} - {league} | Očekivani golovi (xG): <b>{lh+la:.2f}</b></p>
                             <p style="margin:0 0 6px 0; color:#495057; font-size:11px; font-style:italic;">
-                                💡 <b>Poisson Matematika:</b> Model procenjuje prolaznost na <b>{model_prob:.1f}%</b> vs Kladionica <b>{implied_prob:.1f}%</b> (Edge: <b style='color:#6f42c1;'>+{edge:.1f}%</b>).
+                                💡 <b>Poisson Matematika:</b> Prolanost <b>{model_prob:.1f}%</b> vs Kladionica <b>{implied_prob:.1f}%</b> (Edge: <b style='color:#6f42c1;'>+{edge:.1f}%</b>).
                             </p>
-                            <p style="margin:0; font-size:13px;">💎 <b>{market}</b> | Kvota: <b>{real_odd:.2f}</b> | Srazmeran ulog: <b style='color:#6f42c1;'>{stake:,.0f} RSD</b> [<a href='{superbet_link}' target='_blank' style='color:#6f42c1; font-weight:bold;'>Uplati 🎟️</a>]</p>
+                            <p style="margin:0; font-size:13px;">💎 <b>{market}</b> | Kvota: <b>{real_odd:.2f}</b> <span style='color:#6c757d; font-size:11px;'>(Izvor: {bm_source})</span> | Srazmeran ulog: <b style='color:#6f42c1;'>{stake:,.0f} RSD</b></p>
                         </div>
                         """
                         email_blocks.append(block)
