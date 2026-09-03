@@ -1,14 +1,15 @@
 import os
 import sys
-import json
+import time
 import requests
 import math
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 import main
 
 API_KEY = os.environ.get("API_FOOTBALL_KEY", "").strip()
 BASE_URL = "https://v3.football.api-sports.io"
 HEADERS = {'x-apisports-key': API_KEY}
+GITHUB_REPO = "Filip1994/h2h"
 
 MIN_VALUE_EDGE = 12.0
 MIN_HIGH_ODD = 1.65
@@ -85,6 +86,7 @@ def get_value_html_blocks(current_bank=50000.0, max_budget=500.0, blocked_fixtur
     if blocked_fixture_ids is None: blocked_fixture_ids = set()
 
     today_str = datetime.now().strftime('%Y-%m-%d')
+    now_ts = int(time.time())
     saved_bets = main.load_bets()
     fixtures = fetch_api("fixtures", {"date": today_str})
     email_blocks = []
@@ -95,10 +97,14 @@ def get_value_html_blocks(current_bank=50000.0, max_budget=500.0, blocked_fixtur
         try:
             fixture = event.get('fixture') or {}
             fixture_id = fixture.get('id')
-            
-            # ELIMINACIJA DUPLIKATA: Ako je meč već u H2H ili Single Tipu, PRESKAČE SE!
+            match_ts = fixture.get('timestamp', 0)
+
+            # STRIKTAN VREMENSKI FILTER (NE ZAPOČETI MEČEVI)
+            if match_ts <= (now_ts + 900): continue
             if fixture_id in blocked_fixture_ids: continue
             if (fixture.get('status') or {}).get('short') not in ['NS', 'TBD']: continue
+
+            match_time_str = datetime.fromtimestamp(match_ts, tz=timezone.utc).astimezone(timezone(timedelta(hours=2))).strftime('%H:%M')
 
             teams = event.get('teams') or {}
             home_id, away_id = (teams.get('home') or {}).get('id'), (teams.get('away') or {}).get('id')
@@ -140,7 +146,7 @@ def get_value_html_blocks(current_bank=50000.0, max_budget=500.0, blocked_fixtur
                     if (total_spent + stake) <= max_budget:
                         total_spent += stake
                         bet_id = f"{fixture_id}_{market}"
-                        direct_web_skip = f"https://github.com/filipmaric994/QuantBet/issues/new?title=SKIP_{bet_id}"
+                        direct_web_skip = f"https://github.com/{GITHUB_REPO}/issues/new?title=SKIP_{bet_id}"
 
                         block = f"""
                         <div style="background:#ffffff; border-left:4px solid #6f42c1; padding:12px; margin-bottom:12px; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
@@ -148,7 +154,7 @@ def get_value_html_blocks(current_bank=50000.0, max_budget=500.0, blocked_fixtur
                                 <a href="{direct_web_skip}" target="_blank" style="background:#dc3545; color:#ffffff; padding:4px 10px; border-radius:4px; font-size:11px; text-decoration:none; font-weight:bold;">❌ Preskoči tip</a>
                             </div>
                             <h3 style="margin:0 0 5px 0; color:#2c3e50;">⚽ (H) {home} vs {away} (A)</h3>
-                            <p style="margin:0 0 4px 0; color:#7f8c8d; font-size:12px;">🏆 {country} - {league} | Očekivani golovi (xG): <b>{lh+la:.2f}</b></p>
+                            <p style="margin:0 0 4px 0; color:#7f8c8d; font-size:12px;"><b>⏰ Početak:</b> <b style="color:#6f42c1;">{match_time_str}h</b> | 🏆 {country} - {league} | xG: <b>{lh+la:.2f}</b></p>
                             <p style="margin:0 0 6px 0; color:#495057; font-size:11px; font-style:italic;">
                                 💡 <b>Poisson Matematika:</b> Prolanost <b>{model_prob:.1f}%</b> vs Kladionica <b>{implied_prob:.1f}%</b> (Edge: <b style='color:#6f42c1;'>+{edge:.1f}%</b>).
                             </p>
