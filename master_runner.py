@@ -11,10 +11,9 @@ import market_drop_engine
 
 GMAIL_USER = os.environ.get("GMAIL_USER")
 GMAIL_PASS = os.environ.get("GMAIL_APP_PASS")
-INITIAL_BANK = 50000.0  # Početna banka u RSD
+INITIAL_BANK = 50000.0
 
 def calculate_analytics():
-    """Računa Trenutnu Banku, Neto Profit, Ukupno Uloženo, Win Rate i ROI %"""
     bets = main.load_bets()
     completed_bets = [b for b in bets if isinstance(b, dict) and b.get('status') in ['WIN', 'LOSS']]
     
@@ -41,7 +40,7 @@ def send_master_daily_email():
     
     stats = calculate_analytics()
     current_bank = stats["current_bank"]
-    max_daily_risk = current_bank * 0.10  # Max 10% banke dnevno
+    max_daily_risk = current_bank * 0.10
 
     h2h_max_budget = max_daily_risk * 0.80
     single_max_budget = max_daily_risk * 0.10
@@ -56,6 +55,12 @@ def send_master_daily_email():
     total_spent_today = h2h_spent + value_spent + single_spent
     roi_color = "#28a745" if stats["roi_pct"] >= 0 else "#dc3545"
     profit_sign = "+" if stats["total_profit"] > 0 else ""
+
+    single_section = single_content if single_content else """
+    <div style="background:#fff3cd; border:1px solid #ffeeba; color:#856404; padding:12px; border-radius:8px; margin-bottom:20px; text-align:center; font-size:13px;">
+        ⚠️ <b>Danas nema Single Tipa Dana koji zadovoljava rigorozne kriterijume vrednosti.</b> (Preskačemo radi zaštite banke)
+    </div>
+    """
 
     master_html = f"""
     <html>
@@ -82,19 +87,19 @@ def send_master_daily_email():
             </div>
 
             <!-- SEKCIJA 1: SINGLE TIP DANA -->
-            {single_content}
+            {single_section}
 
             <!-- SEKCIJA 2: VIP H2H ZICERI -->
             <h3 style="color:#28a745; border-bottom:2px solid #28a745; padding-bottom:5px;">⚽ 1. VIP H2H Ziceri (Uloženo: {h2h_spent:,.0f} RSD)</h3>
-            {h2h_content if h2h_content else '<p style="font-style:italic; color:#777;">Nema H2H zicera za danas.</p>'}
+            {h2h_content if h2h_content else '<p style="font-style:italic; color:#777; font-size:13px;">Nema H2H zicera sa prolaznošću iznad 75% za danas.</p>'}
 
             <br>
             <!-- SEKCIJA 3: POISSON MATH VALUE BETOVI -->
             <h3 style="color:#6f42c1; border-bottom:2px solid #6f42c1; padding-bottom:5px;">📐 2. Pure Math Value Bets (Uloženo: {value_spent:,.0f} RSD)</h3>
-            {value_content if value_content else '<p style="font-style:italic; color:#777;">Nema izrazitih matematičkih odstupanja danas.</p>'}
+            {value_content if value_content else '<p style="font-style:italic; color:#777; font-size:13px;">Nema izrazitih matematičkih odstupanja (Edge >= 12%) za danas.</p>'}
 
             <div style="background:#eef6ff; padding:12px; text-align:center; border-radius:6px; font-size:12px; color:#0056b3; margin-top:25px;">
-                🛡️ Sistem automatski preračunava uloge od 1.5% banke i vodi statistiku u bets.json.
+                🛡️ Sistem automatski štiti banku i propušta dane bez jasne matematičke prednosti.
             </div>
         </div>
     </body>
