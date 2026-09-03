@@ -2,8 +2,8 @@ name: H2H Multi-Key Scanner & Tracker
 
 on:
   schedule:
-    - cron: '0 7 * * *'    # 09:00h po našem vremenu (07:00 UTC) - Optimalno za ROI
-    - cron: '30 21 * * *'  # 23:30h - Večernja provera rezultata
+    - cron: '0 7 * * *'    # 09:00h CEST - Optimalno jutarnje skeniranje za max ROI
+    - cron: '30 21 * * *'  # 23:30h CEST - Večernja provera rezultata
   workflow_dispatch:
 
 jobs:
