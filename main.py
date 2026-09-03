@@ -112,7 +112,6 @@ def get_h2h_raw_picks():
 
             h2h_all = fetch_api("fixtures/headtohead", {"h2h": f"{home_id}-{away_id}"})
             
-            # STRIKTAN FILTER: ISKLJUČIVO ZAVRŠENI MEČEVI (FT, AET, PEN)!
             completed_h2h = []
             for m in h2h_all:
                 st = (m.get('fixture') or {}).get('status', {}).get('short')
@@ -168,7 +167,6 @@ def get_h2h_raw_picks():
                 if 2 <= ft_goals <= 4: stats["Raspon Golova - 2-4"] += 1
                 if 3 <= ft_goals <= 5: stats["Raspon Golova - 3-5"] += 1
 
-            # TREND FILTER
             last_2_ht = [ (m.get('score', {}).get('halftime', {}).get('home') or 0) + (m.get('score', {}).get('halftime', {}).get('away') or 0) for m in completed_h2h[:2] ]
             if len(last_2_ht) >= 2 and last_2_ht[0] == 0 and last_2_ht[1] == 0:
                 stats["I Poluvreme - Više 0.5"] = 0
@@ -202,6 +200,40 @@ def get_h2h_raw_picks():
     raw_picks.sort(key=lambda x: (x['pct'], x['odd']), reverse=True)
     return raw_picks[:MAX_DAILY_H2H_PICKS]
 
+def get_h2h_html_blocks(current_bank=50000.0, max_daily_budget=4000.0):
+    picks = get_h2h_raw_picks()
+    if not picks: return "", 0.0
+    
+    html_blocks = []
+    total_spent = 0.0
+    today_str = datetime.now().strftime('%Y-%m-%d')
+    saved_bets = load_bets()
+    
+    base_stake = current_bank * 0.015
+    scaling = max_daily_budget / (len(picks) * base_stake) if (len(picks) * base_stake) > max_daily_budget else 1.0
+
+    for p in picks:
+        stake = max(100.0, round((base_stake * scaling) / 50.0) * 50)
+        total_spent += stake
+        bet_id = f"{p['fixture_id']}_{p['market']}"
+        badge = "🔥 <b>SUPER ZICER</b> " if p['pct'] >= 95.0 else ""
+        direct_web_skip = f"https://github.com/filipmaric994/QuantBet/issues/new?title=SKIP_{bet_id}"
+
+        block = f"""
+        <div style="background:#ffffff; border-left:4px solid #28a745; padding:12px; margin-bottom:12px; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+            <div style="float:right;">
+                <a href="{direct_web_skip}" target="_blank" style="background:#dc3545; color:#ffffff; padding:4px 10px; border-radius:4px; font-size:11px; text-decoration:none; font-weight:bold;">❌ Preskoči tip</a>
+            </div>
+            <h3 style="margin:0 0 5px 0; color:#1a2a3a;">⚽ (H) {p['home']} vs {p['away']} (A)</h3>
+            <p style="margin:0 0 4px 0; color:#6c757d; font-size:12px;">🏆 Liga: {p['league']} | Forma: {p['home_form']:.1f} vs {p['away_form']:.1f} gol/meču</p>
+            <p style="margin:0 0 8px 0; color:#495057; font-size:11px; font-style:italic;">📜 Poslednji dueli: {p['h2h_history']}</p>
+            <p style="margin:0; font-size:13px;">👉 {badge}<b>{p['market']}</b> -> <b style='color:#007bff;'>{p['pct']:.0f}%</b> ({p['count']}/{p['total']}) | Kvota: <b>{p['odd']:.2f}</b> | Ulog: <b style='color:#28a745;'>{stake:,.0f} RSD</b></p>
+        </div>
+        """
+        html_blocks.append(block)
+
+    return "".join(html_blocks), total_spent
+
 def skip_bet(keyword):
     bets = load_bets()
     updated = False
@@ -211,7 +243,7 @@ def skip_bet(keyword):
                 b['status'] = 'SKIPPED'
                 b['profit'] = 0
                 updated = True
-                print(f"✅ Tip {b['match']} ({b['market']}) uspeno prebačen u status SKIPPED!")
+                print(f"✅ Tip {b['match']} ({b['market']}) uspesno prebačen u status SKIPPED!")
     if updated: save_bets(bets)
 
 def evening_settle():
