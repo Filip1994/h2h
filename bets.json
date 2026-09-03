@@ -1,1 +1,72 @@
-[]
+[
+    {
+        "id": "1585732_Oba Tima Daju Gol (GG)",
+        "type": "H2H",
+        "event_id": 1585732,
+        "date": "2026-09-03",
+        "sport": "Football",
+        "match": "Bursaspor vs İstanbulspor",
+        "league": "Turkey - 1. Lig",
+        "market": "Oba Tima Daju Gol (GG)",
+        "stake": 750,
+        "odd": 1.83,
+        "status": "PENDING",
+        "profit": 0
+    },
+    {
+        "id": "1558603_I Poluvreme - Više 0.5",
+        "type": "H2H",
+        "event_id": 1558603,
+        "date": "2026-09-03",
+        "sport": "Football",
+        "match": "Gent vs OH Leuven",
+        "league": "Belgium - Jupiler Pro League",
+        "market": "I Poluvreme - Više 0.5",
+        "stake": 750,
+        "odd": 1.36,
+        "status": "PENDING",
+        "profit": 0
+    },
+    {
+        "id": "1570392_I Poluvreme - Više 0.5",
+        "type": "H2H",
+        "event_id": 1570392,
+        "date": "2026-09-03",
+        "sport": "Football",
+        "match": "Real Sociedad vs Celta Vigo",
+        "league": "Spain - La Liga",
+        "market": "I Poluvreme - Više 0.5",
+        "stake": 750,
+        "odd": 1.36,
+        "status": "PENDING",
+        "profit": 0
+    },
+    {
+        "id": "1629057_Oba Tima Daju Gol (GG)",
+        "type": "VALUE_BET",
+        "event_id": 1629057,
+        "date": "2026-09-03",
+        "sport": "Football",
+        "match": "Palermo vs Mantova",
+        "league": "Italy - Coppa Italia",
+        "market": "Oba Tima Daju Gol (GG)",
+        "stake": 500,
+        "odd": 1.8,
+        "status": "PENDING",
+        "profit": 0
+    },
+    {
+        "id": "1603008_SINGLE",
+        "type": "SINGLE_TIP",
+        "event_id": 1603008,
+        "date": "2026-09-03",
+        "sport": "Football",
+        "match": "Al-Fayha vs Al Kholood",
+        "league": "Saudi-Arabia - Pro League",
+        "market": "Match Winner - Home",
+        "stake": 500.0,
+        "odd": 3.0,
+        "status": "PENDING",
+        "profit": 0
+    }
+]
