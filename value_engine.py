@@ -45,14 +45,15 @@ def calculate_market_probabilities(lambda_home, lambda_away):
 
 def get_team_form_stats(team_id):
     matches = fetch_api("fixtures", {"team": team_id, "last": 10})
-    if not matches: return {"scored_avg": 1.2, "conceded_avg": 1.2}
+    completed = [m for m in matches if (m.get('fixture') or {}).get('status', {}).get('short') in ['FT', 'AET', 'PEN']]
+    if not completed: return {"scored_avg": 1.2, "conceded_avg": 1.2}
     scored, conceded = 0, 0
-    for m in matches:
+    for m in completed:
         goals = m.get('goals') or {}
         is_home = m.get('teams', {}).get('home', {}).get('id') == team_id
         scored += (goals.get('home') or 0) if is_home else (goals.get('away') or 0)
         conceded += (goals.get('away') or 0) if is_home else (goals.get('home') or 0)
-    tot = len(matches)
+    tot = len(completed)
     return {"scored_avg": scored / tot, "conceded_avg": conceded / tot}
 
 def get_match_odds(fixture_id):
@@ -80,7 +81,9 @@ def get_match_odds(fixture_id):
     except Exception: pass
     return odds_dict
 
-def get_value_html_blocks(current_bank=50000.0, max_budget=500.0):
+def get_value_html_blocks(current_bank=50000.0, max_budget=500.0, blocked_fixture_ids=None):
+    if blocked_fixture_ids is None: blocked_fixture_ids = set()
+
     today_str = datetime.now().strftime('%Y-%m-%d')
     saved_bets = main.load_bets()
     fixtures = fetch_api("fixtures", {"date": today_str})
@@ -92,6 +95,9 @@ def get_value_html_blocks(current_bank=50000.0, max_budget=500.0):
         try:
             fixture = event.get('fixture') or {}
             fixture_id = fixture.get('id')
+            
+            # ELIMINACIJA DUPLIKATA: Ako je meč već u H2H ili Single Tipu, PRESKAČE SE!
+            if fixture_id in blocked_fixture_ids: continue
             if (fixture.get('status') or {}).get('short') not in ['NS', 'TBD']: continue
 
             teams = event.get('teams') or {}
@@ -134,12 +140,12 @@ def get_value_html_blocks(current_bank=50000.0, max_budget=500.0):
                     if (total_spent + stake) <= max_budget:
                         total_spent += stake
                         bet_id = f"{fixture_id}_{market}"
-                        mailto_skip = f"mailto:filip.maric994@gmail.com?subject=SKIP:{bet_id}&body=Preskacem%20tip%20{home}%20vs%20{away}"
+                        direct_web_skip = f"https://github.com/filipmaric994/QuantBet/issues/new?title=SKIP_{bet_id}"
 
                         block = f"""
                         <div style="background:#ffffff; border-left:4px solid #6f42c1; padding:12px; margin-bottom:12px; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
                             <div style="float:right;">
-                                <a href="{mailto_skip}" style="background:#dc3545; color:#ffffff; padding:4px 10px; border-radius:4px; font-size:11px; text-decoration:none; font-weight:bold;">❌ Preskoči tip</a>
+                                <a href="{direct_web_skip}" target="_blank" style="background:#dc3545; color:#ffffff; padding:4px 10px; border-radius:4px; font-size:11px; text-decoration:none; font-weight:bold;">❌ Preskoči tip</a>
                             </div>
                             <h3 style="margin:0 0 5px 0; color:#2c3e50;">⚽ (H) {home} vs {away} (A)</h3>
                             <p style="margin:0 0 4px 0; color:#7f8c8d; font-size:12px;">🏆 {country} - {league} | Očekivani golovi (xG): <b>{lh+la:.2f}</b></p>
