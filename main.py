@@ -15,7 +15,6 @@ MIN_ODD = 1.35
 
 EXCLUDED_COUNTRIES = ["Brazil", "Argentina", "Colombia", "Chile", "Uruguay", "Paraguay", "Peru", "Ecuador", "Bolivia", "Venezuela", "Egypt", "Morocco", "Tunisia", "Algeria", "South Africa", "Nigeria", "Ghana", "Senegal", "Cameroon", "Kenya", "Ivory Coast"]
 EXCLUDED_LEAGUE_KEYWORDS = ["U19", "U20", "U21", "U23", "Sub-19", "Sub-20", "Reserve", "Reserves", "Amateur", "Oberliga", "Regional", "District", "5th Division", "6th Division", "Next Pro", "MLS Next Pro", "II", "B team"]
-TOP_SUPERBET_LEAGUES = ["Premier League", "Championship", "League One", "La Liga", "Segunda Division", "Serie A", "Serie B", "Bundesliga", "2. Bundesliga", "3. Liga", "Ligue 1", "Ligue 2", "Primeira Liga", "Liga Portugal 2", "Eredivisie", "Eerste Divisie", "Pro League", "Super League", "Bundesliga - Austria", "Premiership", "Superliga", "Allsvenskan", "Eliteserien", "HNL", "1. HNL", "SuperLiga", "Premier League - Russia", "Russian Premier League", "MLS", "Major League Soccer", "UEFA Champions League", "UEFA Europa League", "UEFA Conference League"]
 
 def fetch_api(endpoint, params=None):
     try:
@@ -31,9 +30,6 @@ def is_allowed_league(country_name, league_name):
     for kw in EXCLUDED_LEAGUE_KEYWORDS:
         if kw and kw.lower() in league_name.lower(): return False
     return True
-
-def is_top_league(league_name):
-    return any(top.lower() in league_name.lower() for top in TOP_SUPERBET_LEAGUES)
 
 def load_bets():
     if os.path.exists(BETS_FILE):
@@ -65,18 +61,26 @@ def fetch_real_odds(fixture_id):
                 name, values = b.get('name') or '', b.get('values') or []
                 if name == "Goals Over/Under":
                     for v in values:
-                        if v.get('value') == "Over 2.5" and "Ukupno Golova - Više 2.5" not in odds_dict: 
-                            odds_dict["Ukupno Golova - Više 2.5"] = (float(v.get('odd')), bm_name)
-                        elif v.get('value') == "Over 1.5" and "Raspon Golova - 2-4" not in odds_dict: 
-                            odds_dict["Raspon Golova - 2-4"] = (float(v.get('odd')), bm_name)
+                        if v.get('value') == "Over 2.5": odds_dict["Ukupno Golova - Više 2.5"] = (float(v.get('odd')), bm_name)
+                        elif v.get('value') == "Under 2.5": odds_dict["Ukupno Golova - Manje 2.5"] = (float(v.get('odd')), bm_name)
+                        elif v.get('value') == "Over 1.5": odds_dict["Ukupno Golova - Više 1.5"] = (float(v.get('odd')), bm_name)
                 elif name == "Both Teams Score":
                     for v in values:
-                        if v.get('value') == "Yes" and "Oba Tima Daju Gol (GG)" not in odds_dict: 
-                            odds_dict["Oba Tima Daju Gol (GG)"] = (float(v.get('odd')), bm_name)
+                        if v.get('value') == "Yes": odds_dict["Oba Tima Daju Gol (GG)"] = (float(v.get('odd')), bm_name)
+                elif "Goals" in name or "Multi" in name:
+                    for v in values:
+                        val = v.get('value', '')
+                        if val == "1-3": odds_dict["Raspon Golova - 1-3"] = (float(v.get('odd')), bm_name)
+                        elif val == "2-3": odds_dict["Raspon Golova - 2-3"] = (float(v.get('odd')), bm_name)
+                        elif val == "2-4": odds_dict["Raspon Golova - 2-4"] = (float(v.get('odd')), bm_name)
+                        elif val == "3-5": odds_dict["Raspon Golova - 3-5"] = (float(v.get('odd')), bm_name)
                 elif "First Half" in name and "Over/Under" in name:
                     for v in values:
-                        if v.get('value') == "Over 0.5" and "I Poluvreme - Više 0.5" not in odds_dict: 
-                            odds_dict["I Poluvreme - Više 0.5"] = (float(v.get('odd')), bm_name)
+                        if v.get('value') == "Over 0.5": odds_dict["I Poluvreme - Više 0.5"] = (float(v.get('odd')), bm_name)
+                elif "Halves" in name or "Both Halves" in name:
+                    for v in values:
+                        if "Over 0.5 Both Halves" in v.get('value', '') or "1+I&1+II" in v.get('value', ''):
+                            odds_dict["Gol u oba poluvremena (1+I & 1+II)"] = (float(v.get('odd')), bm_name)
     except Exception: pass
     return odds_dict
 
@@ -101,42 +105,65 @@ def get_h2h_html_blocks(current_bank=50000.0, max_daily_budget=4000.0):
 
             if not is_allowed_league(country, league) or not home_id or not away_id: continue
 
-            h2h_matches = fetch_api("fixtures/headtohead", {"h2h": f"{home_id}-{away_id}"})
-            total = len(h2h_matches)
-            if total < MIN_H2H_MATCHES: continue
+            h2h_all = fetch_api("fixtures/headtohead", {"h2h": f"{home_id}-{away_id}"})
+            if len(h2h_all) < MIN_H2H_MATCHES: continue
+
+            recent_h2h = h2h_all[:8]
+            total = len(recent_h2h)
 
             home_form = fetch_recent_form(home_id)
             away_form = fetch_recent_form(away_id)
 
             h2h_history_ft, h2h_history_ht = [], []
-            stats = {"Ukupno Golova - Više 2.5": 0, "Oba Tima Daju Gol (GG)": 0, "I Poluvreme - Više 0.5": 0}
+            stats = {
+                "Ukupno Golova - Više 2.5": 0,
+                "Ukupno Golova - Manje 2.5": 0,
+                "Oba Tima Daju Gol (GG)": 0,
+                "I Poluvreme - Više 0.5": 0,
+                "Gol u oba poluvremena (1+I & 1+II)": 0,
+                "Raspon Golova - 1-3": 0,
+                "Raspon Golova - 2-3": 0,
+                "Raspon Golova - 2-4": 0,
+                "Raspon Golova - 3-5": 0
+            }
 
-            for m in h2h_matches:
+            for m in recent_h2h:
                 goals, score = m.get('goals') or {}, m.get('score') or {}
                 halftime = score.get('halftime') or {}
                 ft_h, ft_a = goals.get('home') or 0, goals.get('away') or 0
                 ht_h, ht_a = halftime.get('home') or 0, halftime.get('away') or 0
                 ft_goals, ht_goals = ft_h + ft_a, ht_h + ht_a
+                sh_goals = ft_goals - ht_goals
 
                 h2h_history_ft.append(f"{ft_h}:{ft_a}")
                 h2h_history_ht.append(f"{ht_h}:{ht_a}")
 
                 if ft_goals >= 3: stats["Ukupno Golova - Više 2.5"] += 1
+                if ft_goals <= 2: stats["Ukupno Golova - Manje 2.5"] += 1
                 if ft_h > 0 and ft_a > 0: stats["Oba Tima Daju Gol (GG)"] += 1
                 if ht_goals >= 1: stats["I Poluvreme - Više 0.5"] += 1
+                if ht_goals >= 1 and sh_goals >= 1: stats["Gol u oba poluvremena (1+I & 1+II)"] += 1
+                if 1 <= ft_goals <= 3: stats["Raspon Golova - 1-3"] += 1
+                if 2 <= ft_goals <= 3: stats["Raspon Golova - 2-3"] += 1
+                if 2 <= ft_goals <= 4: stats["Raspon Golova - 2-4"] += 1
+                if 3 <= ft_goals <= 5: stats["Raspon Golova - 3-5"] += 1
+
+            # TREND FILTER: Eliminacija poluvremenskih igara ako zadnja 2 meča nisu imala gol u 1. pol
+            last_2_ht = [ (m.get('score', {}).get('halftime', {}).get('home') or 0) + (m.get('score', {}).get('halftime', {}).get('away') or 0) for m in recent_h2h[:2] ]
+            if len(last_2_ht) >= 2 and last_2_ht[0] == 0 and last_2_ht[1] == 0:
+                stats["I Poluvreme - Više 0.5"] = 0
+                stats["Gol u oba poluvremena (1+I & 1+II)"] = 0
 
             odds = fetch_real_odds(fixture_id)
-            allowed_markets = ["Ukupno Golova - Više 2.5", "Oba Tima Daju Gol (GG)", "I Poluvreme - Više 0.5"]
 
             for market, count in stats.items():
-                if market not in allowed_markets: continue
                 pct = (count / total) * 100.0
                 if pct >= MIN_ACCURACY_PCT:
                     odd_tuple = odds.get(market)
                     if not odd_tuple or odd_tuple[0] < MIN_ODD: continue
                     
                     real_odd, bm_source = odd_tuple
-                    history_str = ", ".join(h2h_history_ht[:5]) if market == "I Poluvreme - Više 0.5" else ", ".join(h2h_history_ft[:5])
+                    history_str = f"Poluvremena (HT): [{', '.join(h2h_history_ht[:5])}] | Kraj (FT): [{', '.join(h2h_history_ft[:5])}]"
                     
                     raw_picks.append({
                         "fixture_id": fixture_id, "home": home, "away": away, "league": f"{country} - {league}",
@@ -147,6 +174,9 @@ def get_h2h_html_blocks(current_bank=50000.0, max_daily_budget=4000.0):
         except Exception as e: print(f"Greška na meču: {e}")
 
     if not raw_picks: return "", 0.0
+
+    # Sortiranje: Prvo idu ZICERI sa najvišom prolaznošću (90%+ pa 80%+...)
+    raw_picks.sort(key=lambda x: (x['pct'], x['odd']), reverse=True)
 
     base_stake_per_match = current_bank * 0.015
     total_requested = len(raw_picks) * base_stake_per_match
@@ -165,20 +195,28 @@ def get_h2h_html_blocks(current_bank=50000.0, max_daily_budget=4000.0):
         p['stake'] = stake
         total_spent += stake
 
-        pick_str = f"<b>{p['market']}</b> -> {p['pct']:.0f}% ({p['count']}/{p['total']}) | Kvota: <b>{p['odd']:.2f}</b> <span style='color:#6c757d; font-size:11px;'>(Izvor: {p['bm_source']})</span> | Ulog: <b style='color:#28a745;'>{stake:,.0f} RSD</b>"
+        bet_id = f"{p['fixture_id']}_{p['market']}"
+        
+        # Vizuelno isticanje ako je meč 90%+ Zicer
+        badge = "🔥 <b>SUPER ZICER</b> " if p['pct'] >= 87.5 else ""
+
+        pick_str = f"{badge}<b>{p['market']}</b> -> <b style='color:#007bff;'>{p['pct']:.0f}%</b> ({p['count']}/{p['total']}) | Kvota: <b>{p['odd']:.2f}</b> <span style='color:#6c757d; font-size:11px;'>(Izvor: {p['bm_source']})</span> | Ulog: <b style='color:#28a745;'>{stake:,.0f} RSD</b>"
         
         block = f"""
         <div style="background:#ffffff; border-left:4px solid #28a745; padding:12px; margin-bottom:12px; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+            <div style="float:right;">
+                <a href="https://github.com/filipmaric994/QuantBet/issues/new?title=SKIP_{bet_id}&body=Preskaci_meč" target="_blank" style="background:#dc3545; color:#ffffff; padding:4px 10px; border-radius:4px; font-size:11px; text-decoration:none; font-weight:bold;">❌ Preskoči tip</a>
+            </div>
             <h3 style="margin:0 0 5px 0; color:#1a2a3a;">⚽ (H) {p['home']} vs {p['away']} (A)</h3>
             <p style="margin:0 0 4px 0; color:#6c757d; font-size:12px;">🏆 Liga: {p['league']} | Forma: {p['home_form']:.1f} vs {p['away_form']:.1f} gol/meču</p>
-            <p style="margin:0 0 8px 0; color:#495057; font-size:11px; font-style:italic;">📜 Poslednji dueli: [{p['h2h_history']}]</p>
+            <p style="margin:0 0 8px 0; color:#495057; font-size:11px; font-style:italic;">📜 {p['h2h_history']}</p>
             <p style="margin:0; font-size:13px;">👉 {pick_str}</p>
         </div>
         """
         fb_picks_lines.append(block)
 
         new_bets.append({
-            "id": f"{p['fixture_id']}_{p['market']}", "type": "H2H", "event_id": p['fixture_id'], "date": today_str,
+            "id": bet_id, "type": "H2H", "event_id": p['fixture_id'], "date": today_str,
             "sport": "Football", "match": f"{p['home']} vs {p['away']}", "league": p['league'],
             "market": p['market'], "stake": stake, "odd": p['odd'], "status": "PENDING", "profit": 0
         })
@@ -189,6 +227,18 @@ def get_h2h_html_blocks(current_bank=50000.0, max_daily_budget=4000.0):
     save_bets(saved_bets)
 
     return "".join(fb_picks_lines), total_spent
+
+def skip_bet(keyword):
+    bets = load_bets()
+    updated = False
+    for b in bets:
+        if isinstance(b, dict) and b.get('status') == 'PENDING':
+            if keyword.lower() in b.get('match', '').lower() or keyword.lower() in str(b.get('id', '')).lower():
+                b['status'] = 'SKIPPED'
+                b['profit'] = 0
+                updated = True
+                print(f"✅ Tip {b['match']} ({b['market']}) uspesno prebačen u status SKIPPED!")
+    if updated: save_bets(bets)
 
 def evening_settle():
     bets = load_bets()
@@ -210,13 +260,20 @@ def evening_settle():
                     ft_h, ft_a = goals.get('home') or 0, goals.get('away') or 0
                     ht_h, ht_a = halftime.get('home') or 0, halftime.get('away') or 0
                     ft_goals, ht_goals = ft_h + ft_a, ht_h + ht_a
+                    sh_goals = ft_goals - ht_goals
 
                     market = b.get('market')
                     is_win = False
 
                     if market == "Ukupno Golova - Više 2.5" and ft_goals >= 3: is_win = True
+                    elif market == "Ukupno Golova - Manje 2.5" and ft_goals <= 2: is_win = True
                     elif market == "Oba Tima Daju Gol (GG)" and ft_h > 0 and ft_a > 0: is_win = True
                     elif market == "I Poluvreme - Više 0.5" and ht_goals >= 1: is_win = True
+                    elif market == "Gol u oba poluvremena (1+I & 1+II)" and ht_goals >= 1 and sh_goals >= 1: is_win = True
+                    elif market == "Raspon Golova - 1-3" and 1 <= ft_goals <= 3: is_win = True
+                    elif market == "Raspon Golova - 2-3" and 2 <= ft_goals <= 3: is_win = True
+                    elif market == "Raspon Golova - 2-4" and 2 <= ft_goals <= 4: is_win = True
+                    elif market == "Raspon Golova - 3-5" and 3 <= ft_goals <= 5: is_win = True
 
                     stake, odd = b.get('stake', 750), b.get('odd', 1.0)
 
@@ -234,5 +291,6 @@ def evening_settle():
         print("Večernja provera kompletirana!")
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and sys.argv[1] == "evening":
-        evening_settle()
+    if len(sys.argv) > 1:
+        if sys.argv[1] == "evening": evening_settle()
+        elif sys.argv[1] == "skip" and len(sys.argv) > 2: skip_bet(sys.argv[2])
