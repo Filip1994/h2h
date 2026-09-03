@@ -5,6 +5,7 @@ import requests
 import math
 from datetime import datetime
 from urllib.parse import quote
+import main
 
 API_KEY = os.environ.get("API_FOOTBALL_KEY", "").strip()
 BASE_URL = "https://v3.football.api-sports.io"
@@ -22,9 +23,9 @@ def fetch_api(endpoint, params=None):
         return []
 
 def generate_superbet_search_link(home_team, away_team):
-    clean_home = home_team.split()[0]
-    clean_away = away_team.split()[0]
-    query = quote(f"{clean_home} {clean_away}")
+    clean_home = home_team.split()[0] if home_team else ""
+    clean_away = away_team.split()[0] if away_team else ""
+    query = quote(f"{clean_home} {clean_away}".strip())
     return f"https://superbet.rs/sr-latn/pretraga?query={query}"
 
 def poisson_prob(lmbda, k):
@@ -75,11 +76,11 @@ def get_match_odds(fixture_id):
 
 def get_value_html_blocks(current_bank=50000.0, max_budget=500.0):
     today_str = datetime.now().strftime('%Y-%m-%d')
+    saved_bets = main.load_bets()
     fixtures = fetch_api("fixtures", {"date": today_str})
     email_blocks = []
+    new_bets = []
     total_spent = 0.0
-
-    base_stake = max(100.0, round((current_bank * 0.005) / 50.0) * 50)
 
     for event in fixtures:
         try:
@@ -91,9 +92,9 @@ def get_value_html_blocks(current_bank=50000.0, max_budget=500.0):
             home_id, away_id = (teams.get('home') or {}).get('id'), (teams.get('away') or {}).get('id')
             home, away = (teams.get('home') or {}).get('name', 'Home'), (teams.get('away') or {}).get('name', 'Away')
             league_info = event.get('league') or {}
-            league = f"{league_info.get('country')} - {league_info.get('name')}"
+            league, country = league_info.get('name', ''), league_info.get('country', '')
 
-            if not home_id or not away_id: continue
+            if not main.is_allowed_league(country, league) or not home_id or not away_id: continue
 
             home_stats = get_team_form_stats(home_id)
             away_stats = get_team_form_stats(away_id)
@@ -110,20 +111,39 @@ def get_value_html_blocks(current_bank=50000.0, max_budget=500.0):
                 implied_prob = (1.0 / real_odd) * 100.0
                 edge = model_prob - implied_prob
 
-                if edge >= MIN_VALUE_EDGE and (total_spent + base_stake) <= max_budget:
-                    total_spent += base_stake
-                    block = f"""
-                    <div style="background:#ffffff; border-left:4px solid #6f42c1; padding:12px; margin-bottom:12px; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
-                        <h3 style="margin:0 0 5px 0; color:#2c3e50;">⚽ {home} vs {away}</h3>
-                        <p style="margin:0 0 4px 0; color:#7f8c8d; font-size:12px;">🏆 {league} | Očekivani golovi (xG): <b>{lh+la:.2f}</b></p>
-                        <p style="margin:0 0 6px 0; color:#495057; font-size:11px; font-style:italic;">
-                            💡 <b>Math Obrazloženje:</b> Poisson model procenjuje verovatnoću na <b>{model_prob:.1f}%</b>, dok kvota {real_odd:.2f} implicira tek <b>{implied_prob:.1f}%</b> (Prednost: <b style='color:#6f42c1;'>+{edge:.1f}%</b>).
-                        </p>
-                        <p style="margin:0; font-size:13px;">💎 <b>{market}</b> | Kvota: <b>{real_odd:.2f}</b> | Ulog: <b style='color:#6f42c1;'>{base_stake:,.0f} RSD</b> [<a href='{superbet_link}' target='_blank' style='color:#6f42c1; font-weight:bold;'>Uplati 🎟️</a>]</p>
-                    </div>
-                    """
-                    email_blocks.append(block)
+                if edge >= MIN_VALUE_EDGE:
+                    # KELI PRORAČUN ULOGA
+                    p = model_prob / 100.0
+                    b = real_odd - 1.0
+                    k_frac = (p * b - (1.0 - p)) / b if b > 0 else 0.0
+                    stake_pct = max(0.0025, min(0.01, k_frac * 0.20))
+                    stake = round((current_bank * stake_pct) / 50.0) * 50
+                    stake = max(100.0, stake)
+
+                    if (total_spent + stake) <= max_budget:
+                        total_spent += stake
+                        block = f"""
+                        <div style="background:#ffffff; border-left:4px solid #6f42c1; padding:12px; margin-bottom:12px; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+                            <h3 style="margin:0 0 5px 0; color:#2c3e50;">⚽ {home} vs {away}</h3>
+                            <p style="margin:0 0 4px 0; color:#7f8c8d; font-size:12px;">🏆 {country} - {league} | Očekivani golovi (xG): <b>{lh+la:.2f}</b></p>
+                            <p style="margin:0 0 6px 0; color:#495057; font-size:11px; font-style:italic;">
+                                💡 <b>Poisson Matematika:</b> Model procenjuje prolaznost na <b>{model_prob:.1f}%</b> vs Kladionica <b>{implied_prob:.1f}%</b> (Edge: <b style='color:#6f42c1;'>+{edge:.1f}%</b>).
+                            </p>
+                            <p style="margin:0; font-size:13px;">💎 <b>{market}</b> | Kvota: <b>{real_odd:.2f}</b> | Srazmeran ulog: <b style='color:#6f42c1;'>{stake:,.0f} RSD</b> [<a href='{superbet_link}' target='_blank' style='color:#6f42c1; font-weight:bold;'>Uplati 🎟️</a>]</p>
+                        </div>
+                        """
+                        email_blocks.append(block)
+                        new_bets.append({
+                            "id": f"{fixture_id}_{market}", "type": "VALUE_BET", "event_id": fixture_id, "date": today_str,
+                            "sport": "Football", "match": f"{home} vs {away}", "league": f"{country} - {league}",
+                            "market": market, "stake": stake, "odd": real_odd, "status": "PENDING", "profit": 0
+                        })
 
         except Exception as e: print(f"Greška na Value meču: {e}")
+
+    existing_ids = {b.get('id') for b in saved_bets if isinstance(b, dict)}
+    for nb in new_bets:
+        if nb['id'] not in existing_ids: saved_bets.append(nb)
+    main.save_bets(saved_bets)
 
     return "".join(email_blocks), total_spent
