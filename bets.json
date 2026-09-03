@@ -1,1 +1,30 @@
-[]
+[
+    {
+        "id": "1619048_Oba Tima Daju Gol (GG)",
+        "type": "VALUE_BET",
+        "event_id": 1619048,
+        "date": "2026-09-03",
+        "sport": "Football",
+        "match": "Thisted FC vs Sonderjyske",
+        "league": "Denmark - DBU Pokalen",
+        "market": "Oba Tima Daju Gol (GG)",
+        "stake": 500,
+        "odd": 1.97,
+        "status": "PENDING",
+        "profit": 0
+    },
+    {
+        "id": "1603008_SINGLE",
+        "type": "SINGLE_TIP",
+        "event_id": 1603008,
+        "date": "2026-09-03",
+        "sport": "Football",
+        "match": "Al-Fayha vs Al Kholood",
+        "league": "Saudi-Arabia - Pro League",
+        "market": "Match Winner - Home",
+        "stake": 500.0,
+        "odd": 3.12,
+        "status": "PENDING",
+        "profit": 0
+    }
+]
