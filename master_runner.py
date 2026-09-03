@@ -40,7 +40,7 @@ def calculate_analytics():
 
 def send_master_daily_email():
     if not GMAIL_USER or not GMAIL_PASS:
-        print("⚠️ Nemam Gmail podatke u Secrets (GMAIL_USER / GMAIL_APP_PASS). Preskačem slanje.")
+        print("⚠️ GMAIL_USER ili GMAIL_APP_PASS nedostaju u Secrets. Preskačem slanje.")
         return
 
     today_formatted = datetime.now().strftime('%d.%m.%Y.')
