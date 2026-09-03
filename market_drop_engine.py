@@ -3,7 +3,6 @@ import sys
 import requests
 import math
 from datetime import datetime
-from urllib.parse import quote
 import main
 
 API_KEY = os.environ.get("API_FOOTBALL_KEY", "").strip()
@@ -17,12 +16,6 @@ def fetch_api(endpoint, params=None):
     except Exception as e:
         print(f"Greška na API [{endpoint}]: {e}")
         return []
-
-def generate_superbet_search_link(home_team, away_team):
-    clean_home = home_team.split()[0] if home_team else ""
-    clean_away = away_team.split()[0] if away_team else ""
-    query = quote(f"{clean_home} {clean_away}".strip())
-    return f"https://superbet.rs/sr-latn/pretraga?query={query}"
 
 def poisson_prob(lmbda, k):
     return (math.pow(lmbda, k) * math.exp(-lmbda)) / math.factorial(k)
@@ -39,11 +32,8 @@ def calculate_detailed_metrics(home_id, away_id):
     a_sc = sum((m.get('goals', {}).get('home') or 0) if m.get('teams', {}).get('away', {}).get('id') == away_id else (m.get('goals', {}).get('away') or 0) for m in m_away) / len(m_away)
     a_con = sum((m.get('goals', {}).get('away') or 0) if m.get('teams', {}).get('away', {}).get('id') == away_id else (m.get('goals', {}).get('home') or 0) for m in m_away) / len(m_away)
 
-    # TAČNA xG MATHEMATIKA
-    lh = (h_sc + a_con) / 2.0  # Očekivani golovi domaćina
-    la = (a_sc + h_con) / 2.0  # Očekivani golovi gosta
-    tot_xg = lh + la           # UKUPNI xG MEČA
-
+    lh, la = (h_sc + a_con) / 2.0, (a_sc + h_con) / 2.0
+    tot_xg = lh + la
     prob_over_2_5 = sum(poisson_prob(lh, h) * poisson_prob(la, a) for h in range(8) for a in range(8) if (h + a) >= 3) * 100.0
 
     return {"lh": lh, "la": la, "tot_xg": tot_xg, "prob_25": prob_over_2_5, "h_sc": h_sc, "h_con": h_con, "a_sc": a_sc, "a_con": a_con}
@@ -80,6 +70,7 @@ def get_market_drops_and_single_tip(current_bank=50000.0, max_budget=500.0):
             target_bm = next((bm for bm in bookmakers if bm.get('id') in [8, 11, 6]), bookmakers[0] if bookmakers else None)
 
             if target_bm:
+                bm_name = target_bm.get('name', 'API Market')
                 for b in (target_bm.get('bets') or []):
                     name, values = b.get('name') or '', b.get('values') or []
                     if name in ["Match Winner", "Goals Over/Under"]:
@@ -93,9 +84,9 @@ def get_market_drops_and_single_tip(current_bank=50000.0, max_budget=500.0):
                                 if (val_name == "Over 2.5" and edge >= 8.0) or (val_name in ["Home", "Away"] and metrics['tot_xg'] >= 2.50):
                                     potential_singles.append({
                                         "fixture_id": fixture_id,
-                                        "match": f"{home} vs {away}", "home": home, "away": away,
+                                        "match": f"(H) {home} vs {away} (A)", "home": home, "away": away,
                                         "league": f"{country} - {league}", "market": f"{name} - {val_name}",
-                                        "odd": current_odd, "edge": edge, "prob": prob, "metrics": metrics
+                                        "odd": current_odd, "bm_source": bm_source, "edge": edge, "prob": prob, "metrics": metrics
                                     })
         except Exception as e: print(f"Greška na Single tipu: {e}")
 
@@ -112,25 +103,19 @@ def get_market_drops_and_single_tip(current_bank=50000.0, max_budget=500.0):
     stake = min(max_budget, max(100.0, round((current_bank * stake_pct) / 50.0) * 50))
     spent = stake
 
-    superbet_link = generate_superbet_search_link(best['home'], best['away'])
-
     analysis_html = f"""
     <div style="background:#ffffff; border:1px solid #ff416c; border-radius:8px; padding:15px; margin-bottom:20px; box-shadow:0 2px 8px rgba(0,0,0,0.05);">
         <div style="background:linear-gradient(135deg, #ff416c, #ff4b2b); color:#ffffff; padding:10px; border-radius:6px; text-align:center; font-weight:bold; font-size:15px; margin-bottom:12px;">
             🔥 EKSKLUZIVNI SINGLE TIP DANA: {best['match']}
         </div>
         <p style="margin:0 0 8px 0; font-size:13px; color:#333;"><b>🏆 Takmičenje:</b> {best['league']}</p>
-        <p style="margin:0 0 8px 0; font-size:13px; color:#333;">🎯 <b>Predlog:</b> {best['market']} | Kvota: <b>{best['odd']:.2f}</b> | Ulog: <b style="color:#ff416c;">{stake:,.0f} RSD</b> ({stake_pct*100:.2f}% banke)</p>
+        <p style="margin:0 0 8px 0; font-size:13px; color:#333;">🎯 <b>Predlog:</b> {best['market']} | Kvota: <b>{best['odd']:.2f}</b> <span style='color:#6c757d; font-size:11px;'>(Izvor: {best['bm_source']})</span> | Ulog: <b style="color:#ff416c;">{stake:,.0f} RSD</b> ({stake_pct*100:.2f}% banke)</p>
         
         <div style="background:#fff5f5; border-left:3px solid #ff416c; padding:10px; margin-top:10px; font-size:12px; color:#4a4a4a;">
             <b>📊 Ekspertska Analiza i Kretanje Tržišta:</b><br>
-            • <b>xG Projekcija:</b> Domaćin ima napadački xG od {m['lh']:.2f}, dok gost ima projektovani xG od {m['la']:.2f}. Ukupno očekivano na meču: <b>{m['tot_xg']:.2f} golova</b>.<br>
-            • <b>Pritisak na Kvotu:</b> Implicirana verovatnoća kladionice iznosi {(1/best['odd'])*100:.1f}%, dok naš model procenjuje realnu šansu na <b>{best['prob']:.1f}%</b> (Prednost: +{best['edge']:.1f}%).<br>
+            • <b>xG Projekcija:</b> Domaćin napada sa xG {m['lh']:.2f}, dok gost ima projektovani xG od {m['la']:.2f}. Ukupno očekivano na meču: <b>{m['tot_xg']:.2f} golova</b>.<br>
+            • <b>Pritisak na Kvotu:</b> Implicirana verovatnoća kladionice od {(1/best['odd'])*100:.1f}% podcenjuje realno stanje modela koje iznosi <b>{best['prob']:.1f}%</b> (Prednost: +{best['edge']:.1f}%).<br>
             • <b>Upravljanje Rizikom:</b> Dinamički 1/4 Kelly ulog za maksimalnu zaštitu kapitala.
-        </div>
-        
-        <div style="text-align:center; margin-top:12px;">
-            <a href='{superbet_link}' target='_blank' style='background:#ff416c; color:#ffffff; padding:8px 20px; border-radius:20px; font-weight:bold; text-decoration:none; font-size:12px;'>Uplati na Superbetu 🎟️</a>
         </div>
     </div>
     """
