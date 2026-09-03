@@ -37,6 +37,7 @@ def calculate_analytics():
 
 def send_master_daily_email():
     today_formatted = datetime.now().strftime('%d.%m.%Y')
+    today_str = datetime.now().strftime('%Y-%m-%d')
     
     stats = calculate_analytics()
     current_bank = stats["current_bank"]
@@ -46,21 +47,68 @@ def send_master_daily_email():
     single_max_budget = max_daily_risk * 0.10
     value_max_budget = max_daily_risk * 0.10
 
-    print(f"📊 Banka: {current_bank:,.0f} RSD | Profit: {stats['total_profit']:,.0f} RSD | ROI: {stats['roi_pct']:.2f}%")
+    # PRATI SE SVE ZAUZETE MEČEVE
+    used_fixture_ids = set()
 
-    h2h_content, h2h_spent = main.get_h2h_html_blocks(current_bank, h2h_max_budget)
-    value_content, value_spent = value_engine.get_value_html_blocks(current_bank, value_max_budget)
-    single_content, single_spent = market_drop_engine.get_market_drops_and_single_tip(current_bank, single_max_budget)
+    # 1. SEKCIJA: SINGLE TIP DANA
+    single_content, single_spent, single_fixture_id = market_drop_engine.get_market_drops_and_single_tip(current_bank, single_max_budget)
+    if single_fixture_id:
+        used_fixture_ids.add(single_fixture_id)
+
+    # 2. SEKCIJA: VIP H2H ZICERI (Samo za mečeve koji nisu Single Tip)
+    h2h_picks = main.get_h2h_raw_picks()
+    filtered_h2h_picks = [p for p in h2h_picks if p['fixture_id'] not in used_fixture_ids]
+
+    saved_bets = main.load_bets()
+    h2h_html_blocks = []
+    h2h_spent = 0.0
+
+    base_stake_per_match = current_bank * 0.015
+    total_requested = len(filtered_h2h_picks) * base_stake_per_match
+    scaling_factor = max_daily_budget / total_requested if total_requested > max_daily_budget else 1.0
+
+    for p in filtered_h2h_picks:
+        used_fixture_ids.add(p['fixture_id'])
+        stake = max(100.0, round((base_stake_per_match * scaling_factor) / 50.0) * 50)
+        h2h_spent += stake
+
+        bet_id = f"{p['fixture_id']}_{p['market']}"
+        badge = "🔥 <b>SUPER ZICER</b> " if p['pct'] >= 95.0 else ""
+        direct_web_skip = f"https://github.com/filipmaric994/QuantBet/issues/new?title=SKIP_{bet_id}"
+
+        pick_str = f"{badge}<b>{p['market']}</b> -> <b style='color:#007bff;'>{p['pct']:.0f}%</b> ({p['count']}/{p['total']}) | Kvota: <b>{p['odd']:.2f}</b> <span style='color:#6c757d; font-size:11px;'>(Izvor: {p['bm_source']})</span> | Ulog: <b style='color:#28a745;'>{stake:,.0f} RSD</b>"
+        
+        block = f"""
+        <div style="background:#ffffff; border-left:4px solid #28a745; padding:12px; margin-bottom:12px; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+            <div style="float:right;">
+                <a href="{direct_web_skip}" target="_blank" style="background:#dc3545; color:#ffffff; padding:4px 10px; border-radius:4px; font-size:11px; text-decoration:none; font-weight:bold;">❌ Preskoči tip</a>
+            </div>
+            <h3 style="margin:0 0 5px 0; color:#1a2a3a;">⚽ (H) {p['home']} vs {p['away']} (A)</h3>
+            <p style="margin:0 0 4px 0; color:#6c757d; font-size:12px;">🏆 Liga: {p['league']} | Forma: {p['home_form']:.1f} vs {p['away_form']:.1f} gol/meču</p>
+            <p style="margin:0 0 8px 0; color:#495057; font-size:11px; font-style:italic;">📜 Poslednji dueli: {p['h2h_history']}</p>
+            <p style="margin:0; font-size:13px;">👉 {pick_str}</p>
+        </div>
+        """
+        h2h_html_blocks.append(block)
+
+        new_bet = {
+            "id": bet_id, "type": "H2H", "event_id": p['fixture_id'], "date": today_str,
+            "sport": "Football", "match": f"{p['home']} vs {p['away']}", "league": p['league'],
+            "market": p['market'], "stake": stake, "odd": p['odd'], "status": "PENDING", "profit": 0
+        }
+        if not any(b.get('id') == bet_id for b in saved_bets if isinstance(b, dict)):
+            saved_bets.append(new_bet)
+
+    # 3. SEKCIJA: POISSON VALUE BETS (STROGO ISKLJUČUJE SVE MEČEVE KOJI SU VEĆ U H2H ILI SINGLE TIPU!)
+    value_content, value_spent = value_engine.get_value_html_blocks(current_bank, value_max_budget, used_fixture_ids)
+
+    main.save_bets(saved_bets)
 
     total_spent_today = h2h_spent + value_spent + single_spent
     roi_color = "#28a745" if stats["roi_pct"] >= 0 else "#dc3545"
     profit_sign = "+" if stats["total_profit"] > 0 else ""
 
-    single_section = single_content if single_content else """
-    <div style="background:#fff3cd; border:1px solid #ffeeba; color:#856404; padding:12px; border-radius:8px; margin-bottom:20px; text-align:center; font-size:13px;">
-        ⚠️ <b>Danas nema Single Tipa Dana koji zadovoljava rigorozne kriterijume vrednosti.</b> (Preskačemo radi zaštite banke)
-    </div>
-    """
+    h2h_final_html = "".join(h2h_html_blocks)
 
     master_html = f"""
     <html>
@@ -87,19 +135,19 @@ def send_master_daily_email():
             </div>
 
             <!-- SEKCIJA 1: SINGLE TIP DANA -->
-            {single_section}
+            {single_content}
 
             <!-- SEKCIJA 2: VIP H2H ZICERI -->
             <h3 style="color:#28a745; border-bottom:2px solid #28a745; padding-bottom:5px;">⚽ 1. VIP H2H Ziceri (Uloženo: {h2h_spent:,.0f} RSD)</h3>
-            {h2h_content if h2h_content else '<p style="font-style:italic; color:#777; font-size:13px;">Nema H2H zicera sa prolaznošću iznad 75% za danas.</p>'}
+            {h2h_final_html if h2h_final_html else '<p style="font-style:italic; color:#777; font-size:13px;">Nema H2H zicera sa prolaznošću iznad 75% za danas.</p>'}
 
             <br>
             <!-- SEKCIJA 3: POISSON MATH VALUE BETOVI -->
             <h3 style="color:#6f42c1; border-bottom:2px solid #6f42c1; padding-bottom:5px;">📐 2. Pure Math Value Bets (Uloženo: {value_spent:,.0f} RSD)</h3>
-            {value_content if value_content else '<p style="font-style:italic; color:#777; font-size:13px;">Nema izrazitih matematičkih odstupanja (Edge >= 12%) za danas.</p>'}
+            {value_content if value_content else '<p style="font-style:italic; color:#777; font-size:13px;">Nema dodatnih matematičkih odstupanja (Edge >= 12%) za mečeve van H2H ponude.</p>'}
 
             <div style="background:#eef6ff; padding:12px; text-align:center; border-radius:6px; font-size:12px; color:#0056b3; margin-top:25px;">
-                🛡️ Sistem automatski štiti banku i propušta dane bez jasne matematičke prednosti.
+                🛡️ Sistem automatski štiti banku i eliminise duplicirane ili kontradiktorne opklade.
             </div>
         </div>
     </body>
