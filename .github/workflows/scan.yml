@@ -2,17 +2,18 @@ name: H2H Multi-Key Scanner & Tracker
 
 on:
   schedule:
-    - cron: '0 7 * * *'    # Svakog dana u 09:00 CEST (07:00 UTC)
-    - cron: '30 21 * * *'  # Svakog dana u 23:30 CEST (21:30 UTC)
+    - cron: '0 7 * * *'    # 09:00 CEST (Jutarnji bilten)
+    - cron: '30 21 * * *'  # 23:30 CEST (Večernji CLV i rezultati)
   workflow_dispatch:
-  repository_dispatch:
-    types: [skip_bet]
+  issues:
+    types: [opened]
 
 jobs:
   run-tracker:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      issues: write
 
     steps:
       - name: Checkout kod
@@ -26,32 +27,32 @@ jobs:
       - name: Instaliraj biblioteke
         run: pip install requests
 
-      # POKREĆE SE KADA KLIKNEŠ "PRESKOČI TIP" U MEJLU OVER GOOGLE WEBHOOKA
-      - name: Izvrši Preskakanje Tipa
-        if: github.event_name == 'repository_dispatch'
+      # AKO JE OTVOREN ISSUE ZA PRESKAKANJE
+      - name: Preskoči Tip
+        if: github.event_name == 'issues' && startsWith(github.event.issue.title, 'SKIP_')
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
-        run: python main.py skip ${{ github.event.client_payload.bet_id }}
+        run: |
+          BET_ID=$(echo "${{ github.event.issue.title }}" | sed 's/SKIP_//')
+          python main.py skip $BET_ID
 
-      # REDOVNO JUTARNJE SKENIRANJE
-      - name: Pokreni Master Jutarnji Bilten
-        if: github.event.schedule == '0 7 * * *' || github.event_name == 'workflow_dispatch'
+      # JUTARNJI BILTEN (Telegram)
+      - name: Pokreni Jutarnji Bilten
+        if: github.event_name == 'workflow_dispatch' || (github.event_name == 'schedule' && github.event.schedule == '0 7 * * *')
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
-          GMAIL_USER: ${{ secrets.GMAIL_USER }}
-          GMAIL_APP_PASS: ${{ secrets.GMAIL_APP_PASS }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: python master_runner.py
 
-      # VEČERNJE PORAVNANJE REZULTATA
-      - name: Pokreni Večernju Proveru Rezultata
-        if: github.event.schedule == '30 21 * * *'
+      # VEČERNJA PROVERA I CLV
+      - name: Pokreni Večernju Proveru
+        if: github.event_name == 'schedule' && github.event.schedule == '30 21 * * *'
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
-          GMAIL_USER: ${{ secrets.GMAIL_USER }}
-          GMAIL_APP_PASS: ${{ secrets.GMAIL_APP_PASS }}
         run: python main.py evening
 
-      - name: Sačuvaj bazu opklada na GitHub (Auto Commit)
+      - name: Sačuvaj bazu (Auto Commit)
         run: |
           git config --global user.name "H2H Tracker Bot"
           git config --global user.email "bot@github.com"
