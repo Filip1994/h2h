@@ -11,7 +11,7 @@ BASE_URL = "https://v3.football.api-sports.io"
 HEADERS = {'x-apisports-key': API_KEY}
 
 MIN_VALUE_EDGE = 12.0
-MIN_HIGH_ODD = 1.75
+MIN_HIGH_ODD = 1.65
 
 def fetch_api(endpoint, params=None):
     try:
@@ -30,13 +30,18 @@ def calculate_expected_goals(home_stats, away_stats):
     return lambda_home, lambda_away
 
 def calculate_market_probabilities(lambda_home, lambda_away):
-    prob_over_2_5, prob_gg = 0.0, 0.0
-    for h in range(8):
-        for a in range(8):
-            p = poisson_prob(lambda_home, h) * poisson_prob(lambda_away, a)
-            if (h + a) >= 3: prob_over_2_5 += p
-            if h > 0 and a > 0: prob_gg += p
-    return prob_over_2_5 * 100, prob_gg * 100
+    tot_lambda = lambda_home + lambda_away
+    
+    prob_over_2_5 = sum(poisson_prob(lambda_home, h) * poisson_prob(lambda_away, a) for h in range(8) for a in range(8) if (h + a) >= 3) * 100.0
+    prob_gg = sum(poisson_prob(lambda_home, h) * poisson_prob(lambda_away, a) for h in range(8) for a in range(8) if h > 0 and a > 0) * 100.0
+    
+    lmbda_ht = tot_lambda * 0.45
+    lmbda_st = tot_lambda * 0.55
+    prob_ht_1plus = 1.0 - math.exp(-lmbda_ht)
+    prob_st_1plus = 1.0 - math.exp(-lmbda_st)
+    prob_both_halves = (prob_ht_1plus * prob_st_1plus) * 100.0
+
+    return prob_over_2_5, prob_gg, prob_both_halves
 
 def get_team_form_stats(team_id):
     matches = fetch_api("fixtures", {"team": team_id, "last": 10})
@@ -68,6 +73,10 @@ def get_match_odds(fixture_id):
                 elif name == "Both Teams Score":
                     for v in values:
                         if v.get('value') == "Yes": odds_dict["Oba Tima Daju Gol (GG)"] = (float(v.get('odd')), bm_name)
+                elif "Halves" in name or "Both Halves" in name:
+                    for v in values:
+                        if "Over 0.5 Both Halves" in v.get('value', '') or "1+I&1+II" in v.get('value', ''):
+                            odds_dict["Gol u oba poluvremena (1+I & 1+II)"] = (float(v.get('odd')), bm_name)
     except Exception: pass
     return odds_dict
 
@@ -96,11 +105,17 @@ def get_value_html_blocks(current_bank=50000.0, max_budget=500.0):
             home_stats = get_team_form_stats(home_id)
             away_stats = get_team_form_stats(away_id)
             lh, la = calculate_expected_goals(home_stats, away_stats)
-            prob_3plus, prob_gg = calculate_market_probabilities(lh, la)
+            prob_3plus, prob_gg, prob_both_halves = calculate_market_probabilities(lh, la)
 
             odds = get_match_odds(fixture_id)
 
-            for market, model_prob in {"Ukupno Golova - Više 2.5": prob_3plus, "Oba Tima Daju Gol (GG)": prob_gg}.items():
+            markets_to_check = {
+                "Ukupno Golova - Više 2.5": prob_3plus,
+                "Oba Tima Daju Gol (GG)": prob_gg,
+                "Gol u oba poluvremena (1+I & 1+II)": prob_both_halves
+            }
+
+            for market, model_prob in markets_to_check.items():
                 odd_tuple = odds.get(market)
                 if not odd_tuple or odd_tuple[0] < MIN_HIGH_ODD: continue
 
@@ -118,8 +133,14 @@ def get_value_html_blocks(current_bank=50000.0, max_budget=500.0):
 
                     if (total_spent + stake) <= max_budget:
                         total_spent += stake
+                        bet_id = f"{fixture_id}_{market}"
+                        mailto_skip = f"mailto:filip.maric994@gmail.com?subject=SKIP:{bet_id}&body=Preskacem%20tip%20{home}%20vs%20{away}"
+
                         block = f"""
                         <div style="background:#ffffff; border-left:4px solid #6f42c1; padding:12px; margin-bottom:12px; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+                            <div style="float:right;">
+                                <a href="{mailto_skip}" style="background:#dc3545; color:#ffffff; padding:4px 10px; border-radius:4px; font-size:11px; text-decoration:none; font-weight:bold;">❌ Preskoči tip</a>
+                            </div>
                             <h3 style="margin:0 0 5px 0; color:#2c3e50;">⚽ (H) {home} vs {away} (A)</h3>
                             <p style="margin:0 0 4px 0; color:#7f8c8d; font-size:12px;">🏆 {country} - {league} | Očekivani golovi (xG): <b>{lh+la:.2f}</b></p>
                             <p style="margin:0 0 6px 0; color:#495057; font-size:11px; font-style:italic;">
@@ -130,7 +151,7 @@ def get_value_html_blocks(current_bank=50000.0, max_budget=500.0):
                         """
                         email_blocks.append(block)
                         new_bets.append({
-                            "id": f"{fixture_id}_{market}", "type": "VALUE_BET", "event_id": fixture_id, "date": today_str,
+                            "id": bet_id, "type": "VALUE_BET", "event_id": fixture_id, "date": today_str,
                             "sport": "Football", "match": f"{home} vs {away}", "league": f"{country} - {league}",
                             "market": market, "stake": stake, "odd": real_odd, "status": "PENDING", "profit": 0
                         })
