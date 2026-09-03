@@ -31,7 +31,7 @@ def get_value_html_blocks(current_bank=50000.0, max_budget=500.0, blocked_fixtur
     fixtures = fetch_api("fixtures", {"date": today_str})
     
     value_picks = []
-    new_bets = []  # Inicijalizacija liste
+    new_bets = []
     total_spent = 0.0
 
     completed = [b for b in saved_bets if isinstance(b, dict) and b.get('status') in ['WIN', 'LOSS']]
