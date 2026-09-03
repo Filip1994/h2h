@@ -1,7 +1,6 @@
 import os
 import time
 import requests
-import math
 from datetime import datetime, timezone, timedelta
 import main
 import quant_math
@@ -29,9 +28,9 @@ def get_market_drops_and_single_tip(current_bank=50000.0, max_budget=500.0):
         try:
             fixture = event.get('fixture') or {}
             fixture_id = fixture.get('id')
-            match_ts = fixture.get('timestamp', 0)
+            match_ts = fixture.get('timestamp') or 0
 
-            if match_ts <= (now_ts + 900) or match_ts >= (now_ts + 43200): continue
+            if match_ts <= (now_ts + 900) or match_ts >= (now_ts + 86400): continue
             if (fixture.get('status') or {}).get('short') not in ['NS', 'TBD']: continue
 
             match_time_str = datetime.fromtimestamp(match_ts, tz=timezone.utc).astimezone(timezone(timedelta(hours=2))).strftime('%H:%M')
@@ -75,7 +74,6 @@ def get_market_drops_and_single_tip(current_bank=50000.0, max_budget=500.0):
     potential_singles.sort(key=lambda x: (x['tot_xg'], x['odd']), reverse=True)
     best = potential_singles[0]
 
-    # KELLY STAKE CALCULATION WITH CIRCUIT BREAKER
     completed = [b for b in saved_bets if isinstance(b, dict) and b.get('status') in ['WIN', 'LOSS']]
     cb_multiplier = quant_math.check_circuit_breaker(completed, current_bank)
     
@@ -85,7 +83,6 @@ def get_market_drops_and_single_tip(current_bank=50000.0, max_budget=500.0):
     bet_id = f"{best['fixture_id']}_SINGLE"
 
     analysis_text = (
-        f"⭐ <b>EKSKLUZIVNI SINGLE TIP DANA</b>\n"
         f"⚽ <b>{best['match']}</b>\n"
         f"⏰ <b>Početak:</b> {best['match_time']}h | 🏆 {best['league']}\n"
         f"🎯 <b>Predlog:</b> {best['market']} | xG Forme: <b>{best['tot_xg']:.2f}</b>\n"
