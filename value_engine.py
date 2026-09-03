@@ -12,7 +12,7 @@ BASE_URL = "https://v3.football.api-sports.io"
 HEADERS = {'x-apisports-key': API_KEY}
 
 MIN_VALUE_EDGE = 12.0
-MIN_HIGH_ODD = 1.80
+MIN_HIGH_ODD = 1.75
 
 def fetch_api(endpoint, params=None):
     try:
@@ -58,12 +58,16 @@ def get_team_form_stats(team_id):
     return {"scored_avg": scored / tot, "conceded_avg": conceded / tot}
 
 def get_match_odds(fixture_id):
-    odds_data = fetch_api("odds", {"fixture": fixture_id})
+    odds_data = fetch_api("odds", {"fixture": fixture_id, "bookmaker": 8})
+    if not odds_data:
+        odds_data = fetch_api("odds", {"fixture": fixture_id})
     odds_dict = {}
     if not odds_data: return odds_dict
     try:
-        for bm in (odds_data[0].get('bookmakers') or []):
-            for b in (bm.get('bets') or []):
+        bookmakers = odds_data[0].get('bookmakers') or []
+        target_bm = next((bm for bm in bookmakers if bm.get('id') in [8, 11, 6]), bookmakers[0] if bookmakers else None)
+        if target_bm:
+            for b in (target_bm.get('bets') or []):
                 name, values = b.get('name') or '', b.get('values') or []
                 if name == "Goals Over/Under":
                     for v in values:
@@ -112,7 +116,6 @@ def get_value_html_blocks(current_bank=50000.0, max_budget=500.0):
                 edge = model_prob - implied_prob
 
                 if edge >= MIN_VALUE_EDGE:
-                    # KELI PRORAČUN ULOGA
                     p = model_prob / 100.0
                     b = real_odd - 1.0
                     k_frac = (p * b - (1.0 - p)) / b if b > 0 else 0.0
