@@ -29,7 +29,9 @@ def get_value_html_blocks(current_bank=50000.0, max_budget=500.0, blocked_fixtur
     now_ts = int(time.time())
     saved_bets = main.load_bets()
     fixtures = fetch_api("fixtures", {"date": today_str})
+    
     value_picks = []
+    new_bets = []  # Inicijalizacija liste
     total_spent = 0.0
 
     completed = [b for b in saved_bets if isinstance(b, dict) and b.get('status') in ['WIN', 'LOSS']]
@@ -39,9 +41,9 @@ def get_value_html_blocks(current_bank=50000.0, max_budget=500.0, blocked_fixtur
         try:
             fixture = event.get('fixture') or {}
             fixture_id = fixture.get('id')
-            match_ts = fixture.get('timestamp', 0)
+            match_ts = fixture.get('timestamp') or 0
 
-            if match_ts <= (now_ts + 900) or match_ts >= (now_ts + 43200): continue
+            if match_ts <= (now_ts + 900) or match_ts >= (now_ts + 86400): continue
             if fixture_id in blocked_fixture_ids: continue
             if (fixture.get('status') or {}).get('short') not in ['NS', 'TBD']: continue
 
