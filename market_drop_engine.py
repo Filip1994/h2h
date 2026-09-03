@@ -9,7 +9,7 @@ import main
 API_KEY = os.environ.get("API_FOOTBALL_KEY", "").strip()
 BASE_URL = "https://v3.football.api-sports.io"
 HEADERS = {'x-apisports-key': API_KEY}
-GITHUB_REPO = "Filip1994/h2h"
+SKIP_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbw2tBRDpX1Jw6yvBCwM6VFf0b5HwH9A6Jw1oGyxU8hdrWd8PZAR2yUyQJn8QLccGy7VZA/exec"
 
 def fetch_api(endpoint, params=None):
     try:
@@ -57,7 +57,6 @@ def get_market_drops_and_single_tip(current_bank=50000.0, max_budget=500.0):
             fixture_id = fixture.get('id')
             match_ts = fixture.get('timestamp', 0)
 
-            # STRIKTAN VREMENSKI FILTER (MINIMUN 15 MINUTA UNAPRED)
             if match_ts <= (now_ts + 900): continue
             if (fixture.get('status') or {}).get('short') not in ['NS', 'TBD']: continue
 
@@ -134,7 +133,7 @@ def get_market_drops_and_single_tip(current_bank=50000.0, max_budget=500.0):
     spent = stake
 
     bet_id = f"{best['fixture_id']}_SINGLE"
-    direct_web_skip = f"https://github.com/{GITHUB_REPO}/issues/new?title=SKIP_{bet_id}"
+    direct_web_skip = f"{SKIP_WEBHOOK_URL}?skip={bet_id}"
 
     analysis_html = f"""
     <div style="background:#ffffff; border:1px solid #6366f1; border-left:5px solid #4338ca; border-radius:8px; padding:15px; margin-bottom:20px; box-shadow:0 4px 12px rgba(67, 56, 202, 0.08);">
