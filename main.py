@@ -16,7 +16,7 @@ MIN_ACCURACY_PCT = 75.0
 MIN_ODD = 1.45
 MAX_DAILY_H2H_PICKS = 5
 
-EXCLUDED_COUNTRIES = ["Brazil", "Argentina", "Colombia", "Chile", "Uruguay", "Paraguay", "Peru", "Ecuador", "Bolivia", "Venezuela", "Egypt", "Morocco", "Tunisia", "Algeria", "South Africa", "Nigeria", "Ghana", "Senegal", "Cameroon", "Kenya", "Ivory Coast"]
+EXCLUDED_COUNTRIES = ["Brazil", "Argentina", "Colombia", "Chile", "Uruguay", "Paraguay", "Peru", "Ecuador", "Bolivia", "Venezuela", "Egypt", "Morocco", "Tunisia", "Algeria", "South Africa", "Nigeria", "Ghana", "Cameroon", "Kenya", "Ivory Coast"]
 EXCLUDED_LEAGUE_KEYWORDS = ["U19", "U20", "U21", "U23", "Sub-19", "Sub-20", "Reserve", "Reserves", "Amateur", "Oberliga", "District", "5th Division", "MLS Next Pro", "II", "B team"]
 
 def fetch_api(endpoint, params=None):
@@ -43,13 +43,6 @@ def load_bets():
 
 def save_bets(bets):
     with open(BETS_FILE, 'w', encoding='utf-8') as f: json.dump(bets, f, ensure_ascii=False, indent=4)
-
-def fetch_recent_form(team_id):
-    res = fetch_api("fixtures", {"team": team_id, "last": 10})
-    completed = [m for m in res if (m.get('fixture') or {}).get('status', {}).get('short') in ['FT', 'AET', 'PEN']]
-    if not completed: return {"avg_goals": 0.0}
-    goals_scored = sum((m.get('goals', {}).get('home') or 0) if m.get('teams', {}).get('home', {}).get('id') == team_id else (m.get('goals', {}).get('away') or 0) for m in completed)
-    return {"avg_goals": goals_scored / len(completed)}
 
 def fetch_real_odds(fixture_id):
     res = fetch_api("odds", {"fixture": fixture_id, "bookmaker": 8})
@@ -124,10 +117,6 @@ def get_h2h_raw_picks():
             weights = quant_math.calculate_dixon_coles_weights(dates_list)
             weighted_total = sum(weights) if sum(weights) > 0 else len(completed_h2h)
 
-            home_form = fetch_recent_form(home_id)
-            away_form = fetch_recent_form(away_id)
-            combined_xg = home_form['avg_goals'] + away_form['avg_goals']
-
             formatted_h2h_history = []
             weighted_stats = {"Ukupno Golova - Više 2.5": 0.0, "Ukupno Golova - Manje 2.5": 0.0, "Oba Tima Daju Gol (GG)": 0.0}
 
@@ -155,16 +144,6 @@ def get_h2h_raw_picks():
 
             for market, w_count in weighted_stats.items():
                 pct = (w_count / weighted_total) * 100.0
-                
-                is_conflicted = False
-                if combined_xg > 0:
-                    try:
-                        is_conflicted, _ = quant_math.is_h2h_form_conflicted(market, pct, combined_xg)
-                    except Exception:
-                        is_conflicted = False
-
-                if is_conflicted: continue
-
                 if pct >= MIN_ACCURACY_PCT and pct > best_pct_for_match:
                     odd_tuple = odds.get(market)
                     if odd_tuple and odd_tuple[0] >= MIN_ODD:
@@ -175,12 +154,12 @@ def get_h2h_raw_picks():
                 seen_fixtures.add(fixture_id)
                 m_name, m_pct, m_odd, m_source, m_tot = best_market_for_match
                 
-                recent_5 = formatted_h2h_history[-5:]
+                # Izbor 5 najnovijih utakmica (prikaz od najsvezije ka starijoj)
+                recent_5 = list(reversed(formatted_h2h_history[-5:]))
                 raw_picks.append({
                     "fixture_id": fixture_id, "home": home, "away": away, "league": f"{country} - {league}",
                     "match_time": match_time_str, "market": m_name, "pct": m_pct, "odd": m_odd,
-                    "bm_source": m_source, "total": m_tot, "home_form": home_form['avg_goals'],
-                    "away_form": away_form['avg_goals'], "h2h_history": " • ".join(recent_5)
+                    "bm_source": m_source, "total": m_tot, "h2h_history": " • ".join(recent_5)
                 })
         except Exception as e: print(f"Greška na meču: {e}")
 
