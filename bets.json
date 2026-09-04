@@ -45,7 +45,9 @@
     "xi": 0.0015,
     "model_version": "dc-h2h-v2.0.0",
     "calibration_status": "IDENTITY_UNVALIDATED",
-    "status": "PENDING",
-    "profit": 0.0
+    "status": "WIN",
+    "profit": 375.0,
+    "result": "1:0",
+    "settled_at": "2026-09-04T23:30:02.182809+00:00"
   }
 ]
