@@ -11,7 +11,10 @@ BETS_FILE = "bets.json"
 BASE_URL = "https://v3.football.api-sports.io"
 HEADERS = {'x-apisports-key': API_KEY}
 
-MIN_H2H_MATCHES = 4
+# STROGA MATEMATIČKA PODEŠAVANJA
+MIN_H2H_MATCHES = 5         # Minimum 5 mečeva u uzorku
+YEAR_WINDOW = 4             # Maksimalno 4 godine unazad (sve pre 2022. se odbacuje)
+MAX_RECENT_DAYS = 730       # Bar 1 meč odigran u poslednja 24 meseca
 MIN_ACCURACY_PCT = 75.0
 MIN_ODD = 1.45
 MAX_DAILY_H2H_PICKS = 5
@@ -28,17 +31,11 @@ def fetch_api(endpoint, params=None):
         return []
 
 def is_allowed_match(country_name, league_name, home_name, away_name):
-    # Proverava zemlju
     for country in EXCLUDED_COUNTRIES:
-        if country and country.lower() in country_name.lower(): 
-            return False
-            
-    # Proverava ligu I imena timova na nepoželjne reči (U20, II, Reserve...)
+        if country and country.lower() in country_name.lower(): return False
     full_text = f"{league_name} {home_name} {away_name}".lower()
     for kw in EXCLUDED_KEYWORDS:
-        if kw and kw.lower() in full_text: 
-            return False
-            
+        if kw and kw.lower() in full_text: return False
     return True
 
 def load_bets():
@@ -76,7 +73,7 @@ def fetch_real_odds(fixture_id):
 def get_h2h_raw_picks():
     today_str = datetime.now().strftime('%Y-%m-%d')
     current_year = datetime.now().year
-    min_year = current_year - 10
+    min_year = current_year - YEAR_WINDOW
     now_ts = int(time.time())
 
     raw_picks = []
@@ -101,26 +98,30 @@ def get_h2h_raw_picks():
             league_info = event.get('league') or {}
             league, country = league_info.get('name', 'Liga'), league_info.get('country', 'Nacionalno')
 
-            # Rigorozan filter za ligu I timove
             if not is_allowed_match(country, league, home, away) or not home_id or not away_id: continue
 
             h2h_all = fetch_api("fixtures/headtohead", {"h2h": f"{home_id}-{away_id}"})
             
             completed_h2h = []
             dates_list = []
+            has_recent_match = False
+
             for m in h2h_all:
                 st = (m.get('fixture') or {}).get('status', {}).get('short')
                 if st in ['FT', 'AET', 'PEN']:
                     raw_date = (m.get('fixture') or {}).get('date') or ''
                     if raw_date:
                         try:
-                            m_year = int(raw_date[:4])
-                            if m_year >= min_year:
+                            m_dt = datetime.strptime(raw_date[:10], '%Y-%m-%d')
+                            if m_dt.year >= min_year:
                                 completed_h2h.append(m)
                                 dates_list.append(raw_date)
-                        except Exception: completed_h2h.append(m)
+                                if (datetime.now() - m_dt).days <= MAX_RECENT_DAYS:
+                                    has_recent_match = True
+                        except Exception: pass
 
-            if len(completed_h2h) < MIN_H2H_MATCHES: continue
+            # MATEMATIČKI FILTERI: Min 5 mečeva u zadnje 4 godine + bar 1 meč u zadnja 24 meseca
+            if len(completed_h2h) < MIN_H2H_MATCHES or not has_recent_match: continue
 
             weights = quant_math.calculate_dixon_coles_weights(dates_list)
             weighted_total = sum(weights) if sum(weights) > 0 else len(completed_h2h)
