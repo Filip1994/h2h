@@ -69,12 +69,18 @@ def send_master_daily_email():
                 s_text_html = s_text.replace('\n', '<br>')
                 skip_url = f"https://github.com/{GITHUB_REPO}/issues/new?title=SKIP_{s_fixture_id}_SINGLE"
                 single_html = f"""
-                <div style="background:#ffffff; border:1px solid #6366f1; border-left:5px solid #4338ca; border-radius:8px; padding:15px; margin-bottom:20px;">
-                    <div style="float:right;">
-                        <a href="{skip_url}" target="_blank" style="background:#dc3545; color:#ffffff; padding:5px 10px; border-radius:4px; font-size:11px; text-decoration:none; font-weight:bold;">❌ Preskoči tip</a>
-                    </div>
-                    <div style="background:#4338ca; color:#ffffff; padding:6px 10px; border-radius:4px; font-weight:bold; font-size:13px; margin-bottom:10px; display:inline-block;">⭐ EKSKLUZIVNI SINGLE TIP DANA</div>
-                    <p style="margin:5px 0; font-size:13px;">{s_text_html}</p>
+                <div style="background:#1e1e2e; border:1px solid #6366f1; border-left:5px solid #4338ca; border-radius:8px; padding:15px; margin-bottom:20px;">
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom:12px;">
+                        <tr>
+                            <td align="left" style="vertical-align:middle;">
+                                <span style="background:#4338ca; color:#ffffff; padding:6px 10px; border-radius:4px; font-weight:bold; font-size:11px; display:inline-block;">⭐ SINGLE TIP DANA</span>
+                            </td>
+                            <td align="right" style="vertical-align:middle;">
+                                <a href="{skip_url}" target="_blank" style="background:#dc3545; color:#ffffff; padding:5px 10px; border-radius:4px; font-size:11px; text-decoration:none; font-weight:bold; display:inline-block;">❌ Preskoči tip</a>
+                            </td>
+                        </tr>
+                    </table>
+                    <p style="margin:0; font-size:13px; color:#e0e0e0; line-height:1.5;">{s_text_html}</p>
                 </div>
                 """
     except Exception as e:
@@ -99,14 +105,20 @@ def send_master_daily_email():
             skip_url = f"https://github.com/{GITHUB_REPO}/issues/new?title=SKIP_{bet_id}"
 
             block = f"""
-            <div style="background:#ffffff; border-left:4px solid #28a745; padding:12px; margin-bottom:12px; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
-                <div style="float:right;">
-                    <a href="{skip_url}" target="_blank" style="background:#dc3545; color:#ffffff; padding:4px 10px; border-radius:4px; font-size:11px; text-decoration:none; font-weight:bold;">❌ Preskoči tip</a>
-                </div>
-                <h3 style="margin:0 0 5px 0; color:#1a2a3a; font-size:15px;">⚽ (H) {p['home']} vs {p['away']} (A)</h3>
-                <p style="margin:0 0 4px 0; color:#6c757d; font-size:12px;"><b>⏰ Početak:</b> <b style="color:#28a745;">{p['match_time']}h</b> | 🏆 {p['league']}</p>
-                <p style="margin:0 0 6px 0; color:#495057; font-size:11px; font-style:italic;">📜 Poslednji dueli: {p['h2h_history']}</p>
-                <p style="margin:0; font-size:13px;">👉 {badge}<b>{p['market']}</b> ➔ <b style="color:#007bff;">{p['pct']:.0f}%</b> | Kvota: <b>{p['odd']:.2f}</b> ({p['bm_source']}) | Ulog: <b style="color:#28a745;">{stake:,.0f} RSD</b></p>
+            <div style="background:#1e1e2e; border:1px solid #2d323e; border-left:4px solid #28a745; padding:12px; margin-bottom:12px; border-radius:6px;">
+                <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom:8px;">
+                    <tr>
+                        <td align="left" style="vertical-align:middle;">
+                            <h3 style="margin:0; color:#ffffff; font-size:14px; font-weight:bold;">⚽ (H) {p['home']} vs {p['away']} (A)</h3>
+                        </td>
+                        <td align="right" style="vertical-align:middle; width:90px;">
+                            <a href="{skip_url}" target="_blank" style="background:#dc3545; color:#ffffff; padding:4px 8px; border-radius:4px; font-size:11px; text-decoration:none; font-weight:bold; display:inline-block;">❌ Preskoči</a>
+                        </td>
+                    </tr>
+                </table>
+                <p style="margin:0 0 4px 0; color:#a0a0a0; font-size:12px;"><b>⏰ Početak:</b> <b style="color:#28a745;">{p['match_time']}h</b> | 🏆 {p['league']}</p>
+                <p style="margin:0 0 6px 0; color:#888888; font-size:11px; font-style:italic;">📜 Poslednji dueli: {p['h2h_history']}</p>
+                <p style="margin:0; font-size:13px; color:#ffffff;">👉 {badge}<b>{p['market']}</b> ➔ <b style="color:#007bff;">{p['pct']:.0f}%</b> | Kvota: <b>{p['odd']:.2f}</b> ({p['bm_source']}) | Ulog: <b style="color:#28a745;">{stake:,.0f} RSD</b></p>
             </div>
             """
             h2h_blocks.append(block)
@@ -134,11 +146,18 @@ def send_master_daily_email():
                 text_html = text.replace('\n', '<br>')
                 skip_url = f"https://github.com/{GITHUB_REPO}/issues/new?title=SKIP_{bet_id}"
                 block = f"""
-                <div style="background:#ffffff; border-left:4px solid #6f42c1; padding:12px; margin-bottom:12px; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
-                    <div style="float:right;">
-                        <a href="{skip_url}" target="_blank" style="background:#dc3545; color:#ffffff; padding:4px 10px; border-radius:4px; font-size:11px; text-decoration:none; font-weight:bold;">❌ Preskoči tip</a>
-                    </div>
-                    <p style="margin:0; font-size:13px;">{text_html}</p>
+                <div style="background:#1e1e2e; border:1px solid #2d323e; border-left:4px solid #6f42c1; padding:12px; margin-bottom:12px; border-radius:6px;">
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom:8px;">
+                        <tr>
+                            <td align="left" style="vertical-align:middle;">
+                                <span style="background:#6f42c1; color:#ffffff; padding:3px 8px; border-radius:4px; font-weight:bold; font-size:11px; display:inline-block;">📐 VALUE BET</span>
+                            </td>
+                            <td align="right" style="vertical-align:middle; width:90px;">
+                                <a href="{skip_url}" target="_blank" style="background:#dc3545; color:#ffffff; padding:4px 8px; border-radius:4px; font-size:11px; text-decoration:none; font-weight:bold; display:inline-block;">❌ Preskoči</a>
+                            </td>
+                        </tr>
+                    </table>
+                    <p style="margin:0; font-size:13px; color:#ffffff;">{text_html}</p>
                 </div>
                 """
                 value_blocks.append(block)
@@ -154,39 +173,38 @@ def send_master_daily_email():
 
     master_html = f"""
     <html>
-    <body style="font-family:'Segoe UI', Arial, sans-serif; background-color:#f4f4f7; padding:20px; color:#333;">
-        <div style="max-width:700px; background:#ffffff; margin:0 auto; padding:25px; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.06);">
+    <body style="font-family:'Segoe UI', Arial, sans-serif; background-color:#121212; padding:15px; color:#e0e0e0;">
+        <div style="max-width:650px; background:#181824; margin:0 auto; padding:20px; border-radius:12px; border:1px solid #2a2a3a;">
             
-            <div style="text-align:center; padding-bottom:15px; border-bottom:2px solid #eef0f2; margin-bottom:20px;">
-                <h1 style="color:#1a2a3a; margin:0; font-size:22px;">🚀 QUANT FUND BILTEN ({today_formatted})</h1>
+            <div style="text-align:center; padding-bottom:15px; border-bottom:1px solid #2a2a3a; margin-bottom:20px;">
+                <h1 style="color:#ffffff; margin:0 0 10px 0; font-size:20px;">🚀 QUANT FUND BILTEN ({today_formatted})</h1>
                 
-                <div style="background:#f8f9fa; border:1px solid #e9ecef; border-radius:8px; padding:12px; margin-top:12px; display:inline-block; width:95%;">
-                    <table width="100%" style="text-align:center; font-size:13px;">
+                <div style="background:#222232; border:1px solid #2a2a3a; border-radius:8px; padding:12px;">
+                    <table width="100%" style="text-align:center; font-size:12px; color:#e0e0e0;">
                         <tr>
-                            <td>🏦 <b>Banka:</b><br><span style="font-size:15px; font-weight:bold; color:#1a2a3a;">{current_bank:,.0f} RSD</span></td>
-                            <td>📈 <b>Profit:</b><br><span style="font-size:15px; font-weight:bold; color:{roi_color};">{profit_sign}{stats['total_profit']:,.0f} RSD</span></td>
-                            <td>📊 <b>ROI:</b><br><span style="font-size:15px; font-weight:bold; color:{roi_color};">{stats['roi_pct']:.2f}%</span></td>
-                            <td>🎯 <b>Prolaznost:</b><br><span style="font-size:15px; font-weight:bold; color:#007bff;">{stats['win_rate']:.1f}% ({stats['total_matches']})</span></td>
+                            <td>🏦 <b>Banka:</b><br><span style="font-size:14px; font-weight:bold; color:#ffffff;">{current_bank:,.0f} RSD</span></td>
+                            <td>📈 <b>Profit:</b><br><span style="font-size:14px; font-weight:bold; color:{roi_color};">{profit_sign}{stats['total_profit']:,.0f} RSD</span></td>
+                            <td>📊 <b>ROI:</b><br><span style="font-size:14px; font-weight:bold; color:{roi_color};">{stats['roi_pct']:.2f}%</span></td>
+                            <td>🎯 <b>Prolaznost:</b><br><span style="font-size:14px; font-weight:bold; color:#007bff;">{stats['win_rate']:.1f}% ({stats['total_matches']})</span></td>
                         </tr>
                     </table>
                 </div>
 
-                <p style="color:#6c757d; margin:10px 0 0 0; font-size:12px;">
+                <p style="color:#a0a0a0; margin:10px 0 0 0; font-size:12px;">
                     Predloženi ulog danas: <b>{total_spent_today:,.0f} RSD</b> (Dnevni limit: {max_daily_risk:,.0f} RSD)
                 </p>
             </div>
 
             {single_html}
 
-            <h3 style="color:#28a745; border-bottom:2px solid #28a745; padding-bottom:5px;">⚽ 1. VIP H2H Ziceri (Uloženo: {h2h_spent:,.0f} RSD)</h3>
-            {h2h_final_html if h2h_final_html else '<p style="font-style:italic; color:#777; font-size:13px;">Nema H2H zicera sa prolaznošću iznad 75% za danas.</p>'}
+            <h3 style="color:#28a745; border-bottom:1px solid #28a745; padding-bottom:5px; margin-top:20px; font-size:15px;">⚽ 1. VIP H2H Ziceri (Uloženo: {h2h_spent:,.0f} RSD)</h3>
+            {h2h_final_html if h2h_final_html else '<p style="font-style:italic; color:#888; font-size:12px;">Nema H2H zicera sa prolaznošću iznad 75% za danas.</p>'}
 
-            <br>
-            <h3 style="color:#6f42c1; border-bottom:2px solid #6f42c1; padding-bottom:5px;">📐 2. Pure Math Value Bets (Uloženo: {value_spent:,.0f} RSD)</h3>
-            {value_final_html if value_final_html else '<p style="font-style:italic; color:#777; font-size:13px;">Nema dodatnih matematičkih odstupanja (Edge >= 12%) za danas.</p>'}
+            <h3 style="color:#6f42c1; border-bottom:1px solid #6f42c1; padding-bottom:5px; margin-top:25px; font-size:15px;">📐 2. Pure Math Value Bets (Uloženo: {value_spent:,.0f} RSD)</h3>
+            {value_final_html if value_final_html else '<p style="font-style:italic; color:#888; font-size:12px;">Nema dodatnih matematičkih odstupanja (Edge >= 12%) za danas.</p>'}
 
-            <div style="background:#eef6ff; padding:12px; text-align:center; border-radius:6px; font-size:12px; color:#0056b3; margin-top:25px;">
-                🛡️ Sistem primenjuje Dixon-Coles time-decay i Kelly Criterion stake sizing.
+            <div style="background:#222232; padding:10px; text-align:center; border-radius:6px; font-size:11px; color:#888888; margin-top:25px; border:1px solid #2a2a3a;">
+                🛡️ Dixon-Coles time-decay • Kelly Criterion • Circuit Breaker protection
             </div>
         </div>
     </body>
