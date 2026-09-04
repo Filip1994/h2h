@@ -16,10 +16,8 @@ MIN_ACCURACY_PCT = 75.0
 MIN_ODD = 1.45
 MAX_DAILY_H2H_PICKS = 5
 
-# TIERING LIGA
-TIER_1_COUNTRIES = ["England", "Spain", "Germany", "Italy", "France", "World"]
 EXCLUDED_COUNTRIES = ["Brazil", "Argentina", "Colombia", "Chile", "Uruguay", "Paraguay", "Peru", "Ecuador", "Bolivia", "Venezuela", "Egypt", "Morocco", "Tunisia", "Algeria", "South Africa", "Nigeria", "Ghana", "Senegal", "Cameroon", "Kenya", "Ivory Coast"]
-EXCLUDED_LEAGUE_KEYWORDS = ["U19", "U20", "U21", "U23", "Sub-19", "Sub-20", "Reserve", "Reserves", "Amateur", "Oberliga", "Regional", "District", "5th Division", "6th Division", "Next Pro", "MLS Next Pro", "II", "B team"]
+EXCLUDED_LEAGUE_KEYWORDS = ["U19", "U20", "U21", "U23", "Sub-19", "Sub-20", "Reserve", "Reserves", "Amateur", "Oberliga", "District", "5th Division", "MLS Next Pro", "II", "B team"]
 
 def fetch_api(endpoint, params=None):
     try:
@@ -90,9 +88,9 @@ def get_h2h_raw_picks():
         try:
             fixture = event.get('fixture') or {}
             fixture_id = fixture.get('id')
-            match_ts = fixture.get('timestamp', 0)
+            match_ts = fixture.get('timestamp') or 0
 
-            if match_ts <= (now_ts + 900) or match_ts >= (now_ts + 43200): continue
+            if match_ts <= (now_ts + 900) or match_ts >= (now_ts + 86400): continue
             if (fixture.get('status') or {}).get('short') not in ['NS', 'TBD']: continue
 
             match_time_str = datetime.fromtimestamp(match_ts, tz=timezone.utc).astimezone(timezone(timedelta(hours=2))).strftime('%H:%M')
@@ -108,24 +106,25 @@ def get_h2h_raw_picks():
             h2h_all = fetch_api("fixtures/headtohead", {"h2h": f"{home_id}-{away_id}"})
             
             completed_h2h = []
-            dates_list = []
             for m in h2h_all:
                 st = (m.get('fixture') or {}).get('status', {}).get('short')
                 if st in ['FT', 'AET', 'PEN']:
-                    raw_date = (m.get('fixture') or {}).get('date', '')
+                    raw_date = (m.get('fixture') or {}).get('date') or ''
                     if raw_date:
                         try:
                             m_year = int(raw_date[:4])
                             if m_year >= min_year:
                                 completed_h2h.append(m)
-                                dates_list.append(raw_date)
                         except Exception: completed_h2h.append(m)
 
             if len(completed_h2h) < MIN_H2H_MATCHES: continue
 
-            # DIXON-COLES WEIGHTING
+            # SORTIRANJE: Najnovije utakmice idu prve (od 2026 ka starijim)
+            completed_h2h.sort(key=lambda m: (m.get('fixture') or {}).get('date') or '', reverse=True)
+            dates_list = [(m.get('fixture') or {}).get('date') or '' for m in completed_h2h]
+
             weights = quant_math.calculate_dixon_coles_weights(dates_list)
-            weighted_total = sum(weights)
+            weighted_total = sum(weights) if sum(weights) > 0 else len(completed_h2h)
 
             home_form = fetch_recent_form(home_id)
             away_form = fetch_recent_form(away_id)
@@ -135,14 +134,14 @@ def get_h2h_raw_picks():
             weighted_stats = {"Ukupno Golova - Više 2.5": 0.0, "Ukupno Golova - Manje 2.5": 0.0, "Oba Tima Daju Gol (GG)": 0.0}
 
             for idx, m in enumerate(completed_h2h):
-                goals, score = m.get('goals') or {}, m.get('score') or {}
-                halftime = score.get('halftime') or {}
+                goals = m.get('goals') or {}
+                halftime = (m.get('score') or {}).get('halftime') or {}
                 ft_h, ft_a = goals.get('home') or 0, goals.get('away') or 0
                 ht_h, ht_a = halftime.get('home') or 0, halftime.get('away') or 0
                 ft_goals = ft_h + ft_a
                 w = weights[idx] if idx < len(weights) else 0.5
 
-                raw_date = (m.get('fixture') or {}).get('date', '')
+                raw_date = (m.get('fixture') or {}).get('date') or ''
                 date_str = datetime.strptime(raw_date[:10], '%Y-%m-%d').strftime('%d.%m.%Y.') if raw_date else ""
 
                 formatted_h2h_history.append(f"[{date_str}] <b>{ft_h}:{ft_a}</b> (HT {ht_h}:{ht_a})")
@@ -158,9 +157,7 @@ def get_h2h_raw_picks():
 
             for market, w_count in weighted_stats.items():
                 pct = (w_count / weighted_total) * 100.0
-                
-                # CONFLICT FILTER CHECK
-                is_conflicted, reason = quant_math.is_h2h_form_conflicted(market, pct, combined_xg)
+                is_conflicted, _ = quant_math.is_h2h_form_conflicted(market, pct, combined_xg)
                 if is_conflicted: continue
 
                 if pct >= MIN_ACCURACY_PCT and pct > best_pct_for_match:
@@ -173,6 +170,7 @@ def get_h2h_raw_picks():
                 seen_fixtures.add(fixture_id)
                 m_name, m_pct, m_odd, m_source, m_tot = best_market_for_match
                 
+                # [:5] sada uzima 5 najsvežijih mečeva jer je lista sortirana opadajuće!
                 raw_picks.append({
                     "fixture_id": fixture_id, "home": home, "away": away, "league": f"{country} - {league}",
                     "match_time": match_time_str, "market": m_name, "pct": m_pct, "odd": m_odd,
@@ -215,14 +213,13 @@ def evening_settle():
                     ft_h, ft_a = goals.get('home') or 0, goals.get('away') or 0
                     ft_goals = ft_h + ft_a
 
-                    # CLOSING LINE VALUE (CLV) TRACKING
                     closing_odds = fetch_real_odds(fixture_id)
                     captured_odd = b.get('odd', 1.0)
                     market = b.get('market')
                     
                     if market in closing_odds:
                         c_odd = closing_odds[market][0]
-                        clv_edge = ((captured_odd - c_odd) / c_odd) * 100.0
+                        clv_edge = ((captured_odd - c_odd) / c_odd) * 100.0 if c_odd > 0 else 0.0
                         b['clv_edge'] = round(clv_edge, 2)
 
                     is_win = False
