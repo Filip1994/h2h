@@ -17,7 +17,7 @@ MIN_ODD = 1.45
 MAX_DAILY_H2H_PICKS = 5
 
 EXCLUDED_COUNTRIES = ["Brazil", "Argentina", "Colombia", "Chile", "Uruguay", "Paraguay", "Peru", "Ecuador", "Bolivia", "Venezuela", "Egypt", "Morocco", "Tunisia", "Algeria", "South Africa", "Nigeria", "Ghana", "Cameroon", "Kenya", "Ivory Coast"]
-EXCLUDED_LEAGUE_KEYWORDS = ["U19", "U20", "U21", "U23", "Sub-19", "Sub-20", "Reserve", "Reserves", "Amateur", "Oberliga", "District", "5th Division", "MLS Next Pro", "II", "B team"]
+EXCLUDED_KEYWORDS = ["U19", "U20", "U21", "U23", "Sub-19", "Sub-20", "Reserve", "Reserves", "Amateur", "Oberliga", "District", "5th Division", "MLS Next Pro", "II", "B team", "Youth"]
 
 def fetch_api(endpoint, params=None):
     try:
@@ -27,11 +27,18 @@ def fetch_api(endpoint, params=None):
         print(f"Greška na API [{endpoint}]: {e}")
         return []
 
-def is_allowed_league(country_name, league_name):
+def is_allowed_match(country_name, league_name, home_name, away_name):
+    # Proverava zemlju
     for country in EXCLUDED_COUNTRIES:
-        if country and country.lower() in country_name.lower(): return False
-    for kw in EXCLUDED_LEAGUE_KEYWORDS:
-        if kw and kw.lower() in league_name.lower(): return False
+        if country and country.lower() in country_name.lower(): 
+            return False
+            
+    # Proverava ligu I imena timova na nepoželjne reči (U20, II, Reserve...)
+    full_text = f"{league_name} {home_name} {away_name}".lower()
+    for kw in EXCLUDED_KEYWORDS:
+        if kw and kw.lower() in full_text: 
+            return False
+            
     return True
 
 def load_bets():
@@ -94,7 +101,8 @@ def get_h2h_raw_picks():
             league_info = event.get('league') or {}
             league, country = league_info.get('name', 'Liga'), league_info.get('country', 'Nacionalno')
 
-            if not is_allowed_league(country, league) or not home_id or not away_id: continue
+            # Rigorozan filter za ligu I timove
+            if not is_allowed_match(country, league, home, away) or not home_id or not away_id: continue
 
             h2h_all = fetch_api("fixtures/headtohead", {"h2h": f"{home_id}-{away_id}"})
             
@@ -114,7 +122,6 @@ def get_h2h_raw_picks():
 
             if len(completed_h2h) < MIN_H2H_MATCHES: continue
 
-            # Dixon-Coles racunica na hronoloskom nizu (staro -> novo)
             weights = quant_math.calculate_dixon_coles_weights(dates_list)
             weighted_total = sum(weights) if sum(weights) > 0 else len(completed_h2h)
 
@@ -155,7 +162,6 @@ def get_h2h_raw_picks():
                 seen_fixtures.add(fixture_id)
                 m_name, m_pct, m_odd, m_source, m_tot = best_market_for_match
                 
-                # Uzimamo poslednjih 5 iz istorije i obrcemo ih samo za prikaz (novo -> staro)
                 display_history = list(reversed(formatted_h2h_history[-5:]))
                 
                 raw_picks.append({
