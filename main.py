@@ -106,6 +106,7 @@ def get_h2h_raw_picks():
             h2h_all = fetch_api("fixtures/headtohead", {"h2h": f"{home_id}-{away_id}"})
             
             completed_h2h = []
+            dates_list = []
             for m in h2h_all:
                 st = (m.get('fixture') or {}).get('status', {}).get('short')
                 if st in ['FT', 'AET', 'PEN']:
@@ -115,13 +116,10 @@ def get_h2h_raw_picks():
                             m_year = int(raw_date[:4])
                             if m_year >= min_year:
                                 completed_h2h.append(m)
+                                dates_list.append(raw_date)
                         except Exception: completed_h2h.append(m)
 
             if len(completed_h2h) < MIN_H2H_MATCHES: continue
-
-            # SORTIRANJE: Najnovije utakmice idu prve (od 2026 ka starijim)
-            completed_h2h.sort(key=lambda m: (m.get('fixture') or {}).get('date') or '', reverse=True)
-            dates_list = [(m.get('fixture') or {}).get('date') or '' for m in completed_h2h]
 
             weights = quant_math.calculate_dixon_coles_weights(dates_list)
             weighted_total = sum(weights) if sum(weights) > 0 else len(completed_h2h)
@@ -170,12 +168,12 @@ def get_h2h_raw_picks():
                 seen_fixtures.add(fixture_id)
                 m_name, m_pct, m_odd, m_source, m_tot = best_market_for_match
                 
-                # [:5] sada uzima 5 najsvežijih mečeva jer je lista sortirana opadajuće!
+                # [-5:] uzima 5 poslednjih (najnovijih) utakmica iz istorije bez kvarenja matematike!
                 raw_picks.append({
                     "fixture_id": fixture_id, "home": home, "away": away, "league": f"{country} - {league}",
                     "match_time": match_time_str, "market": m_name, "pct": m_pct, "odd": m_odd,
                     "bm_source": m_source, "total": m_tot, "home_form": home_form['avg_goals'],
-                    "away_form": away_form['avg_goals'], "h2h_history": " • ".join(formatted_h2h_history[:5])
+                    "away_form": away_form['avg_goals'], "h2h_history": " • ".join(formatted_h2h_history[-5:])
                 })
         except Exception as e: print(f"Greška na meču: {e}")
 
