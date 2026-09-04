@@ -155,7 +155,14 @@ def get_h2h_raw_picks():
 
             for market, w_count in weighted_stats.items():
                 pct = (w_count / weighted_total) * 100.0
-                is_conflicted, _ = quant_math.is_h2h_form_conflicted(market, pct, combined_xg)
+                
+                is_conflicted = False
+                if combined_xg > 0:
+                    try:
+                        is_conflicted, _ = quant_math.is_h2h_form_conflicted(market, pct, combined_xg)
+                    except Exception:
+                        is_conflicted = False
+
                 if is_conflicted: continue
 
                 if pct >= MIN_ACCURACY_PCT and pct > best_pct_for_match:
@@ -168,12 +175,12 @@ def get_h2h_raw_picks():
                 seen_fixtures.add(fixture_id)
                 m_name, m_pct, m_odd, m_source, m_tot = best_market_for_match
                 
-                # [-5:] uzima 5 poslednjih (najnovijih) utakmica iz istorije bez kvarenja matematike!
+                recent_5 = formatted_h2h_history[-5:]
                 raw_picks.append({
                     "fixture_id": fixture_id, "home": home, "away": away, "league": f"{country} - {league}",
                     "match_time": match_time_str, "market": m_name, "pct": m_pct, "odd": m_odd,
                     "bm_source": m_source, "total": m_tot, "home_form": home_form['avg_goals'],
-                    "away_form": away_form['avg_goals'], "h2h_history": " • ".join(formatted_h2h_history[-5:])
+                    "away_form": away_form['avg_goals'], "h2h_history": " • ".join(recent_5)
                 })
         except Exception as e: print(f"Greška na meču: {e}")
 
