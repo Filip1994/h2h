@@ -1,0 +1,46 @@
+name: Skip pending bet
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  actions: write
+  contents: write
+  issues: write
+
+concurrency:
+  group: quantbet-ledger
+  cancel-in-progress: false
+
+jobs:
+  skip:
+    if: >-
+      startsWith(github.event.issue.title, 'SKIP_') &&
+      (github.event.issue.author_association == 'OWNER' ||
+       github.event.issue.author_association == 'MEMBER' ||
+       github.event.issue.author_association == 'COLLABORATOR')
+    runs-on: ubuntu-latest
+    env:
+      ISSUE_TITLE: ${{ github.event.issue.title }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: python main.py skip --issue-title "$ISSUE_TITLE"
+      - name: Commit SKIPPED state
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add bets.json
+          git commit -m "Skip pending QuantBet tip"
+          git push
+      - name: Refresh GitHub Pages
+        run: gh workflow run pages.yml --ref "${{ github.event.repository.default_branch }}"
+      - run: gh issue close "${{ github.event.issue.number }}" --comment "Tip je prebačen u SKIPPED status."
