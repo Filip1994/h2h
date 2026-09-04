@@ -1,1 +1,16 @@
-[]
+[
+    {
+        "id": "1621305_SINGLE",
+        "type": "SINGLE_TIP",
+        "event_id": 1621305,
+        "date": "2026-09-04",
+        "sport": "Football",
+        "match": "(H) Bali United vs PSS Sleman (A)",
+        "league": "Indonesia - Liga 1",
+        "market": "Više 2.5 Golova",
+        "stake": 500.0,
+        "odd": 2.15,
+        "status": "PENDING",
+        "profit": 0
+    }
+]
