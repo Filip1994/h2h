@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+.env
+.cache/api/*.json
+report_preview.html
+report_subject.txt
