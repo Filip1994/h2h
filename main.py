@@ -114,6 +114,7 @@ def get_h2h_raw_picks():
 
             if len(completed_h2h) < MIN_H2H_MATCHES: continue
 
+            # Dixon-Coles racunica na hronoloskom nizu (staro -> novo)
             weights = quant_math.calculate_dixon_coles_weights(dates_list)
             weighted_total = sum(weights) if sum(weights) > 0 else len(completed_h2h)
 
@@ -154,12 +155,13 @@ def get_h2h_raw_picks():
                 seen_fixtures.add(fixture_id)
                 m_name, m_pct, m_odd, m_source, m_tot = best_market_for_match
                 
-                # Izbor 5 najnovijih utakmica (prikaz od najsvezije ka starijoj)
-                recent_5 = list(reversed(formatted_h2h_history[-5:]))
+                # Uzimamo poslednjih 5 iz istorije i obrcemo ih samo za prikaz (novo -> staro)
+                display_history = list(reversed(formatted_h2h_history[-5:]))
+                
                 raw_picks.append({
                     "fixture_id": fixture_id, "home": home, "away": away, "league": f"{country} - {league}",
                     "match_time": match_time_str, "market": m_name, "pct": m_pct, "odd": m_odd,
-                    "bm_source": m_source, "total": m_tot, "h2h_history": " • ".join(recent_5)
+                    "bm_source": m_source, "total": m_tot, "h2h_history": " • ".join(display_history)
                 })
         except Exception as e: print(f"Greška na meču: {e}")
 
