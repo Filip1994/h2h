@@ -1,5 +1,11 @@
-from quantbot.risk import circuit_breaker_multiplier, kelly_stake, portfolio_analytics
+from quantbot.risk import (
+    allocate_stakes,
+    circuit_breaker_multiplier,
+    kelly_stake,
+    portfolio_analytics,
+)
 from quantbot.storage import BetStore
+from quantbot.types import Market, MarketCandidate, OddsQuote
 
 
 def test_kelly_is_capped_and_never_forces_negative_ev(settings) -> None:
@@ -33,9 +39,6 @@ def test_store_blocks_fixture_across_all_statuses(settings) -> None:
 
 def test_daily_risk_counts_settled_bets_too(settings) -> None:
     from datetime import UTC, datetime
-
-    from quantbot.types import MarketCandidate, Market, OddsQuote
-    from quantbot.risk import allocate_stakes
 
     now = datetime(2026, 9, 4, 6, 0, tzinfo=UTC)
     existing = [
