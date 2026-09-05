@@ -37,8 +37,42 @@ def test_daily_risk_counts_settled_bets_too(settings) -> None:
     from quantbot.risk import allocate_stakes
 
     now = datetime(2026, 9, 4, 6, 0, tzinfo=UTC)
-    existing = [{"id": "old", "event_id": 1, "status": "WIN", "stake": 1500, "profit": 100, "date": "2026-09-04"}]
+    existing = [
+        {
+            "id": "old",
+            "event_id": 1,
+            "status": "WIN",
+            "stake": 1500,
+            "profit": 100,
+            "date": "2026-09-04",
+        }
+    ]
     quote = OddsQuote(Market.OVER_25, 2.0, 2.0, 8, "Book", now)
-    candidate = MarketCandidate(1, now, 10, "L", "C", 1, "A", 2, "B", Market.OVER_25, 0.8, 0.8, 0.77, 0.0, 0, 0.0, (), quote, 1.5, 1.2, 0.0, 0.54, 0.10, "UNVALIDATED")
+    candidate = MarketCandidate(
+        1,
+        now,
+        10,
+        "L",
+        "C",
+        1,
+        "A",
+        2,
+        "B",
+        Market.OVER_25,
+        0.8,
+        0.8,
+        0.77,
+        0.0,
+        0,
+        0.0,
+        (),
+        quote,
+        1.5,
+        1.2,
+        0.0,
+        0.54,
+        0.10,
+        "UNVALIDATED",
+    )
     # 3% of 50k = 1500, so an already-created 1500 stake leaves no daily budget.
     assert allocate_stakes([candidate], existing, now=now, settings=settings) == []
