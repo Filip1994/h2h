@@ -42,7 +42,9 @@ def portfolio_analytics(
         if str(bet.get("status", "")).upper() == "PENDING"
     )
     day = today or datetime.now().date().isoformat()
-    daily_stake = sum(float(bet.get("stake") or 0.0) for bet in bets if _bet_date(bet) == day)
+    daily_stake = sum(
+        float(bet.get("stake") or 0.0) for bet in bets if _bet_date(bet) == day
+    )
 
     equity = initial_bank
     peak = initial_bank
@@ -73,7 +75,9 @@ def circuit_breaker_multiplier(drawdown: float, settings: Settings) -> float:
     return 1.0
 
 
-def kelly_stake(bank: float, probability: float, odd: float, settings: Settings) -> float:
+def kelly_stake(
+    bank: float, probability: float, odd: float, settings: Settings
+) -> float:
     if bank <= 0.0 or not 0.0 < probability < 1.0 or odd <= 1.0:
         return 0.0
     full_kelly = ((probability * odd) - 1.0) / (odd - 1.0)
@@ -102,7 +106,8 @@ def allocate_stakes(
 
     # Daily risk is cumulative stake created today, even if an earlier bet has already settled.
     daily_remaining = max(
-        0.0, analytics.current_bank * settings.max_daily_risk_pct - analytics.daily_stake
+        0.0,
+        analytics.current_bank * settings.max_daily_risk_pct - analytics.daily_stake,
     )
     open_remaining = max(
         0.0, analytics.current_bank * settings.max_open_risk_pct - analytics.open_stake
@@ -112,10 +117,19 @@ def allocate_stakes(
     pick_slots = max(0, settings.max_daily_picks - today_count)
 
     selected: list[tuple[MarketCandidate, float]] = []
-    for candidate in sorted(candidates, key=lambda item: (item.expected_value, item.probability_edge), reverse=True):
+    for candidate in sorted(
+        candidates,
+        key=lambda item: (item.expected_value, item.probability_edge),
+        reverse=True,
+    ):
         if len(selected) >= pick_slots:
             break
-        stake = kelly_stake(analytics.current_bank, candidate.decision_probability, candidate.quote.odd, settings)
+        stake = kelly_stake(
+            analytics.current_bank,
+            candidate.decision_probability,
+            candidate.quote.odd,
+            settings,
+        )
         stake *= multiplier
         stake = min(stake, remaining)
         stake = math.floor(stake / settings.stake_step) * settings.stake_step
