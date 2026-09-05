@@ -4,7 +4,7 @@ import argparse
 import json
 import os
 import sys
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
@@ -29,6 +29,9 @@ def write_ledger_meta(settings: Settings, updated_at: datetime) -> None:
         "model_version": MODEL_VERSION,
         "github_repository": settings.github_repository,
         "updated_at": updated_at.isoformat(),
+        "decision_timestamp": updated_at.astimezone(UTC).isoformat(),
+        "data_cutoff": updated_at.astimezone(UTC).isoformat(),
+        "h2h_telemetry_enabled": settings.h2h_telemetry_enabled,
     }
     atomic_write_json(ROOT / "ledger_meta.json", payload)
 
@@ -107,6 +110,7 @@ def run_analytics() -> int:
                 "win_rate": analytics.win_rate,
                 "completed_count": analytics.completed_count,
                 "open_stake": analytics.open_stake,
+                "daily_stake": analytics.daily_stake,
                 "current_drawdown": analytics.current_drawdown,
             },
             ensure_ascii=False,
