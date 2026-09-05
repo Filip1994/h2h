@@ -18,11 +18,16 @@ class PortfolioAnalytics:
     win_rate: float
     completed_count: int
     open_stake: float
+    daily_stake: float
     current_drawdown: float
 
 
+def _bet_date(bet: dict[str, Any]) -> str:
+    return str(bet.get("date") or str(bet.get("created_at") or "")[:10])
+
+
 def portfolio_analytics(
-    bets: list[dict[str, Any]], initial_bank: float
+    bets: list[dict[str, Any]], initial_bank: float, *, today: str | None = None
 ) -> PortfolioAnalytics:
     completed = [
         bet for bet in bets if str(bet.get("status", "")).upper() in {"WIN", "LOSS"}
@@ -36,6 +41,8 @@ def portfolio_analytics(
         for bet in bets
         if str(bet.get("status", "")).upper() == "PENDING"
     )
+    day = today or datetime.now().date().isoformat()
+    daily_stake = sum(float(bet.get("stake") or 0.0) for bet in bets if _bet_date(bet) == day)
 
     equity = initial_bank
     peak = initial_bank
@@ -53,6 +60,7 @@ def portfolio_analytics(
         win_rate=(wins / len(completed)) if completed else 0.0,
         completed_count=len(completed),
         open_stake=open_stake,
+        daily_stake=daily_stake,
         current_drawdown=max(0.0, drawdown),
     )
 
@@ -65,9 +73,7 @@ def circuit_breaker_multiplier(drawdown: float, settings: Settings) -> float:
     return 1.0
 
 
-def kelly_stake(
-    bank: float, probability: float, odd: float, settings: Settings
-) -> float:
+def kelly_stake(bank: float, probability: float, odd: float, settings: Settings) -> float:
     if bank <= 0.0 or not 0.0 < probability < 1.0 or odd <= 1.0:
         return 0.0
     full_kelly = ((probability * odd) - 1.0) / (odd - 1.0)
@@ -86,44 +92,30 @@ def allocate_stakes(
     now: datetime,
     settings: Settings,
 ) -> list[tuple[MarketCandidate, float]]:
-    analytics = portfolio_analytics(existing_bets, settings.initial_bank)
+    today = now.date().isoformat()
+    analytics = portfolio_analytics(existing_bets, settings.initial_bank, today=today)
     if analytics.current_bank <= 0.0:
         return []
     multiplier = circuit_breaker_multiplier(analytics.current_drawdown, settings)
     if multiplier <= 0.0:
         return []
 
-    today = now.date().isoformat()
-    pending = [
-        bet for bet in existing_bets if str(bet.get("status", "")).upper() == "PENDING"
-    ]
-    today_open_stake = sum(
-        float(bet.get("stake") or 0.0) for bet in pending if bet.get("date") == today
-    )
-    today_open_count = sum(1 for bet in pending if bet.get("date") == today)
+    # Daily risk is cumulative stake created today, even if an earlier bet has already settled.
     daily_remaining = max(
-        0.0, analytics.current_bank * settings.max_daily_risk_pct - today_open_stake
+        0.0, analytics.current_bank * settings.max_daily_risk_pct - analytics.daily_stake
     )
     open_remaining = max(
         0.0, analytics.current_bank * settings.max_open_risk_pct - analytics.open_stake
     )
     remaining = min(daily_remaining, open_remaining)
-    pick_slots = max(0, settings.max_daily_picks - today_open_count)
+    today_count = sum(1 for bet in existing_bets if _bet_date(bet) == today)
+    pick_slots = max(0, settings.max_daily_picks - today_count)
 
     selected: list[tuple[MarketCandidate, float]] = []
-    for candidate in sorted(
-        candidates,
-        key=lambda item: (item.expected_value, item.probability_edge),
-        reverse=True,
-    ):
+    for candidate in sorted(candidates, key=lambda item: (item.expected_value, item.probability_edge), reverse=True):
         if len(selected) >= pick_slots:
             break
-        stake = kelly_stake(
-            analytics.current_bank,
-            candidate.decision_probability,
-            candidate.quote.odd,
-            settings,
-        )
+        stake = kelly_stake(analytics.current_bank, candidate.decision_probability, candidate.quote.odd, settings)
         stake *= multiplier
         stake = min(stake, remaining)
         stake = math.floor(stake / settings.stake_step) * settings.stake_step

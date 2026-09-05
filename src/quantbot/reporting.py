@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import html
 import smtplib
-from datetime import datetime
+from datetime import UTC, datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from typing import Any
@@ -21,70 +21,42 @@ def _money(value: float) -> str:
 
 
 def _skip_url(repository: str, bet_id: str) -> str:
-    query = urlencode(
-        {
-            "title": f"SKIP_{bet_id}",
-            "body": "Automatski zahtev: prebaci navedeni PENDING tip u SKIPPED status.",
-        }
-    )
+    query = urlencode({"title": f"SKIP_{bet_id}", "body": "Automatski zahtev: prebaci navedeni PENDING tip u SKIPPED status."})
     return f"https://github.com/{repository}/issues/new?{query}"
 
 
-def build_email(
-    result: GenerationResult, settings: Settings, generated_at: datetime
-) -> tuple[str, str]:
+def build_email(result: GenerationResult, settings: Settings, generated_at: datetime) -> tuple[str, str]:
     analytics = result.analytics
     mode = "PAPER" if settings.paper_mode else "LIVE"
     cards: list[str] = []
     for bet in result.new_bets:
-        kickoff = datetime.fromisoformat(str(bet["kickoff"])).astimezone(
-            settings.timezone
-        )
-        history = "".join(
-            f'<div style="color:#8b949e;font-size:11px;margin-top:3px;">{_esc(item)}</div>'
-            for item in bet.get("h2h_history", [])
-        )
-        skip_url = _skip_url(settings.github_repository, str(bet["id"]))
+        kickoff = datetime.fromisoformat(str(bet["kickoff"])).astimezone(settings.timezone)
         cards.append(
-            f"""
-            <div style="background:#161b22;border:1px solid #30363d;border-left:4px solid #3fb950;border-radius:8px;padding:14px;margin:0 0 12px;">
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr>
-                <td style="font-size:15px;font-weight:700;color:#f0f6fc;">⚽ {_esc(bet["match"])}</td>
-                <td align="right"><a href="{_esc(skip_url)}" style="background:#da3633;color:#fff;padding:5px 8px;border-radius:5px;text-decoration:none;font-size:11px;">Preskoči</a></td>
-              </tr></table>
-              <div style="color:#8b949e;font-size:12px;margin-top:7px;">🏆 {_esc(bet["league"])} · ⏰ {kickoff:%H:%M}</div>
-              <div style="color:#f0f6fc;font-size:13px;margin-top:7px;">👉 <b>{_esc(bet["market_display"])}</b> · kvota <b>{float(bet["odd"]):.2f}</b> ({_esc(bet["bookmaker"])})</div>
-              <div style="color:#c9d1d9;font-size:12px;margin-top:5px;">Model {100 * float(bet["model_probability"]):.1f}% · odluka {100 * float(bet["decision_probability"]):.1f}% · H2H {100 * float(bet["h2h_rate"]):.1f}%/{int(bet["h2h_n"])} · EV <b>{100 * float(bet["expected_value"]):+.1f}%</b></div>
-              <div style="color:#3fb950;font-size:13px;margin-top:5px;">💰 Ulog: <b>{_money(float(bet["stake"]))} RSD</b> · {_esc(mode)}</div>
-              <div style="border-top:1px solid #30363d;margin-top:8px;padding-top:5px;">{history}</div>
-            </div>
-            """
+            f'''<div style="background:#161b22;border:1px solid #30363d;border-radius:8px;padding:14px;margin:0 0 12px;">
+              <div style="font-size:15px;font-weight:700;">⚽ {_esc(bet["match"])}</div>
+              <div style="color:#8b949e;font-size:12px;margin-top:6px;">{_esc(bet["league"])} · ⏰ {kickoff:%H:%M}</div>
+              <div style="margin-top:7px;">👉 <b>{_esc(bet["market_display"])}</b> · kvota <b>{float(bet["odd"]):.2f}</b></div>
+              <div style="color:#c9d1d9;font-size:12px;margin-top:6px;">Model {100*float(bet["model_probability"]):.1f}% · odluka {100*float(bet["decision_probability"]):.1f}% · EV {100*float(bet["expected_value"]):+.1f}%</div>
+              <div style="margin-top:6px;">💰 <b>{_money(float(bet["stake"]))} RSD</b> · {_esc(mode)}</div>
+              <div style="margin-top:8px;"><a href="{_esc(_skip_url(settings.github_repository, str(bet["id"]))) }" style="color:#ff7b72;">Preskoči tip</a></div>
+            </div>'''
         )
-
-    picks_html = (
-        "".join(cards)
-        or '<div style="color:#8b949e;padding:15px;background:#161b22;border-radius:8px;">Nema tipova koji prolaze H2H + Dixon–Coles + EV + risk filtere.</div>'
-    )
+    picks_html = "".join(cards) or '<div style="background:#161b22;padding:14px;border-radius:8px;color:#8b949e;">Danas nema tipa koji prolazi sve filtere. To je normalan rezultat.</div>'
     roi_color = "#3fb950" if analytics.roi >= 0 else "#f85149"
-    body = f"""
-    <!doctype html><html><body style="margin:0;background:#0d1117;font-family:Arial,sans-serif;color:#f0f6fc;">
-      <div style="max-width:650px;margin:auto;padding:14px;">
-        <div style="background:#161b22;border:1px solid #30363d;border-radius:10px;padding:16px;margin-bottom:14px;text-align:center;">
-          <div style="font-size:19px;font-weight:700;">⚡ QUANTBET · {_esc(mode)}</div>
-          <div style="color:#8b949e;font-size:12px;margin-top:4px;">{generated_at:%d.%m.%Y. %H:%M} · {len(result.new_bets)} novih tipova · {result.api_requests} API zahteva</div>
-          <table role="presentation" width="100%" cellspacing="0" cellpadding="6" style="margin-top:10px;font-size:12px;"><tr>
-            <td>🏦 Banka<br><b>{_money(analytics.current_bank)} RSD</b></td>
-            <td>📈 ROI<br><b style="color:{roi_color};">{100 * analytics.roi:+.2f}%</b></td>
-            <td>🎯 Win rate<br><b>{100 * analytics.win_rate:.1f}% ({analytics.completed_count})</b></td>
-            <td>📉 DD<br><b>{100 * analytics.current_drawdown:.1f}%</b></td>
-          </tr></table>
-        </div>
-        {picks_html}
-        <div style="color:#6e7681;font-size:10px;text-align:center;margin-top:14px;">Dixon–Coles · paired-market de-vig · probability haircut · capped fractional Kelly</div>
+    cutoff = generated_at.astimezone(UTC).isoformat()
+    body = f'''<!doctype html><html><body style="margin:0;background:#0d1117;font-family:Arial,sans-serif;color:#f0f6fc;"><div style="max-width:680px;margin:auto;padding:14px;">
+      <div style="background:#161b22;border:1px solid #30363d;border-radius:10px;padding:16px;text-align:center;">
+        <div style="font-size:19px;font-weight:700;">⚡ QUANTBET · {_esc(mode)}</div>
+        <div style="color:#8b949e;font-size:12px;margin-top:5px;">{generated_at:%d.%m.%Y. %H:%M} · {len(result.new_bets)} novih tipova · {result.api_requests} API zahteva</div>
+        <div style="color:#8b949e;font-size:11px;margin-top:5px;">H2H uticaj: 0% · data cutoff: {_esc(cutoff)}</div>
+        <table width="100%" cellspacing="0" cellpadding="6" style="margin-top:10px;font-size:12px;"><tr>
+          <td>🏦 Banka<br><b>{_money(analytics.current_bank)} RSD</b></td><td>📈 ROI<br><b style="color:{roi_color};">{100*analytics.roi:+.2f}%</b></td><td>🎯 Win rate<br><b>{100*analytics.win_rate:.1f}% ({analytics.completed_count})</b></td><td>📉 DD<br><b>{100*analytics.current_drawdown:.1f}%</b></td>
+        </tr></table>
       </div>
-    </body></html>
-    """
-    subject = f"⚡ QuantBet {mode}: {len(result.new_bets)} tipova · ROI {100 * analytics.roi:+.1f}% · {generated_at:%d.%m.%Y.}"
+      <div style="margin-top:14px;">{picks_html}</div>
+      <div style="color:#8b949e;font-size:11px;margin-top:12px;">Model proceni verovatnoću → kalibracija je proveri → tržišna cena se uporedi → ako dokaz nije dovoljno jak, nema opklade. H2H se trenutno samo meri u pozadini i ne utiče na odluku.</div>
+    </div></body></html>'''
+    subject = f"⚡ QuantBet {mode}: {len(result.new_bets)} tipova · ROI {100*analytics.roi:+.1f}% · {generated_at:%d.%m.%Y.}"
     return subject, body
 
 
@@ -100,9 +72,7 @@ def send_email(subject: str, html_body: str, settings: Settings) -> bool:
     try:
         with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=30) as server:
             server.login(settings.gmail_user, settings.gmail_app_pass)
-            server.sendmail(
-                settings.gmail_user, [settings.email_to], message.as_string()
-            )
+            server.sendmail(settings.gmail_user, [settings.email_to], message.as_string())
         return True
     except (OSError, smtplib.SMTPException) as exc:
         print(f"⚠️ Email nije poslat: {exc}")

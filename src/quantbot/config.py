@@ -42,6 +42,7 @@ class Settings:
     initial_bank: float
     paper_mode: bool
     allow_uncalibrated_live: bool
+    h2h_telemetry_enabled: bool
     min_odd: float
     max_market_overround: float
     min_h2h_matches: int
@@ -113,6 +114,7 @@ class Settings:
             initial_bank=_float("INITIAL_BANK_RSD", 50_000.0),
             paper_mode=_bool("PAPER_MODE", True),
             allow_uncalibrated_live=_bool("ALLOW_UNCALIBRATED_LIVE", False),
+            h2h_telemetry_enabled=_bool("H2H_TELEMETRY_ENABLED", False),
             min_odd=_float("MIN_ODD", 1.45),
             max_market_overround=_float("MAX_MARKET_OVERROUND", 0.20),
             min_h2h_matches=_int("MIN_H2H_MATCHES", 5),
