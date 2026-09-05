@@ -128,10 +128,12 @@ class MarketCandidate:
     ) -> dict[str, Any]:
         return {
             "id": bet_id,
-            "type": "DC_H2H_VALUE",
+            "type": "DC_VALUE",
             "mode": mode,
             "event_id": self.fixture_id,
             "created_at": created_at.isoformat(),
+            "decision_timestamp": created_at.isoformat(),
+            "data_cutoff": created_at.isoformat(),
             "date": created_at.date().isoformat(),
             "kickoff": self.kickoff.isoformat(),
             "sport": "Football",
@@ -156,6 +158,7 @@ class MarketCandidate:
             "decision_probability": round(self.decision_probability, 6),
             "probability_edge": round(self.probability_edge, 6),
             "expected_value": round(self.expected_value, 6),
+            "h2h_enabled": bool(self.h2h_n),
             "h2h_rate": round(self.h2h_rate, 6),
             "h2h_n": self.h2h_n,
             "h2h_effective_n": round(self.h2h_effective_n, 3),
