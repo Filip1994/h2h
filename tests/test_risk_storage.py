@@ -32,7 +32,8 @@ def test_store_blocks_fixture_across_all_statuses(settings) -> None:
 
 
 def test_daily_risk_counts_settled_bets_too(settings) -> None:
-    from datetime import datetime, UTC
+    from datetime import UTC, datetime
+
     from quantbot.types import MarketCandidate, Market, OddsQuote
     from quantbot.risk import allocate_stakes
 
