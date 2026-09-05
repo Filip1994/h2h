@@ -291,7 +291,12 @@ class QuantEngine:
                         rejection_reason=reason,
                     )
                 )
-                if reason or quote is None or expected_value is None or probability_edge is None:
+                if (
+                    reason
+                    or quote is None
+                    or expected_value is None
+                    or probability_edge is None
+                ):
                     continue
                 fixture_candidates.append(
                     MarketCandidate(
