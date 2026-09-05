@@ -150,7 +150,11 @@
     "model_version": "dc-h2h-v2.0.0",
     "calibration_status": "IDENTITY_UNVALIDATED",
     "status": "PENDING",
-    "profit": 0.0
+    "profit": 0.0,
+    "closing_odd": 2.21,
+    "closing_opposite_odd": 1.64,
+    "closing_market_probability_devig": 0.425974,
+    "closing_odds_captured_at": "2026-09-05T16:09:11.605458+00:00"
   },
   {
     "id": "1548523_UNDER_2_5",
