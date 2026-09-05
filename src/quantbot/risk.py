@@ -40,7 +40,8 @@ def portfolio_analytics(
         float(bet.get("stake") or 0.0)
         for bet in bets
         if str(bet.get("status", "")).upper() == "PENDING"
-    )day = today or datetime.now(UTC).date().isoformat()
+    )
+    day = today or datetime.now(UTC).date().isoformat()
     daily_stake = sum(
         float(bet.get("stake") or 0.0) for bet in bets if _bet_date(bet) == day
     )
