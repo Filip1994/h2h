@@ -4534,9 +4534,11 @@
     "bookmaker_id": 8,
     "market_overround": 0.063919,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "2:0",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1601521_UNDER_2_5_dc-h2h-v2.0.0",
@@ -4561,9 +4563,11 @@
     "bookmaker_id": 11,
     "market_overround": 0.060986,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "2:0",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1601521_BTTS_YES_dc-h2h-v2.0.0",
@@ -4588,9 +4592,11 @@
     "bookmaker_id": 8,
     "market_overround": 0.04712,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "2:0",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1619839_OVER_2_5_dc-h2h-v2.0.0",
@@ -6430,9 +6436,11 @@
     "bookmaker_id": null,
     "market_overround": null,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "1:1",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1568475_UNDER_2_5_dc-h2h-v2.0.0",
@@ -6457,9 +6465,11 @@
     "bookmaker_id": null,
     "market_overround": null,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "1:1",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1568475_BTTS_YES_dc-h2h-v2.0.0",
@@ -6484,9 +6494,11 @@
     "bookmaker_id": null,
     "market_overround": null,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "1:1",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1577516_OVER_2_5_dc-h2h-v2.0.0",
@@ -6511,9 +6523,11 @@
     "bookmaker_id": 11,
     "market_overround": 0.047838,
     "selected": true,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "0:1",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1577516_UNDER_2_5_dc-h2h-v2.0.0",
@@ -6538,9 +6552,11 @@
     "bookmaker_id": 11,
     "market_overround": 0.047838,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "0:1",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1577516_BTTS_YES_dc-h2h-v2.0.0",
@@ -6565,9 +6581,11 @@
     "bookmaker_id": 11,
     "market_overround": 0.078431,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "0:1",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1579218_OVER_2_5_dc-h2h-v2.0.0",
@@ -6592,9 +6610,11 @@
     "bookmaker_id": null,
     "market_overround": null,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "1:2",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1579218_UNDER_2_5_dc-h2h-v2.0.0",
@@ -6619,9 +6639,11 @@
     "bookmaker_id": null,
     "market_overround": null,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "1:2",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1579218_BTTS_YES_dc-h2h-v2.0.0",
@@ -6646,9 +6668,11 @@
     "bookmaker_id": null,
     "market_overround": null,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "1:2",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1579225_OVER_2_5_dc-h2h-v2.0.0",
@@ -6673,9 +6697,11 @@
     "bookmaker_id": null,
     "market_overround": null,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "4:0",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1579225_UNDER_2_5_dc-h2h-v2.0.0",
@@ -6700,9 +6726,11 @@
     "bookmaker_id": null,
     "market_overround": null,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "4:0",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1579225_BTTS_YES_dc-h2h-v2.0.0",
@@ -6727,9 +6755,11 @@
     "bookmaker_id": null,
     "market_overround": null,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "4:0",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1588333_OVER_2_5_dc-h2h-v2.0.0",
@@ -6754,9 +6784,11 @@
     "bookmaker_id": 8,
     "market_overround": 0.059783,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "0:4",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1588333_UNDER_2_5_dc-h2h-v2.0.0",
@@ -6781,9 +6813,11 @@
     "bookmaker_id": 8,
     "market_overround": 0.059783,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "0:4",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1588333_BTTS_YES_dc-h2h-v2.0.0",
@@ -6808,9 +6842,11 @@
     "bookmaker_id": 8,
     "market_overround": 0.073763,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "0:4",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1606133_OVER_2_5_dc-h2h-v2.0.0",
@@ -7321,9 +7357,11 @@
     "bookmaker_id": 8,
     "market_overround": 0.064815,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "3:6",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1551783_UNDER_2_5_dc-h2h-v2.0.0",
@@ -7348,9 +7386,11 @@
     "bookmaker_id": 8,
     "market_overround": 0.064815,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "3:6",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1551783_BTTS_YES_dc-h2h-v2.0.0",
@@ -7375,9 +7415,11 @@
     "bookmaker_id": 8,
     "market_overround": 0.077922,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "3:6",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1611050_OVER_2_5_dc-h2h-v2.0.0",
@@ -7564,9 +7606,11 @@
     "bookmaker_id": 8,
     "market_overround": 0.062475,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "0:2",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1497682_UNDER_2_5_dc-h2h-v2.0.0",
@@ -7591,9 +7635,11 @@
     "bookmaker_id": 8,
     "market_overround": 0.062475,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "0:2",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1497682_BTTS_YES_dc-h2h-v2.0.0",
@@ -7618,9 +7664,11 @@
     "bookmaker_id": 8,
     "market_overround": 0.066667,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "0:2",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1558512_OVER_2_5_dc-h2h-v2.0.0",
@@ -7645,9 +7693,11 @@
     "bookmaker_id": 8,
     "market_overround": 0.059783,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "2:0",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1558512_UNDER_2_5_dc-h2h-v2.0.0",
@@ -7672,9 +7722,11 @@
     "bookmaker_id": 8,
     "market_overround": 0.059783,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "2:0",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1558512_BTTS_YES_dc-h2h-v2.0.0",
@@ -7699,9 +7751,11 @@
     "bookmaker_id": 11,
     "market_overround": 0.089563,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "2:0",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1562260_OVER_2_5_dc-h2h-v2.0.0",
@@ -7726,9 +7780,11 @@
     "bookmaker_id": null,
     "market_overround": null,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "3:0",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1562260_UNDER_2_5_dc-h2h-v2.0.0",
@@ -7753,9 +7809,11 @@
     "bookmaker_id": null,
     "market_overround": null,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "3:0",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1562260_BTTS_YES_dc-h2h-v2.0.0",
@@ -7780,9 +7838,11 @@
     "bookmaker_id": null,
     "market_overround": null,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "3:0",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1562621_OVER_2_5_dc-h2h-v2.0.0",
@@ -7807,9 +7867,11 @@
     "bookmaker_id": 8,
     "market_overround": 0.066667,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "1:2",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1562621_UNDER_2_5_dc-h2h-v2.0.0",
@@ -7834,9 +7896,11 @@
     "bookmaker_id": 11,
     "market_overround": 0.105525,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "1:2",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1562621_BTTS_YES_dc-h2h-v2.0.0",
@@ -7861,9 +7925,11 @@
     "bookmaker_id": 11,
     "market_overround": 0.092437,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "1:2",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1571838_OVER_2_5_dc-h2h-v2.0.0",
@@ -7888,9 +7954,11 @@
     "bookmaker_id": 8,
     "market_overround": 0.053361,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "0:3",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1571838_UNDER_2_5_dc-h2h-v2.0.0",
@@ -7915,9 +7983,11 @@
     "bookmaker_id": 8,
     "market_overround": 0.053361,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "0:3",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1571838_BTTS_YES_dc-h2h-v2.0.0",
@@ -7942,9 +8012,11 @@
     "bookmaker_id": 11,
     "market_overround": 0.090215,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "0:3",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1573837_OVER_2_5_dc-h2h-v2.0.0",
@@ -8050,9 +8122,11 @@
     "bookmaker_id": 8,
     "market_overround": 0.061728,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "0:1",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1581516_UNDER_2_5_dc-h2h-v2.0.0",
@@ -8077,9 +8151,11 @@
     "bookmaker_id": 8,
     "market_overround": 0.061728,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "0:1",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1581516_BTTS_YES_dc-h2h-v2.0.0",
@@ -8104,9 +8180,11 @@
     "bookmaker_id": 11,
     "market_overround": 0.092751,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "0:1",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1581764_OVER_2_5_dc-h2h-v2.0.0",
@@ -8212,9 +8290,11 @@
     "bookmaker_id": 8,
     "market_overround": 0.064426,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "1:0",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1589995_UNDER_2_5_dc-h2h-v2.0.0",
@@ -8239,9 +8319,11 @@
     "bookmaker_id": 11,
     "market_overround": 0.085552,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "1:0",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1589995_BTTS_YES_dc-h2h-v2.0.0",
@@ -8266,9 +8348,11 @@
     "bookmaker_id": 11,
     "market_overround": 0.089551,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "1:0",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1595215_OVER_2_5_dc-h2h-v2.0.0",
@@ -8293,9 +8377,11 @@
     "bookmaker_id": 8,
     "market_overround": 0.053361,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "1:4",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1595215_UNDER_2_5_dc-h2h-v2.0.0",
@@ -8320,9 +8406,11 @@
     "bookmaker_id": 8,
     "market_overround": 0.053361,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "1:4",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1595215_BTTS_YES_dc-h2h-v2.0.0",
@@ -8347,9 +8435,11 @@
     "bookmaker_id": 11,
     "market_overround": 0.090315,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "1:4",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1604837_OVER_2_5_dc-h2h-v2.0.0",
@@ -8536,9 +8626,11 @@
     "bookmaker_id": 8,
     "market_overround": 0.063919,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "3:2",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1516127_UNDER_2_5_dc-h2h-v2.0.0",
@@ -8563,9 +8655,11 @@
     "bookmaker_id": 8,
     "market_overround": 0.063919,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "3:2",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1516127_BTTS_YES_dc-h2h-v2.0.0",
@@ -8590,9 +8684,11 @@
     "bookmaker_id": 11,
     "market_overround": 0.090315,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "3:2",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1552749_OVER_2_5_dc-h2h-v2.0.0",
@@ -8617,9 +8713,11 @@
     "bookmaker_id": 11,
     "market_overround": 0.01583,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "0:1",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1552749_UNDER_2_5_dc-h2h-v2.0.0",
@@ -8644,9 +8742,11 @@
     "bookmaker_id": 11,
     "market_overround": 0.01583,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "0:1",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1552749_BTTS_YES_dc-h2h-v2.0.0",
@@ -8671,9 +8771,11 @@
     "bookmaker_id": 8,
     "market_overround": 0.068376,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "0:1",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1560239_OVER_2_5_dc-h2h-v2.0.0",
@@ -8698,9 +8800,11 @@
     "bookmaker_id": 8,
     "market_overround": 0.059783,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "1:2",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1560239_UNDER_2_5_dc-h2h-v2.0.0",
@@ -8725,9 +8829,11 @@
     "bookmaker_id": 8,
     "market_overround": 0.059783,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "1:2",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1560239_BTTS_YES_dc-h2h-v2.0.0",
@@ -8752,9 +8858,11 @@
     "bookmaker_id": 8,
     "market_overround": 0.073763,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "1:2",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1603015_OVER_2_5_dc-h2h-v2.0.0",
@@ -8779,9 +8887,11 @@
     "bookmaker_id": 8,
     "market_overround": 0.063919,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "0:0",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1603015_UNDER_2_5_dc-h2h-v2.0.0",
@@ -8806,9 +8916,11 @@
     "bookmaker_id": 8,
     "market_overround": 0.063919,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "0:0",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1603015_BTTS_YES_dc-h2h-v2.0.0",
@@ -8833,9 +8945,11 @@
     "bookmaker_id": 8,
     "market_overround": 0.071829,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "0:0",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1550113_OVER_2_5_dc-h2h-v2.0.0",
@@ -8860,9 +8974,11 @@
     "bookmaker_id": 11,
     "market_overround": 0.015228,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "3:2",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1550113_UNDER_2_5_dc-h2h-v2.0.0",
@@ -8887,9 +9003,11 @@
     "bookmaker_id": 11,
     "market_overround": 0.015228,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "3:2",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1550113_BTTS_YES_dc-h2h-v2.0.0",
@@ -8914,9 +9032,11 @@
     "bookmaker_id": 8,
     "market_overround": 0.068376,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "3:2",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1551552_OVER_2_5_dc-h2h-v2.0.0",
@@ -8941,9 +9061,11 @@
     "bookmaker_id": 8,
     "market_overround": 0.055556,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "0:0",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1551552_UNDER_2_5_dc-h2h-v2.0.0",
@@ -8968,9 +9090,11 @@
     "bookmaker_id": 11,
     "market_overround": 0.065694,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "0:0",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1551552_BTTS_YES_dc-h2h-v2.0.0",
@@ -8995,9 +9119,11 @@
     "bookmaker_id": 8,
     "market_overround": 0.078035,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "0:0",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1566601_OVER_2_5_dc-h2h-v2.0.0",
@@ -9103,9 +9229,11 @@
     "bookmaker_id": 8,
     "market_overround": 0.073763,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "0:2",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1589485_UNDER_2_5_dc-h2h-v2.0.0",
@@ -9130,9 +9258,11 @@
     "bookmaker_id": 8,
     "market_overround": 0.073763,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "0:2",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1589485_BTTS_YES_dc-h2h-v2.0.0",
@@ -9157,9 +9287,11 @@
     "bookmaker_id": 11,
     "market_overround": 0.09127,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "0:2",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1603551_OVER_2_5_dc-h2h-v2.0.0",
@@ -9184,9 +9316,11 @@
     "bookmaker_id": 8,
     "market_overround": 0.055556,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "3:1",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1603551_UNDER_2_5_dc-h2h-v2.0.0",
@@ -9211,9 +9345,11 @@
     "bookmaker_id": 11,
     "market_overround": 0.065694,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "3:1",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1603551_BTTS_YES_dc-h2h-v2.0.0",
@@ -9238,9 +9374,11 @@
     "bookmaker_id": 8,
     "market_overround": 0.078035,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "3:1",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1613930_OVER_2_5_dc-h2h-v2.0.0",
@@ -9265,9 +9403,11 @@
     "bookmaker_id": null,
     "market_overround": null,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "1:2",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1613930_UNDER_2_5_dc-h2h-v2.0.0",
@@ -9292,9 +9432,11 @@
     "bookmaker_id": null,
     "market_overround": null,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "1:2",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1613930_BTTS_YES_dc-h2h-v2.0.0",
@@ -9319,9 +9461,11 @@
     "bookmaker_id": null,
     "market_overround": null,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "1:2",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1614850_OVER_2_5_dc-h2h-v2.0.0",
@@ -9346,9 +9490,11 @@
     "bookmaker_id": null,
     "market_overround": null,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "0:2",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1614850_UNDER_2_5_dc-h2h-v2.0.0",
@@ -9373,9 +9519,11 @@
     "bookmaker_id": null,
     "market_overround": null,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "0:2",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1614850_BTTS_YES_dc-h2h-v2.0.0",
@@ -9400,9 +9548,11 @@
     "bookmaker_id": null,
     "market_overround": null,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "0:2",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1614852_OVER_2_5_dc-h2h-v2.0.0",
@@ -9427,9 +9577,11 @@
     "bookmaker_id": null,
     "market_overround": null,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "1:0",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1614852_UNDER_2_5_dc-h2h-v2.0.0",
@@ -9454,9 +9606,11 @@
     "bookmaker_id": null,
     "market_overround": null,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "1:0",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1614852_BTTS_YES_dc-h2h-v2.0.0",
@@ -9481,9 +9635,11 @@
     "bookmaker_id": null,
     "market_overround": null,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "1:0",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1616988_OVER_2_5_dc-h2h-v2.0.0",
@@ -9751,9 +9907,11 @@
     "bookmaker_id": null,
     "market_overround": null,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "1:1",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1617293_UNDER_2_5_dc-h2h-v2.0.0",
@@ -9778,9 +9936,11 @@
     "bookmaker_id": null,
     "market_overround": null,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "1:1",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1617293_BTTS_YES_dc-h2h-v2.0.0",
@@ -9805,9 +9965,11 @@
     "bookmaker_id": null,
     "market_overround": null,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "1:1",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1617912_OVER_2_5_dc-h2h-v2.0.0",
@@ -9913,9 +10075,11 @@
     "bookmaker_id": 11,
     "market_overround": 0.049253,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "0:4",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1558619_UNDER_2_5_dc-h2h-v2.0.0",
@@ -9940,9 +10104,11 @@
     "bookmaker_id": 8,
     "market_overround": 0.059783,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "0:4",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1558619_BTTS_YES_dc-h2h-v2.0.0",
@@ -9967,9 +10133,11 @@
     "bookmaker_id": 8,
     "market_overround": 0.073763,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "0:4",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1597925_OVER_2_5_dc-h2h-v2.0.0",
@@ -9994,9 +10162,11 @@
     "bookmaker_id": null,
     "market_overround": null,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "4:1",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1597925_UNDER_2_5_dc-h2h-v2.0.0",
@@ -10021,9 +10191,11 @@
     "bookmaker_id": null,
     "market_overround": null,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "4:1",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1597925_BTTS_YES_dc-h2h-v2.0.0",
@@ -10048,9 +10220,11 @@
     "bookmaker_id": null,
     "market_overround": null,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "4:1",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1599449_OVER_2_5_dc-h2h-v2.0.0",
@@ -10075,9 +10249,11 @@
     "bookmaker_id": 8,
     "market_overround": 0.063919,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "1:3",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1599449_UNDER_2_5_dc-h2h-v2.0.0",
@@ -10102,9 +10278,11 @@
     "bookmaker_id": 8,
     "market_overround": 0.063919,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "1:3",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1599449_BTTS_YES_dc-h2h-v2.0.0",
@@ -10129,9 +10307,11 @@
     "bookmaker_id": 8,
     "market_overround": 0.081387,
     "selected": false,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-h2h-v2.0.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-h2h-v2.0.0",
+    "result": "1:3",
+    "settled_at": "2026-09-05T18:26:45.595027+00:00"
   },
   {
     "id": "1511676_OVER_2_5_dc-h2h-v2.0.0",
