@@ -46,7 +46,7 @@ def build_email(
 <tr><td style="padding:6px 18px 12px;"><span style="font-size:9px;letter-spacing:1px;color:#6f8eac;">SIGNAL</span><br><b style="font-size:15px;color:#fff;">{_esc(bet["market_display"])}</b> <span style="color:#45d9ff;font-weight:800;">@ {float(bet["odd"]):.2f}</span></td></tr>
 <tr><td style="padding:0 18px 12px;color:#a9bfd5;font-size:12px;">MODEL <b style="color:#eef7ff;">{100 * float(bet["model_probability"]):.1f}%</b> · DECISION <b style="color:#eef7ff;">{100 * float(bet["decision_probability"]):.1f}%</b> · EV <b style="color:#45f0a5;">{100 * float(bet["expected_value"]):+.1f}%</b></td></tr>
 <tr><td style="padding:12px 18px;background:#0a1524;border-top:1px solid #203b5c;"><span style="color:#6f8eac;font-size:9px;letter-spacing:1px;">RISK ALLOCATION</span><br><b style="font-size:17px;color:#45f0a5;">{_money(float(bet["stake"]))} RSD</b> <span style="color:#718aa4;font-size:11px;">· {_esc(mode)}</span></td></tr>
-<tr><td style="padding:10px 18px 14px;"><a href="{_esc(_skip_url(settings.github_repository, str(bet["id"]))) }" style="color:#ff8a9a;text-decoration:none;font-size:10px;font-weight:700;">↳ PRESKOČI TIP</a></td></tr></table>'''
+<tr><td style="padding:10px 18px 14px;"><a href="{_esc(_skip_url(settings.github_repository, str(bet["id"])))}" style="color:#ff8a9a;text-decoration:none;font-size:10px;font-weight:700;">↳ PRESKOČI TIP</a></td></tr></table>'''
         )
     picks_html = (
         "".join(cards)
