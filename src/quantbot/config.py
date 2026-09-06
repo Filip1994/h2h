@@ -28,6 +28,7 @@ class Settings:
     api_base_url: str
     timezone_name: str
     api_request_budget: int
+    api_budget_reserve: int
     api_max_attempts: int
     api_retry_base_seconds: float
     bookmaker_priority: tuple[int, ...]
@@ -37,6 +38,8 @@ class Settings:
     bets_file: Path
     predictions_file: Path
     calibration_file: Path
+    api_usage_file: Path
+    api_usage_history_file: Path
     cache_dir: Path
 
     initial_bank: float
@@ -101,7 +104,8 @@ class Settings:
                 "API_FOOTBALL_BASE_URL", "https://v3.football.api-sports.io"
             ).rstrip("/"),
             timezone_name=os.getenv("TIMEZONE", "Europe/Belgrade").strip(),
-            api_request_budget=_int("API_REQUEST_BUDGET", 7000),
+            api_request_budget=_int("API_REQUEST_BUDGET", 7500),
+            api_budget_reserve=_int("API_BUDGET_RESERVE", 500),
             api_max_attempts=_int("API_MAX_ATTEMPTS", 3),
             api_retry_base_seconds=_float("API_RETRY_BASE_SECONDS", 1.0),
             bookmaker_priority=bookmaker_priority,
@@ -110,6 +114,8 @@ class Settings:
             bets_file=root / "bets.json",
             predictions_file=root / "predictions.json",
             calibration_file=root / "calibration.json",
+            api_usage_file=root / "api_usage.json",
+            api_usage_history_file=root / "api_usage_history.json",
             cache_dir=root / ".cache" / "api",
             initial_bank=_float("INITIAL_BANK_RSD", 50_000.0),
             paper_mode=_bool("PAPER_MODE", True),
@@ -178,6 +184,8 @@ class Settings:
             raise ValueError("DRAWDOWN_REDUCE_AT mora biti manji od DRAWDOWN_STOP_AT")
         if self.api_request_budget < 1:
             raise ValueError("API_REQUEST_BUDGET mora biti pozitivan")
+        if not 0 <= self.api_budget_reserve < self.api_request_budget:
+            raise ValueError("API_BUDGET_RESERVE mora biti >= 0 i manji od budžeta")
         if self.api_max_attempts < 1:
             raise ValueError("API_MAX_ATTEMPTS mora biti najmanje 1")
         if not 0.0 <= self.api_retry_base_seconds <= 30.0:

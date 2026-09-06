@@ -36,18 +36,52 @@ def write_ledger_meta(settings: Settings, updated_at: datetime) -> None:
     atomic_write_json(ROOT / "ledger_meta.json", payload)
 
 
+def write_api_usage(settings: Settings, updated_at: datetime, result) -> None:
+    usage = dict(result.api_usage)
+    usage.update(
+        {
+            "timestamp": updated_at.astimezone(UTC).isoformat(),
+            "date": updated_at.astimezone(settings.timezone).date().isoformat(),
+            "new_bets": len(result.new_bets),
+        }
+    )
+    atomic_write_json(settings.api_usage_file, usage)
+
+    history: list[dict] = []
+    if settings.api_usage_history_file.exists():
+        try:
+            loaded = json.loads(
+                settings.api_usage_history_file.read_text(encoding="utf-8")
+            )
+            if isinstance(loaded, list):
+                history = loaded
+        except (OSError, TypeError, ValueError, json.JSONDecodeError):
+            history = []
+
+    history.append(usage)
+    history = history[-90:]
+    atomic_write_json(settings.api_usage_history_file, history)
+
+
 def run_generate(*, deliver_email: bool = True) -> int:
     settings = Settings.from_env(ROOT)
     generated_at = datetime.now(settings.timezone)
     result = QuantEngine(settings).generate(generated_at)
+
     write_ledger_meta(settings, generated_at)
+    write_api_usage(settings, generated_at, result)
+
     subject, html_body = build_email(result, settings, generated_at)
     (ROOT / "report_preview.html").write_text(html_body, encoding="utf-8")
     (ROOT / "report_subject.txt").write_text(subject, encoding="utf-8")
+
     if deliver_email:
         send_email(subject, html_body, settings)
+
     for line in result.diagnostics:
         print(line)
+
+    print(f"API usage: {json.dumps(result.api_usage, ensure_ascii=False)}")
     print(f"✅ Sačuvano novih tipova: {len(result.new_bets)}")
     return 0
 
@@ -56,8 +90,10 @@ def run_send_report() -> int:
     settings = Settings.from_env(ROOT)
     subject_path = ROOT / "report_subject.txt"
     body_path = ROOT / "report_preview.html"
+
     if not subject_path.exists() or not body_path.exists():
         raise SystemExit("Nema generisanog reporta; prvo pokreni generate")
+
     sent = send_email(
         subject_path.read_text(encoding="utf-8"),
         body_path.read_text(encoding="utf-8"),
@@ -76,6 +112,7 @@ def run_monitor() -> int:
 def run_skip(identifier: str) -> int:
     settings = Settings.from_env(ROOT)
     changed = skip_bet(BetStore(settings.bets_file), identifier)
+
     print(
         "✅ Tip je prebačen u SKIPPED."
         if changed
@@ -100,6 +137,7 @@ def run_analytics() -> int:
     settings = Settings.from_env(ROOT)
     bets = BetStore(settings.bets_file).load()
     analytics = portfolio_analytics(bets, settings.initial_bank)
+
     print(
         json.dumps(
             {
@@ -123,25 +161,47 @@ def run_analytics() -> int:
 def parser() -> argparse.ArgumentParser:
     cli = argparse.ArgumentParser(description="QuantBet H2H v2")
     subcommands = cli.add_subparsers(dest="command", required=True)
-    generate = subcommands.add_parser("generate", help="Generiši dnevni bilten")
+
+    generate = subcommands.add_parser(
+        "generate",
+        help="Generiši dnevni bilten",
+    )
     generate.add_argument("--no-email", action="store_true")
+
     subcommands.add_parser(
-        "send-report", help="Pošalji poslednji generisani email report"
+        "send-report",
+        help="Pošalji poslednji generisani email report",
     )
-    subcommands.add_parser("monitor", help="Snimi closing odds i poravnaj rezultate")
-    subcommands.add_parser("settle", help="Alias za monitor")
     subcommands.add_parser(
-        "calibrate", help="Refituj Platt kalibraciju iz OOS prediction ledgera"
+        "monitor",
+        help="Snimi closing odds i poravnaj rezultate",
     )
-    subcommands.add_parser("analytics", help="Prikaži portfolio metrike")
-    skip = subcommands.add_parser("skip", help="Prebaci tačan bet ID u SKIPPED")
+    subcommands.add_parser(
+        "settle",
+        help="Alias za monitor",
+    )
+    subcommands.add_parser(
+        "calibrate",
+        help="Refituj Platt kalibraciju iz OOS prediction ledgera",
+    )
+    subcommands.add_parser(
+        "analytics",
+        help="Prikaži portfolio metrike",
+    )
+
+    skip = subcommands.add_parser(
+        "skip",
+        help="Prebaci tačan bet ID u SKIPPED",
+    )
     skip.add_argument("--id", dest="identifier")
     skip.add_argument("--issue-title")
+
     return cli
 
 
 def main() -> int:
     args = parser().parse_args()
+
     if args.command == "generate":
         return run_generate(deliver_email=not args.no_email)
     if args.command == "send-report":
@@ -157,6 +217,7 @@ def main() -> int:
         if not identifier:
             raise SystemExit("skip zahteva --id, --issue-title ili ISSUE_TITLE")
         return run_skip(identifier)
+
     raise SystemExit(f"Nepoznata komanda: {args.command}")
 
 
