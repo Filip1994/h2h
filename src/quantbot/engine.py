@@ -214,10 +214,7 @@ class QuantEngine:
         )
         decision_timestamp = now_local.astimezone(UTC)
 
-        if (
-            not self.settings.paper_mode
-            and not self.settings.allow_uncalibrated_live
-        ):
+        if not self.settings.paper_mode and not self.settings.allow_uncalibrated_live:
             missing = [
                 market.value
                 for market in Market
@@ -314,7 +311,9 @@ class QuantEngine:
                     captured_at=decision_timestamp,
                 )
             except APIBudgetExceeded:
-                diagnostics.append("API budžet dostignut; skeniranje zaustavljeno")
+                diagnostics.append(
+                    "API budžet dostignut; skeniranje zaustavljeno"
+                )
                 break
             except (
                 APIError,
@@ -349,7 +348,11 @@ class QuantEngine:
                     reason = "REJECT_NO_ODDS"
                 elif quote.odd < self.settings.min_odd:
                     reason = "REJECT_ODD"
-                elif not (0.0 <= quote.overround <= self.settings.max_market_overround):
+                elif not (
+                    0.0
+                    <= quote.overround
+                    <= self.settings.max_market_overround
+                ):
                     reason = "REJECT_OVERROUND"
                 else:
                     expected_value = decision_probability * quote.odd - 1.0
