@@ -1,7 +1,10 @@
 {
   "initial_bank": 50000.0,
   "paper_mode": true,
-  "model_version": "dc-h2h-v2.0.0",
+  "model_version": "dc-value-v2.1.0",
   "github_repository": "Filip1994/h2h",
-  "updated_at": "2026-09-05T11:50:33.547250+02:00"
+  "updated_at": "2026-09-06T01:51:57.388329+02:00",
+  "decision_timestamp": "2026-09-05T23:51:57.388329+00:00",
+  "data_cutoff": "2026-09-05T23:51:57.388329+00:00",
+  "h2h_telemetry_enabled": false
 }
