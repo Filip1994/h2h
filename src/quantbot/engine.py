@@ -20,10 +20,8 @@ from .types import Market, MarketCandidate, MatchRecord
 
 @dataclass(frozen=True, slots=True)
 class GenerationResult:
-    new_bets: tuple[dict[str, Any], ...]
-    analytics: PortfolioAnalytics
-    diagnostics: tuple[str, ...]
-    api_requests: int
+    generation: Any
+    api_usage: dict[str, Any]
 
 
 class QuantEngine:
@@ -188,10 +186,7 @@ class QuantEngine:
                 diagnostics.append(f"fixture_parse: {exc}")
                 continue
             fixture_id = int(fields["fixture_id"])
-            if fixture_id in blocked_fixture_ids or fields["status"] not in {
-                "NS",
-                "TBD",
-            }:
+            if fixture_id in blocked_fixture_ids or fields["status"] not in {"NS", "TBD"}:
                 continue
             if not (
                 decision_timestamp + timedelta(minutes=15)
@@ -367,9 +362,21 @@ class QuantEngine:
         diagnostics.append(
             f"scan={len(raw_fixtures)} candidates={len(candidates)} selected={len(appended)} h2h_telemetry={self.settings.h2h_telemetry_enabled} data_cutoff={decision_timestamp.isoformat()} api={self.api.request_count}"
         )
-        return GenerationResult(
-            new_bets=tuple(appended),
-            analytics=analytics,
-            diagnostics=tuple(diagnostics),
-            api_requests=self.api.request_count,
+        generation = GenerationResult.__annotations__
+        from .engine import GenerationResult as _Result
+        return _Result.__new__(
+            _Result,
+        ) if False else type("_Generation", (), {
+            "new_bets": tuple(appended),
+            "analytics": analytics,
+            "diagnostics": tuple(diagnostics),
+            "api_requests": self.api.request_count,
+        })() and GenerationResult(
+            generation=type("_Generation", (), {
+                "new_bets": tuple(appended),
+                "analytics": analytics,
+                "diagnostics": tuple(diagnostics),
+                "api_requests": self.api.request_count,
+            })(),
+            api_usage=self.api.usage_snapshot(),
         )
