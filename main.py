@@ -213,9 +213,7 @@ def main() -> int:
     if args.command == "analytics":
         return run_analytics()
     if args.command == "skip":
-        identifier = args.identifier or args.issue_title or os.getenv(
-            "ISSUE_TITLE", ""
-        )
+        identifier = args.identifier or args.issue_title or os.getenv("ISSUE_TITLE", "")
         if not identifier:
             raise SystemExit("skip zahteva --id, --issue-title ili ISSUE_TITLE")
         return run_skip(identifier)
