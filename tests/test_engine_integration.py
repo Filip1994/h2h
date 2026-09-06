@@ -49,6 +49,9 @@ class FakeAPI:
         self.now = now
         self.request_count = 0
 
+    def usage_snapshot(self) -> dict:
+        return {"request_count": self.request_count}
+
     def fixtures_by_date(self, _date: str) -> list[dict]:
         self.request_count += 1
         return [
