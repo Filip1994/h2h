@@ -311,7 +311,11 @@
     "model_version": "dc-value-v2.1.0",
     "calibration_status": "IDENTITY_UNVALIDATED",
     "status": "PENDING",
-    "profit": 0.0
+    "profit": 0.0,
+    "closing_odd": 3.4,
+    "closing_opposite_odd": 1.33,
+    "closing_market_probability_devig": 0.281184,
+    "closing_odds_captured_at": "2026-09-06T00:13:50.150351+00:00"
   },
   {
     "id": "1601522_OVER_2_5",
