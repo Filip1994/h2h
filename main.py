@@ -42,7 +42,7 @@ def write_api_usage(settings: Settings, updated_at: datetime, result) -> None:
         {
             "timestamp": updated_at.astimezone(UTC).isoformat(),
             "date": updated_at.astimezone(settings.timezone).date().isoformat(),
-            "new_bets": len(result.generation.new_bets),
+            "new_bets": len(result.new_bets),
         }
     )
     atomic_write_json(settings.api_usage_file, usage)
@@ -65,15 +65,15 @@ def run_generate(*, deliver_email: bool = True) -> int:
     result = QuantEngine(settings).generate(generated_at)
     write_ledger_meta(settings, generated_at)
     write_api_usage(settings, generated_at, result)
-    subject, html_body = build_email(result.generation, settings, generated_at)
+    subject, html_body = build_email(result, settings, generated_at)
     (ROOT / "report_preview.html").write_text(html_body, encoding="utf-8")
     (ROOT / "report_subject.txt").write_text(subject, encoding="utf-8")
     if deliver_email:
         send_email(subject, html_body, settings)
-    for line in result.generation.diagnostics:
+    for line in result.diagnostics:
         print(line)
     print(f"API usage: {json.dumps(result.api_usage, ensure_ascii=False)}")
-    print(f"✅ Sačuvano novih tipova: {len(result.generation.new_bets)}")
+    print(f"✅ Sačuvano novih tipova: {len(result.new_bets)}")
     return 0
 
 
@@ -150,14 +150,10 @@ def parser() -> argparse.ArgumentParser:
     subcommands = cli.add_subparsers(dest="command", required=True)
     generate = subcommands.add_parser("generate", help="Generiši dnevni bilten")
     generate.add_argument("--no-email", action="store_true")
-    subcommands.add_parser(
-        "send-report", help="Pošalji poslednji generisani email report"
-    )
+    subcommands.add_parser("send-report", help="Pošalji poslednji generisani email report")
     subcommands.add_parser("monitor", help="Snimi closing odds i poravnaj rezultate")
     subcommands.add_parser("settle", help="Alias za monitor")
-    subcommands.add_parser(
-        "calibrate", help="Refituj Platt kalibraciju iz OOS prediction ledgera"
-    )
+    subcommands.add_parser("calibrate", help="Refituj Platt kalibraciju iz OOS prediction ledgera")
     subcommands.add_parser("analytics", help="Prikaži portfolio metrike")
     skip = subcommands.add_parser("skip", help="Prebaci tačan bet ID u SKIPPED")
     skip.add_argument("--id", dest="identifier")
