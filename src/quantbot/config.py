@@ -58,6 +58,7 @@ class Settings:
     min_calibration_samples: int
     max_calibration_ece: float
     max_daily_picks: int
+    intraday_lookahead_hours: int
 
     kelly_fraction: float
     max_bet_stake_pct: float
@@ -133,6 +134,7 @@ class Settings:
             min_calibration_samples=_int("MIN_CALIBRATION_SAMPLES", 200),
             max_calibration_ece=_float("MAX_CALIBRATION_ECE", 0.05),
             max_daily_picks=_int("MAX_DAILY_PICKS", 5),
+            intraday_lookahead_hours=_int("INTRADAY_LOOKAHEAD_HOURS", 6),
             kelly_fraction=_float("KELLY_FRACTION", 0.25),
             max_bet_stake_pct=_float("MAX_BET_STAKE_PCT", 0.01),
             max_daily_risk_pct=_float("MAX_DAILY_RISK_PCT", 0.03),
@@ -194,6 +196,8 @@ class Settings:
             raise ValueError("MIN_STAKE_RSD i STAKE_STEP_RSD moraju biti pozitivni")
         if self.max_daily_picks < 1:
             raise ValueError("MAX_DAILY_PICKS mora biti najmanje 1")
+        if self.intraday_lookahead_hours < 1 or self.intraday_lookahead_hours > 24:
+            raise ValueError("INTRADAY_LOOKAHEAD_HOURS mora biti između 1 i 24")
         if self.min_calibration_samples < 1:
             raise ValueError("MIN_CALIBRATION_SAMPLES mora biti najmanje 1")
         if self.training_seasons < 1:
