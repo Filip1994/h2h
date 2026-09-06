@@ -29,7 +29,11 @@ def test_build_email_uses_futuristic_inline_layout(settings) -> None:
             },
         )
 
-    subject, body = build_email(Result(), settings, datetime(2026, 9, 7, 10, 0, tzinfo=UTC))
+    subject, body = build_email(
+        Result(),
+        settings,
+        datetime(2026, 9, 7, 10, 0, tzinfo=UTC),
+    )
     assert "DAILY BULLETIN" in body
     assert "QUANTBET // INTELLIGENCE FEED" in body
     assert "Team A vs Team B" in body
