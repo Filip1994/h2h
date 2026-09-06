@@ -3,7 +3,8 @@ name: Daily QuantBet bulletin
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 6 * * *"
+    - cron: "15 0 * * *"
+      timezone: "Europe/Belgrade"
 
 permissions:
   actions: write
@@ -57,4 +58,4 @@ jobs:
         if: always() && steps.ledger.outputs.changed == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh workflow run pages.yml --ref "${{ github.event.repository.default_branch }}"
+        run: gh workflow run pages.yml --ref "${{ github.event.repository.default_branch}"
