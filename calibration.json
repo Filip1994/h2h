@@ -1,2 +1,20 @@
-{}
-
+{
+  "OVER_2_5": {
+    "a": 1.0,
+    "b": 0.0,
+    "n": 184,
+    "validated": false
+  },
+  "UNDER_2_5": {
+    "a": 1.0,
+    "b": 0.0,
+    "n": 184,
+    "validated": false
+  },
+  "BTTS_YES": {
+    "a": 1.0,
+    "b": 0.0,
+    "n": 184,
+    "validated": false
+  }
+}
