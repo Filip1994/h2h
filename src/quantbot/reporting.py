@@ -21,18 +21,27 @@ def _money(value: float) -> str:
 
 
 def _skip_url(repository: str, bet_id: str) -> str:
-    query = urlencode({"title": f"SKIP_{bet_id}", "body": "Automatski zahtev: prebaci navedeni PENDING tip u SKIPPED status."})
+    query = urlencode(
+        {
+            "title": f"SKIP_{bet_id}",
+            "body": "Automatski zahtev: prebaci navedeni PENDING tip u SKIPPED status.",
+        }
+    )
     return f"https://github.com/{repository}/issues/new?{query}"
 
 
-def build_email(result: GenerationResult, settings: Settings, generated_at: datetime) -> tuple[str, str]:
+def build_email(
+    result: GenerationResult, settings: Settings, generated_at: datetime
+) -> tuple[str, str]:
     analytics = result.analytics
     mode = "PAPER" if settings.paper_mode else "LIVE"
     roi_positive = analytics.roi >= 0
     roi_color = "#45f0a5" if roi_positive else "#ff5f6d"
     cards: list[str] = []
     for bet in result.new_bets:
-        kickoff = datetime.fromisoformat(str(bet["kickoff"])).astimezone(settings.timezone)
+        kickoff = datetime.fromisoformat(str(bet["kickoff"])).astimezone(
+            settings.timezone
+        )
         skip_url = _esc(_skip_url(settings.github_repository, str(bet["id"])))
         cards.append(
             f'''<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 14px;background:#0d1a2b;border:1px solid #203b5c;border-radius:14px;overflow:hidden;">
@@ -42,7 +51,10 @@ def build_email(result: GenerationResult, settings: Settings, generated_at: date
 <tr><td style="padding:12px 18px;border-top:1px solid #203b5c;background:#0a1524;"><span style="color:#6f8eac;font-size:10px;letter-spacing:1px;">RISK ALLOCATION</span><br><b style="font-size:17px;color:#45f0a5;">{_money(float(bet["stake"]))} RSD</b> <span style="color:#718aa4;font-size:11px;">· {_esc(mode)}</span></td></tr>
 <tr><td style="padding:11px 18px 15px;"><a href="{skip_url}" style="display:inline-block;color:#ff8a9a;text-decoration:none;font-size:11px;font-weight:700;">↳ PRESKOČI TIP</a></td></tr></table>'''
         )
-    picks_html = "".join(cards) or '<div style="padding:18px;background:#0d1a2b;border:1px solid #203b5c;border-radius:14px;color:#7f9ab8;">NO QUALIFIED PICKS · FILTERS HELD.</div>'
+    picks_html = (
+        "".join(cards)
+        or '<div style="padding:18px;background:#0d1a2b;border:1px solid #203b5c;border-radius:14px;color:#7f9ab8;">NO QUALIFIED PICKS · FILTERS HELD.</div>'
+    )
     cutoff = generated_at.astimezone(UTC).isoformat()
     body = f'''<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
 <body style="margin:0;padding:0;background:#050b14;font-family:Arial,Helvetica,sans-serif;color:#eef7ff;">
@@ -60,7 +72,10 @@ def build_email(result: GenerationResult, settings: Settings, generated_at: date
 <tr><td style="padding:12px 20px 22px;color:#718aa4;font-size:10px;line-height:1.7;">MODEL → CALIBRATION → MARKET → RISK. No signal means no bet. Data cutoff: {_esc(cutoff)}. H2H telemetry is informational and does not alter the production decision while disabled.</td></tr>
 <tr><td style="padding:13px 20px;background:#06101c;border-top:1px solid #193451;color:#4f6d89;font-size:9px;text-align:center;letter-spacing:1px;">QUANTBET · TRANSPARENT PAPER VALIDATION · ALL STAKES IN RSD</td></tr>
 </table></td></tr></table></body></html>'''
-    subject = f"⚡ QuantBet {mode}: {len(result.new_bets)} tipova · ROI {100 * analytics.roi:+.1f}% · {generated_at:%d.%m.%Y.}"
+    subject = (
+        f"⚡ QuantBet {mode}: {len(result.new_bets)} tipova · "
+        f"ROI {100 * analytics.roi:+.1f}% · {generated_at:%d.%m.%Y.}"
+    )
     return subject, body
 
 
@@ -76,7 +91,9 @@ def send_email(subject: str, html_body: str, settings: Settings) -> bool:
     try:
         with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=30) as server:
             server.login(settings.gmail_user, settings.gmail_app_pass)
-            server.sendmail(settings.gmail_user, [settings.email_to], message.as_string())
+            server.sendmail(
+                settings.gmail_user, [settings.email_to], message.as_string()
+            )
         return True
     except (OSError, smtplib.SMTPException) as exc:
         print(f"⚠️ Email nije poslat: {exc}")
