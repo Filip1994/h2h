@@ -1,0 +1,20 @@
+[
+  {
+    "request_count": 440,
+    "request_budget": 7500,
+    "working_budget": 7000,
+    "reserve": 500,
+    "remaining_working": 6560,
+    "cache_hits": 0,
+    "cache_misses": 440,
+    "cache_hit_rate": 0.0,
+    "endpoint_requests": {
+      "fixtures": 333,
+      "odds": 107
+    },
+    "endpoint_cache_hits": {},
+    "timestamp": "2026-09-06T22:53:57.553111+00:00",
+    "date": "2026-09-07",
+    "new_bets": 3
+  }
+]
