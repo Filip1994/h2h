@@ -5,6 +5,7 @@ import json
 import os
 import tempfile
 import time
+from collections import Counter
 from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError, URLError
@@ -26,6 +27,10 @@ class APIFootballClient:
     def __init__(self, settings: Settings) -> None:
         self.settings = settings
         self.request_count = 0
+        self.cache_hits = 0
+        self.cache_misses = 0
+        self.endpoint_requests: Counter[str] = Counter()
+        self.endpoint_cache_hits: Counter[str] = Counter()
         self.settings.cache_dir.mkdir(parents=True, exist_ok=True)
 
     def _cache_path(self, endpoint: str, params: dict[str, Any]) -> Path:
@@ -77,6 +82,7 @@ class APIFootballClient:
         params: dict[str, Any] | None = None,
         *,
         ttl_seconds: int = 0,
+        reserve_protected: bool = False,
     ) -> list[dict[str, Any]]:
         params = {
             key: value for key, value in (params or {}).items() if value is not None
@@ -84,7 +90,10 @@ class APIFootballClient:
         cache_path = self._cache_path(endpoint, params)
         cached = self._read_cache(cache_path)
         if cached is not None:
+            self.cache_hits += 1
+            self.endpoint_cache_hits[endpoint] += 1
             return cached
+        self.cache_misses += 1
 
         query = urlencode(params)
         url = f"{self.settings.api_base_url}/{endpoint.lstrip('/')}"
@@ -95,10 +104,13 @@ class APIFootballClient:
 
         raw = ""
         for attempt in range(self.settings.api_max_attempts):
-            if self.request_count >= self.settings.api_request_budget:
+            usable_budget = self.settings.api_request_budget - (
+                0 if reserve_protected else self.settings.api_budget_reserve
+            )
+            if self.request_count >= usable_budget:
                 raise APIBudgetExceeded(
-                    "Run je dostigao API budžet od "
-                    f"{self.settings.api_request_budget} zahteva"
+                    "Run je dostigao API radni budžet od "
+                    f"{usable_budget} zahteva; rezerva={self.settings.api_budget_reserve}"
                 )
             request = Request(
                 url,
@@ -109,6 +121,7 @@ class APIFootballClient:
                 method="GET",
             )
             self.request_count += 1
+            self.endpoint_requests[endpoint] += 1
             try:
                 with urlopen(request, timeout=20) as response:
                     raw = response.read().decode("utf-8")
@@ -142,6 +155,28 @@ class APIFootballClient:
 
         self._write_cache(cache_path, result, ttl_seconds)
         return result
+
+    def usage_snapshot(self) -> dict[str, Any]:
+        return {
+            "request_count": self.request_count,
+            "request_budget": self.settings.api_request_budget,
+            "working_budget": self.settings.api_request_budget
+            - self.settings.api_budget_reserve,
+            "reserve": self.settings.api_budget_reserve,
+            "remaining_working": max(
+                0,
+                self.settings.api_request_budget
+                - self.settings.api_budget_reserve
+                - self.request_count,
+            ),
+            "cache_hits": self.cache_hits,
+            "cache_misses": self.cache_misses,
+            "cache_hit_rate": round(
+                self.cache_hits / max(1, self.cache_hits + self.cache_misses), 6
+            ),
+            "endpoint_requests": dict(sorted(self.endpoint_requests.items())),
+            "endpoint_cache_hits": dict(sorted(self.endpoint_cache_hits.items())),
+        }
 
     def _retry_delay(self, attempt: int, retry_after: str | None = None) -> None:
         delay = self.settings.api_retry_base_seconds * (2**attempt)
