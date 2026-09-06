@@ -36,19 +36,44 @@ def write_ledger_meta(settings: Settings, updated_at: datetime) -> None:
     atomic_write_json(ROOT / "ledger_meta.json", payload)
 
 
+def write_api_usage(settings: Settings, updated_at: datetime, result) -> None:
+    usage = dict(result.api_usage)
+    usage.update(
+        {
+            "timestamp": updated_at.astimezone(UTC).isoformat(),
+            "date": updated_at.astimezone(settings.timezone).date().isoformat(),
+            "new_bets": len(result.generation.new_bets),
+        }
+    )
+    atomic_write_json(settings.api_usage_file, usage)
+    history: list[dict] = []
+    if settings.api_usage_history_file.exists():
+        try:
+            loaded = json.loads(settings.api_usage_history_file.read_text(encoding="utf-8"))
+            if isinstance(loaded, list):
+                history = loaded
+        except (OSError, TypeError, ValueError, json.JSONDecodeError):
+            history = []
+    history.append(usage)
+    history = history[-90:]
+    atomic_write_json(settings.api_usage_history_file, history)
+
+
 def run_generate(*, deliver_email: bool = True) -> int:
     settings = Settings.from_env(ROOT)
     generated_at = datetime.now(settings.timezone)
     result = QuantEngine(settings).generate(generated_at)
     write_ledger_meta(settings, generated_at)
-    subject, html_body = build_email(result, settings, generated_at)
+    write_api_usage(settings, generated_at, result)
+    subject, html_body = build_email(result.generation, settings, generated_at)
     (ROOT / "report_preview.html").write_text(html_body, encoding="utf-8")
     (ROOT / "report_subject.txt").write_text(subject, encoding="utf-8")
     if deliver_email:
         send_email(subject, html_body, settings)
-    for line in result.diagnostics:
+    for line in result.generation.diagnostics:
         print(line)
-    print(f"✅ Sačuvano novih tipova: {len(result.new_bets)}")
+    print(f"API usage: {json.dumps(result.api_usage, ensure_ascii=False)}")
+    print(f"✅ Sačuvano novih tipova: {len(result.generation.new_bets)}")
     return 0
 
 
