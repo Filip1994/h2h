@@ -131,14 +131,10 @@ class QuantEngine:
         counts = DixonColesModel.team_match_counts(records)
 
         if counts[int(fields["home_id"])] < self.settings.min_team_matches:
-            raise DixonColesFitError(
-                "Domaći tim nema dovoljan trening uzorak"
-            )
+            raise DixonColesFitError("Domaći tim nema dovoljan trening uzorak")
 
         if counts[int(fields["away_id"])] < self.settings.min_team_matches:
-            raise DixonColesFitError(
-                "Gostujući tim nema dovoljan trening uzorak"
-            )
+            raise DixonColesFitError("Gostujući tim nema dovoljan trening uzorak")
 
         model = DixonColesModel.fit(
             records,
@@ -187,33 +183,19 @@ class QuantEngine:
             "h2h_n": h2h_n,
             "h2h_effective_n": round(h2h_effective_n, 3),
             "h2h_eligible": (
-                h2h_rate >= self.settings.min_h2h_rate
-                if h2h_n
-                else None
+                h2h_rate >= self.settings.min_h2h_rate if h2h_n else None
             ),
             "odd": round(quote.odd, 4) if quote else None,
-            "opposite_odd": (
-                round(quote.opposite_odd, 4)
-                if quote
-                else None
-            ),
+            "opposite_odd": round(quote.opposite_odd, 4) if quote else None,
             "bookmaker_id": quote.bookmaker_id if quote else None,
             "bookmaker": quote.bookmaker_name if quote else None,
             "odds_captured_at": (
-                quote.captured_at.isoformat()
-                if quote
-                else None
+                quote.captured_at.isoformat() if quote else None
             ),
             "market_probability_devig": (
-                round(quote.devig_probability, 6)
-                if quote
-                else None
+                round(quote.devig_probability, 6) if quote else None
             ),
-            "market_overround": (
-                round(quote.overround, 6)
-                if quote
-                else None
-            ),
+            "market_overround": round(quote.overround, 6) if quote else None,
             "selected": selected,
             "rejection_reason": rejection_reason,
             "status": "PENDING",
@@ -248,16 +230,12 @@ class QuantEngine:
                 )
 
         existing_bets = self.bet_store.load()
-        blocked_fixture_ids = self.bet_store.blocked_fixture_ids(
-            existing_bets
-        )
+        blocked_fixture_ids = self.bet_store.blocked_fixture_ids(existing_bets)
         diagnostics: list[str] = []
         candidates: list[MarketCandidate] = []
         prediction_records: list[dict[str, Any]] = []
 
-        raw_fixtures = self.api.fixtures_by_date(
-            now_local.date().isoformat()
-        )
+        raw_fixtures = self.api.fixtures_by_date(now_local.date().isoformat())
 
         for raw_fixture in raw_fixtures:
             try:
@@ -268,10 +246,10 @@ class QuantEngine:
 
             fixture_id = int(fields["fixture_id"])
 
-            if (
-                fixture_id in blocked_fixture_ids
-                or fields["status"] not in {"NS", "TBD"}
-            ):
+            if fixture_id in blocked_fixture_ids or fields["status"] not in {
+                "NS",
+                "TBD",
+            }:
                 continue
 
             if not (
@@ -303,9 +281,7 @@ class QuantEngine:
                         settings=self.settings,
                     )
                 except (APIError, ValueError, TypeError) as exc:
-                    diagnostics.append(
-                        f"fixture_{fixture_id}_h2h: {exc}"
-                    )
+                    diagnostics.append(f"fixture_{fixture_id}_h2h: {exc}")
 
             h2h_rates = (
                 h2h.weighted_rates
@@ -338,9 +314,7 @@ class QuantEngine:
                     captured_at=decision_timestamp,
                 )
             except APIBudgetExceeded:
-                diagnostics.append(
-                    "API budžet dostignut; skeniranje zaustavljeno"
-                )
+                diagnostics.append("API budžet dostignut; skeniranje zaustavljeno")
                 break
             except (
                 APIError,
@@ -348,9 +322,7 @@ class QuantEngine:
                 ArithmeticError,
                 ValueError,
             ) as exc:
-                diagnostics.append(
-                    f"fixture_{fixture_id}: {exc}"
-                )
+                diagnostics.append(f"fixture_{fixture_id}: {exc}")
                 continue
 
             fixture_candidates: list[MarketCandidate] = []
@@ -366,8 +338,7 @@ class QuantEngine:
                 quote = quotes.get(market)
                 decision_probability = max(
                     0.0,
-                    calibrated_probability
-                    - self.settings.probability_haircut,
+                    calibrated_probability - self.settings.probability_haircut,
                 )
 
                 reason = None
@@ -378,19 +349,12 @@ class QuantEngine:
                     reason = "REJECT_NO_ODDS"
                 elif quote.odd < self.settings.min_odd:
                     reason = "REJECT_ODD"
-                elif not (
-                    0.0
-                    <= quote.overround
-                    <= self.settings.max_market_overround
-                ):
+                elif not (0.0 <= quote.overround <= self.settings.max_market_overround):
                     reason = "REJECT_OVERROUND"
                 else:
-                    expected_value = (
-                        decision_probability * quote.odd - 1.0
-                    )
+                    expected_value = decision_probability * quote.odd - 1.0
                     probability_edge = (
-                        decision_probability
-                        - quote.devig_probability
+                        decision_probability - quote.devig_probability
                     )
 
                     if expected_value < self.settings.min_ev:
@@ -495,9 +459,7 @@ class QuantEngine:
             for candidate, stake in allocations
         ]
 
-        appended = self.bet_store.append_unique_fixtures(
-            proposed_bets
-        )
+        appended = self.bet_store.append_unique_fixtures(proposed_bets)
         final_bets = self.bet_store.load()
 
         analytics = portfolio_analytics(
