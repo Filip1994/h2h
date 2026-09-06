@@ -182,16 +182,12 @@ class QuantEngine:
             "h2h_rate": round(h2h_rate, 6),
             "h2h_n": h2h_n,
             "h2h_effective_n": round(h2h_effective_n, 3),
-            "h2h_eligible": (
-                h2h_rate >= self.settings.min_h2h_rate if h2h_n else None
-            ),
+            "h2h_eligible": (h2h_rate >= self.settings.min_h2h_rate if h2h_n else None),
             "odd": round(quote.odd, 4) if quote else None,
             "opposite_odd": round(quote.opposite_odd, 4) if quote else None,
             "bookmaker_id": quote.bookmaker_id if quote else None,
             "bookmaker": quote.bookmaker_name if quote else None,
-            "odds_captured_at": (
-                quote.captured_at.isoformat() if quote else None
-            ),
+            "odds_captured_at": (quote.captured_at.isoformat() if quote else None),
             "market_probability_devig": (
                 round(quote.devig_probability, 6) if quote else None
             ),
@@ -281,9 +277,7 @@ class QuantEngine:
                     diagnostics.append(f"fixture_{fixture_id}_h2h: {exc}")
 
             h2h_rates = (
-                h2h.weighted_rates
-                if h2h
-                else {market: 0.0 for market in Market}
+                h2h.weighted_rates if h2h else {market: 0.0 for market in Market}
             )
             h2h_n = len(h2h.matches) if h2h else 0
             h2h_effective_n = h2h.effective_n if h2h else 0.0
@@ -311,9 +305,7 @@ class QuantEngine:
                     captured_at=decision_timestamp,
                 )
             except APIBudgetExceeded:
-                diagnostics.append(
-                    "API budžet dostignut; skeniranje zaustavljeno"
-                )
+                diagnostics.append("API budžet dostignut; skeniranje zaustavljeno")
                 break
             except (
                 APIError,
@@ -328,11 +320,9 @@ class QuantEngine:
 
             for market in Market:
                 model_probability = model_probabilities[market]
-                calibrated_probability, calibration_status = (
-                    self.calibrator.apply(
-                        market,
-                        model_probability,
-                    )
+                calibrated_probability, calibration_status = self.calibrator.apply(
+                    market,
+                    model_probability,
                 )
                 quote = quotes.get(market)
                 decision_probability = max(
@@ -348,17 +338,11 @@ class QuantEngine:
                     reason = "REJECT_NO_ODDS"
                 elif quote.odd < self.settings.min_odd:
                     reason = "REJECT_ODD"
-                elif not (
-                    0.0
-                    <= quote.overround
-                    <= self.settings.max_market_overround
-                ):
+                elif not (0.0 <= quote.overround <= self.settings.max_market_overround):
                     reason = "REJECT_OVERROUND"
                 else:
                     expected_value = decision_probability * quote.odd - 1.0
-                    probability_edge = (
-                        decision_probability - quote.devig_probability
-                    )
+                    probability_edge = decision_probability - quote.devig_probability
 
                     if expected_value < self.settings.min_ev:
                         reason = "REJECT_LOW_EV"
