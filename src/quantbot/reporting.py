@@ -1,3 +1,4 @@
+# fmt: off
 from __future__ import annotations
 
 import html
@@ -81,3 +82,4 @@ def send_email(subject: str, html_body: str, settings: Settings) -> bool:
     except (OSError, smtplib.SMTPException) as exc:
         print(f"⚠️ Email nije poslat: {exc}")
         return False
+# fmt: on
