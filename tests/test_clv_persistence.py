@@ -1,6 +1,7 @@
 import json
-from datetime import datetime
+from datetime import UTC, datetime, timedelta
 
+from quantbot.closing import capture_five_minute_closing_quotes
 from quantbot.persistence import OddsSnapshotStore, record_prediction_quote
 from quantbot.types import Market, OddsQuote
 
@@ -122,6 +123,53 @@ def test_missing_t5_is_not_fabricated(tmp_path):
     assert all(r["snapshot_type"] != "T5" for r in records)
 
 
+def test_t5_capture_window(monkeypatch, tmp_path):
+    class Settings:
+        bets_file = tmp_path / "bets.json"
+        max_market_overround = 0.25
+
+    now = datetime(2026, 9, 8, 10, 0, tzinfo=UTC)
+    bet = {
+        "id": "b1",
+        "status": "PENDING",
+        "kickoff": (now + timedelta(minutes=5)).isoformat(),
+        "event_id": 1,
+        "market": "OVER_2_5",
+        "bookmaker_id": 10,
+    }
+
+    class FakeStore:
+        def __init__(self, _path):
+            self.data = [dict(bet)]
+
+        def load(self):
+            return self.data
+
+        def save(self, data):
+            self.data = data
+
+    class FakeAPI:
+        def __init__(self, _settings):
+            pass
+
+        def odds(self, _fixture_id):
+            return []
+
+    monkeypatch.setattr("quantbot.closing.BetStore", FakeStore)
+    monkeypatch.setattr("quantbot.closing.APIFootballClient", FakeAPI)
+    monkeypatch.setattr(
+        "quantbot.closing.extract_best_quotes",
+        lambda *args, **kwargs: {
+            Market.OVER_25: quote(now.isoformat())
+        },
+    )
+
+    assert capture_five_minute_closing_quotes(Settings, now) == 1
+
+    outside = now + timedelta(minutes=4)
+    assert capture_five_minute_closing_quotes(Settings, outside) == 0
+
+
 def test_clv_formula_correctness(tmp_path):
     store = OddsSnapshotStore(tmp_path / "odds_snapshots.jsonl")
     store.append_quote(
@@ -144,5 +192,6 @@ def test_clv_formula_correctness(tmp_path):
     entry, closing = records
     assert round(entry["odd"] / closing["odd"] - 1, 6) == 0.052632
     assert (
-        round(closing["devig_probability"] - entry["devig_probability"], 6) == 0.012802
+        round(closing["devig_probability"] - entry["devig_probability"], 6)
+        == 0.012802
     )
