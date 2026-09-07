@@ -35,10 +35,7 @@ class QuantEngine:
         self.api = api or APIFootballClient(settings)
         self.bet_store = bet_store or BetStore(settings.bets_file)
         self.prediction_store = prediction_store or PredictionStore(settings.predictions_file)
-        self.calibrator = ProbabilityCalibrator.load(
-            settings.calibration_file,
-            min_samples=settings.min_calibration_samples,
-        )
+        self.calibrator = ProbabilityCalibrator.load(settings.calibration_file, min_samples=settings.min_calibration_samples)
         self._model_cache: dict[tuple[int, int, str], DixonColesModel] = {}
         self._training_cache: dict[tuple[int, int, str], list[MatchRecord]] = {}
 
@@ -80,38 +77,7 @@ class QuantEngine:
 
     def _prediction_record(self, fields, market, model_probability, calibrated_probability, calibration_status, h2h_rate, h2h_n, h2h_effective_n, quote, created_at, *, rejection_reason=None, selected=False):
         return {
-            "id": f"{fields['fixture_id']}_{market.value}_{MODEL_VERSION}",
-            "event_id": fields["fixture_id"],
-            "kickoff": fields["kickoff"].isoformat(),
-            "created_at": created_at.isoformat(),
-            "decision_timestamp": created_at.astimezone(UTC).isoformat(),
-            "data_cutoff": created_at.astimezone(UTC).isoformat(),
-            "league_id": fields["league_id"],
-            "league": f"{fields['country']} - {fields['league_name']}",
-            "home_id": fields["home_id"],
-            "away_id": fields["away_id"],
-            "match": f"{fields['home_name']} vs {fields['away_name']}",
-            "market": market.value,
-            "model_probability": round(model_probability, 6),
-            "calibrated_probability": round(calibrated_probability, 6),
-            "calibration_status": calibration_status,
-            "h2h_enabled": self.settings.h2h_telemetry_enabled,
-            "h2h_rate": round(h2h_rate, 6),
-            "h2h_n": h2h_n,
-            "h2h_effective_n": round(h2h_effective_n, 3),
-            "h2h_eligible": (h2h_rate >= self.settings.min_h2h_rate if h2h_n else None),
-            "odd": round(quote.odd, 4) if quote else None,
-            "opposite_odd": round(quote.opposite_odd, 4) if quote else None,
-            "bookmaker_id": quote.bookmaker_id if quote else None,
-            "bookmaker": quote.bookmaker_name if quote else None,
-            "odds_captured_at": (quote.captured_at.isoformat() if quote else None),
-            "market_probability_devig": round(quote.devig_probability, 6) if quote else None,
-            "market_overround": round(quote.overround, 6) if quote else None,
-            "selected": selected,
-            "rejection_reason": rejection_reason,
-            "status": "PENDING",
-            "outcome": None,
-            "model_version": MODEL_VERSION,
+            "id": f"{fields['fixture_id']}_{market.value}_{MODEL_VERSION}", "event_id": fields["fixture_id"], "kickoff": fields["kickoff"].isoformat(), "created_at": created_at.isoformat(), "decision_timestamp": created_at.astimezone(UTC).isoformat(), "data_cutoff": created_at.astimezone(UTC).isoformat(), "league_id": fields["league_id"], "league": f"{fields['country']} - {fields['league_name']}", "home_id": fields["home_id"], "away_id": fields["away_id"], "match": f"{fields['home_name']} vs {fields['away_name']}", "market": market.value, "model_probability": round(model_probability, 6), "calibrated_probability": round(calibrated_probability, 6), "calibration_status": calibration_status, "h2h_enabled": self.settings.h2h_telemetry_enabled, "h2h_rate": round(h2h_rate, 6), "h2h_n": h2h_n, "h2h_effective_n": round(h2h_effective_n, 3), "h2h_eligible": (h2h_rate >= self.settings.min_h2h_rate if h2h_n else None), "odd": round(quote.odd, 4) if quote else None, "opposite_odd": round(quote.opposite_odd, 4) if quote else None, "bookmaker_id": quote.bookmaker_id if quote else None, "bookmaker": quote.bookmaker_name if quote else None, "odds_captured_at": (quote.captured_at.isoformat() if quote else None), "market_probability_devig": round(quote.devig_probability, 6) if quote else None, "market_overround": round(quote.overround, 6) if quote else None, "selected": selected, "rejection_reason": rejection_reason, "status": "PENDING", "outcome": None, "model_version": MODEL_VERSION,
         }
 
     def generate(self, now: datetime | None = None) -> GenerationResult:
@@ -121,7 +87,6 @@ class QuantEngine:
             missing = [market.value for market in Market if not self.calibrator.is_validated(market)]
             if missing:
                 raise RuntimeError("LIVE režim odbijen: nema validirane kalibracije za " + ", ".join(missing))
-
         existing_bets = self.bet_store.load()
         blocked_fixture_ids = self.bet_store.blocked_fixture_ids(existing_bets)
         diagnostics: list[str] = []
@@ -129,7 +94,6 @@ class QuantEngine:
         prediction_records: list[dict[str, Any]] = []
         raw_fixtures = self.api.fixtures_by_date(now_local.date().isoformat())
         upper_hours = self.settings.intraday_lookahead_hours if self.settings.intraday_mode else 24
-
         for raw_fixture in raw_fixtures:
             try:
                 fields = current_fixture_fields(raw_fixture)
@@ -143,32 +107,27 @@ class QuantEngine:
                 continue
             if not is_allowed_match(fields["country"], fields["league_name"], fields["home_name"], fields["away_name"], self.settings.excluded_countries):
                 continue
-
             h2h = None
             if self.settings.h2h_telemetry_enabled:
                 try:
-                    raw_h2h = self.api.head_to_head(fields["home_id"], fields["away_id"])
-                    h2h = build_h2h_stats(raw_h2h, now=decision_timestamp, settings=self.settings)
+                    h2h = build_h2h_stats(self.api.head_to_head(fields["home_id"], fields["away_id"]), now=decision_timestamp, settings=self.settings)
                 except (APIError, ValueError, TypeError) as exc:
                     diagnostics.append(f"fixture_{fixture_id}_h2h: {exc}")
             h2h_rates = h2h.weighted_rates if h2h else {market: 0.0 for market in Market}
             h2h_n = len(h2h.matches) if h2h else 0
             h2h_effective_n = h2h.effective_n if h2h else 0.0
             history = format_recent_history(h2h) if h2h else ()
-
             try:
                 model = self._model_for_fixture(fields, data_cutoff=decision_timestamp)
                 model_probabilities = model.market_probabilities(fields["home_id"], fields["away_id"], max_goals=self.settings.max_score_goals)
                 lambda_home, lambda_away = model.expected_goals(fields["home_id"], fields["away_id"])
-                raw_odds = self.api.odds(fixture_id)
-                quotes = extract_best_quotes(raw_odds, bookmaker_priority=self.settings.bookmaker_priority, allow_any_bookmaker=self.settings.allow_any_bookmaker, captured_at=decision_timestamp)
+                quotes = extract_best_quotes(self.api.odds(fixture_id), bookmaker_priority=self.settings.bookmaker_priority, allow_any_bookmaker=self.settings.allow_any_bookmaker, captured_at=decision_timestamp)
             except APIBudgetExceeded:
                 diagnostics.append("API budžet dostignut; skeniranje zaustavljeno")
                 break
             except (APIError, DixonColesFitError, ArithmeticError, ValueError) as exc:
                 diagnostics.append(f"fixture_{fixture_id}: {exc}")
                 continue
-
             fixture_candidates: list[MarketCandidate] = []
             for market in Market:
                 model_probability = model_probabilities[market]
@@ -197,8 +156,9 @@ class QuantEngine:
                 fixture_candidates.append(MarketCandidate(fixture_id=fixture_id, kickoff=fields["kickoff"], league_id=fields["league_id"], league_name=fields["league_name"], country=fields["country"], home_id=fields["home_id"], home_name=fields["home_name"], away_id=fields["away_id"], away_name=fields["away_name"], market=market, model_probability=model_probability, calibrated_probability=calibrated_probability, decision_probability=decision_probability, h2h_rate=h2h_rates[market], h2h_n=h2h_n, h2h_effective_n=h2h_effective_n, h2h_history=history, quote=quote, lambda_home=lambda_home, lambda_away=lambda_away, rho=model.rho, expected_value=expected_value, probability_edge=probability_edge, calibration_status=calibration_status))
             if fixture_candidates:
                 candidates.append(max(fixture_candidates, key=lambda item: (item.expected_value, item.probability_edge)))
-
         allocations = allocate_stakes(candidates, existing_bets, now=now_local, settings=self.settings)
+        if self.settings.intraday_mode:
+            allocations = [(candidate, stake) for candidate, stake in allocations if candidate.expected_value >= self.settings.strong_signal_min_ev and candidate.probability_edge >= self.settings.strong_signal_min_edge and stake >= self.settings.strong_signal_min_stake]
         selected_ids = {f"{candidate.fixture_id}_{candidate.market.value}_{MODEL_VERSION}" for candidate, _ in allocations}
         for record in prediction_records:
             if record["id"] in selected_ids:
