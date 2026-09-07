@@ -33,13 +33,14 @@ jobs:
           restore-keys: api-cache-${{ runner.os }}-
       - run: pip install -r requirements.txt
       - run: python main.py monitor
+      - run: python tools/settle_alerts.py
       - name: Commit ledger changes
         run: |
-          if git diff --quiet -- bets.json predictions.json; then
+          if git diff --quiet -- bets.json predictions.json intraday_alerts.json; then
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add bets.json predictions.json
+          git add bets.json predictions.json intraday_alerts.json
           git commit -m "Settle QuantBet ledger"
           git push
