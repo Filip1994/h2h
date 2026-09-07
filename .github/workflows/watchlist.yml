@@ -31,7 +31,6 @@ jobs:
       STRONG_SIGNAL_MIN_EDGE_PP: "0.05"
       STRONG_SIGNAL_MIN_STAKE_RSD: "300"
     steps:
-      # Scheduler fires every 5m; watchlist.py enforces the adaptive per-fixture cadence.
       - uses: actions/checkout@v7
         with:
           ref: ${{ github.event.repository.default_branch }}
@@ -46,13 +45,50 @@ jobs:
           restore-keys: api-cache-${{ runner.os }}-
       - run: pip install -r requirements.txt
       - run: python main.py watchlist
-      - name: Commit watchlist state
+      - name: Build public strong-signal dataset
         run: |
-          if git diff --quiet -- intraday_watchlist_state.json intraday_alerts.json; then
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          def load(path):
+              p=Path(path)
+              if not p.exists():
+                  return []
+              try:
+                  value=json.loads(p.read_text(encoding='utf-8'))
+                  return value if isinstance(value,list) else []
+              except Exception:
+                  return []
+          alerts=load('intraday_alerts.json')
+          bets=[x for x in load('bets.json') if str(x.get('signal_source',''))=='INTRADAY_ALERT']
+          merged={}
+          for item in alerts+bets:
+              key=str(item.get('id') or item.get('prediction_id') or item.get('event_id') or '')
+              if not key:
+                  continue
+              current=merged.get(key,{})
+              current.update(item)
+              if item.get('status') in {'WIN','LOSS'}:
+                  current['virtual_profit']=item.get('profit', item.get('virtual_profit', 0))
+              merged[key]=current
+          data=sorted(merged.values(), key=lambda x: str(x.get('signal_sent_at') or x.get('created_at') or x.get('date') or ''))
+          Path('strong_signals.json').write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print(f'public strong signals: {len(data)}')
+          PY
+      - name: Commit watchlist and strong-signal state
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- intraday_watchlist_state.json intraday_alerts.json strong_signals.json; then
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add intraday_watchlist_state.json intraday_alerts.json
-          git commit -m "Update QuantBet adaptive watchlist"
-          git push
+          git add intraday_watchlist_state.json intraday_alerts.json strong_signals.json
+          git commit -m "Update QuantBet adaptive watchlist and strong signals"
+          for attempt in 1 2 3; do
+            if git push; then exit 0; fi
+            git fetch origin main
+            git rebase origin/main || { git rebase --abort; sleep 2; }
+          done
+          echo "Unable to push after retries" >&2
+          exit 1
