@@ -30,14 +30,20 @@ def build_public_strong_signals(root: Path = ROOT) -> list[dict[str, Any]]:
 
     merged: dict[str, dict[str, Any]] = {}
     for item in previous + alerts + bets:
-        key = str(item.get("id") or item.get("prediction_id") or item.get("event_id") or "")
+        key = str(
+            item.get("id") or item.get("prediction_id") or item.get("event_id") or ""
+        )
         if not key:
             continue
         current = merged.setdefault(key, {})
         current_status = str(current.get("status") or current.get("outcome") or "")
         item_status = str(item.get("status") or item.get("outcome") or "")
         if current_status in TERMINAL and item_status not in TERMINAL:
-            preserved_terminal = {k: v for k, v in current.items() if k in {"status", "outcome", "profit", "virtual_profit", "settled_at"}}
+            preserved_terminal = {
+                k: v
+                for k, v in current.items()
+                if k in {"status", "outcome", "profit", "virtual_profit", "settled_at"}
+            }
             current.update(item)
             current.update(preserved_terminal)
         else:
