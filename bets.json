@@ -48,7 +48,8 @@
     "status": "WIN",
     "profit": 375.0,
     "result": "1:0",
-    "settled_at": "2026-09-04T23:30:02.182809+00:00"
+    "settled_at": "2026-09-04T23:30:02.182809+00:00",
+    "clv_status": "NOT_COMPUTABLE"
   },
   {
     "id": "1577516_OVER_2_5",
@@ -105,7 +106,8 @@
     "result": "0:1",
     "settled_at": "2026-09-05T18:26:45.595027+00:00",
     "clv_odds_pct": 0.020833,
-    "clv_probability_pp": 0.010471
+    "clv_probability_pp": 0.010471,
+    "clv_status": "NOT_COMPUTABLE"
   },
   {
     "id": "1552467_UNDER_2_5",
@@ -162,7 +164,8 @@
     "result": "3:1",
     "settled_at": "2026-09-05T20:32:00.428958+00:00",
     "clv_odds_pct": -0.0181,
-    "clv_probability_pp": -0.008922
+    "clv_probability_pp": -0.008922,
+    "clv_status": "NOT_COMPUTABLE"
   },
   {
     "id": "1548523_UNDER_2_5",
@@ -219,7 +222,8 @@
     "result": "4:1",
     "settled_at": "2026-09-05T22:25:35.434888+00:00",
     "clv_odds_pct": 0.072917,
-    "clv_probability_pp": 0.034336
+    "clv_probability_pp": 0.034336,
+    "clv_status": "NOT_COMPUTABLE"
   },
   {
     "id": "1629829_UNDER_2_5",
@@ -273,7 +277,11 @@
     "result": "2:0",
     "settled_at": "2026-09-07T01:08:36.004117+00:00",
     "clv_odds_pct": 0.0,
-    "clv_probability_pp": 0.0
+    "clv_probability_pp": 0.0,
+    "prediction_id": "1629829_UNDER_2_5_dc-value-v2.1.0",
+    "signal_id": "1629829_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "4864863d40d1a1cce4ca13bdfa8257de8451034bd25db95bfabe543b6a5570f6",
+    "clv_status": "NOT_COMPUTABLE"
   },
   {
     "id": "1490444_UNDER_2_5",
@@ -327,7 +335,11 @@
     "result": "0:0",
     "settled_at": "2026-09-06T04:51:54.244981+00:00",
     "clv_odds_pct": 0.0,
-    "clv_probability_pp": 0.0
+    "clv_probability_pp": 0.0,
+    "prediction_id": "1490444_UNDER_2_5_dc-value-v2.1.0",
+    "signal_id": "1490444_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "ad0fb03e44c422fe9d7d1402279690b0eaac0b67c0a6eca79bf54fadd131fb83",
+    "clv_status": "NOT_COMPUTABLE"
   },
   {
     "id": "1601522_OVER_2_5",
@@ -375,7 +387,11 @@
     "status": "WIN",
     "profit": 405.0,
     "result": "5:0",
-    "settled_at": "2026-09-06T17:50:30.013104+00:00"
+    "settled_at": "2026-09-06T17:50:30.013104+00:00",
+    "prediction_id": "1601522_OVER_2_5_dc-value-v2.1.0",
+    "signal_id": "1601522_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "7154b53c0ffea999d893f12c2df7a8765a3e4cc431048a79d740763c7083a927",
+    "clv_status": "NOT_COMPUTABLE"
   },
   {
     "id": "1601424_UNDER_2_5",
@@ -429,7 +445,11 @@
     "result": "2:1",
     "settled_at": "2026-09-06T19:41:18.277545+00:00",
     "clv_odds_pct": 0.080153,
-    "clv_probability_pp": 0.025288
+    "clv_probability_pp": 0.025288,
+    "prediction_id": "1601424_UNDER_2_5_dc-value-v2.1.0",
+    "signal_id": "1601424_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "eb467de9a644407de608fc76e0523545ae318e1ffc1cf2eab58610eeac95d8c4",
+    "clv_status": "NOT_COMPUTABLE"
   },
   {
     "id": "1636736_OVER_2_5",
@@ -483,7 +503,11 @@
     "result": "2:2",
     "settled_at": "2026-09-07T17:58:47.277589+00:00",
     "clv_odds_pct": 0.0,
-    "clv_probability_pp": 0.0
+    "clv_probability_pp": 0.0,
+    "prediction_id": "1636736_OVER_2_5_dc-value-v2.1.0",
+    "signal_id": "1636736_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "52943a101b018c0e6e4e788f5cb2b5777fcfbff22f4e31d025ee89ce78f74263",
+    "clv_status": "NOT_COMPUTABLE"
   },
   {
     "id": "1585746_UNDER_2_5",
@@ -531,7 +555,11 @@
     "status": "WIN",
     "profit": 375.0,
     "result": "1:0",
-    "settled_at": "2026-09-07T22:32:50.674837+00:00"
+    "settled_at": "2026-09-07T22:32:50.674837+00:00",
+    "prediction_id": "1585746_UNDER_2_5_dc-value-v2.1.0",
+    "signal_id": "1585746_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "29dab24a11f6bc7db7a41a32df06b6ed1b993513a144505d841ea5d89be34fe9",
+    "clv_status": "NOT_COMPUTABLE"
   },
   {
     "id": "1576480_OVER_2_5",
@@ -579,6 +607,10 @@
     "status": "WIN",
     "profit": 580.0,
     "result": "2:1",
-    "settled_at": "2026-09-07T22:32:50.674837+00:00"
+    "settled_at": "2026-09-07T22:32:50.674837+00:00",
+    "prediction_id": "1576480_OVER_2_5_dc-value-v2.1.0",
+    "signal_id": "1576480_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "e756179de0d241437442608162bb8459b84132dd69261d84dfd28bf9251d80f1",
+    "clv_status": "NOT_COMPUTABLE"
   }
 ]
