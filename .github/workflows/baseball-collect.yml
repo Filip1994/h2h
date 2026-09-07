@@ -1,0 +1,53 @@
+name: Baseball data footprint
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "7 * * * *"
+      timezone: "Europe/Belgrade"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: baseball-data-footprint
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    env:
+      API_BASEBALL_KEY: ${{ secrets.API_BASEBALL_KEY }}
+      API_BASEBALL_BASE_URL: https://v1.baseball.api-sports.io
+      BASEBALL_API_REQUEST_BUDGET: "300"
+      BASEBALL_MAX_ODDS_CALLS: "298"
+      BASEBALL_API_MAX_ATTEMPTS: "2"
+      BASEBALL_API_RETRY_BASE_SECONDS: "1"
+      TIMEZONE: Europe/Belgrade
+      PAPER_MODE: "true"
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Validate API key presence
+        run: test -n "$API_BASEBALL_KEY"
+
+      - name: Collect Baseball snapshots
+        run: python scripts/baseball_collect.py
+
+      - name: Commit Baseball data footprint
+        run: |
+          if git diff --quiet -- data/baseball/raw; then
+            echo "No new Baseball snapshot data"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/baseball/raw
+          git commit -m "Collect Baseball market snapshots"
+          git push
