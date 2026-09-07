@@ -67,4 +67,6 @@ def test_build_public_strong_signals_merges_and_preserves_lifecycle(tmp_path) ->
 def test_build_public_strong_signals_is_safe_with_missing_inputs(tmp_path) -> None:
     data = build_public_strong_signals(tmp_path)
     assert data == []
-    assert json.loads((tmp_path / "strong_signals.json").read_text(encoding="utf-8")) == []
+    assert (
+        json.loads((tmp_path / "strong_signals.json").read_text(encoding="utf-8")) == []
+    )
