@@ -1,18 +1,18 @@
 {
-  "request_count": 73,
+  "request_count": 305,
   "request_budget": 7500,
   "working_budget": 7000,
   "reserve": 500,
-  "remaining_working": 6927,
+  "remaining_working": 6695,
   "cache_hits": 0,
-  "cache_misses": 73,
+  "cache_misses": 305,
   "cache_hit_rate": 0.0,
   "endpoint_requests": {
-    "fixtures": 57,
-    "odds": 16
+    "fixtures": 237,
+    "odds": 68
   },
   "endpoint_cache_hits": {},
-  "timestamp": "2026-09-07T08:47:58.598368+00:00",
+  "timestamp": "2026-09-07T14:39:07.280202+00:00",
   "date": "2026-09-07",
   "new_bets": 0
 }
