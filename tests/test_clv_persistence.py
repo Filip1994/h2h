@@ -79,7 +79,7 @@ def test_rejected_signal_without_bet_and_missing_bookmaker(tmp_path):
         "odds_captured_at": "2026-09-08T10:00:00+00:00",
     }
     assert record_prediction_quote(Settings, prediction, bet_id=None)
-    missing = dict(prediction, id="p-missing", odd=None)
+    missing = dict(prediction, id="p-missing", bookmaker_id=None)
     assert record_prediction_quote(Settings, missing) is None
 
 
@@ -190,6 +190,5 @@ def test_clv_formula_correctness(tmp_path):
     entry, closing = records
     assert round(entry["odd"] / closing["odd"] - 1, 6) == 0.052632
     assert (
-        round(closing["devig_probability"] - entry["devig_probability"], 6)
-        == 0.012802
+        round(closing["devig_probability"] - entry["devig_probability"], 6) == 0.012802
     )
