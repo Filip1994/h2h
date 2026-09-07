@@ -35,13 +35,14 @@ jobs:
           restore-keys: api-cache-${{ runner.os }}-
       - run: pip install -r requirements.txt
       - run: python main.py capture-closing
+      - run: python tools/capture_alert_closing.py
       - name: Commit T-5 snapshots
         run: |
-          if git diff --quiet -- bets.json; then
+          if git diff --quiet -- bets.json intraday_alerts.json; then
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add bets.json
+          git add bets.json intraday_alerts.json
           git commit -m "Capture QuantBet T-5 closing odds"
           git push
