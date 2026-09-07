@@ -41,6 +41,4 @@ jobs:
           git add bets.json
           git commit -m "Skip pending QuantBet tip"
           git push
-      - name: Refresh GitHub Pages
-        run: gh workflow run pages.yml --ref "${{ github.event.repository.default_branch }}"
       - run: gh issue close "${{ github.event.issue.number }}" --comment "Tip je prebačen u SKIPPED status."
