@@ -22,7 +22,7 @@ jobs:
       GMAIL_APP_PASS: ${{ secrets.GMAIL_APP_PASS }}
       EMAIL_TO: ${{ secrets.EMAIL_TO }}
       PAPER_MODE: ${{ vars.PAPER_MODE || 'true' }}
-      H2H_TELEMETRY_ENABLED: ${{ vars.H2H_TELEMETRY_ENABLED || 'false' }}
+      H2H_TELEMETRY_ENABLED: "true"
       API_REQUEST_BUDGET: ${{ vars.API_REQUEST_BUDGET || '7500' }}
       API_BUDGET_RESERVE: ${{ vars.API_BUDGET_RESERVE || '500' }}
       INTRADAY_MODE: "true"
@@ -46,7 +46,7 @@ jobs:
           restore-keys: api-cache-${{ runner.os }}-
       - run: pip install -r requirements.txt
       - run: python main.py generate
-      - name: Commit intraday ledger and signal alerts
+      - name: Commit intraday ledger, signals and raw API archive
         run: |
           set -euo pipefail
           files=(bets.json predictions.json ledger_meta.json api_usage.json api_usage_history.json intraday_alerts.json intraday_watchlist_state.json)
@@ -55,9 +55,10 @@ jobs:
             if [ -e "$file" ] && ! git diff --quiet -- "$file"; then changed=1; fi
             if [ -e "$file" ] && git ls-files --error-unmatch "$file" >/dev/null 2>&1; then :; elif [ -e "$file" ]; then changed=1; fi
           done
+          if git status --porcelain -- data/raw_api | grep -q .; then changed=1; fi
           if [ "$changed" -eq 0 ]; then exit 0; fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add --ignore-errors "${files[@]}"
-          git commit -m "Update QuantBet intraday ledger and signals"
+          git add --ignore-errors "${files[@]}" data/raw_api
+          git commit -m "Update QuantBet intraday ledger and API archive"
           git push
