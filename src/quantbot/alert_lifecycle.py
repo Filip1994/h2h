@@ -153,8 +153,28 @@ def _settle_counterfactual(
             }
         )
         return True
-    if status in REVIEW_STATUSES or status not in FINISHED_STATUSES or score is None:
+    if status in REVIEW_STATUSES:
+        alert.update(
+            {
+                "status": "REVIEW",
+                "profit": 0.0,
+                "settled_at": now.isoformat(),
+                "result": status,
+            }
+        )
+        return True
+    if status not in FINISHED_STATUSES:
         return False
+    if score is None:
+        alert.update(
+            {
+                "status": "REVIEW",
+                "profit": 0.0,
+                "settled_at": now.isoformat(),
+                "result": status,
+            }
+        )
+        return True
     try:
         won = market_outcome(Market.parse(str(alert["market"])), *score)
     except (KeyError, ValueError):
