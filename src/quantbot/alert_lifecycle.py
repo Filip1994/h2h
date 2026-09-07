@@ -95,7 +95,10 @@ def capture_alert_closing_quotes(
             only_bookmaker_id=bookmaker_id,
         )
         quote = quotes.get(market)
-        if quote is None or not 0.0 <= quote.overround <= settings.max_market_overround:
+        if (
+            quote is None
+            or not 0.0 <= quote.overround <= settings.max_market_overround
+        ):
             continue
         _apply_closing(alert, quote, now_utc)
         captured += 1
