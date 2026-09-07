@@ -18,6 +18,8 @@ from .risk import kelly_stake, portfolio_analytics
 from .storage import BetStore, atomic_write_json
 from .types import Market
 
+# fmt: off
+
 STATE_FILE = "intraday_watchlist_state.json"
 ALERT_FILE = "intraday_alerts.json"
 SIGNAL_UPDATE_MIN_EV_DELTA = 0.03
@@ -350,3 +352,5 @@ def run_watchlist(settings: Settings, now: datetime | None = None) -> dict[str, 
         "t5_captured": t5_captured,
         "api_requests": api.request_count,
     }
+
+# fmt: on
