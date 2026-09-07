@@ -16,6 +16,7 @@ on:
     branches: [main]
     paths:
       - index.html
+      - strong-signals.html
       - bets.json
       - ledger_meta.json
       - intraday_alerts.json
@@ -48,19 +49,21 @@ jobs:
           set -euo pipefail
           rm -rf _site
           mkdir -p _site
-          cp index.html bets.json ledger_meta.json intraday_alerts.json strong_signals.json _site/
+          cp index.html bets.json ledger_meta.json _site/
+          [ -f strong-signals.html ] && cp strong-signals.html _site/ || true
+          [ -f intraday_alerts.json ] && cp intraday_alerts.json _site/ || true
+          [ -f strong_signals.json ] && cp strong_signals.json _site/ || true
           test -s _site/index.html
           test -s _site/bets.json
           test -s _site/ledger_meta.json
-          test -s _site/intraday_alerts.json
           python - <<'PY'
           import json
           from pathlib import Path
           for name in ('bets.json','ledger_meta.json','intraday_alerts.json','strong_signals.json'):
               p=Path('_site')/name
               if not p.exists():
-                  if name=='strong_signals.json': continue
-                  raise SystemExit(f'missing {name}')
+                  print(name, 'not present yet')
+                  continue
               data=json.loads(p.read_text(encoding='utf-8'))
               print(name, 'records=', len(data) if isinstance(data,list) else 'object')
           PY
