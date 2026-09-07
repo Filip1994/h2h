@@ -58,7 +58,9 @@ def _apply_closing(alert: dict[str, Any], quote: Any, captured_at: datetime) -> 
         alert["clv_odds_pct"] = clv
 
 
-def capture_alert_closing_quotes(settings: Settings, now: datetime | None = None) -> int:
+def capture_alert_closing_quotes(
+    settings: Settings, now: datetime | None = None
+) -> int:
     now_utc = (now or datetime.now(UTC)).astimezone(UTC)
     alerts = _load_alerts(settings.root)
     api = APIFootballClient(settings)
@@ -180,7 +182,9 @@ def _settle_counterfactual(
     return True
 
 
-def settle_intraday_alerts(settings: Settings, now: datetime | None = None) -> int:
+def settle_intraday_alerts(
+    settings: Settings, now: datetime | None = None
+) -> int:
     now_utc = (now or datetime.now(UTC)).astimezone(UTC)
     alerts = _load_alerts(settings.root)
     if not alerts:
