@@ -2,6 +2,10 @@ name: Monitor odds and settle ledgers
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/monitor.yml"
   schedule:
     - cron: "*/10 * * * *"
 
