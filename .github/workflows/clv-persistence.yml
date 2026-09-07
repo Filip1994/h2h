@@ -1,0 +1,56 @@
+name: QuantBet CLV persistence
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows:
+      - Daily QuantBet bulletin
+      - QuantBet intraday strong-signal scanner
+      - QuantBet adaptive watchlist monitor
+      - Monitor odds and settle ledgers
+      - QuantBet T-5 closing odds capture
+    types: [completed]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: quantbet-ledger
+  cancel-in-progress: false
+
+jobs:
+  persist:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    env:
+      API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+      PAPER_MODE: ${{ vars.PAPER_MODE || 'true' }}
+      API_REQUEST_BUDGET: ${{ vars.API_REQUEST_BUDGET || '7500' }}
+      API_BUDGET_RESERVE: ${{ vars.API_BUDGET_RESERVE || '500' }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: python tools/persist_clv.py all
+      - name: Commit canonical CLV persistence
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- bets.json predictions.json && test -z "$(git status --porcelain -- data/odds_snapshots.jsonl)"; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add bets.json predictions.json data/odds_snapshots.jsonl
+          git commit -m "Persist canonical QuantBet CLV snapshots"
+          for attempt in 1 2 3; do
+            if git push; then exit 0; fi
+            git fetch origin main
+            git rebase origin/main || { git rebase --abort; sleep 2; }
+          done
+          echo "Unable to push after retries" >&2
+          exit 1
