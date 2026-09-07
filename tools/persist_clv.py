@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 from datetime import UTC, datetime
@@ -12,7 +13,11 @@ if str(SRC) not in sys.path:
 
 from quantbot.config import Settings
 from quantbot.markets import extract_best_quotes
-from quantbot.persistence import OddsSnapshotStore, record_prediction_quote, snapshot_id
+from quantbot.persistence import (
+    OddsSnapshotStore,
+    record_prediction_quote,
+    snapshot_id,
+)
 from quantbot.storage import BetStore, atomic_write_json
 from quantbot.types import Market, OddsQuote
 
@@ -47,7 +52,11 @@ def load_snapshots() -> list[dict]:
 
 def key(item: dict) -> tuple[int, str, int] | None:
     try:
-        return int(item["event_id"]), str(item["market"]), int(item["bookmaker_id"])
+        return (
+            int(item["event_id"]),
+            str(item["market"]),
+            int(item["bookmaker_id"]),
+        )
     except (KeyError, TypeError, ValueError):
         return None
 
@@ -55,27 +64,43 @@ def key(item: dict) -> tuple[int, str, int] | None:
 def entries(settings: Settings) -> int:
     predictions = load_list(settings.predictions_file)
     bets = BetStore(settings.bets_file).load()
-    bet_by_key = {key(b): str(b["id"]) for b in bets if key(b) and b.get("id")}
+    bet_by_key = {
+        key(b): str(b["id"])
+        for b in bets
+        if key(b) and b.get("id")
+    }
     store = OddsSnapshotStore(SNAP)
     changed = 0
-    for p in predictions:
-        if p.get("entry_snapshot_id") or not p.get("odd") or not p.get("opposite_odd"):
+    for prediction in predictions:
+        if (
+            prediction.get("entry_snapshot_id")
+            or not prediction.get("odd")
+            or not prediction.get("opposite_odd")
+        ):
             continue
-        sid = record_prediction_quote(settings, p, bet_id=bet_by_key.get(key(p)), store=store)
-        if sid:
-            p["signal_id"] = str(p.get("signal_id") or p.get("id"))
-            p["entry_snapshot_id"] = sid
+        snapshot = record_prediction_quote(
+            settings,
+            prediction,
+            bet_id=bet_by_key.get(key(prediction)),
+            store=store,
+        )
+        if snapshot:
+            prediction["signal_id"] = str(
+                prediction.get("signal_id") or prediction.get("id")
+            )
+            prediction["entry_snapshot_id"] = snapshot
             changed += 1
+
     if changed:
         atomic_write_json(settings.predictions_file, predictions)
         bets = BetStore(settings.bets_file).load()
         pred_map = {key(p): p for p in predictions if key(p)}
-        for b in bets:
-            p = pred_map.get(key(b))
-            if p and p.get("entry_snapshot_id"):
-                b["prediction_id"] = p.get("id")
-                b["signal_id"] = p.get("signal_id") or p.get("id")
-                b["entry_snapshot_id"] = p.get("entry_snapshot_id")
+        for bet in bets:
+            prediction = pred_map.get(key(bet))
+            if prediction and prediction.get("entry_snapshot_id"):
+                bet["prediction_id"] = prediction.get("id")
+                bet["signal_id"] = prediction.get("signal_id") or prediction.get("id")
+                bet["entry_snapshot_id"] = prediction.get("entry_snapshot_id")
         BetStore(settings.bets_file).save(bets)
     return changed
 
@@ -83,59 +108,113 @@ def entries(settings: Settings) -> int:
 def intermediate(settings: Settings) -> int:
     predictions = load_list(settings.predictions_file)
     by_fixture: dict[int, list[dict]] = {}
-    for p in predictions:
+    for prediction in predictions:
         try:
-            by_fixture.setdefault(int(p["event_id"]), []).append(p)
+            by_fixture.setdefault(int(prediction["event_id"]), []).append(prediction)
         except (KeyError, TypeError, ValueError):
-            pass
+            continue
+
     store = OddsSnapshotStore(SNAP)
     changed = 0
     for path in sorted(RAW.glob("*.jsonl")):
         for line in path.read_text(encoding="utf-8").splitlines():
             try:
-                r = json.loads(line)
-                fixture_id = int((r.get("params") or {})["fixture"])
-                captured = datetime.fromisoformat(str(r["captured_at"])).astimezone(UTC)
-                raw = (r.get("payload") or {}).get("response")
+                record = json.loads(line)
+                fixture_id = int((record.get("params") or {})["fixture"])
+                captured = datetime.fromisoformat(
+                    str(record["captured_at"])
+                ).astimezone(UTC)
+                raw = (record.get("payload") or {}).get("response")
             except (KeyError, TypeError, ValueError, json.JSONDecodeError):
                 continue
-            if r.get("endpoint") != "odds" or not isinstance(raw, list):
+            if record.get("endpoint") != "odds" or not isinstance(raw, list):
                 continue
-            for p in by_fixture.get(fixture_id, []):
+
+            for prediction in by_fixture.get(fixture_id, []):
                 try:
-                    bookmaker_id = int(p["bookmaker_id"])
-                    market = Market.parse(str(p["market"]))
+                    bookmaker_id = int(prediction["bookmaker_id"])
+                    market = Market.parse(str(prediction["market"]))
                 except (KeyError, TypeError, ValueError):
                     continue
-                quotes = extract_best_quotes(raw, bookmaker_priority=(bookmaker_id,), allow_any_bookmaker=False, captured_at=captured, only_bookmaker_id=bookmaker_id)
-                q = quotes.get(market)
-                if q is None or not (0 <= q.overround <= settings.max_market_overround):
+                quotes = extract_best_quotes(
+                    raw,
+                    bookmaker_priority=(bookmaker_id,),
+                    allow_any_bookmaker=False,
+                    captured_at=captured,
+                    only_bookmaker_id=bookmaker_id,
+                )
+                quote = quotes.get(market)
+                if quote is None or not (
+                    0 <= quote.overround <= settings.max_market_overround
+                ):
                     continue
-                if store.append_quote(q, fixture_id=fixture_id, snapshot_type="INTERMEDIATE", prediction_id=str(p.get("id") or "") or None, signal_id=str(p.get("signal_id") or p.get("id") or "") or None, captured_by="raw_api_archive"):
+                if store.append_quote(
+                    quote,
+                    fixture_id=fixture_id,
+                    snapshot_type="INTERMEDIATE",
+                    prediction_id=str(prediction.get("id") or "") or None,
+                    signal_id=str(
+                        prediction.get("signal_id") or prediction.get("id") or ""
+                    )
+                    or None,
+                    captured_by="raw_api_archive",
+                ):
                     changed += 1
     return changed
 
 
 def t5(settings: Settings) -> int:
     bets = BetStore(settings.bets_file).load()
-    predictions = {key(p): p for p in load_list(settings.predictions_file) if key(p)}
+    predictions = {
+        key(prediction): prediction
+        for prediction in load_list(settings.predictions_file)
+        if key(prediction)
+    }
     store = OddsSnapshotStore(SNAP)
     changed = 0
-    for b in bets:
-        if b.get("t5_snapshot_id") or b.get("closing_5m_odd") is None or b.get("closing_5m_odds_captured_at") is None:
+    for bet in bets:
+        if (
+            bet.get("t5_snapshot_id")
+            or bet.get("closing_5m_odd") is None
+            or bet.get("closing_5m_odds_captured_at") is None
+        ):
             continue
         try:
-            opposite = float(b.get("closing_5m_opposite_odd") or 0)
+            opposite = float(bet.get("closing_5m_opposite_odd") or 0)
             if opposite <= 1:
                 continue
-            q = OddsQuote(Market.parse(str(b["market"])), float(b["closing_5m_odd"]), opposite, int(b["bookmaker_id"]), str(b.get("bookmaker") or ""), datetime.fromisoformat(str(b["closing_5m_odds_captured_at"])).astimezone(UTC))
+            quote = OddsQuote(
+                Market.parse(str(bet["market"])),
+                float(bet["closing_5m_odd"]),
+                opposite,
+                int(bet["bookmaker_id"]),
+                str(bet.get("bookmaker") or ""),
+                datetime.fromisoformat(
+                    str(bet["closing_5m_odds_captured_at"])
+                ).astimezone(UTC),
+            )
         except (KeyError, TypeError, ValueError):
             continue
-        p = predictions.get(key(b))
-        sid = str((p or {}).get("signal_id") or (p or {}).get("id") or b.get("signal_id") or b.get("prediction_id") or "") or None
-        snap = store.append_quote(q, fixture_id=int(b["event_id"]), snapshot_type="T5", prediction_id=(p or {}).get("id"), bet_id=str(b["id"]), signal_id=sid, captured_by="capture-closing")
-        if snap:
-            b["t5_snapshot_id"] = snap
+
+        prediction = predictions.get(key(bet))
+        signal = str(
+            (prediction or {}).get("signal_id")
+            or (prediction or {}).get("id")
+            or bet.get("signal_id")
+            or bet.get("prediction_id")
+            or ""
+        ) or None
+        snapshot = store.append_quote(
+            quote,
+            fixture_id=int(bet["event_id"]),
+            snapshot_type="T5",
+            prediction_id=(prediction or {}).get("id"),
+            bet_id=str(bet["id"]),
+            signal_id=signal,
+            captured_by="capture-closing",
+        )
+        if snapshot:
+            bet["t5_snapshot_id"] = snapshot
             changed += 1
     if changed:
         BetStore(settings.bets_file).save(bets)
@@ -146,57 +225,103 @@ def closing(settings: Settings) -> int:
     bets = BetStore(settings.bets_file).load()
     snapshots = load_snapshots()
     changed = 0
-    for b in bets:
-        if str(b.get("status", "")).upper() not in TERMINAL or b.get("closing_snapshot_id"):
+    for bet in bets:
+        if (
+            str(bet.get("status", "")).upper() not in TERMINAL
+            or bet.get("closing_snapshot_id")
+        ):
             continue
         try:
-            kickoff = datetime.fromisoformat(str(b["kickoff"])).astimezone(UTC)
-            candidates = [s for s in snapshots if s.get("snapshot_type") in {"INTERMEDIATE", "T5"} and int(s.get("fixture_id")) == int(b["event_id"]) and str(s.get("market")) == str(b["market"]) and int(s.get("bookmaker_id")) == int(b["bookmaker_id"]) and datetime.fromisoformat(str(s["odds_captured_at"])).astimezone(UTC) <= kickoff]
+            kickoff = datetime.fromisoformat(str(bet["kickoff"])).astimezone(UTC)
+            candidates = [
+                snapshot
+                for snapshot in snapshots
+                if snapshot.get("snapshot_type") in {"INTERMEDIATE", "T5"}
+                and int(snapshot.get("fixture_id")) == int(bet["event_id"])
+                and str(snapshot.get("market")) == str(bet["market"])
+                and int(snapshot.get("bookmaker_id")) == int(bet["bookmaker_id"])
+                and datetime.fromisoformat(
+                    str(snapshot["odds_captured_at"])
+                ).astimezone(UTC)
+                <= kickoff
+            ]
         except (KeyError, TypeError, ValueError):
             continue
+
         if not candidates:
-            b["clv_status"] = "NOT_COMPUTABLE"
+            bet["clv_status"] = "NOT_COMPUTABLE"
             continue
-        latest = max(candidates, key=lambda s: str(s["odds_captured_at"]))
-        c = dict(latest)
-        c["snapshot_type"] = "CLOSING"
-        c["captured_by"] = "closing-finalizer"
-        c["prediction_id"] = b.get("prediction_id") or latest.get("prediction_id")
-        c["bet_id"] = str(b["id"])
-        c["signal_id"] = b.get("signal_id") or latest.get("signal_id")
-        c["snapshot_id"] = snapshot_id(c)
-        existing = {str(s.get("snapshot_id")) for s in snapshots}
-        if c["snapshot_id"] not in existing:
+
+        latest = max(candidates, key=lambda snapshot: str(snapshot["odds_captured_at"]))
+        canonical = dict(latest)
+        canonical["snapshot_type"] = "CLOSING"
+        canonical["captured_by"] = "closing-finalizer"
+        canonical["prediction_id"] = bet.get("prediction_id") or latest.get("prediction_id")
+        canonical["bet_id"] = str(bet["id"])
+        canonical["signal_id"] = bet.get("signal_id") or latest.get("signal_id")
+        canonical["snapshot_id"] = snapshot_id(canonical)
+        existing = {str(snapshot.get("snapshot_id")) for snapshot in snapshots}
+        if canonical["snapshot_id"] not in existing:
             with SNAP.open("a", encoding="utf-8") as handle:
-                handle.write(json.dumps(c, ensure_ascii=False, sort_keys=True, separators=(",", ":")) + "\n")
-            snapshots.append(c)
+                handle.write(
+                    json.dumps(
+                        canonical,
+                        ensure_ascii=False,
+                        sort_keys=True,
+                        separators=(",", ":"),
+                    )
+                    + "\n"
+                )
+            snapshots.append(canonical)
             changed += 1
-        b["closing_snapshot_id"] = c["snapshot_id"]
-        b["closing_odd"] = c["odd"]
-        b["closing_opposite_odd"] = c["opposite_odd"]
-        b["closing_market_probability_devig"] = c["devig_probability"]
-        b["closing_odds_captured_at"] = c["odds_captured_at"]
-        entry = next((s for s in snapshots if s.get("snapshot_id") == b.get("entry_snapshot_id")), None)
+
+        bet["closing_snapshot_id"] = canonical["snapshot_id"]
+        bet["closing_odd"] = canonical["odd"]
+        bet["closing_opposite_odd"] = canonical["opposite_odd"]
+        bet["closing_market_probability_devig"] = canonical["devig_probability"]
+        bet["closing_odds_captured_at"] = canonical["odds_captured_at"]
+        entry = next(
+            (
+                snapshot
+                for snapshot in snapshots
+                if snapshot.get("snapshot_id") == bet.get("entry_snapshot_id")
+            ),
+            None,
+        )
         if entry:
-            b["clv_odds_pct"] = round(float(entry["odd"]) / float(c["odd"]) - 1, 6)
-            b["clv_probability_pp"] = round(float(c["devig_probability"]) - float(entry["devig_probability"]), 6)
-            b["clv_status"] = "COMPUTABLE"
+            bet["clv_odds_pct"] = round(
+                float(entry["odd"]) / float(canonical["odd"]) - 1,
+                6,
+            )
+            bet["clv_probability_pp"] = round(
+                float(canonical["devig_probability"])
+                - float(entry["devig_probability"]),
+                6,
+            )
+            bet["clv_status"] = "COMPUTABLE"
         else:
-            b["clv_status"] = "NOT_COMPUTABLE"
+            bet["clv_status"] = "NOT_COMPUTABLE"
+
     BetStore(settings.bets_file).save(bets)
     return changed
 
 
 def main() -> int:
-    import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("phase", choices=("entry", "intermediate", "t5", "closing", "all"))
+    parser.add_argument(
+        "phase",
+        choices=("entry", "intermediate", "t5", "closing", "all"),
+    )
     phase = parser.parse_args().phase
     settings = Settings.from_env(ROOT)
-    if phase in {"entry", "all"}: print(f"ENTRY snapshots: {entries(settings)}")
-    if phase in {"intermediate", "all"}: print(f"INTERMEDIATE snapshots: {intermediate(settings)}")
-    if phase in {"t5", "all"}: print(f"T5 snapshots: {t5(settings)}")
-    if phase in {"closing", "all"}: print(f"CLOSING snapshots: {closing(settings)}")
+    if phase in {"entry", "all"}:
+        print(f"ENTRY snapshots: {entries(settings)}")
+    if phase in {"intermediate", "all"}:
+        print(f"INTERMEDIATE snapshots: {intermediate(settings)}")
+    if phase in {"t5", "all"}:
+        print(f"T5 snapshots: {t5(settings)}")
+    if phase in {"closing", "all"}:
+        print(f"CLOSING snapshots: {closing(settings)}")
     return 0
 
 
