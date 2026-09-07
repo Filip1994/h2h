@@ -23,7 +23,7 @@ jobs:
       GMAIL_APP_PASS: ${{ secrets.GMAIL_APP_PASS }}
       EMAIL_TO: ${{ secrets.EMAIL_TO }}
       PAPER_MODE: ${{ vars.PAPER_MODE || 'true' }}
-      H2H_TELEMETRY_ENABLED: ${{ vars.H2H_TELEMETRY_ENABLED || 'false' }}
+      H2H_TELEMETRY_ENABLED: "true"
       API_REQUEST_BUDGET: ${{ vars.API_REQUEST_BUDGET || '7500' }}
       API_BUDGET_RESERVE: ${{ vars.API_BUDGET_RESERVE || '500' }}
     steps:
@@ -41,15 +41,15 @@ jobs:
           restore-keys: api-cache-${{ runner.os }}-
       - run: pip install -r requirements.txt
       - run: python main.py generate --no-email
-      - name: Commit ledger changes
+      - name: Commit ledger and raw API archive
         run: |
-          if git diff --quiet -- bets.json predictions.json calibration.json ledger_meta.json api_usage.json api_usage_history.json; then
+          if git diff --quiet -- bets.json predictions.json calibration.json ledger_meta.json api_usage.json api_usage_history.json data/raw_api; then
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add bets.json predictions.json calibration.json ledger_meta.json api_usage.json api_usage_history.json
-          git commit -m "Update QuantBet daily ledger"
+          git add bets.json predictions.json calibration.json ledger_meta.json api_usage.json api_usage_history.json data/raw_api
+          git commit -m "Update QuantBet daily ledger and API archive"
           git push
       - name: Send committed bulletin
         run: python main.py send-report
