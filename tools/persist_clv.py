@@ -193,7 +193,16 @@ def t5(settings: Settings) -> int:
             continue
 
         prediction = predictions.get(key(bet))
-        signal = str((prediction or {}).get("signal_id") or (prediction or {}).get("id") or bet.get("signal_id") or bet.get("prediction_id") or "") or None
+        signal = (
+            str(
+                (prediction or {}).get("signal_id")
+                or (prediction or {}).get("id")
+                or bet.get("signal_id")
+                or bet.get("prediction_id")
+                or ""
+            )
+            or None
+        )
         snapshot = store.append_quote(
             quote,
             fixture_id=int(bet["event_id"]),
@@ -216,7 +225,9 @@ def closing(settings: Settings) -> int:
     snapshots = load_snapshots()
     changed = 0
     for bet in bets:
-        if str(bet.get("status", "")).upper() not in TERMINAL or bet.get("closing_snapshot_id"):
+        if str(bet.get("status", "")).upper() not in TERMINAL or bet.get(
+            "closing_snapshot_id"
+        ):
             continue
         try:
             kickoff = datetime.fromisoformat(str(bet["kickoff"])).astimezone(UTC)
@@ -243,7 +254,9 @@ def closing(settings: Settings) -> int:
         canonical = dict(latest)
         canonical["snapshot_type"] = "CLOSING"
         canonical["captured_by"] = "closing-finalizer"
-        canonical["prediction_id"] = bet.get("prediction_id") or latest.get("prediction_id")
+        canonical["prediction_id"] = bet.get("prediction_id") or latest.get(
+            "prediction_id"
+        )
         canonical["bet_id"] = str(bet["id"])
         canonical["signal_id"] = bet.get("signal_id") or latest.get("signal_id")
         canonical["snapshot_id"] = snapshot_id(canonical)
