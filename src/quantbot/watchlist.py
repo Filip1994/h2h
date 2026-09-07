@@ -3,11 +3,11 @@ from __future__ import annotations
 import json
 from datetime import UTC, datetime
 from pathlib import Path
-from types import SimpleNamespace
 from typing import Any
 
 from .alerts import (
-    build_strong_signal_email,
+    build_new_opportunity_email,
+    build_signal_update_email,
     is_strong_signal,
     send_strong_signal_email,
 )
@@ -18,8 +18,12 @@ from .risk import kelly_stake, portfolio_analytics
 from .storage import BetStore, atomic_write_json
 from .types import Market
 
+# fmt: off
+
 STATE_FILE = "intraday_watchlist_state.json"
 ALERT_FILE = "intraday_alerts.json"
+SIGNAL_UPDATE_MIN_EV_DELTA = 0.03
+SIGNAL_UPDATE_MIN_EDGE_DELTA = 0.02
 
 
 def _load_list(path: Path) -> list[dict[str, Any]]:
@@ -81,6 +85,7 @@ def _event_from_prediction(
     stake: float,
     now: datetime,
     linked_bet: dict[str, Any] | None,
+    signal_type: str,
 ) -> dict[str, Any]:
     event_id = f"{prediction['id']}:{now.astimezone(UTC).strftime('%Y%m%d%H%M')}"
     return {
@@ -104,6 +109,7 @@ def _event_from_prediction(
         "expected_value": round(expected_value, 6),
         "stake": round(float(linked_bet.get("stake") if linked_bet else stake), 2),
         "signal_source": "INTRADAY_ALERT",
+        "signal_type": signal_type,
         "signal_sent_at": now.isoformat(),
         "linked_bet_id": linked_bet.get("id") if linked_bet else None,
         "status": "PENDING",
@@ -129,6 +135,18 @@ def _apply_linked_result(event: dict[str, Any], bet: dict[str, Any] | None) -> N
     ):
         if bet.get(key) is not None:
             event[key] = bet[key]
+
+
+def _material_improvement(
+    current_ev: float,
+    current_edge: float,
+    baseline_ev: float,
+    baseline_edge: float,
+) -> bool:
+    return (
+        current_ev - baseline_ev >= SIGNAL_UPDATE_MIN_EV_DELTA
+        or current_edge - baseline_edge >= SIGNAL_UPDATE_MIN_EDGE_DELTA
+    )
 
 
 def run_watchlist(settings: Settings, now: datetime | None = None) -> dict[str, int]:
@@ -162,7 +180,8 @@ def run_watchlist(settings: Settings, now: datetime | None = None) -> dict[str, 
         by_fixture.setdefault(fixture_id, []).append(prediction)
 
     scanned = 0
-    alerts_sent = 0
+    opportunities_sent = 0
+    updates_sent = 0
     t5_captured = 0
     api = APIFootballClient(settings)
 
@@ -200,7 +219,8 @@ def run_watchlist(settings: Settings, now: datetime | None = None) -> dict[str, 
             "last_scan_at": now_utc.isoformat(),
             "cadence_seconds": interval,
         }
-        strong_events: list[dict[str, Any]] = []
+        new_opportunities: list[dict[str, Any]] = []
+        signal_updates: list[dict[str, Any]] = []
         for prediction in fixture_predictions:
             try:
                 market = Market.parse(str(prediction["market"]))
@@ -236,26 +256,48 @@ def run_watchlist(settings: Settings, now: datetime | None = None) -> dict[str, 
             key = str(prediction["id"])
             previous = state.setdefault(key, {})
             was_strong = bool(previous.get("was_strong"))
-            probe = {
-                "id": linked_bet.get("id") if linked_bet else key,
-                "event_id": fixture_id,
-                "market": market.value,
-                "market_display": prediction.get("market_display", market.value),
-                "match": prediction.get("match"),
-                "league": prediction.get("league"),
-                "kickoff": prediction.get("kickoff"),
-                "odd": quote.odd,
-                "bookmaker": quote.bookmaker_name,
-                "model_probability": prediction.get("model_probability"),
-                "decision_probability": decision,
-                "probability_edge": edge,
-                "expected_value": ev,
-                "stake": suggested_stake,
-            }
-            strong = is_strong_signal(probe, settings)
+            strong = is_strong_signal(
+                {
+                    "id": linked_bet.get("id") if linked_bet else key,
+                    "event_id": fixture_id,
+                    "market": market.value,
+                    "stake": suggested_stake,
+                    "expected_value": ev,
+                    "probability_edge": edge,
+                },
+                settings,
+            )
             previous["was_strong"] = strong
             previous["last_seen_at"] = now_utc.isoformat()
-            if strong and not was_strong:
+
+            if strong and linked_bet:
+                baseline_ev = float(
+                    previous.get("last_alert_ev", linked_bet.get("expected_value") or 0.0)
+                )
+                baseline_edge = float(
+                    previous.get(
+                        "last_alert_edge", linked_bet.get("probability_edge") or 0.0
+                    )
+                )
+                if _material_improvement(ev, edge, baseline_ev, baseline_edge):
+                    event = _event_from_prediction(
+                        prediction,
+                        quote=quote,
+                        decision_probability=decision,
+                        expected_value=ev,
+                        probability_edge=edge,
+                        stake=suggested_stake,
+                        now=now_local,
+                        linked_bet=linked_bet,
+                        signal_type="SIGNAL_UPDATE",
+                    )
+                    if not any(a.get("id") == event["id"] for a in alerts):
+                        alerts.append(event)
+                        signal_updates.append(event)
+                        previous["last_alert_ev"] = ev
+                        previous["last_alert_edge"] = edge
+
+            elif strong and not linked_bet and not was_strong:
                 event = _event_from_prediction(
                     prediction,
                     quote=quote,
@@ -264,10 +306,13 @@ def run_watchlist(settings: Settings, now: datetime | None = None) -> dict[str, 
                     probability_edge=edge,
                     stake=suggested_stake,
                     now=now_local,
-                    linked_bet=linked_bet,
+                    linked_bet=None,
+                    signal_type="NEW_OPPORTUNITY",
                 )
                 alerts.append(event)
-                strong_events.append(event)
+                new_opportunities.append(event)
+                previous["last_alert_ev"] = ev
+                previous["last_alert_edge"] = edge
 
             if strong and 120 <= seconds <= 480:
                 event_matches = [a for a in alerts if a.get("prediction_id") == key]
@@ -281,11 +326,18 @@ def run_watchlist(settings: Settings, now: datetime | None = None) -> dict[str, 
                         event["closing_5m_odds_captured_at"] = now_utc.isoformat()
                         t5_captured += 1
 
-        if strong_events and settings.intraday_alert_enabled:
-            result = SimpleNamespace(new_bets=tuple(strong_events))
-            subject, html_body = build_strong_signal_email(result, settings, now_local)
+        if new_opportunities and settings.intraday_alert_enabled:
+            subject, html_body = build_new_opportunity_email(
+                new_opportunities, settings, now_local
+            )
             if send_strong_signal_email(subject, html_body, settings):
-                alerts_sent += len(strong_events)
+                opportunities_sent += len(new_opportunities)
+        if signal_updates and settings.intraday_alert_enabled:
+            subject, html_body = build_signal_update_email(
+                signal_updates, settings, now_local
+            )
+            if send_strong_signal_email(subject, html_body, settings):
+                updates_sent += len(signal_updates)
 
     for event in alerts:
         bet = linked.get((int(event.get("event_id", 0)), str(event.get("market", ""))))
@@ -295,7 +347,10 @@ def run_watchlist(settings: Settings, now: datetime | None = None) -> dict[str, 
     atomic_write_json(alerts_path, alerts[-1000:])
     return {
         "fixtures_scanned": scanned,
-        "alerts_sent": alerts_sent,
+        "opportunities_sent": opportunities_sent,
+        "updates_sent": updates_sent,
         "t5_captured": t5_captured,
         "api_requests": api.request_count,
     }
+
+# fmt: on
