@@ -36,13 +36,22 @@ jobs:
       - run: pip install -r requirements.txt
       - run: python main.py capture-closing
       - run: python tools/capture_alert_closing.py
-      - name: Commit T-5 snapshots and raw API archive
+      - name: Build public strong-signal dataset
+        run: python tools/build_public_strong_signals.py
+      - name: Commit T-5 snapshots, strong signals and raw API archive
         run: |
-          if git diff --quiet -- bets.json intraday_alerts.json && test -z "$(git status --porcelain -- data/raw_api)"; then
+          set -euo pipefail
+          if git diff --quiet -- bets.json intraday_alerts.json strong_signals.json && test -z "$(git status --porcelain -- data/raw_api)"; then
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add bets.json intraday_alerts.json data/raw_api
+          git add bets.json intraday_alerts.json strong_signals.json data/raw_api
           git commit -m "Capture QuantBet T-5 closing odds and API archive"
-          git push
+          for attempt in 1 2 3; do
+            if git push; then exit 0; fi
+            git fetch origin main
+            git rebase origin/main || { git rebase --abort; sleep 2; }
+          done
+          echo "Unable to push after retries" >&2
+          exit 1
