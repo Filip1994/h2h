@@ -146,16 +146,12 @@ def record_prediction_quote(
         odd=float(prediction["odd"]),
         opposite_odd=float(prediction["opposite_odd"]),
         bookmaker_id=int(prediction["bookmaker_id"]),
-        bookmaker_name=str(
-            prediction.get("bookmaker") or prediction["bookmaker_id"]
-        ),
+        bookmaker_name=str(prediction.get("bookmaker") or prediction["bookmaker_id"]),
         captured_at=datetime.fromisoformat(
             str(prediction["odds_captured_at"])
         ).astimezone(UTC),
     )
-    target = store or OddsSnapshotStore(
-        settings.root / "data" / "odds_snapshots.jsonl"
-    )
+    target = store or OddsSnapshotStore(settings.root / "data" / "odds_snapshots.jsonl")
     return target.append_quote(
         quote,
         fixture_id=int(prediction["event_id"]),
