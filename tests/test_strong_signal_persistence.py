@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from datetime import UTC, datetime
 
+import main
 from main import persist_intraday_strong_signals
 
 
@@ -32,11 +33,19 @@ def test_generate_strong_signal_is_persisted_and_deduplicated(settings) -> None:
         "profit": 0.0,
     }
 
-    persist_intraday_strong_signals(settings, (bet,), now)
-    persist_intraday_strong_signals(settings, (bet,), now)
+    original_root = main.ROOT
+    main.ROOT = settings.root
+    try:
+        alerts_path = settings.root / "intraday_alerts.json"
+        assert not alerts_path.exists()
 
-    alerts_path = settings.root / "intraday_alerts.json"
-    alerts = json.loads(alerts_path.read_text(encoding="utf-8"))
+        persist_intraday_strong_signals(settings, (bet,), now)
+        assert alerts_path.exists()
+
+        persist_intraday_strong_signals(settings, (bet,), now)
+        alerts = json.loads(alerts_path.read_text(encoding="utf-8"))
+    finally:
+        main.ROOT = original_root
 
     assert len(alerts) == 1
     assert alerts[0]["id"] == "generate:bet-strong-001"
