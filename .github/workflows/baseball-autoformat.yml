@@ -1,0 +1,34 @@
+name: Baseball autoformat
+
+on:
+  push:
+    branches:
+      - feature/baseball-live-v1
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: feature/baseball-live-v1
+          fetch-depth: 1
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - run: pip install ruff==0.16.6
+      - run: ruff format src/quantbot/baseball tests/test_baseball_collector.py
+      - name: Commit formatting changes
+        run: |
+          if git diff --quiet; then
+            echo "Already formatted"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/quantbot/baseball tests/test_baseball_collector.py
+          git commit -m "Format Baseball code"
+          git push origin feature/baseball-live-v1
