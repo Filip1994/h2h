@@ -1,0 +1,37 @@
+name: QuantBet closing-day bulletin
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "30 3 * * *"
+      timezone: "Europe/Belgrade"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: quantbet-closing-report
+  cancel-in-progress: false
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    env:
+      GMAIL_USER: ${{ secrets.GMAIL_USER }}
+      GMAIL_APP_PASS: ${{ secrets.GMAIL_APP_PASS }}
+      EMAIL_TO: ${{ secrets.EMAIL_TO }}
+      PAPER_MODE: ${{ vars.PAPER_MODE || 'true' }}
+      API_REQUEST_BUDGET: ${{ vars.API_REQUEST_BUDGET || '7500' }}
+      API_BUDGET_RESERVE: ${{ vars.API_BUDGET_RESERVE || '500' }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Send previous-day closing bulletin
+        run: |
+          DAY=$(TZ=Europe/Belgrade date -d 'yesterday' +%F)
+          python main.py closing-report --day "$DAY"

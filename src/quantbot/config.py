@@ -34,6 +34,12 @@ class Settings:
     bookmaker_priority: tuple[int, ...]
     allow_any_bookmaker: bool
     excluded_countries: tuple[str, ...]
+    intraday_mode: bool
+    intraday_lookahead_hours: int
+    intraday_alert_enabled: bool
+    strong_signal_min_ev: float
+    strong_signal_min_edge: float
+    strong_signal_min_stake: float
 
     bets_file: Path
     predictions_file: Path
@@ -111,6 +117,12 @@ class Settings:
             bookmaker_priority=bookmaker_priority,
             allow_any_bookmaker=_bool("ALLOW_ANY_BOOKMAKER", True),
             excluded_countries=excluded_countries,
+            intraday_mode=_bool("INTRADAY_MODE", False),
+            intraday_lookahead_hours=_int("INTRADAY_LOOKAHEAD_HOURS", 6),
+            intraday_alert_enabled=_bool("INTRADAY_ALERT_ENABLED", True),
+            strong_signal_min_ev=_float("STRONG_SIGNAL_MIN_EV", 0.10),
+            strong_signal_min_edge=_float("STRONG_SIGNAL_MIN_EDGE_PP", 0.05),
+            strong_signal_min_stake=_float("STRONG_SIGNAL_MIN_STAKE_RSD", 300.0),
             bets_file=root / "bets.json",
             predictions_file=root / "predictions.json",
             calibration_file=root / "calibration.json",
@@ -170,6 +182,8 @@ class Settings:
             "MAX_OPEN_RISK_PCT": self.max_open_risk_pct,
             "DRAWDOWN_REDUCE_AT": self.drawdown_reduce_at,
             "DRAWDOWN_STOP_AT": self.drawdown_stop_at,
+            "STRONG_SIGNAL_MIN_EV": self.strong_signal_min_ev,
+            "STRONG_SIGNAL_MIN_EDGE_PP": self.strong_signal_min_edge,
         }
         for name, value in probabilities.items():
             if not 0.0 <= value <= 1.0:
@@ -192,8 +206,12 @@ class Settings:
             raise ValueError("API_RETRY_BASE_SECONDS mora biti između 0 i 30")
         if self.min_stake <= 0.0 or self.stake_step <= 0.0:
             raise ValueError("MIN_STAKE_RSD i STAKE_STEP_RSD moraju biti pozitivni")
+        if self.strong_signal_min_stake <= 0.0:
+            raise ValueError("STRONG_SIGNAL_MIN_STAKE_RSD mora biti pozitivan")
         if self.max_daily_picks < 1:
             raise ValueError("MAX_DAILY_PICKS mora biti najmanje 1")
+        if self.intraday_lookahead_hours < 1 or self.intraday_lookahead_hours > 24:
+            raise ValueError("INTRADAY_LOOKAHEAD_HOURS mora biti između 1 i 24")
         if self.min_calibration_samples < 1:
             raise ValueError("MIN_CALIBRATION_SAMPLES mora biti najmanje 1")
         if self.training_seasons < 1:
