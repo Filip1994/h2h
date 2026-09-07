@@ -60,7 +60,9 @@ def check_settlement_health(
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Detect stale pending QuantBet settlements")
+    parser = argparse.ArgumentParser(
+        description="Detect stale pending QuantBet settlements"
+    )
     parser.add_argument("--max-age-minutes", type=int, default=30)
     args = parser.parse_args()
     report = check_settlement_health(ROOT, datetime.now(UTC), args.max_age_minutes)
