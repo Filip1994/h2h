@@ -82,16 +82,12 @@ def run_generate(*, deliver_email: bool = True) -> int:
         strong = tuple(
             bet for bet in result.new_bets if is_strong_signal(bet, settings)
         )
-        subject, html_body = build_strong_signal_email(
-            result, settings, generated_at
-        )
+        subject, html_body = build_strong_signal_email(result, settings, generated_at)
         (ROOT / "report_preview.html").write_text(html_body, encoding="utf-8")
         (ROOT / "report_subject.txt").write_text(subject, encoding="utf-8")
         if deliver_email and settings.intraday_alert_enabled and strong:
             send_strong_signal_email(subject, html_body, settings)
-        print(
-            f"🚨 Strong signals: {len(strong)} / new bets: {len(result.new_bets)}"
-        )
+        print(f"🚨 Strong signals: {len(strong)} / new bets: {len(result.new_bets)}")
     else:
         subject, html_body = build_email(result, settings, generated_at)
         (ROOT / "report_preview.html").write_text(html_body, encoding="utf-8")
@@ -142,8 +138,7 @@ def run_closing_report(day: str | None = None) -> int:
         b
         for b in bets
         if str(b.get("date") or str(b.get("created_at") or "")[:10]) == target_day
-        and str(b.get("signal_source", ""))
-        in {"DAILY_BULLETIN", "INTRADAY_ALERT"}
+        and str(b.get("signal_source", "")) in {"DAILY_BULLETIN", "INTRADAY_ALERT"}
     ]
     alerts_path = ROOT / "intraday_alerts.json"
     if alerts_path.exists():
@@ -235,7 +230,9 @@ def parser() -> argparse.ArgumentParser:
     subcommands.add_parser(
         "send-report", help="Pošalji poslednji generisani email report"
     )
-    subcommands.add_parser("watchlist", help="Adaptivno prati pikove i near-miss signale")
+    subcommands.add_parser(
+        "watchlist", help="Adaptivno prati pikove i near-miss signale"
+    )
     subcommands.add_parser("monitor", help="Snimi closing odds i poravnaj rezultate")
     subcommands.add_parser(
         "capture-closing", help="Snimi T-5 closing odds za signalizovane utakmice"
@@ -274,11 +271,7 @@ def main() -> int:
     if args.command == "analytics":
         return run_analytics()
     if args.command == "skip":
-        identifier = (
-            args.identifier
-            or args.issue_title
-            or os.getenv("ISSUE_TITLE", "")
-        )
+        identifier = args.identifier or args.issue_title or os.getenv("ISSUE_TITLE", "")
         if not identifier:
             raise SystemExit("skip zahteva --id, --issue-title ili ISSUE_TITLE")
         return run_skip(identifier)

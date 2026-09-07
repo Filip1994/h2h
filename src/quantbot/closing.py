@@ -102,8 +102,7 @@ def build_closing_day_email(
     selected = [
         b
         for b in bets
-        if str(b.get("signal_source", ""))
-        in {"DAILY_BULLETIN", "INTRADAY_ALERT"}
+        if str(b.get("signal_source", "")) in {"DAILY_BULLETIN", "INTRADAY_ALERT"}
     ]
     selected.sort(key=lambda b: str(b.get("kickoff", "")))
     rows = "".join(_row(b) for b in selected)
