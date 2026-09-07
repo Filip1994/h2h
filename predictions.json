@@ -32417,7 +32417,7 @@
   {
     "id": "1538692_OVER_2_5_dc-value-v2.1.0",
     "event_id": 1538692,
-    "kickoff": "2026-09-06T12:30:00+00:00",
+    "kickoff": "2026-09-09T12:30:00+00:00",
     "created_at": "2026-09-06T01:51:57.388329+02:00",
     "decision_timestamp": "2026-09-05T23:51:57.388329+00:00",
     "data_cutoff": "2026-09-05T23:51:57.388329+00:00",
@@ -32451,7 +32451,7 @@
   {
     "id": "1538692_UNDER_2_5_dc-value-v2.1.0",
     "event_id": 1538692,
-    "kickoff": "2026-09-06T12:30:00+00:00",
+    "kickoff": "2026-09-09T12:30:00+00:00",
     "created_at": "2026-09-06T01:51:57.388329+02:00",
     "decision_timestamp": "2026-09-05T23:51:57.388329+00:00",
     "data_cutoff": "2026-09-05T23:51:57.388329+00:00",
@@ -32485,7 +32485,7 @@
   {
     "id": "1538692_BTTS_YES_dc-value-v2.1.0",
     "event_id": 1538692,
-    "kickoff": "2026-09-06T12:30:00+00:00",
+    "kickoff": "2026-09-09T12:30:00+00:00",
     "created_at": "2026-09-06T01:51:57.388329+02:00",
     "decision_timestamp": "2026-09-05T23:51:57.388329+00:00",
     "data_cutoff": "2026-09-05T23:51:57.388329+00:00",
@@ -86213,9 +86213,11 @@
     "market_overround": null,
     "selected": false,
     "rejection_reason": "REJECT_NO_ODDS",
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-value-v2.1.0",
+    "result": "2:4",
+    "settled_at": "2026-09-07T12:49:09.237612+00:00"
   },
   {
     "id": "1634834_UNDER_2_5_dc-value-v2.1.0",
@@ -86247,9 +86249,11 @@
     "market_overround": null,
     "selected": false,
     "rejection_reason": "REJECT_NO_ODDS",
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-value-v2.1.0",
+    "result": "2:4",
+    "settled_at": "2026-09-07T12:49:09.237612+00:00"
   },
   {
     "id": "1634834_BTTS_YES_dc-value-v2.1.0",
@@ -86281,9 +86285,11 @@
     "market_overround": null,
     "selected": false,
     "rejection_reason": "REJECT_NO_ODDS",
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-value-v2.1.0",
+    "result": "2:4",
+    "settled_at": "2026-09-07T12:49:09.237612+00:00"
   },
   {
     "id": "1530995_OVER_2_5_dc-value-v2.1.0",
