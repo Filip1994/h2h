@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 from datetime import UTC, datetime
 from pathlib import Path
-from types import SimpleNamespace
 from typing import Any
 
 from .alerts import (
@@ -290,8 +289,7 @@ def run_watchlist(settings: Settings, now: datetime | None = None) -> dict[str, 
                         linked_bet=linked_bet,
                         signal_type="SIGNAL_UPDATE",
                     )
-                    new_alert_id = event["id"]
-                    if not any(a.get("id") == new_alert_id for a in alerts):
+                    if not any(a.get("id") == event["id"] for a in alerts):
                         alerts.append(event)
                         signal_updates.append(event)
                         previous["last_alert_ev"] = ev
