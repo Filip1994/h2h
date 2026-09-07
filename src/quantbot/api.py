@@ -35,7 +35,9 @@ class APIFootballClient:
         self.endpoint_requests: Counter[str] = Counter()
         self.endpoint_cache_hits: Counter[str] = Counter()
         self.settings.cache_dir.mkdir(parents=True, exist_ok=True)
-        self.settings.root.joinpath("data", "raw_api").mkdir(parents=True, exist_ok=True)
+        self.settings.root.joinpath("data", "raw_api").mkdir(
+            parents=True, exist_ok=True
+        )
 
     def _archive_path(self, captured_at: datetime) -> Path:
         return (
@@ -67,7 +69,9 @@ class APIFootballClient:
         }
         path = self._archive_path(captured_at)
         path.parent.mkdir(parents=True, exist_ok=True)
-        line = json.dumps(record, ensure_ascii=False, separators=(",", ":")) + "\n"
+        line = (
+            json.dumps(record, ensure_ascii=False, separators=(",", ":")) + "\n"
+        )
         with path.open("a", encoding="utf-8") as handle:
             handle.write(line)
             handle.flush()
