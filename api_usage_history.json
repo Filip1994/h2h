@@ -52,5 +52,25 @@
     "timestamp": "2026-09-07T14:39:07.280202+00:00",
     "date": "2026-09-07",
     "new_bets": 0
+  },
+  {
+    "request_count": 20,
+    "request_budget": 7500,
+    "working_budget": 7000,
+    "reserve": 500,
+    "remaining_working": 6980,
+    "cache_hits": 24,
+    "cache_misses": 20,
+    "cache_hit_rate": 0.545455,
+    "endpoint_requests": {
+      "fixtures": 13,
+      "odds": 7
+    },
+    "endpoint_cache_hits": {
+      "fixtures": 24
+    },
+    "timestamp": "2026-09-07T18:56:30.955108+00:00",
+    "date": "2026-09-07",
+    "new_bets": 0
   }
 ]
