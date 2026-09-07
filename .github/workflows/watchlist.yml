@@ -46,36 +46,7 @@ jobs:
       - run: pip install -r requirements.txt
       - run: python main.py watchlist
       - name: Build public strong-signal dataset
-        run: |
-          python - <<'PY'
-          import json
-          from pathlib import Path
-          def load(path):
-              p=Path(path)
-              if not p.exists():
-                  return []
-              try:
-                  value=json.loads(p.read_text(encoding='utf-8'))
-                  return value if isinstance(value,list) else []
-              except Exception:
-                  return []
-          previous=load('strong_signals.json')
-          alerts=load('intraday_alerts.json')
-          bets=[x for x in load('bets.json') if str(x.get('signal_source',''))=='INTRADAY_ALERT']
-          merged={}
-          for item in previous+alerts+bets:
-              key=str(item.get('id') or item.get('prediction_id') or item.get('event_id') or '')
-              if not key:
-                  continue
-              current=merged.get(key,{})
-              current.update(item)
-              if item.get('status') in {'WIN','LOSS'}:
-                  current['virtual_profit']=item.get('profit', item.get('virtual_profit', 0))
-              merged[key]=current
-          data=sorted(merged.values(), key=lambda x: str(x.get('signal_sent_at') or x.get('created_at') or x.get('date') or ''))
-          Path('strong_signals.json').write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
-          print(f'public strong signals: {len(data)}')
-          PY
+        run: python tools/build_public_strong_signals.py
       - name: Commit watchlist, strong-signal state and raw API archive
         run: |
           set -euo pipefail
