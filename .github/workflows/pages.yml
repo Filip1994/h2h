@@ -2,6 +2,16 @@ name: Deploy QuantBet dashboard
 
 on:
   workflow_dispatch:
+  workflow_run:
+    workflows:
+      - QuantBet intraday strong-signal scanner
+      - QuantBet adaptive watchlist monitor
+      - QuantBet T-5 closing odds capture
+      - QuantBet daily bulletin
+      - QuantBet intraday monitor
+      - QuantBet closing-day bulletin
+      - QuantBet skip pending tip
+    types: [completed]
   push:
     branches: [main]
     paths:
@@ -23,12 +33,15 @@ concurrency:
 
 jobs:
   deploy:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: main
       - uses: actions/configure-pages@v5
       - name: Build static artifact
         run: |
@@ -37,6 +50,12 @@ jobs:
           test -s _site/index.html
           test -s _site/bets.json
           test -s _site/ledger_meta.json
+          python - <<'PY'
+          import json
+          for name in ("bets.json", "ledger_meta.json"):
+              with open(name, encoding="utf-8") as f:
+                  json.load(f, parse_constant=lambda value: (_ for _ in ()).throw(ValueError(f"invalid JSON constant: {value}")))
+          PY
       - uses: actions/upload-pages-artifact@v4
         with:
           path: _site
