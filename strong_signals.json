@@ -22,12 +22,16 @@
     "signal_source": "INTRADAY_ALERT",
     "signal_sent_at": "2026-09-07T20:53:27.924836+02:00",
     "linked_bet_id": null,
-    "status": "PENDING",
-    "profit": 0.0,
+    "status": "LOSS",
+    "profit": -500.0,
     "closing_5m_odd": null,
     "closing_5m_opposite_odd": null,
     "closing_5m_market_probability_devig": null,
-    "closing_5m_odds_captured_at": null
+    "closing_5m_odds_captured_at": null,
+    "result": "0:0",
+    "settled_at": "2026-09-07T22:33:07.742885+00:00",
+    "settlement_type": "COUNTERFACTUAL_ALERT",
+    "virtual_profit": -500.0
   },
   {
     "id": "1498787_UNDER_2_5_dc-value-v2.1.0:202609071853",
@@ -52,12 +56,16 @@
     "signal_source": "INTRADAY_ALERT",
     "signal_sent_at": "2026-09-07T20:53:27.924836+02:00",
     "linked_bet_id": null,
-    "status": "PENDING",
-    "profit": 0.0,
+    "status": "WIN",
+    "profit": 240.0,
     "closing_5m_odd": null,
     "closing_5m_opposite_odd": null,
     "closing_5m_market_probability_devig": null,
-    "closing_5m_odds_captured_at": null
+    "closing_5m_odds_captured_at": null,
+    "result": "1:0",
+    "settled_at": "2026-09-07T22:33:07.742885+00:00",
+    "settlement_type": "COUNTERFACTUAL_ALERT",
+    "virtual_profit": 240.0
   },
   {
     "id": "1601425_UNDER_2_5_dc-value-v2.1.0:202609071853",
@@ -82,12 +90,16 @@
     "signal_source": "INTRADAY_ALERT",
     "signal_sent_at": "2026-09-07T20:53:27.924836+02:00",
     "linked_bet_id": null,
-    "status": "PENDING",
-    "profit": 0.0,
+    "status": "LOSS",
+    "profit": -500.0,
     "closing_5m_odd": null,
     "closing_5m_opposite_odd": null,
     "closing_5m_market_probability_devig": null,
-    "closing_5m_odds_captured_at": null
+    "closing_5m_odds_captured_at": null,
+    "result": "1:2",
+    "settled_at": "2026-09-07T22:33:07.742885+00:00",
+    "settlement_type": "COUNTERFACTUAL_ALERT",
+    "virtual_profit": -500.0
   },
   {
     "id": "1600682_UNDER_2_5_dc-value-v2.1.0:202609071853",

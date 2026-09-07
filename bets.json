@@ -528,8 +528,10 @@
     "xi": 0.0015,
     "model_version": "dc-value-v2.1.0",
     "calibration_status": "IDENTITY_UNVALIDATED",
-    "status": "PENDING",
-    "profit": 0.0
+    "status": "WIN",
+    "profit": 375.0,
+    "result": "1:0",
+    "settled_at": "2026-09-07T22:32:50.674837+00:00"
   },
   {
     "id": "1576480_OVER_2_5",
@@ -574,7 +576,9 @@
     "xi": 0.0015,
     "model_version": "dc-value-v2.1.0",
     "calibration_status": "IDENTITY_UNVALIDATED",
-    "status": "PENDING",
-    "profit": 0.0
+    "status": "WIN",
+    "profit": 580.0,
+    "result": "2:1",
+    "settled_at": "2026-09-07T22:32:50.674837+00:00"
   }
 ]
