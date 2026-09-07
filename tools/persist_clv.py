@@ -13,7 +13,11 @@ if str(SRC) not in sys.path:
 
 from quantbot.config import Settings
 from quantbot.markets import extract_best_quotes
-from quantbot.persistence import OddsSnapshotStore, record_prediction_quote
+from quantbot.persistence import (
+    OddsSnapshotStore,
+    record_prediction_quote,
+    snapshot_id,
+)
 from quantbot.storage import BetStore, atomic_write_json
 from quantbot.types import Market, OddsQuote
 
@@ -63,6 +67,7 @@ def entries(settings: Settings) -> int:
     bet_by_key = {key(b): str(b["id"]) for b in bets if key(b) and b.get("id")}
     store = OddsSnapshotStore(SNAP)
     changed = 0
+
     for prediction in predictions:
         if (
             prediction.get("entry_snapshot_id")
@@ -70,12 +75,14 @@ def entries(settings: Settings) -> int:
             or not prediction.get("opposite_odd")
         ):
             continue
+
         snapshot = record_prediction_quote(
             settings,
             prediction,
             bet_id=bet_by_key.get(key(prediction)),
             store=store,
         )
+
         if snapshot:
             prediction["signal_id"] = str(
                 prediction.get("signal_id") or prediction.get("id")
@@ -87,19 +94,25 @@ def entries(settings: Settings) -> int:
         atomic_write_json(settings.predictions_file, predictions)
         bets = BetStore(settings.bets_file).load()
         pred_map = {key(p): p for p in predictions if key(p)}
+
         for bet in bets:
             prediction = pred_map.get(key(bet))
             if prediction and prediction.get("entry_snapshot_id"):
                 bet["prediction_id"] = prediction.get("id")
-                bet["signal_id"] = prediction.get("signal_id") or prediction.get("id")
+                bet["signal_id"] = prediction.get("signal_id") or prediction.get(
+                    "id"
+                )
                 bet["entry_snapshot_id"] = prediction.get("entry_snapshot_id")
+
         BetStore(settings.bets_file).save(bets)
+
     return changed
 
 
 def intermediate(settings: Settings) -> int:
     predictions = load_list(settings.predictions_file)
     by_fixture: dict[int, list[dict]] = {}
+
     for prediction in predictions:
         try:
             by_fixture.setdefault(int(prediction["event_id"]), []).append(prediction)
@@ -108,6 +121,7 @@ def intermediate(settings: Settings) -> int:
 
     store = OddsSnapshotStore(SNAP)
     changed = 0
+
     for path in sorted(RAW.glob("*.jsonl")):
         for line in path.read_text(encoding="utf-8").splitlines():
             try:
@@ -119,6 +133,7 @@ def intermediate(settings: Settings) -> int:
                 raw = (record.get("payload") or {}).get("response")
             except (KeyError, TypeError, ValueError, json.JSONDecodeError):
                 continue
+
             if record.get("endpoint") != "odds" or not isinstance(raw, list):
                 continue
 
@@ -128,6 +143,7 @@ def intermediate(settings: Settings) -> int:
                     market = Market.parse(str(prediction["market"]))
                 except (KeyError, TypeError, ValueError):
                     continue
+
                 quotes = extract_best_quotes(
                     raw,
                     bookmaker_priority=(bookmaker_id,),
@@ -136,10 +152,12 @@ def intermediate(settings: Settings) -> int:
                     only_bookmaker_id=bookmaker_id,
                 )
                 quote = quotes.get(market)
+
                 if quote is None or not (
                     0 <= quote.overround <= settings.max_market_overround
                 ):
                     continue
+
                 if store.append_quote(
                     quote,
                     fixture_id=fixture_id,
@@ -152,6 +170,7 @@ def intermediate(settings: Settings) -> int:
                     captured_by="raw_api_archive",
                 ):
                     changed += 1
+
     return changed
 
 
@@ -164,6 +183,7 @@ def t5(settings: Settings) -> int:
     }
     store = OddsSnapshotStore(SNAP)
     changed = 0
+
     for bet in bets:
         if (
             bet.get("t5_snapshot_id")
@@ -171,10 +191,13 @@ def t5(settings: Settings) -> int:
             or bet.get("closing_5m_odds_captured_at") is None
         ):
             continue
+
         try:
             opposite = float(bet.get("closing_5m_opposite_odd") or 0)
+
             if opposite <= 1:
                 continue
+
             quote = OddsQuote(
                 Market.parse(str(bet["market"])),
                 float(bet["closing_5m_odd"]),
@@ -189,6 +212,7 @@ def t5(settings: Settings) -> int:
             continue
 
         prediction = predictions.get(key(bet))
+
         signal = (
             str(
                 (prediction or {}).get("signal_id")
@@ -199,6 +223,7 @@ def t5(settings: Settings) -> int:
             )
             or None
         )
+
         snapshot = store.append_quote(
             quote,
             fixture_id=int(bet["event_id"]),
@@ -208,11 +233,14 @@ def t5(settings: Settings) -> int:
             signal_id=signal,
             captured_by="capture-closing",
         )
+
         if snapshot:
             bet["t5_snapshot_id"] = snapshot
             changed += 1
+
     if changed:
         BetStore(settings.bets_file).save(bets)
+
     return changed
 
 
@@ -220,15 +248,21 @@ def closing(settings: Settings) -> int:
     """Persist only the real closing quote captured by the existing monitor."""
     bets = BetStore(settings.bets_file).load()
     snapshots = load_snapshots()
+    store = OddsSnapshotStore(SNAP)
+    existing_ids = {
+        str(snapshot["snapshot_id"])
+        for snapshot in snapshots
+        if snapshot.get("snapshot_id")
+    }
     changed = 0
 
     for bet in bets:
         if str(bet.get("status", "")).upper() not in TERMINAL:
             continue
 
-        # monitor.py is the existing successful closing capture path. Its
-        # closing_* fields are the only source eligible for canonical CLOSING.
-        # T5 and INTERMEDIATE snapshots are never used as substitutes.
+        # monitor.py is the existing successful closing capture path.
+        # These closing_* fields are the only source eligible for canonical
+        # CLOSING. T5 and INTERMEDIATE are never used as substitutes.
         if any(
             bet.get(field) is None
             for field in (
@@ -242,15 +276,19 @@ def closing(settings: Settings) -> int:
             continue
 
         try:
-            kickoff = datetime.fromisoformat(str(bet["kickoff"])).astimezone(UTC)
+            kickoff = datetime.fromisoformat(
+                str(bet["kickoff"])
+            ).astimezone(UTC)
             captured_at = datetime.fromisoformat(
                 str(bet["closing_odds_captured_at"])
             ).astimezone(UTC)
             odd = float(bet["closing_odd"])
             opposite_odd = float(bet["closing_opposite_odd"])
             devig_probability = float(bet["closing_market_probability_devig"])
+
             if odd <= 1 or opposite_odd <= 1 or captured_at > kickoff:
                 raise ValueError("invalid canonical closing quote")
+
             market = Market.parse(str(bet["market"]))
             bookmaker_id = int(bet["bookmaker_id"])
             fixture_id = int(bet["event_id"])
@@ -261,6 +299,7 @@ def closing(settings: Settings) -> int:
         prediction_id = bet.get("prediction_id")
         signal_id = bet.get("signal_id") or prediction_id
         overround = (1.0 / odd) + (1.0 / opposite_odd) - 1.0
+
         canonical = {
             "fixture_id": fixture_id,
             "market": market.value,
@@ -280,14 +319,19 @@ def closing(settings: Settings) -> int:
             "source_request_hash": None,
             "captured_by": "monitor-closing-capture",
         }
-        store = OddsSnapshotStore(SNAP)
-        snapshot_id_value = store.append(canonical)
-        if snapshot_id_value:
-            changed += 1
-            snapshots.append({**canonical, "snapshot_id": snapshot_id_value})
 
-        if snapshot_id_value:
-            bet["closing_snapshot_id"] = snapshot_id_value
+        canonical_id = snapshot_id(canonical)
+
+        if canonical_id not in existing_ids:
+            store.append(canonical)
+            existing_ids.add(canonical_id)
+            snapshots.append({**canonical, "snapshot_id": canonical_id})
+            changed += 1
+
+        # Important: even when the snapshot already existed, use its
+        # deterministic canonical ID. This avoids losing the linkage because
+        # OddsSnapshotStore.append() returns None on an exact duplicate.
+        bet["closing_snapshot_id"] = canonical_id
 
         entry = next(
             (
@@ -297,7 +341,8 @@ def closing(settings: Settings) -> int:
             ),
             None,
         )
-        if entry and snapshot_id_value:
+
+        if entry:
             bet["clv_odds_pct"] = round(
                 float(entry["odd"]) / float(canonical["odd"]) - 1,
                 6,
@@ -323,14 +368,19 @@ def main() -> int:
     )
     phase = parser.parse_args().phase
     settings = Settings.from_env(ROOT)
+
     if phase in {"entry", "all"}:
         print(f"ENTRY snapshots: {entries(settings)}")
+
     if phase in {"intermediate", "all"}:
         print(f"INTERMEDIATE snapshots: {intermediate(settings)}")
+
     if phase in {"t5", "all"}:
         print(f"T5 snapshots: {t5(settings)}")
+
     if phase in {"closing", "all"}:
         print(f"CLOSING snapshots: {closing(settings)}")
+
     return 0
 
 
