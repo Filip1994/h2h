@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -43,7 +43,9 @@ def _norm(value: Any) -> str:
 
 
 def _game_time(game: dict[str, Any]) -> datetime | None:
-    raw = ((game.get("date") or game.get("game") or {}).get("date")) if isinstance(game.get("date"), dict) else game.get("date")
+    raw = game.get("date")
+    if isinstance(raw, dict):
+        raw = raw.get("date")
     raw = raw or ((game.get("game") or {}).get("date"))
     if not raw:
         return None
@@ -154,10 +156,9 @@ def _append_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
 
 def collect_once(root: Path, *, now: datetime | None = None, max_odds_requests: int = 199) -> dict[str, int]:
     now = (now or datetime.now(UTC)).astimezone(UTC)
-    settings_root = root
     from .config import BaseballSettings
 
-    settings = BaseballSettings.from_env(settings_root)
+    settings = BaseballSettings.from_env(root)
     client = BaseballAPIClient(settings)
     games = client.games_by_date(now.date().isoformat())
     candidates: list[tuple[datetime, dict[str, Any]]] = []
@@ -171,8 +172,8 @@ def collect_once(root: Path, *, now: datetime | None = None, max_odds_requests: 
             candidates.append((kickoff, game))
 
     # Guarantee league diversity first, then spend the remaining request budget on games
-    # nearest to first pitch. This deliberately favors information density without
-    # starving smaller leagues that carry odds.
+    # nearest to first pitch. This favors information density without starving smaller
+    # leagues that carry odds.
     candidates.sort(key=lambda item: (item[0], _league_name(item[1]), _game_id(item[1]) or 0))
     selected: list[dict[str, Any]] = []
     seen_leagues: set[str] = set()
@@ -217,8 +218,7 @@ def collect_once(root: Path, *, now: datetime | None = None, max_odds_requests: 
         odds_calls += 1
         compact = compact_odds(odds)
         league = _league_name(game) or "UNKNOWN"
-        coverage.setdefault(league, {"snapshots": 0, "bookmakers": set()})
-        existing = coverage[league]
+        existing = coverage.setdefault(league, {"snapshots": 0, "bookmakers": []})
         if not isinstance(existing, dict):
             existing = {"snapshots": 0, "bookmakers": []}
             coverage[league] = existing
@@ -227,11 +227,12 @@ def collect_once(root: Path, *, now: datetime | None = None, max_odds_requests: 
         existing["bookmakers"] = sorted(names)
         existing["snapshots"] = int(existing.get("snapshots") or 0) + 1
         home, away = _team_names(game)
+        kickoff = _game_time(game)
         rows.append(
             {
                 "captured_at": now.isoformat(),
                 "game_id": game_id,
-                "kickoff": _game_time(game).isoformat() if _game_time(game) else None,
+                "kickoff": kickoff.isoformat() if kickoff else None,
                 "league": league,
                 "home": home,
                 "away": away,
