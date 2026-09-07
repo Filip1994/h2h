@@ -87,12 +87,15 @@ def test_immutable_entry_and_closing_types(tmp_path):
     entry = store.append_quote(
         quote(), fixture_id=1, snapshot_type="ENTRY", prediction_id="p1"
     )
-    assert store.append_quote(
-        quote("2026-09-08T10:00:00+00:00", 2.2),
-        fixture_id=1,
-        snapshot_type="ENTRY",
-        prediction_id="p1",
-    ) is not None
+    assert (
+        store.append_quote(
+            quote("2026-09-08T10:00:00+00:00", 2.2),
+            fixture_id=1,
+            snapshot_type="ENTRY",
+            prediction_id="p1",
+        )
+        is not None
+    )
     closing = store.append_quote(
         quote("2026-09-08T10:55:00+00:00", 1.9),
         fixture_id=1,
@@ -111,9 +114,7 @@ def test_immutable_entry_and_closing_types(tmp_path):
 
 def test_missing_t5_is_not_fabricated(tmp_path):
     store = OddsSnapshotStore(tmp_path / "odds_snapshots.jsonl")
-    assert store.append_quote(
-        quote(), fixture_id=1, snapshot_type="INTERMEDIATE"
-    )
+    assert store.append_quote(quote(), fixture_id=1, snapshot_type="INTERMEDIATE")
     records = [
         json.loads(x)
         for x in (tmp_path / "odds_snapshots.jsonl").read_text().splitlines()
@@ -142,4 +143,7 @@ def test_clv_formula_correctness(tmp_path):
     ]
     entry, closing = records
     assert round(entry["odd"] / closing["odd"] - 1, 6) == 0.052632
-    assert round(closing["devig_probability"] - entry["devig_probability"], 6) == 0.012802
+    assert (
+        round(closing["devig_probability"] - entry["devig_probability"], 6)
+        == 0.012802
+    )
