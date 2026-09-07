@@ -95,10 +95,7 @@ def capture_alert_closing_quotes(
             only_bookmaker_id=bookmaker_id,
         )
         quote = quotes.get(market)
-        if (
-            quote is None
-            or not 0.0 <= quote.overround <= settings.max_market_overround
-        ):
+        if quote is None or not 0.0 <= quote.overround <= settings.max_market_overround:
             continue
         _apply_closing(alert, quote, now_utc)
         captured += 1
@@ -205,9 +202,7 @@ def _settle_counterfactual(
     return True
 
 
-def settle_intraday_alerts(
-    settings: Settings, now: datetime | None = None
-) -> int:
+def settle_intraday_alerts(settings: Settings, now: datetime | None = None) -> int:
     now_utc = (now or datetime.now(UTC)).astimezone(UTC)
     alerts = _load_alerts(settings.root)
     if not alerts:
@@ -249,8 +244,7 @@ def settle_intraday_alerts(
                 continue
             payload = response[0]
             status = str(
-                ((payload.get("fixture") or {}).get("status") or {}).get("short")
-                or ""
+                ((payload.get("fixture") or {}).get("status") or {}).get("short") or ""
             )
             score = regulation_score(payload) if status in FINISHED_STATUSES else None
             fixture_cache[fixture_id] = (status, score)
