@@ -6,14 +6,17 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
 
-from .alerts import build_strong_signal_email, is_strong_signal, send_strong_signal_email
+from .alerts import (
+    build_strong_signal_email,
+    is_strong_signal,
+    send_strong_signal_email,
+)
 from .api import APIBudgetExceeded, APIError, APIFootballClient
 from .config import Settings
 from .markets import extract_best_quotes
 from .risk import kelly_stake, portfolio_analytics
 from .storage import BetStore, atomic_write_json
 from .types import Market
-
 
 STATE_FILE = "intraday_watchlist_state.json"
 ALERT_FILE = "intraday_alerts.json"
@@ -55,7 +58,13 @@ def cadence_seconds(seconds_to_kickoff: float) -> int:
     return 300
 
 
-def _near_miss(model_probability: float, calibrated_probability: float, odd: float, devig: float, settings: Settings) -> bool:
+def _near_miss(
+    model_probability: float,
+    calibrated_probability: float,
+    odd: float,
+    devig: float,
+    settings: Settings,
+) -> bool:
     decision = max(0.0, calibrated_probability - settings.probability_haircut)
     ev = decision * odd - 1.0
     edge = decision - devig
@@ -109,7 +118,15 @@ def _event_from_prediction(
 def _apply_linked_result(event: dict[str, Any], bet: dict[str, Any] | None) -> None:
     if not bet:
         return
-    for key in ("status", "profit", "outcome", "closing_5m_odd", "closing_5m_opposite_odd", "closing_5m_market_probability_devig", "closing_5m_odds_captured_at"):
+    for key in (
+        "status",
+        "profit",
+        "outcome",
+        "closing_5m_odd",
+        "closing_5m_opposite_odd",
+        "closing_5m_market_probability_devig",
+        "closing_5m_odds_captured_at",
+    ):
         if bet.get(key) is not None:
             event[key] = bet[key]
 
@@ -124,8 +141,14 @@ def run_watchlist(settings: Settings, now: datetime | None = None) -> dict[str, 
     bets = BetStore(settings.bets_file).load()
     alerts = _load_list(alerts_path)
     state = _load_state(state_path)
-    analytics = portfolio_analytics(bets, settings.initial_bank, today=now_local.date().isoformat())
-    linked = {(int(b.get("event_id")), str(b.get("market"))): b for b in bets if b.get("event_id") is not None}
+    analytics = portfolio_analytics(
+        bets, settings.initial_bank, today=now_local.date().isoformat()
+    )
+    linked = {
+        (int(b.get("event_id")), str(b.get("market"))): b
+        for b in bets
+        if b.get("event_id") is not None
+    }
     by_fixture: dict[int, list[dict[str, Any]]] = {}
     for prediction in predictions:
         try:
@@ -151,7 +174,9 @@ def run_watchlist(settings: Settings, now: datetime | None = None) -> dict[str, 
         last_scan_raw = fixture_state.get("last_scan_at")
         if last_scan_raw:
             try:
-                elapsed = (now_utc - datetime.fromisoformat(last_scan_raw).astimezone(UTC)).total_seconds()
+                elapsed = (
+                    now_utc - datetime.fromisoformat(last_scan_raw).astimezone(UTC)
+                ).total_seconds()
             except ValueError:
                 elapsed = interval
             if elapsed < interval:
@@ -171,7 +196,10 @@ def run_watchlist(settings: Settings, now: datetime | None = None) -> dict[str, 
             continue
 
         scanned += 1
-        state[str(fixture_id)] = {"last_scan_at": now_utc.isoformat(), "cadence_seconds": interval}
+        state[str(fixture_id)] = {
+            "last_scan_at": now_utc.isoformat(),
+            "cadence_seconds": interval,
+        }
         strong_events: list[dict[str, Any]] = []
         for prediction in fixture_predictions:
             try:
@@ -179,15 +207,31 @@ def run_watchlist(settings: Settings, now: datetime | None = None) -> dict[str, 
             except (KeyError, TypeError, ValueError):
                 continue
             quote = quotes.get(market)
-            if quote is None or not (0.0 <= quote.overround <= settings.max_market_overround):
+            if quote is None or not (
+                0.0 <= quote.overround <= settings.max_market_overround
+            ):
                 continue
-            calibrated = float(prediction.get("calibrated_probability") or prediction.get("model_probability") or 0.0)
+            calibrated = float(
+                prediction.get("calibrated_probability")
+                or prediction.get("model_probability")
+                or 0.0
+            )
             decision = max(0.0, calibrated - settings.probability_haircut)
             ev = decision * quote.odd - 1.0
             edge = decision - quote.devig_probability
             linked_bet = linked.get((fixture_id, market.value))
-            suggested_stake = float(linked_bet.get("stake")) if linked_bet else kelly_stake(analytics.current_bank, decision, quote.odd, settings)
-            if not _near_miss(float(prediction.get("model_probability") or 0.0), calibrated, quote.odd, quote.devig_probability, settings):
+            suggested_stake = (
+                float(linked_bet.get("stake"))
+                if linked_bet
+                else kelly_stake(analytics.current_bank, decision, quote.odd, settings)
+            )
+            if not _near_miss(
+                float(prediction.get("model_probability") or 0.0),
+                calibrated,
+                quote.odd,
+                quote.devig_probability,
+                settings,
+            ):
                 continue
             key = str(prediction["id"])
             previous = state.setdefault(key, {})
@@ -212,7 +256,16 @@ def run_watchlist(settings: Settings, now: datetime | None = None) -> dict[str, 
             previous["was_strong"] = strong
             previous["last_seen_at"] = now_utc.isoformat()
             if strong and not was_strong:
-                event = _event_from_prediction(prediction, quote=quote, decision_probability=decision, expected_value=ev, probability_edge=edge, stake=suggested_stake, now=now_local, linked_bet=linked_bet)
+                event = _event_from_prediction(
+                    prediction,
+                    quote=quote,
+                    decision_probability=decision,
+                    expected_value=ev,
+                    probability_edge=edge,
+                    stake=suggested_stake,
+                    now=now_local,
+                    linked_bet=linked_bet,
+                )
                 alerts.append(event)
                 strong_events.append(event)
 
@@ -222,7 +275,9 @@ def run_watchlist(settings: Settings, now: datetime | None = None) -> dict[str, 
                     if event.get("closing_5m_odd") is None:
                         event["closing_5m_odd"] = round(quote.odd, 4)
                         event["closing_5m_opposite_odd"] = round(quote.opposite_odd, 4)
-                        event["closing_5m_market_probability_devig"] = round(quote.devig_probability, 6)
+                        event["closing_5m_market_probability_devig"] = round(
+                            quote.devig_probability, 6
+                        )
                         event["closing_5m_odds_captured_at"] = now_utc.isoformat()
                         t5_captured += 1
 
@@ -238,4 +293,9 @@ def run_watchlist(settings: Settings, now: datetime | None = None) -> dict[str, 
 
     atomic_write_json(state_path, state)
     atomic_write_json(alerts_path, alerts[-1000:])
-    return {"fixtures_scanned": scanned, "alerts_sent": alerts_sent, "t5_captured": t5_captured, "api_requests": api.request_count}
+    return {
+        "fixtures_scanned": scanned,
+        "alerts_sent": alerts_sent,
+        "t5_captured": t5_captured,
+        "api_requests": api.request_count,
+    }
