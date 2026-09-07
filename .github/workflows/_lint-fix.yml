@@ -1,0 +1,31 @@
+name: Temporary Ruff lint fix
+
+on:
+  push:
+    branches:
+      - fix/ci-format-main
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - run: pip install ruff==0.16.6
+      - run: ruff check . --fix
+      - name: Commit lint fix
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet; then
+            echo "Already lint-clean"
+            exit 0
+          fi
+          git add src/quantbot/watchlist.py
+          git commit -m "style: fix Ruff import ordering"
+          git push
