@@ -40,7 +40,7 @@ jobs:
       - name: Commit canonical CLV persistence
         run: |
           set -euo pipefail
-          if git diff --quiet -- bets.json predictions.json && test -z "$(git status --porcelain -- data/odds_snapshots.jsonl);"; then
+          if git diff --quiet -- bets.json predictions.json && test -z "$(git status --porcelain -- data/odds_snapshots.jsonl)"; then
             exit 0
           fi
           git config user.name "github-actions[bot]"
