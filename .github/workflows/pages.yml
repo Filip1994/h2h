@@ -34,6 +34,9 @@ jobs:
         run: |
           mkdir -p _site
           cp index.html bets.json ledger_meta.json _site/
+          test -s _site/index.html
+          test -s _site/bets.json
+          test -s _site/ledger_meta.json
       - uses: actions/upload-pages-artifact@v4
         with:
           path: _site
