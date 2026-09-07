@@ -59,14 +59,18 @@ jobs:
           python - <<'PY'
           import json
           from pathlib import Path
-          for name in ("bets.json", "ledger_meta.json"):
-              path = Path("_site") / name
-              with path.open(encoding="utf-8") as f:
-                  data = json.load(f, parse_constant=lambda value: (_ for _ in ()).throw(ValueError(f"invalid JSON constant: {value}")))
-              print(f"validated {name}: {path.stat().st_size} bytes")
-              if name == "bets.json":
-                  print(f"ledger records: {len(data)}")
+          bets=json.loads(Path('bets.json').read_text(encoding='utf-8'))
+          meta=json.loads(Path('ledger_meta.json').read_text(encoding='utf-8'))
+          Path('_site/data.js').write_text('window.QUANTBET_DATA='+json.dumps({'bets':bets,'meta':meta},ensure_ascii=False,separators=(',',':'))+';',encoding='utf-8')
+          for name in ('bets.json','ledger_meta.json'):
+              path=Path('_site')/name
+              with path.open(encoding='utf-8') as f:
+                  data=json.load(f,parse_constant=lambda value: (_ for _ in ()).throw(ValueError(f'invalid JSON constant: {value}')))
+              print(f'validated {name}: {path.stat().st_size} bytes')
+              if name=='bets.json': print(f'ledger records: {len(data)}')
+          print(f'embedded data: {Path("_site/data.js").stat().st_size} bytes')
           PY
+          test -s _site/data.js
       - uses: actions/upload-pages-artifact@v4
         with:
           path: _site
