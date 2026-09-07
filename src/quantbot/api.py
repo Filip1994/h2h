@@ -6,6 +6,7 @@ import os
 import tempfile
 import time
 from collections import Counter
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError, URLError
@@ -24,6 +25,8 @@ class APIBudgetExceeded(APIError):
 
 
 class APIFootballClient:
+    ARCHIVE_SCHEMA_VERSION = 1
+
     def __init__(self, settings: Settings) -> None:
         self.settings = settings
         self.request_count = 0
@@ -32,6 +35,45 @@ class APIFootballClient:
         self.endpoint_requests: Counter[str] = Counter()
         self.endpoint_cache_hits: Counter[str] = Counter()
         self.settings.cache_dir.mkdir(parents=True, exist_ok=True)
+        self.settings.root.joinpath("data", "raw_api").mkdir(
+            parents=True, exist_ok=True
+        )
+
+    def _archive_path(self, captured_at: datetime) -> Path:
+        return (
+            self.settings.root
+            / "data"
+            / "raw_api"
+            / f"{captured_at.astimezone(UTC).date().isoformat()}.jsonl"
+        )
+
+    def _archive_response(
+        self,
+        endpoint: str,
+        params: dict[str, Any],
+        payload: dict[str, Any],
+        captured_at: datetime,
+        request_url: str,
+    ) -> None:
+        record = {
+            "schema_version": self.ARCHIVE_SCHEMA_VERSION,
+            "captured_at": captured_at.astimezone(UTC).isoformat(),
+            "endpoint": endpoint,
+            "params": params,
+            "request_url": request_url,
+            "request_count": self.request_count,
+            "github_run_id": os.getenv("GITHUB_RUN_ID"),
+            "github_workflow": os.getenv("GITHUB_WORKFLOW"),
+            "github_sha": os.getenv("GITHUB_SHA"),
+            "payload": payload,
+        }
+        path = self._archive_path(captured_at)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        line = json.dumps(record, ensure_ascii=False, separators=(",", ":")) + "\n"
+        with path.open("a", encoding="utf-8") as handle:
+            handle.write(line)
+            handle.flush()
+            os.fsync(handle.fileno())
 
     def _cache_path(self, endpoint: str, params: dict[str, Any]) -> Path:
         canonical = json.dumps(
@@ -153,6 +195,8 @@ class APIFootballClient:
         if not isinstance(result, list):
             raise APIError(f"Neočekivan API odgovor za {endpoint}")
 
+        captured_at = datetime.now(UTC)
+        self._archive_response(endpoint, params, payload, captured_at, url)
         self._write_cache(cache_path, result, ttl_seconds)
         return result
 

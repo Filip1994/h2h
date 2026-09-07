@@ -76,16 +76,16 @@ jobs:
           Path('strong_signals.json').write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
           print(f'public strong signals: {len(data)}')
           PY
-      - name: Commit watchlist and strong-signal state
+      - name: Commit watchlist, strong-signal state and raw API archive
         run: |
           set -euo pipefail
-          if git diff --quiet -- intraday_watchlist_state.json intraday_alerts.json strong_signals.json; then
+          if git diff --quiet -- intraday_watchlist_state.json intraday_alerts.json strong_signals.json && test -z "$(git status --porcelain -- data/raw_api)"; then
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add intraday_watchlist_state.json intraday_alerts.json strong_signals.json
-          git commit -m "Update QuantBet adaptive watchlist and strong signals"
+          git add intraday_watchlist_state.json intraday_alerts.json strong_signals.json data/raw_api
+          git commit -m "Update QuantBet watchlist and API archive"
           for attempt in 1 2 3; do
             if git push; then exit 0; fi
             git fetch origin main
