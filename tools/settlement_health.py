@@ -23,7 +23,7 @@ def _parse(value: object) -> datetime | None:
     if not value:
         return None
     try:
-        return datetime.fromisoformat(str(value).replace("Z", "+00:00")).astimezone(UTC)
+        return datetime.fromisoformat(str(value)).astimezone(UTC)
     except ValueError:
         return None
 
