@@ -14,7 +14,7 @@ Baseball is a first-class sport inside the existing `h2h` repository. Football p
 - bookmaker and market coverage inventory under `data/baseball/market_coverage.json`
 - Baseball intraday signal schema and paper alert layer
 
-API-Sports Baseball currently advertises 77 leagues/cups, 30 bookmakers, odds coverage for major competitions including MLB, NPB, KBO and CPBL, and a Pro tier of 7,500 requests/day. The live collector therefore probes all available Baseball competitions returned by the daily schedule and prioritizes games carrying odds. citeturn0search0
+API-Sports Baseball currently advertises 77 leagues/cups, 30 bookmakers, odds coverage for major competitions including MLB, NPB, KBO and CPBL, and a Pro tier of 7,500 requests/day. The live collector therefore probes all available Baseball competitions returned by the daily schedule and prioritizes games carrying odds.
 
 ## Budget policy
 
