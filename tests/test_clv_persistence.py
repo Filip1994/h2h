@@ -56,9 +56,7 @@ def test_stable_prediction_and_bet_linkage(tmp_path):
         "signal_id": "p1",
     }
     sid = record_prediction_quote(Settings, prediction, bet_id="b1")
-    record = json.loads(
-        (tmp_path / "data" / "odds_snapshots.jsonl").read_text()
-    )
+    record = json.loads((tmp_path / "data" / "odds_snapshots.jsonl").read_text())
     assert sid == record["snapshot_id"]
     assert record["prediction_id"] == "p1"
     assert record["bet_id"] == "b1"
@@ -89,15 +87,12 @@ def test_immutable_entry_and_closing_types(tmp_path):
     entry = store.append_quote(
         quote(), fixture_id=1, snapshot_type="ENTRY", prediction_id="p1"
     )
-    assert (
-        store.append_quote(
-            quote("2026-09-08T10:00:00+00:00", 2.2),
-            fixture_id=1,
-            snapshot_type="ENTRY",
-            prediction_id="p1",
-        )
-        is not None
-    )
+    assert store.append_quote(
+        quote("2026-09-08T10:00:00+00:00", 2.2),
+        fixture_id=1,
+        snapshot_type="ENTRY",
+        prediction_id="p1",
+    ) is not None
     closing = store.append_quote(
         quote("2026-09-08T10:55:00+00:00", 1.9),
         fixture_id=1,
@@ -147,7 +142,4 @@ def test_clv_formula_correctness(tmp_path):
     ]
     entry, closing = records
     assert round(entry["odd"] / closing["odd"] - 1, 6) == 0.052632
-    assert (
-        round(closing["devig_probability"] - entry["devig_probability"], 6)
-        == 0.012802
-    )
+    assert round(closing["devig_probability"] - entry["devig_probability"], 6) == 0.012802
