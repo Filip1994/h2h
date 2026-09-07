@@ -71,6 +71,73 @@ def write_api_usage(settings: Settings, updated_at: datetime, result) -> None:
     atomic_write_json(settings.api_usage_history_file, history[-90:])
 
 
+def persist_intraday_strong_signals(
+    settings: Settings, strong: tuple[dict, ...], generated_at: datetime
+) -> None:
+    """Persist every generate-based Strong Signal before attempting email delivery."""
+    if not strong:
+        return
+
+    path = ROOT / "intraday_alerts.json"
+    alerts: list[dict] = []
+    if path.exists():
+        try:
+            loaded = json.loads(path.read_text(encoding="utf-8"))
+            if isinstance(loaded, list):
+                alerts = loaded
+        except (OSError, TypeError, ValueError, json.JSONDecodeError):
+            alerts = []
+
+    existing_ids = {
+        str(item.get("linked_bet_id") or item.get("id"))
+        for item in alerts
+        if isinstance(item, dict)
+    }
+    timestamp = generated_at.isoformat()
+    for bet in strong:
+        bet_id = str(bet.get("id") or "")
+        if not bet_id or bet_id in existing_ids:
+            continue
+        alerts.append(
+            {
+                "id": f"generate:{bet_id}",
+                "prediction_id": bet.get("prediction_id"),
+                "event_id": bet.get("event_id"),
+                "market": bet.get("market"),
+                "market_display": bet.get("market_display", bet.get("market")),
+                "match": bet.get("match"),
+                "league": bet.get("league"),
+                "kickoff": bet.get("kickoff"),
+                "odd": bet.get("odd"),
+                "opposite_odd": bet.get("opposite_odd"),
+                "bookmaker_id": bet.get("bookmaker_id"),
+                "bookmaker": bet.get("bookmaker"),
+                "odds_captured_at": bet.get("odds_captured_at"),
+                "model_probability": bet.get("model_probability"),
+                "calibrated_probability": bet.get("calibrated_probability"),
+                "decision_probability": bet.get("decision_probability"),
+                "probability_edge": bet.get("probability_edge"),
+                "expected_value": bet.get("expected_value"),
+                "stake": bet.get("stake"),
+                "signal_source": "INTRADAY_ALERT",
+                "signal_sent_at": timestamp,
+                "linked_bet_id": bet_id,
+                "status": bet.get("status", "PENDING"),
+                "profit": bet.get("profit", 0.0),
+                "closing_5m_odd": bet.get("closing_5m_odd"),
+                "closing_5m_opposite_odd": bet.get("closing_5m_opposite_odd"),
+                "closing_5m_market_probability_devig": bet.get(
+                    "closing_5m_market_probability_devig"
+                ),
+                "closing_5m_odds_captured_at": bet.get("closing_5m_odds_captured_at"),
+                "persistence_source": "GENERATE",
+            }
+        )
+        existing_ids.add(bet_id)
+
+    atomic_write_json(path, alerts[-1000:])
+
+
 def run_generate(*, deliver_email: bool = True) -> int:
     settings = Settings.from_env(ROOT)
     generated_at = datetime.now(settings.timezone)
@@ -82,6 +149,7 @@ def run_generate(*, deliver_email: bool = True) -> int:
         strong = tuple(
             bet for bet in result.new_bets if is_strong_signal(bet, settings)
         )
+        persist_intraday_strong_signals(settings, strong, generated_at)
         subject, html_body = build_strong_signal_email(result, settings, generated_at)
         (ROOT / "report_preview.html").write_text(html_body, encoding="utf-8")
         (ROOT / "report_subject.txt").write_text(subject, encoding="utf-8")
