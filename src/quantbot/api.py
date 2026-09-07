@@ -69,9 +69,7 @@ class APIFootballClient:
         }
         path = self._archive_path(captured_at)
         path.parent.mkdir(parents=True, exist_ok=True)
-        line = (
-            json.dumps(record, ensure_ascii=False, separators=(",", ":")) + "\n"
-        )
+        line = json.dumps(record, ensure_ascii=False, separators=(",", ":")) + "\n"
         with path.open("a", encoding="utf-8") as handle:
             handle.write(line)
             handle.flush()
