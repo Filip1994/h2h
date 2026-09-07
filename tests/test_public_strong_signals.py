@@ -25,15 +25,29 @@ def test_build_public_strong_signals_merges_and_preserves_lifecycle(tmp_path) ->
                 "profit": 450,
                 "signal_sent_at": "2026-09-07T18:00:00+00:00",
             },
-            {"id": "signal-2", "status": "PENDING", "signal_sent_at": "2026-09-07T18:05:00+00:00"},
+            {
+                "id": "signal-2",
+                "status": "PENDING",
+                "signal_sent_at": "2026-09-07T18:05:00+00:00",
+            },
         ],
     )
     write_json(
         tmp_path,
         "bets.json",
         [
-            {"id": "signal-2", "signal_source": "INTRADAY_ALERT", "status": "WIN", "profit": 300},
-            {"id": "ignored", "signal_source": "DAILY_BULLETIN", "status": "WIN", "profit": 999},
+            {
+                "id": "signal-2",
+                "signal_source": "INTRADAY_ALERT",
+                "status": "WIN",
+                "profit": 300,
+            },
+            {
+                "id": "ignored",
+                "signal_source": "DAILY_BULLETIN",
+                "status": "WIN",
+                "profit": 999,
+            },
         ],
     )
 
@@ -44,10 +58,16 @@ def test_build_public_strong_signals_merges_and_preserves_lifecycle(tmp_path) ->
     assert data[0]["virtual_profit"] == 450
     assert data[1]["status"] == "WIN"
     assert data[1]["virtual_profit"] == 300
-    assert json.loads((tmp_path / "strong_signals.json").read_text(encoding="utf-8")) == data
+    assert (
+        json.loads((tmp_path / "strong_signals.json").read_text(encoding="utf-8"))
+        == data
+    )
 
 
 def test_build_public_strong_signals_is_safe_with_missing_inputs(tmp_path) -> None:
     data = build_public_strong_signals(tmp_path)
     assert data == []
-    assert json.loads((tmp_path / "strong_signals.json").read_text(encoding="utf-8")) == []
+    assert (
+        json.loads((tmp_path / "strong_signals.json").read_text(encoding="utf-8"))
+        == []
+    )
