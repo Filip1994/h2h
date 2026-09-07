@@ -34,17 +34,22 @@ jobs:
       - run: pip install -r requirements.txt
       - run: python main.py monitor
       - run: python tools/settle_alerts.py
+      - name: Check settlement health
+        id: settlement-health
+        continue-on-error: true
+        run: python tools/settlement_health.py --max-age-minutes 30
       - name: Build public strong-signal dataset
         run: python tools/build_public_strong_signals.py
-      - name: Commit ledger, strong signals and raw API archive
+      - name: Commit ledger, health report, strong signals and raw API archive
+        if: always()
         run: |
           set -euo pipefail
-          if git diff --quiet -- bets.json predictions.json intraday_alerts.json strong_signals.json && test -z "$(git status --porcelain -- data/raw_api)"; then
+          if git diff --quiet -- bets.json predictions.json intraday_alerts.json strong_signals.json settlement_health.json && test -z "$(git status --porcelain -- data/raw_api)"; then
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add bets.json predictions.json intraday_alerts.json strong_signals.json data/raw_api
+          git add bets.json predictions.json intraday_alerts.json strong_signals.json settlement_health.json data/raw_api
           git commit -m "Settle QuantBet ledger and archive API data"
           for attempt in 1 2 3; do
             if git push; then exit 0; fi
@@ -53,3 +58,6 @@ jobs:
           done
           echo "Unable to push after retries" >&2
           exit 1
+      - name: Fail when settlement is stale
+        if: steps.settlement-health.outcome == 'failure'
+        run: exit 1
