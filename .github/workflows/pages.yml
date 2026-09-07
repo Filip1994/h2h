@@ -18,20 +18,18 @@ on:
       - index.html
       - bets.json
       - ledger_meta.json
+      - intraday_alerts.json
       - strong_signals.json
       - .github/workflows/pages.yml
   schedule:
     - cron: "17 * * * *"
-
 permissions:
   contents: read
   pages: write
   id-token: write
-
 concurrency:
   group: github-pages
   cancel-in-progress: true
-
 jobs:
   deploy:
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
@@ -50,16 +48,20 @@ jobs:
           set -euo pipefail
           rm -rf _site
           mkdir -p _site
-          cp index.html bets.json ledger_meta.json strong_signals.json _site/
+          cp index.html bets.json ledger_meta.json intraday_alerts.json strong_signals.json _site/
           test -s _site/index.html
           test -s _site/bets.json
           test -s _site/ledger_meta.json
-          test -s _site/strong_signals.json
+          test -s _site/intraday_alerts.json
           python - <<'PY'
           import json
           from pathlib import Path
-          for name in ('bets.json','ledger_meta.json','strong_signals.json'):
-              with (Path('_site')/name).open(encoding='utf-8') as f: data=json.load(f)
+          for name in ('bets.json','ledger_meta.json','intraday_alerts.json','strong_signals.json'):
+              p=Path('_site')/name
+              if not p.exists():
+                  if name=='strong_signals.json': continue
+                  raise SystemExit(f'missing {name}')
+              data=json.loads(p.read_text(encoding='utf-8'))
               print(name, 'records=', len(data) if isinstance(data,list) else 'object')
           PY
       - uses: actions/upload-pages-artifact@v4
