@@ -13,11 +13,7 @@ if str(SRC) not in sys.path:
 
 from quantbot.config import Settings
 from quantbot.markets import extract_best_quotes
-from quantbot.persistence import (
-    OddsSnapshotStore,
-    record_prediction_quote,
-    snapshot_id,
-)
+from quantbot.persistence import OddsSnapshotStore, record_prediction_quote
 from quantbot.storage import BetStore, atomic_write_json
 from quantbot.types import Market, OddsQuote
 
@@ -221,65 +217,78 @@ def t5(settings: Settings) -> int:
 
 
 def closing(settings: Settings) -> int:
+    """Persist only the real closing quote captured by the existing monitor."""
     bets = BetStore(settings.bets_file).load()
     snapshots = load_snapshots()
     changed = 0
+
     for bet in bets:
-        if str(bet.get("status", "")).upper() not in TERMINAL or bet.get(
-            "closing_snapshot_id"
-        ):
-            continue
-        try:
-            kickoff = datetime.fromisoformat(str(bet["kickoff"])).astimezone(UTC)
-            candidates = [
-                snapshot
-                for snapshot in snapshots
-                if snapshot.get("snapshot_type") in {"INTERMEDIATE", "T5"}
-                and int(snapshot.get("fixture_id")) == int(bet["event_id"])
-                and str(snapshot.get("market")) == str(bet["market"])
-                and int(snapshot.get("bookmaker_id")) == int(bet["bookmaker_id"])
-                and datetime.fromisoformat(
-                    str(snapshot["odds_captured_at"])
-                ).astimezone(UTC)
-                <= kickoff
-            ]
-        except (KeyError, TypeError, ValueError):
+        if str(bet.get("status", "")).upper() not in TERMINAL:
             continue
 
-        if not candidates:
+        # monitor.py is the existing successful closing capture path. Its
+        # closing_* fields are the only source eligible for canonical CLOSING.
+        # T5 and INTERMEDIATE snapshots are never used as substitutes.
+        if any(
+            bet.get(field) is None
+            for field in (
+                "closing_odd",
+                "closing_opposite_odd",
+                "closing_market_probability_devig",
+                "closing_odds_captured_at",
+            )
+        ):
             bet["clv_status"] = "NOT_COMPUTABLE"
             continue
 
-        latest = max(candidates, key=lambda snapshot: str(snapshot["odds_captured_at"]))
-        canonical = dict(latest)
-        canonical["snapshot_type"] = "CLOSING"
-        canonical["captured_by"] = "closing-finalizer"
-        canonical["prediction_id"] = bet.get("prediction_id") or latest.get(
-            "prediction_id"
-        )
-        canonical["bet_id"] = str(bet["id"])
-        canonical["signal_id"] = bet.get("signal_id") or latest.get("signal_id")
-        canonical["snapshot_id"] = snapshot_id(canonical)
-        existing = {str(snapshot.get("snapshot_id")) for snapshot in snapshots}
-        if canonical["snapshot_id"] not in existing:
-            with SNAP.open("a", encoding="utf-8") as handle:
-                handle.write(
-                    json.dumps(
-                        canonical,
-                        ensure_ascii=False,
-                        sort_keys=True,
-                        separators=(",", ":"),
-                    )
-                    + "\n"
-                )
-            snapshots.append(canonical)
-            changed += 1
+        try:
+            kickoff = datetime.fromisoformat(str(bet["kickoff"])).astimezone(UTC)
+            captured_at = datetime.fromisoformat(
+                str(bet["closing_odds_captured_at"])
+            ).astimezone(UTC)
+            odd = float(bet["closing_odd"])
+            opposite_odd = float(bet["closing_opposite_odd"])
+            devig_probability = float(bet["closing_market_probability_devig"])
+            if odd <= 1 or opposite_odd <= 1 or captured_at > kickoff:
+                raise ValueError("invalid canonical closing quote")
+            market = Market.parse(str(bet["market"]))
+            bookmaker_id = int(bet["bookmaker_id"])
+            fixture_id = int(bet["event_id"])
+        except (KeyError, TypeError, ValueError):
+            bet["clv_status"] = "NOT_COMPUTABLE"
+            continue
 
-        bet["closing_snapshot_id"] = canonical["snapshot_id"]
-        bet["closing_odd"] = canonical["odd"]
-        bet["closing_opposite_odd"] = canonical["opposite_odd"]
-        bet["closing_market_probability_devig"] = canonical["devig_probability"]
-        bet["closing_odds_captured_at"] = canonical["odds_captured_at"]
+        prediction_id = bet.get("prediction_id")
+        signal_id = bet.get("signal_id") or prediction_id
+        overround = (1.0 / odd) + (1.0 / opposite_odd) - 1.0
+        canonical = {
+            "fixture_id": fixture_id,
+            "market": market.value,
+            "bookmaker_id": bookmaker_id,
+            "bookmaker": str(bet.get("bookmaker") or bookmaker_id),
+            "selection": market.value,
+            "odd": round(odd, 4),
+            "opposite_odd": round(opposite_odd, 4),
+            "devig_probability": round(devig_probability, 6),
+            "overround": round(overround, 6),
+            "odds_captured_at": captured_at.isoformat(),
+            "snapshot_type": "CLOSING",
+            "prediction_id": str(prediction_id) if prediction_id else None,
+            "bet_id": str(bet["id"]),
+            "signal_id": str(signal_id) if signal_id else None,
+            "source_endpoint": "odds",
+            "source_request_hash": None,
+            "captured_by": "monitor-closing-capture",
+        }
+        store = OddsSnapshotStore(SNAP)
+        snapshot_id_value = store.append(canonical)
+        if snapshot_id_value:
+            changed += 1
+            snapshots.append({**canonical, "snapshot_id": snapshot_id_value})
+
+        if snapshot_id_value:
+            bet["closing_snapshot_id"] = snapshot_id_value
+
         entry = next(
             (
                 snapshot
@@ -288,7 +297,7 @@ def closing(settings: Settings) -> int:
             ),
             None,
         )
-        if entry:
+        if entry and snapshot_id_value:
             bet["clv_odds_pct"] = round(
                 float(entry["odd"]) / float(canonical["odd"]) - 1,
                 6,
