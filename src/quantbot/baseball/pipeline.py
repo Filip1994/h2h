@@ -37,4 +37,6 @@ class BaseballPipeline:
         reserve: int = 500,
     ) -> dict[int, int]:
         priorities = rank_games(games, now)
-        return allocate_budget(self.client.settings.api_request_budget, priorities, reserve=reserve)
+        return allocate_budget(
+            self.client.settings.api_request_budget, priorities, reserve=reserve
+        )

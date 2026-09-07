@@ -36,7 +36,8 @@ class BaseballSettings:
             api_retry_base_seconds=floating("BASEBALL_API_RETRY_BASE_SECONDS", 1.0),
             cache_dir=root / ".cache" / "baseball-api",
             timezone_name=os.getenv("TIMEZONE", "Europe/Belgrade").strip(),
-            paper_mode=os.getenv("PAPER_MODE", "true").strip().lower() in {"1", "true", "yes", "on"},
+            paper_mode=os.getenv("PAPER_MODE", "true").strip().lower()
+            in {"1", "true", "yes", "on"},
         )
 
     def validate(self) -> None:

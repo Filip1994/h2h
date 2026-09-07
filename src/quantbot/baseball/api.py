@@ -52,16 +52,26 @@ class BaseballAPIClient:
             if isinstance(response, list):
                 self.cache_hits += 1
                 return response
-        except (FileNotFoundError, KeyError, TypeError, ValueError, json.JSONDecodeError):
+        except (
+            FileNotFoundError,
+            KeyError,
+            TypeError,
+            ValueError,
+            json.JSONDecodeError,
+        ):
             return None
         return None
 
-    def _write_cache(self, path: Path, response: list[dict[str, Any]], ttl_seconds: int) -> None:
+    def _write_cache(
+        self, path: Path, response: list[dict[str, Any]], ttl_seconds: int
+    ) -> None:
         if ttl_seconds <= 0:
             return
         payload = {"expires_at": time.time() + ttl_seconds, "response": response}
         path.parent.mkdir(parents=True, exist_ok=True)
-        fd, temp_name = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".tmp", dir=path.parent)
+        fd, temp_name = tempfile.mkstemp(
+            prefix=f".{path.name}.", suffix=".tmp", dir=path.parent
+        )
         try:
             with os.fdopen(fd, "w", encoding="utf-8") as handle:
                 json.dump(payload, handle, ensure_ascii=False, separators=(",", ":"))
@@ -79,7 +89,9 @@ class BaseballAPIClient:
         *,
         ttl_seconds: int = 0,
     ) -> list[dict[str, Any]]:
-        params = {key: value for key, value in (params or {}).items() if value is not None}
+        params = {
+            key: value for key, value in (params or {}).items() if value is not None
+        }
         cache_path = self._cache_path(endpoint, params)
         cached = self._read_cache(cache_path)
         if cached is not None:
@@ -105,7 +117,10 @@ class BaseballAPIClient:
                 )
             request = Request(
                 url,
-                headers={"x-apisports-key": self.settings.api_key, "Accept": "application/json"},
+                headers={
+                    "x-apisports-key": self.settings.api_key,
+                    "Accept": "application/json",
+                },
                 method="GET",
             )
             self.request_count += 1
@@ -120,13 +135,17 @@ class BaseballAPIClient:
                     self._retry_delay(attempt, retry_after)
                     continue
                 detail = exc.read().decode("utf-8", errors="replace")[:500]
-                raise BaseballAPIError(f"API HTTP {exc.code} for {endpoint}: {detail}") from exc
+                raise BaseballAPIError(
+                    f"API HTTP {exc.code} for {endpoint}: {detail}"
+                ) from exc
             except (URLError, TimeoutError) as exc:
                 if attempt + 1 < self.settings.api_max_attempts:
                     self._retry_delay(attempt)
                     continue
                 reason = getattr(exc, "reason", str(exc))
-                raise BaseballAPIError(f"API network error for {endpoint}: {reason}") from exc
+                raise BaseballAPIError(
+                    f"API network error for {endpoint}: {reason}"
+                ) from exc
 
         try:
             payload = json.loads(raw)
@@ -158,13 +177,21 @@ class BaseballAPIClient:
     def game(self, game_id: int) -> list[dict[str, Any]]:
         return self.get("games", {"id": game_id}, ttl_seconds=120)
 
-    def games_by_league_season(self, league_id: int, season: int) -> list[dict[str, Any]]:
-        return self.get("games", {"league": league_id, "season": season}, ttl_seconds=21_600)
+    def games_by_league_season(
+        self, league_id: int, season: int
+    ) -> list[dict[str, Any]]:
+        return self.get(
+            "games", {"league": league_id, "season": season}, ttl_seconds=21_600
+        )
 
     def standings(self, league_id: int, season: int) -> list[dict[str, Any]]:
-        return self.get("standings", {"league": league_id, "season": season}, ttl_seconds=21_600)
+        return self.get(
+            "standings", {"league": league_id, "season": season}, ttl_seconds=21_600
+        )
 
-    def team_statistics(self, team_id: int, league_id: int, season: int) -> list[dict[str, Any]]:
+    def team_statistics(
+        self, team_id: int, league_id: int, season: int
+    ) -> list[dict[str, Any]]:
         return self.get(
             "teams/statistics",
             {"team": team_id, "league": league_id, "season": season},
@@ -172,7 +199,11 @@ class BaseballAPIClient:
         )
 
     def player_statistics(self, player_id: int, season: int) -> list[dict[str, Any]]:
-        return self.get("players/statistics", {"id": player_id, "season": season}, ttl_seconds=86_400)
+        return self.get(
+            "players/statistics",
+            {"id": player_id, "season": season},
+            ttl_seconds=86_400,
+        )
 
     def odds(self, game_id: int) -> list[dict[str, Any]]:
         return self.get("odds", {"game": game_id}, ttl_seconds=120)

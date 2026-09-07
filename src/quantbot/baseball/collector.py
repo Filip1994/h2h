@@ -98,7 +98,9 @@ def _bookmaker_records(payload: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 for market in bets:
                     if not isinstance(market, dict):
                         continue
-                    market_name = _text(market.get("name") or market.get("label") or market.get("type"))
+                    market_name = _text(
+                        market.get("name") or market.get("label") or market.get("type")
+                    )
                     values = market.get("values") or market.get("outcomes") or []
                     if isinstance(values, dict):
                         values = [values]
@@ -108,8 +110,12 @@ def _bookmaker_records(payload: list[dict[str, Any]]) -> list[dict[str, Any]]:
                             if not isinstance(value, dict):
                                 continue
                             row = {
-                                "value": value.get("value") or value.get("label") or value.get("name"),
-                                "odd": value.get("odd") or value.get("price") or value.get("odds"),
+                                "value": value.get("value")
+                                or value.get("label")
+                                or value.get("name"),
+                                "odd": value.get("odd")
+                                or value.get("price")
+                                or value.get("odds"),
                                 "handicap": value.get("handicap") or value.get("point"),
                             }
                             if any(v is not None for v in row.values()):
@@ -133,7 +139,9 @@ def compact_odds(payload: list[dict[str, Any]]) -> dict[str, Any]:
             market_name = market["name"]
             market_norm = _norm(market_name)
             market_names.add(market_name)
-            if keep_bookmaker or any(token in market_norm for token in TARGET_MARKET_TOKENS):
+            if keep_bookmaker or any(
+                token in market_norm for token in TARGET_MARKET_TOKENS
+            ):
                 markets.append(market)
         if keep_bookmaker or markets:
             bookmakers.append({"name": bookmaker_name, "markets": markets})
@@ -151,10 +159,14 @@ def _append_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a", encoding="utf-8") as handle:
         for row in rows:
-            handle.write(json.dumps(row, ensure_ascii=False, separators=(",", ":")) + "\n")
+            handle.write(
+                json.dumps(row, ensure_ascii=False, separators=(",", ":")) + "\n"
+            )
 
 
-def collect_once(root: Path, *, now: datetime | None = None, max_odds_requests: int = 199) -> dict[str, int]:
+def collect_once(
+    root: Path, *, now: datetime | None = None, max_odds_requests: int = 199
+) -> dict[str, int]:
     now = (now or datetime.now(UTC)).astimezone(UTC)
     from .config import BaseballSettings
 
@@ -174,7 +186,9 @@ def collect_once(root: Path, *, now: datetime | None = None, max_odds_requests: 
     # Guarantee league diversity first, then spend the remaining request budget on games
     # nearest to first pitch. This favors information density without starving smaller
     # leagues that carry odds.
-    candidates.sort(key=lambda item: (item[0], _league_name(item[1]), _game_id(item[1]) or 0))
+    candidates.sort(
+        key=lambda item: (item[0], _league_name(item[1]), _game_id(item[1]) or 0)
+    )
     selected: list[dict[str, Any]] = []
     seen_leagues: set[str] = set()
     for _, game in candidates:
@@ -185,14 +199,18 @@ def collect_once(root: Path, *, now: datetime | None = None, max_odds_requests: 
         if len(selected) >= max_odds_requests:
             break
     if len(selected) < max_odds_requests:
-        for _, game in sorted(candidates, key=lambda item: abs((item[0] - now).total_seconds())):
+        for _, game in sorted(
+            candidates, key=lambda item: abs((item[0] - now).total_seconds())
+        ):
             if game in selected:
                 continue
             selected.append(game)
             if len(selected) >= max_odds_requests:
                 break
 
-    day_path = root / "data" / "baseball" / "snapshots" / f"{now.date().isoformat()}.jsonl"
+    day_path = (
+        root / "data" / "baseball" / "snapshots" / f"{now.date().isoformat()}.jsonl"
+    )
     coverage_path = root / "data" / "baseball" / "market_coverage.json"
     rows: list[dict[str, Any]] = []
     coverage: dict[str, Any] = {}
@@ -213,7 +231,14 @@ def collect_once(root: Path, *, now: datetime | None = None, max_odds_requests: 
         except BaseballAPIBudgetExceeded:
             break
         except BaseballAPIError as exc:
-            rows.append({"captured_at": now.isoformat(), "game": game, "game_id": game_id, "odds_error": str(exc)})
+            rows.append(
+                {
+                    "captured_at": now.isoformat(),
+                    "game": game,
+                    "game_id": game_id,
+                    "odds_error": str(exc),
+                }
+            )
             continue
         odds_calls += 1
         compact = compact_odds(odds)
@@ -243,5 +268,14 @@ def collect_once(root: Path, *, now: datetime | None = None, max_odds_requests: 
 
     _append_jsonl(day_path, rows)
     coverage_path.parent.mkdir(parents=True, exist_ok=True)
-    coverage_path.write_text(json.dumps(coverage, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    return {"games_seen": games_seen, "games_selected": len(selected), "odds_calls": odds_calls, "api_requests": client.request_count, "rows_written": len(rows)}
+    coverage_path.write_text(
+        json.dumps(coverage, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    return {
+        "games_seen": games_seen,
+        "games_selected": len(selected),
+        "odds_calls": odds_calls,
+        "api_requests": client.request_count,
+        "rows_written": len(rows),
+    }
