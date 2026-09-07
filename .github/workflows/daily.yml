@@ -41,16 +41,17 @@ jobs:
           restore-keys: api-cache-${{ runner.os }}-
       - run: pip install -r requirements.txt
       - run: python main.py generate --no-email
+      - run: python tools/decision_audit.py
       - name: Commit ledger changes
         id: ledger
         run: |
-          if git diff --quiet -- bets.json predictions.json calibration.json ledger_meta.json api_usage.json api_usage_history.json; then
+          if git diff --quiet -- bets.json predictions.json calibration.json ledger_meta.json api_usage.json api_usage_history.json audit/decision_audit.jsonl; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add bets.json predictions.json calibration.json ledger_meta.json api_usage.json api_usage_history.json
+          git add bets.json predictions.json calibration.json ledger_meta.json api_usage.json api_usage_history.json audit/decision_audit.jsonl
           git commit -m "Update QuantBet daily ledger"
           git push
           echo "changed=true" >> "$GITHUB_OUTPUT"
