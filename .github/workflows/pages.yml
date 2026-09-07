@@ -6,11 +6,11 @@ on:
     workflows:
       - QuantBet intraday strong-signal scanner
       - QuantBet adaptive watchlist monitor
+      - Monitor odds and settle ledgers
       - QuantBet T-5 closing odds capture
-      - QuantBet daily bulletin
-      - QuantBet intraday monitor
+      - Daily QuantBet bulletin
       - QuantBet closing-day bulletin
-      - QuantBet skip pending tip
+      - Skip pending bet
     types: [completed]
   push:
     branches: [main]
@@ -31,6 +31,9 @@ concurrency:
   group: github-pages
   cancel-in-progress: true
 
+env:
+  PAGES_ARTIFACT_RETENTION_DAYS: 1
+
 jobs:
   deploy:
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
@@ -42,9 +45,12 @@ jobs:
       - uses: actions/checkout@v7
         with:
           ref: main
+          fetch-depth: 1
       - uses: actions/configure-pages@v5
       - name: Build static artifact
         run: |
+          set -euo pipefail
+          rm -rf _site
           mkdir -p _site
           cp index.html bets.json ledger_meta.json _site/
           test -s _site/index.html
@@ -52,13 +58,19 @@ jobs:
           test -s _site/ledger_meta.json
           python - <<'PY'
           import json
+          from pathlib import Path
           for name in ("bets.json", "ledger_meta.json"):
-              with open(name, encoding="utf-8") as f:
-                  json.load(f, parse_constant=lambda value: (_ for _ in ()).throw(ValueError(f"invalid JSON constant: {value}")))
+              path = Path("_site") / name
+              with path.open(encoding="utf-8") as f:
+                  data = json.load(f, parse_constant=lambda value: (_ for _ in ()).throw(ValueError(f"invalid JSON constant: {value}")))
+              print(f"validated {name}: {path.stat().st_size} bytes")
+              if name == "bets.json":
+                  print(f"ledger records: {len(data)}")
           PY
       - uses: actions/upload-pages-artifact@v4
         with:
           path: _site
+          retention-days: 1
       - name: Deploy dashboard
         id: deployment
         uses: actions/deploy-pages@v4
