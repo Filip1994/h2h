@@ -2,7 +2,11 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
-from quantbot.alert_lifecycle import _apply_closing, _clv_pct, _settle_counterfactual
+from quantbot.alert_lifecycle import (
+    _apply_closing,
+    _clv_pct,
+    _settle_counterfactual,
+)
 
 
 class Quote:
