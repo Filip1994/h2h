@@ -59,10 +59,11 @@ jobs:
                   return value if isinstance(value,list) else []
               except Exception:
                   return []
+          previous=load('strong_signals.json')
           alerts=load('intraday_alerts.json')
           bets=[x for x in load('bets.json') if str(x.get('signal_source',''))=='INTRADAY_ALERT']
           merged={}
-          for item in alerts+bets:
+          for item in previous+alerts+bets:
               key=str(item.get('id') or item.get('prediction_id') or item.get('event_id') or '')
               if not key:
                   continue
