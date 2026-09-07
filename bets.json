@@ -264,12 +264,16 @@
     "xi": 0.0015,
     "model_version": "dc-value-v2.1.0",
     "calibration_status": "IDENTITY_UNVALIDATED",
-    "status": "PENDING",
-    "profit": 0.0,
+    "status": "WIN",
+    "profit": 729.0,
     "closing_odd": 2.62,
     "closing_opposite_odd": 1.44,
     "closing_market_probability_devig": 0.35468,
-    "closing_odds_captured_at": "2026-09-06T19:41:18.277545+00:00"
+    "closing_odds_captured_at": "2026-09-06T19:41:18.277545+00:00",
+    "result": "2:0",
+    "settled_at": "2026-09-07T01:08:36.004117+00:00",
+    "clv_odds_pct": 0.0,
+    "clv_probability_pp": 0.0
   },
   {
     "id": "1490444_UNDER_2_5",
