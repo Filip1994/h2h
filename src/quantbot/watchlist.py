@@ -18,7 +18,6 @@ from .risk import kelly_stake, portfolio_analytics
 from .storage import BetStore, atomic_write_json
 from .types import Market
 
-
 STATE_FILE = "intraday_watchlist_state.json"
 ALERT_FILE = "intraday_alerts.json"
 
