@@ -64,11 +64,7 @@ def key(item: dict) -> tuple[int, str, int] | None:
 def entries(settings: Settings) -> int:
     predictions = load_list(settings.predictions_file)
     bets = BetStore(settings.bets_file).load()
-    bet_by_key = {
-        key(b): str(b["id"])
-        for b in bets
-        if key(b) and b.get("id")
-    }
+    bet_by_key = {key(b): str(b["id"]) for b in bets if key(b) and b.get("id")}
     store = OddsSnapshotStore(SNAP)
     changed = 0
     for prediction in predictions:
@@ -197,13 +193,7 @@ def t5(settings: Settings) -> int:
             continue
 
         prediction = predictions.get(key(bet))
-        signal = str(
-            (prediction or {}).get("signal_id")
-            or (prediction or {}).get("id")
-            or bet.get("signal_id")
-            or bet.get("prediction_id")
-            or ""
-        ) or None
+        signal = str((prediction or {}).get("signal_id") or (prediction or {}).get("id") or bet.get("signal_id") or bet.get("prediction_id") or "") or None
         snapshot = store.append_quote(
             quote,
             fixture_id=int(bet["event_id"]),
@@ -226,10 +216,7 @@ def closing(settings: Settings) -> int:
     snapshots = load_snapshots()
     changed = 0
     for bet in bets:
-        if (
-            str(bet.get("status", "")).upper() not in TERMINAL
-            or bet.get("closing_snapshot_id")
-        ):
+        if str(bet.get("status", "")).upper() not in TERMINAL or bet.get("closing_snapshot_id"):
             continue
         try:
             kickoff = datetime.fromisoformat(str(bet["kickoff"])).astimezone(UTC)
