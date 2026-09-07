@@ -11,6 +11,8 @@ from urllib.parse import urlencode
 from .config import Settings
 from .engine import GenerationResult
 
+# fmt: off
+
 
 def _esc(value: Any) -> str:
     return html.escape(str(value), quote=True)
@@ -158,3 +160,5 @@ def send_strong_signal_email(subject: str, html_body: str, settings: Settings) -
     except (OSError, smtplib.SMTPException) as exc:
         print(f"⚠️ Strong-signal email nije poslat: {exc}")
         return False
+
+# fmt: on
