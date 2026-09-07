@@ -144,6 +144,5 @@ def test_clv_formula_correctness(tmp_path):
     entry, closing = records
     assert round(entry["odd"] / closing["odd"] - 1, 6) == 0.052632
     assert (
-        round(closing["devig_probability"] - entry["devig_probability"], 6)
-        == 0.012802
+        round(closing["devig_probability"] - entry["devig_probability"], 6) == 0.012802
     )
