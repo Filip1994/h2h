@@ -18,6 +18,7 @@ on:
       - index.html
       - bets.json
       - ledger_meta.json
+      - strong_signals.json
       - .github/workflows/pages.yml
   schedule:
     - cron: "17 * * * *"
@@ -30,9 +31,6 @@ permissions:
 concurrency:
   group: github-pages
   cancel-in-progress: true
-
-env:
-  PAGES_ARTIFACT_RETENTION_DAYS: 1
 
 jobs:
   deploy:
@@ -52,25 +50,18 @@ jobs:
           set -euo pipefail
           rm -rf _site
           mkdir -p _site
-          cp index.html bets.json ledger_meta.json _site/
+          cp index.html bets.json ledger_meta.json strong_signals.json _site/
           test -s _site/index.html
           test -s _site/bets.json
           test -s _site/ledger_meta.json
+          test -s _site/strong_signals.json
           python - <<'PY'
           import json
           from pathlib import Path
-          bets=json.loads(Path('bets.json').read_text(encoding='utf-8'))
-          meta=json.loads(Path('ledger_meta.json').read_text(encoding='utf-8'))
-          Path('_site/data.js').write_text('window.QUANTBET_DATA='+json.dumps({'bets':bets,'meta':meta},ensure_ascii=False,separators=(',',':'))+';',encoding='utf-8')
-          for name in ('bets.json','ledger_meta.json'):
-              path=Path('_site')/name
-              with path.open(encoding='utf-8') as f:
-                  data=json.load(f,parse_constant=lambda value: (_ for _ in ()).throw(ValueError(f'invalid JSON constant: {value}')))
-              print(f'validated {name}: {path.stat().st_size} bytes')
-              if name=='bets.json': print(f'ledger records: {len(data)}')
-          print(f'embedded data: {Path("_site/data.js").stat().st_size} bytes')
+          for name in ('bets.json','ledger_meta.json','strong_signals.json'):
+              with (Path('_site')/name).open(encoding='utf-8') as f: data=json.load(f)
+              print(name, 'records=', len(data) if isinstance(data,list) else 'object')
           PY
-          test -s _site/data.js
       - uses: actions/upload-pages-artifact@v4
         with:
           path: _site
