@@ -43,7 +43,7 @@ jobs:
       - run: python main.py generate --no-email
       - name: Commit ledger and raw API archive
         run: |
-          if git diff --quiet -- bets.json predictions.json calibration.json ledger_meta.json api_usage.json api_usage_history.json data/raw_api; then
+          if git diff --quiet -- bets.json predictions.json calibration.json ledger_meta.json api_usage.json api_usage_history.json && test -z "$(git status --porcelain -- data/raw_api)"; then
             exit 0
           fi
           git config user.name "github-actions[bot]"
