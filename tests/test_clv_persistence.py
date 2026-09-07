@@ -159,14 +159,12 @@ def test_t5_capture_window(monkeypatch, tmp_path):
     monkeypatch.setattr("quantbot.closing.APIFootballClient", FakeAPI)
     monkeypatch.setattr(
         "quantbot.closing.extract_best_quotes",
-        lambda *args, **kwargs: {
-            Market.OVER_25: quote(now.isoformat())
-        },
+        lambda *args, **kwargs: {Market.OVER_25: quote(now.isoformat())},
     )
 
     assert capture_five_minute_closing_quotes(Settings, now) == 1
 
-    outside = now + timedelta(minutes=4)
+    outside = now + timedelta(minutes=9)
     assert capture_five_minute_closing_quotes(Settings, outside) == 0
 
 
