@@ -46,10 +46,10 @@ jobs:
           restore-keys: api-cache-${{ runner.os }}-
       - run: pip install -r requirements.txt
       - run: python main.py generate
-      - name: Commit intraday ledger, signals and raw API archive
+      - name: Commit intraday ledger, signals, health and raw API archive
         run: |
           set -euo pipefail
-          files=(bets.json predictions.json ledger_meta.json api_usage.json api_usage_history.json intraday_alerts.json intraday_watchlist_state.json)
+          files=(bets.json predictions.json ledger_meta.json api_usage.json api_usage_history.json generation_health.json generation_health_history.json intraday_alerts.json intraday_watchlist_state.json)
           changed=0
           for file in "${files[@]}"; do
             if [ -e "$file" ] && ! git diff --quiet -- "$file"; then changed=1; fi
@@ -60,5 +60,16 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add --ignore-errors "${files[@]}" data/raw_api
-          git commit -m "Update QuantBet intraday ledger and API archive"
-          git push
+          git commit -m "Update QuantBet intraday ledger and generation health"
+          for attempt in 1 2 3; do
+            if git push; then exit 0; fi
+            if [ "$attempt" -eq 3 ]; then break; fi
+            git fetch origin main
+            if ! git rebase origin/main; then
+              git rebase --abort || true
+              echo "Ledger reconciliation conflict; intraday update failed." >&2
+              exit 1
+            fi
+          done
+          echo "Unable to push intraday update after 3 attempts" >&2
+          exit 1
