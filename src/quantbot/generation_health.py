@@ -40,16 +40,13 @@ def _telemetry(result: Any) -> dict[str, Any]:
 def _funnel(telemetry: dict[str, Any]) -> dict[str, int]:
     value = telemetry.get("funnel")
     if isinstance(value, dict):
-        return {
-            key: max(0, int(value.get(key, 0)))
-            for key in FUNNEL_SEMANTICS
-        }
+        return {key: max(0, int(value.get(key, 0))) for key in FUNNEL_SEMANTICS}
     return {
         "discovered": int(telemetry.get("fixtures_discovered", 0)),
         "eligible": int(telemetry.get("fixtures_eligible", 0)),
         "modelled": int(telemetry.get("fixtures_modelled", 0)),
         "predictions": int(telemetry.get("predictions_generated", 0)),
-        "candidates": int(telemetry.get("candidates", telemetry.get("candidates_qualified", 0))),
+        "candidates": int(telemetry.get("candidates", 0)),
         "selections": int(telemetry.get("selections_produced", 0)),
     }
 
