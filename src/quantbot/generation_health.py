@@ -27,7 +27,9 @@ def _telemetry(result: Any) -> dict[str, Any]:
     return dict(value) if isinstance(value, dict) else {}
 
 
-def _classification_reasons(usage: dict[str, Any], telemetry: dict[str, Any]) -> list[str]:
+def _classification_reasons(
+    usage: dict[str, Any], telemetry: dict[str, Any]
+) -> list[str]:
     reasons: list[str] = []
     if usage.get("rate_limit_events", 0):
         reasons.append("API_RATE_LIMIT")
@@ -80,9 +82,7 @@ def build_failure_health(
     telemetry: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     pipeline = dict(telemetry or {})
-    pipeline.setdefault(
-        "fixture_failures", {"api": 0, "dixon_coles": 0, "other": 0}
-    )
+    pipeline.setdefault("fixture_failures", {"api": 0, "dixon_coles": 0, "other": 0})
     return {
         "schema_version": 2,
         "timestamp": generated_at.astimezone(UTC).isoformat(),
