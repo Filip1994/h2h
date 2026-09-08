@@ -42,11 +42,13 @@ def test_tier_three_four_and_five_are_blocked() -> None:
 def test_unknown_and_missing_tier_are_blocked() -> None:
     assert not is_allowed_match("England", "Some Unknown League", "A", "B")
     assert not is_allowed_match(None, None, "A", "B")
-    assert not is_allowed_match("England", "Championship", "A", "B", league_tier=None)
+    assert not is_allowed_match("Nowhere", "Provider League", "A", "B", league_tier=None)
 
 
 def test_provider_tier_is_deterministic() -> None:
     assert is_allowed_match("Nowhere", "Provider League", "A", "B", league_tier=1)
     assert is_allowed_match("Nowhere", "Provider League", "A", "B", league_tier=2)
     assert not is_allowed_match("Nowhere", "Provider League", "A", "B", league_tier=3)
-    assert not is_allowed_match("Nowhere", "Provider League", "A", "B", league_tier="unknown")
+    assert not is_allowed_match(
+        "Nowhere", "Provider League", "A", "B", league_tier="unknown"
+    )
