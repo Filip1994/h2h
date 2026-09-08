@@ -104,6 +104,8 @@ class MarketCandidate:
     model_probability: float
     calibrated_probability: float
     decision_probability: float
+    h2h_enabled: bool
+    h2h_available: bool
     h2h_rate: float
     h2h_n: int
     h2h_effective_n: float
@@ -158,7 +160,8 @@ class MarketCandidate:
             "decision_probability": round(self.decision_probability, 6),
             "probability_edge": round(self.probability_edge, 6),
             "expected_value": round(self.expected_value, 6),
-            "h2h_enabled": bool(self.h2h_n),
+            "h2h_enabled": self.h2h_enabled,
+            "h2h_available": self.h2h_available,
             "h2h_rate": round(self.h2h_rate, 6),
             "h2h_n": self.h2h_n,
             "h2h_effective_n": round(self.h2h_effective_n, 3),
