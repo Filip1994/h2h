@@ -1,7 +1,16 @@
 {
-  "checked_at": "2026-09-08T17:49:00.903614+00:00",
+  "checked_at": "2026-09-08T20:19:40.940066+00:00",
   "max_age_minutes": 30,
-  "stale_pending_count": 0,
-  "status": "OK",
-  "stale_pending": []
+  "stale_pending_count": 1,
+  "status": "FAIL",
+  "stale_pending": [
+    {
+      "source": "intraday_alerts.json",
+      "id": "1600773_BTTS_YES_dc-value-v2.1.0:202609081312",
+      "event_id": 1600773,
+      "match": "Young Africans vs Geita Gold",
+      "kickoff": "2026-09-08T16:00:00+00:00",
+      "eligible_at": "2026-09-08T17:30:00+00:00"
+    }
+  ]
 }
