@@ -107445,7 +107445,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1552155_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "014b1ee517f20d73273be999aef93554988af8ab7f0ddc4e6ee116faf5fe2ea4"
   },
   {
     "id": "1552155_UNDER_2_5_dc-value-v2.1.0",
@@ -107479,7 +107481,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1552155_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "e344675d035dc3f1264f2fa3a66aef618aec2fa265b5ce32d74f2f61fa18ee96"
   },
   {
     "id": "1552155_BTTS_YES_dc-value-v2.1.0",
@@ -107513,6 +107517,8 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1552155_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "aa3cea24c5657f8009188a609a16f1cb088f6d44c900c215711d0c15b91f556c"
   }
 ]
