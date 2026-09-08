@@ -64,11 +64,15 @@ def build_success_marker(
 
 
 def write_success_marker(marker: dict, path: Path = MARKER_PATH) -> None:
-    path.write_text(json.dumps(marker, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    path.write_text(
+        json.dumps(marker, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="QuantBet daily bulletin health marker")
+    parser = argparse.ArgumentParser(
+        description="QuantBet daily bulletin health marker"
+    )
     parser.add_argument("--guard", action="store_true")
     parser.add_argument("--write-success", action="store_true")
     parser.add_argument("--generation-started-at")

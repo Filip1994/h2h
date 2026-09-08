@@ -10,7 +10,8 @@ from .calibration import ProbabilityCalibrator
 from .config import Settings
 from .dixon_coles import DixonColesFitError, DixonColesModel
 from .filters import is_allowed_match
-from .h2h import build_h2h_stats, format_recent_history
+from .h2h import build_h2h_stats_detailed, format_recent_history
+from .h2h_telemetry import H2HSnapshotStore, build_snapshot
 from .markets import extract_best_quotes
 from .parsing import current_fixture_fields, match_record_from_api
 from .risk import PortfolioAnalytics, allocate_stakes, portfolio_analytics
@@ -44,6 +45,7 @@ class QuantEngine:
         )
         self._model_cache: dict[tuple[int, int, str], DixonColesModel] = {}
         self._training_cache: dict[tuple[int, int, str], list[MatchRecord]] = {}
+        self.h2h_snapshot_store = H2HSnapshotStore(settings.root)
 
     def _training_records(
         self, league_id: int, season: int, data_cutoff: datetime
@@ -112,6 +114,10 @@ class QuantEngine:
         quote,
         created_at,
         *,
+        h2h_snapshot_id: str,
+        h2h_available: bool,
+        h2h_status: str,
+        h2h_error: str | None = None,
         rejection_reason=None,
         selected=False,
     ):
@@ -132,6 +138,10 @@ class QuantEngine:
             "calibrated_probability": round(calibrated_probability, 6),
             "calibration_status": calibration_status,
             "h2h_enabled": self.settings.h2h_telemetry_enabled,
+            "h2h_available": h2h_available,
+            "h2h_status": h2h_status,
+            "h2h_error": h2h_error,
+            "h2h_snapshot_id": h2h_snapshot_id,
             "h2h_rate": round(h2h_rate, 6),
             "h2h_n": h2h_n,
             "h2h_effective_n": round(h2h_effective_n, 3),
@@ -207,16 +217,45 @@ class QuantEngine:
                 self.settings.excluded_countries,
             ):
                 continue
+
             h2h = None
+            h2h_status = "NOT_REQUESTED"
+            h2h_error = None
             if self.settings.h2h_telemetry_enabled:
                 try:
-                    h2h = build_h2h_stats(
-                        self.api.head_to_head(fields["home_id"], fields["away_id"]),
-                        now=decision_timestamp,
-                        settings=self.settings,
+                    h2h_raw = self.api.head_to_head(
+                        fields["home_id"], fields["away_id"]
                     )
-                except (APIError, ValueError, TypeError) as exc:
+                    h2h, h2h_status = build_h2h_stats_detailed(
+                        h2h_raw, now=decision_timestamp, settings=self.settings
+                    )
+                except APIError as exc:
+                    h2h_status = "API_ERROR"
+                    h2h_error = str(exc)[:500]
                     diagnostics.append(f"fixture_{fixture_id}_h2h: {exc}")
+                except (ValueError, TypeError) as exc:
+                    h2h_status = "PARSE_ERROR"
+                    h2h_error = str(exc)[:500]
+                    diagnostics.append(f"fixture_{fixture_id}_h2h: {exc}")
+
+            snapshot = build_snapshot(
+                fixture_id=fixture_id,
+                decision_timestamp=decision_timestamp,
+                home_id=int(fields["home_id"]),
+                away_id=int(fields["away_id"]),
+                home_name=str(fields["home_name"]),
+                away_name=str(fields["away_name"]),
+                league_id=int(fields["league_id"]),
+                league=f"{fields['country']} - {fields['league_name']}",
+                h2h_enabled=self.settings.h2h_telemetry_enabled,
+                status=h2h_status,
+                stats=h2h,
+                error=h2h_error,
+                captured_at=decision_timestamp,
+            )
+            snapshot_id = str(snapshot["h2h_snapshot_id"])
+            self.h2h_snapshot_store.append(snapshot)
+
             h2h_rates = (
                 h2h.weighted_rates if h2h else {market: 0.0 for market in Market}
             )
@@ -283,6 +322,10 @@ class QuantEngine:
                         h2h_effective_n,
                         quote,
                         now_local,
+                        h2h_snapshot_id=snapshot_id,
+                        h2h_available=bool(snapshot["h2h_available"]),
+                        h2h_status=h2h_status,
+                        h2h_error=h2h_error,
                         rejection_reason=reason,
                     )
                 )
@@ -360,6 +403,14 @@ class QuantEngine:
             )
             for candidate, stake in allocations
         ]
+        prediction_by_id = {str(item["id"]): item for item in prediction_records}
+        for bet in proposed_bets:
+            prediction_id = f"{bet['event_id']}_{bet['market']}_{MODEL_VERSION}"
+            research = prediction_by_id.get(prediction_id, {})
+            bet["h2h_snapshot_id"] = research.get("h2h_snapshot_id")
+            bet["h2h_available"] = research.get("h2h_available", False)
+            bet["h2h_status"] = research.get("h2h_status", "NOT_REQUESTED")
+            bet["h2h_error"] = research.get("h2h_error")
         signal_source = (
             "INTRADAY_ALERT" if self.settings.intraday_mode else "DAILY_BULLETIN"
         )
@@ -372,7 +423,9 @@ class QuantEngine:
             final_bets, self.settings.initial_bank, today=now_local.date().isoformat()
         )
         diagnostics.append(
-            f"scan={len(raw_fixtures)} candidates={len(candidates)} selected={len(appended)} h2h_telemetry={self.settings.h2h_telemetry_enabled} data_cutoff={decision_timestamp.isoformat()} api={self.api.request_count} mode={'intraday' if self.settings.intraday_mode else 'daily'}"
+            f"scan={len(raw_fixtures)} candidates={len(candidates)} selected={len(appended)} "
+            f"h2h_telemetry={self.settings.h2h_telemetry_enabled} data_cutoff={decision_timestamp.isoformat()} "
+            f"api={self.api.request_count} mode={'intraday' if self.settings.intraday_mode else 'daily'}"
         )
         return GenerationResult(
             new_bets=tuple(appended),

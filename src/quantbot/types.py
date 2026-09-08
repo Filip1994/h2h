@@ -115,6 +115,7 @@ class MarketCandidate:
     expected_value: float
     probability_edge: float
     calibration_status: str
+    h2h_enabled: bool = False
 
     def to_bet(
         self,
@@ -131,6 +132,7 @@ class MarketCandidate:
             "type": "DC_VALUE",
             "mode": mode,
             "event_id": self.fixture_id,
+            "prediction_id": f"{self.fixture_id}_{self.market.value}_{model_version}",
             "created_at": created_at.isoformat(),
             "decision_timestamp": created_at.isoformat(),
             "data_cutoff": created_at.isoformat(),
@@ -158,7 +160,7 @@ class MarketCandidate:
             "decision_probability": round(self.decision_probability, 6),
             "probability_edge": round(self.probability_edge, 6),
             "expected_value": round(self.expected_value, 6),
-            "h2h_enabled": bool(self.h2h_n),
+            "h2h_enabled": self.h2h_enabled,
             "h2h_rate": round(self.h2h_rate, 6),
             "h2h_n": self.h2h_n,
             "h2h_effective_n": round(self.h2h_effective_n, 3),
