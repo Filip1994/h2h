@@ -124,10 +124,25 @@ def test_engine_selects_one_market_and_blocks_fixture_on_rerun(settings) -> None
     assert first.new_bets[0]["market"] in {"OVER_2_5", "BTTS_YES"}
     assert first.new_bets[0]["expected_value"] >= 0
     assert len(engine.prediction_store.load()) == 3
+    assert first.telemetry["funnel"] == {
+        "discovered": 1,
+        "eligible": 1,
+        "modelled": 1,
+        "predictions": 3,
+        "candidates": 1,
+        "selections": 1,
+    }
+    assert first.telemetry["fixtures_without_odds"] == 0
 
     second = engine.generate(now)
     assert second.new_bets == ()
     assert len(engine.bet_store.load()) == 1
+    assert second.telemetry["funnel"]["discovered"] == 1
+    assert second.telemetry["funnel"]["eligible"] == 0
+    assert second.telemetry["funnel"]["modelled"] == 0
+    assert second.telemetry["funnel"]["predictions"] == 0
+    assert second.telemetry["funnel"]["candidates"] == 0
+    assert second.telemetry["funnel"]["selections"] == 0
 
 
 def test_live_mode_refuses_unvalidated_probabilities(settings, monkeypatch) -> None:

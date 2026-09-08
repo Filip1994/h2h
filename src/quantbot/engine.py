@@ -175,9 +175,11 @@ class QuantEngine:
             "predictions_generated": 0,
             "candidates_evaluated": 0,
             "candidates_qualified": 0,
+            "candidates": 0,
             "selections_produced": 0,
             "training_sample_insufficiency": 0,
             "fit_failures": 0,
+            "fixtures_without_odds": 0,
             "fixture_failures": {"api": 0, "dixon_coles": 0, "other": 0},
         }
         raw_fixtures = self.api.fixtures_by_date(now_local.date().isoformat())
@@ -227,13 +229,15 @@ class QuantEngine:
                 lambda_home, lambda_away = model.expected_goals(
                     fields["home_id"], fields["away_id"]
                 )
+                telemetry["fixtures_modelled"] += 1
                 quotes = extract_best_quotes(
                     self.api.odds(fixture_id),
                     bookmaker_priority=self.settings.bookmaker_priority,
                     allow_any_bookmaker=self.settings.allow_any_bookmaker,
                     captured_at=decision_timestamp,
                 )
-                telemetry["fixtures_modelled"] += 1
+                if not quotes:
+                    telemetry["fixtures_without_odds"] += 1
             except APIBudgetExceeded:
                 diagnostics.append("API budžet dostignut; skeniranje zaustavljeno")
                 break
@@ -323,6 +327,7 @@ class QuantEngine:
                 )
             if fixture_candidates:
                 telemetry["candidates_qualified"] += len(fixture_candidates)
+                telemetry["candidates"] += 1
                 candidates.append(
                     max(
                         fixture_candidates,
@@ -369,6 +374,14 @@ class QuantEngine:
             bet["signal_sent_at"] = now_local.isoformat()
         appended = self.bet_store.append_unique_fixtures(proposed_bets)
         telemetry["selections_produced"] = len(appended)
+        telemetry["funnel"] = {
+            "discovered": telemetry["fixtures_discovered"],
+            "eligible": telemetry["fixtures_eligible"],
+            "modelled": telemetry["fixtures_modelled"],
+            "predictions": telemetry["predictions_generated"],
+            "candidates": telemetry["candidates"],
+            "selections": telemetry["selections_produced"],
+        }
         final_bets = self.bet_store.load()
         analytics = portfolio_analytics(
             final_bets, self.settings.initial_bank, today=now_local.date().isoformat()

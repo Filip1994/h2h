@@ -4,6 +4,16 @@ from datetime import UTC, datetime
 from typing import Any
 
 
+FUNNEL_SEMANTICS = {
+    "discovered": "Raw fixtures returned by the fixture discovery call for the run.",
+    "eligible": "Discovered fixtures that pass status, time-window, duplicate-block and league eligibility checks.",
+    "modelled": "Eligible fixtures for which the model successfully produced probabilities and expected goals; odds availability is not required for this stage.",
+    "predictions": "Market-level prediction records produced from successfully modelled fixtures.",
+    "candidates": "Fixture-level candidates retained after at least one market passes the existing EV/edge/odds gates.",
+    "selections": "Final bets appended by the existing allocation and BetStore selection path.",
+}
+
+
 def _fixture_failure_counts(diagnostics: tuple[str, ...]) -> dict[str, int]:
     counts = {"api": 0, "dixon_coles": 0, "other": 0}
     for diagnostic in diagnostics:
@@ -25,6 +35,20 @@ def _fixture_failure_counts(diagnostics: tuple[str, ...]) -> dict[str, int]:
 def _telemetry(result: Any) -> dict[str, Any]:
     value = getattr(result, "telemetry", {})
     return dict(value) if isinstance(value, dict) else {}
+
+
+def _funnel(telemetry: dict[str, Any]) -> dict[str, int]:
+    value = telemetry.get("funnel")
+    if isinstance(value, dict):
+        return {key: max(0, int(value.get(key, 0))) for key in FUNNEL_SEMANTICS}
+    return {
+        "discovered": int(telemetry.get("fixtures_discovered", 0)),
+        "eligible": int(telemetry.get("fixtures_eligible", 0)),
+        "modelled": int(telemetry.get("fixtures_modelled", 0)),
+        "predictions": int(telemetry.get("predictions_generated", 0)),
+        "candidates": int(telemetry.get("candidates", 0)),
+        "selections": int(telemetry.get("selections_produced", 0)),
+    }
 
 
 def _classification_reasons(
@@ -58,14 +82,18 @@ def build_success_health(generated_at: datetime, result: Any) -> dict[str, Any]:
         result.diagnostics
     )
     telemetry["fixture_failures"] = fixture_failures
+    funnel = _funnel(telemetry)
+    telemetry["funnel"] = funnel
     degraded_reasons = _classification_reasons(usage, telemetry)
 
     return {
-        "schema_version": 2,
+        "schema_version": 3,
         "timestamp": generated_at.astimezone(UTC).isoformat(),
         "status": "DEGRADED" if degraded_reasons else "HEALTHY",
         "classification_reasons": degraded_reasons,
         "pipeline": telemetry,
+        "funnel": funnel,
+        "funnel_semantics": FUNNEL_SEMANTICS,
         "fixture_failures": fixture_failures,
         "api": usage,
         "new_bets": len(result.new_bets),
@@ -83,12 +111,16 @@ def build_failure_health(
 ) -> dict[str, Any]:
     pipeline = dict(telemetry or {})
     pipeline.setdefault("fixture_failures", {"api": 0, "dixon_coles": 0, "other": 0})
+    funnel = _funnel(pipeline)
+    pipeline["funnel"] = funnel
     return {
-        "schema_version": 2,
+        "schema_version": 3,
         "timestamp": generated_at.astimezone(UTC).isoformat(),
         "status": "BLOCKED",
         "classification_reasons": [type(error).__name__],
         "pipeline": pipeline,
+        "funnel": funnel,
+        "funnel_semantics": FUNNEL_SEMANTICS,
         "fixture_failures": pipeline["fixture_failures"],
         "api": dict(api_usage),
         "new_bets": 0,

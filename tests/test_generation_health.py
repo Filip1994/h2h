@@ -53,6 +53,7 @@ def test_clean_generation_is_healthy_with_pipeline_counts() -> None:
         "predictions_generated": 12,
         "candidates_evaluated": 12,
         "candidates_qualified": 2,
+        "candidates": 2,
         "selections_produced": 1,
         "training_sample_insufficiency": 0,
         "fit_failures": 0,
@@ -69,8 +70,33 @@ def test_clean_generation_is_healthy_with_pipeline_counts() -> None:
     health = build_success_health(datetime.now(UTC), result)
     assert health["status"] == "HEALTHY"
     assert health["classification_reasons"] == []
-    assert health["pipeline"]["fixtures_discovered"] == 10
+    assert health["funnel"] == {
+        "discovered": 10,
+        "eligible": 4,
+        "modelled": 4,
+        "predictions": 12,
+        "candidates": 2,
+        "selections": 1,
+    }
+    assert health["funnel_semantics"]["candidates"].startswith(
+        "Fixture-level candidates"
+    )
     assert health["pipeline"]["selections_produced"] == 1
+
+
+def test_missing_canonical_candidate_counter_is_not_reconstructed_from_market_count() -> None:
+    result = _result(
+        telemetry={
+            "fixtures_discovered": 3,
+            "fixtures_eligible": 2,
+            "fixtures_modelled": 2,
+            "predictions_generated": 6,
+            "candidates_qualified": 5,
+            "selections_produced": 1,
+        },
+    )
+    health = build_success_health(datetime.now(UTC), result)
+    assert health["funnel"]["candidates"] == 0
 
 
 def test_budget_exhaustion_is_degraded_and_not_a_rpm_threshold() -> None:
@@ -99,6 +125,7 @@ def test_mixed_degraded_run_exposes_coverage_and_failure_counts() -> None:
         "predictions_generated": 18,
         "candidates_evaluated": 18,
         "candidates_qualified": 3,
+        "candidates": 3,
         "selections_produced": 2,
         "training_sample_insufficiency": 2,
         "fit_failures": 1,
@@ -124,6 +151,7 @@ def test_mixed_degraded_run_exposes_coverage_and_failure_counts() -> None:
     } <= set(health["classification_reasons"])
     assert health["pipeline"]["fixtures_eligible"] == 8
     assert health["pipeline"]["fit_failures"] == 1
+    assert health["funnel"]["candidates"] == 3
 
 
 def test_fatal_generation_failure_is_classified_blocked_but_observation_only() -> None:
@@ -136,5 +164,6 @@ def test_fatal_generation_failure_is_classified_blocked_but_observation_only() -
     assert health["status"] == "BLOCKED"
     assert health["classification_reasons"] == ["RuntimeError"]
     assert health["pipeline"]["fixtures_discovered"] == 5
+    assert health["funnel"]["discovered"] == 5
     assert health["observation_only"] is True
     assert health["threshold_action"] == "NO_AUTOMATIC_BLOCKING"
