@@ -764,6 +764,10 @@
     "signal_sent_at": "2026-09-08T02:45:18.177343+02:00",
     "prediction_id": "1603995_UNDER_2_5_dc-value-v2.1.0",
     "signal_id": "1603995_UNDER_2_5_dc-value-v2.1.0",
-    "entry_snapshot_id": "e47ea93fe48b3f4cf99cd8d11ae86669b2f49708d22ad30afff89d9077359508"
+    "entry_snapshot_id": "e47ea93fe48b3f4cf99cd8d11ae86669b2f49708d22ad30afff89d9077359508",
+    "closing_odd": 1.7,
+    "closing_opposite_odd": 2.1,
+    "closing_market_probability_devig": 0.552632,
+    "closing_odds_captured_at": "2026-09-08T13:56:01.318803+00:00"
   }
 ]
