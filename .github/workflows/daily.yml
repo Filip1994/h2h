@@ -82,16 +82,16 @@ jobs:
       - name: Capture generation completion
         id: generation-complete
         run: echo "timestamp=$(python -c 'from datetime import datetime,UTC; print(datetime.now(UTC).isoformat())')" >> "$GITHUB_OUTPUT"
-      - name: Commit ledger and raw API archive
+      - name: Commit ledger and generation health
         run: |
           set -euo pipefail
-          if git diff --quiet -- bets.json predictions.json calibration.json ledger_meta.json api_usage.json api_usage_history.json && test -z "$(git status --porcelain -- data/raw_api)"; then
+          if git diff --quiet -- bets.json predictions.json calibration.json ledger_meta.json api_usage.json api_usage_history.json generation_health.json generation_health_history.json && test -z "$(git status --porcelain -- data/raw_api)"; then
             echo "No ledger changes to commit."
           else
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add bets.json predictions.json calibration.json ledger_meta.json api_usage.json api_usage_history.json data/raw_api
-            git commit -m "Update QuantBet daily ledger and API archive"
+            git add bets.json predictions.json calibration.json ledger_meta.json api_usage.json api_usage_history.json generation_health.json generation_health_history.json data/raw_api
+            git commit -m "Update QuantBet daily ledger and generation health"
             for attempt in 1 2 3; do
               if git push; then
                 git fetch origin main
@@ -117,7 +117,7 @@ jobs:
         run: |
           python tools/bulletin_health.py --write-success \
             --generation-started-at "${{ steps.generation-start.outputs.timestamp }}" \
-            --generation-completed-at "${{ steps.generation-complete.outputs.timestamp }}"
+            --generation-completed-at "${{ steps/generation-complete.outputs.timestamp }}"
       - name: Commit bulletin health marker
         run: |
           set -euo pipefail
@@ -125,4 +125,13 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add bulletin_health.json
           git commit -m "Mark daily QuantBet bulletin successful"
-          git push
+          for attempt in 1 2 3; do
+            if git push; then exit 0; fi
+            if [ "$attempt" -eq 3 ]; then break; fi
+            git fetch origin main
+            if ! git rebase origin/main; then
+              git rebase --abort || true
+              exit 1
+            fi
+          done
+          exit 1
