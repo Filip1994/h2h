@@ -99,9 +99,7 @@ def entries(settings: Settings) -> int:
             prediction = pred_map.get(key(bet))
             if prediction and prediction.get("entry_snapshot_id"):
                 bet["prediction_id"] = prediction.get("id")
-                bet["signal_id"] = prediction.get("signal_id") or prediction.get(
-                    "id"
-                )
+                bet["signal_id"] = prediction.get("signal_id") or prediction.get("id")
                 bet["entry_snapshot_id"] = prediction.get("entry_snapshot_id")
 
         BetStore(settings.bets_file).save(bets)
@@ -276,9 +274,7 @@ def closing(settings: Settings) -> int:
             continue
 
         try:
-            kickoff = datetime.fromisoformat(
-                str(bet["kickoff"])
-            ).astimezone(UTC)
+            kickoff = datetime.fromisoformat(str(bet["kickoff"])).astimezone(UTC)
             captured_at = datetime.fromisoformat(
                 str(bet["closing_odds_captured_at"])
             ).astimezone(UTC)
