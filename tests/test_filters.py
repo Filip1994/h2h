@@ -25,7 +25,11 @@ def test_optional_country_exclusion_is_exact() -> None:
 
 def test_england_allows_only_top_four_leagues() -> None:
     for league in ("Premier League", "Championship", "League One", "League Two"):
-        assert is_allowed_match("England", league, "Team A", "Team B")
-    assert not is_allowed_match("England", "National League", "Team A", "Team B")
-    assert not is_allowed_match("England", "National League North", "Team A", "Team B")
-    assert not is_allowed_match("England", "National League South", "Team A", "Team B")
+        assert is_allowed_match("England", league, "Alpha United", "Gamma City")
+    assert not is_allowed_match("England", "National League", "Alpha United", "Gamma City")
+    assert not is_allowed_match(
+        "England", "National League North", "Alpha United", "Gamma City"
+    )
+    assert not is_allowed_match(
+        "England", "National League South", "Alpha United", "Gamma City"
+    )
