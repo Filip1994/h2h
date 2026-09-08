@@ -196,7 +196,9 @@ def run_generate(*, deliver_email: bool = True) -> int:
     for line in result.diagnostics:
         print(line)
     print(f"API usage: {json.dumps(result.api_usage, ensure_ascii=False)}")
-    print(f"Generation health: {json.dumps(build_success_health(generated_at, result), ensure_ascii=False)}")
+    print(
+        f"Generation health: {json.dumps(build_success_health(generated_at, result), ensure_ascii=False)}"
+    )
     print(f"✅ Sačuvano novih tipova: {len(result.new_bets)}")
     return 0
 
