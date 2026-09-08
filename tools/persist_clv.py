@@ -125,9 +125,7 @@ def intermediate(settings: Settings) -> int:
             try:
                 record = json.loads(line)
                 fixture_id = int((record.get("params") or {})["fixture"])
-                captured = datetime.fromisoformat(
-                    str(record["captured_at"])
-                ).astimezone(UTC)
+                captured = datetime.fromisoformat(str(record["captured_at"])).astimezone(UTC)
                 raw = (record.get("payload") or {}).get("response")
             except (KeyError, TypeError, ValueError, json.JSONDecodeError):
                 continue
@@ -151,9 +149,7 @@ def intermediate(settings: Settings) -> int:
                 )
                 quote = quotes.get(market)
 
-                if quote is None or not (
-                    0 <= quote.overround <= settings.max_market_overround
-                ):
+                if quote is None or not (0 <= quote.overround <= settings.max_market_overround):
                     continue
 
                 if store.append_quote(
@@ -161,10 +157,7 @@ def intermediate(settings: Settings) -> int:
                     fixture_id=fixture_id,
                     snapshot_type="INTERMEDIATE",
                     prediction_id=str(prediction.get("id") or "") or None,
-                    signal_id=str(
-                        prediction.get("signal_id") or prediction.get("id") or ""
-                    )
-                    or None,
+                    signal_id=str(prediction.get("signal_id") or prediction.get("id") or "") or None,
                     captured_by="raw_api_archive",
                 ):
                     changed += 1
@@ -192,35 +185,27 @@ def t5(settings: Settings) -> int:
 
         try:
             opposite = float(bet.get("closing_5m_opposite_odd") or 0)
-
             if opposite <= 1:
                 continue
-
             quote = OddsQuote(
                 Market.parse(str(bet["market"])),
                 float(bet["closing_5m_odd"]),
                 opposite,
                 int(bet["bookmaker_id"]),
                 str(bet.get("bookmaker") or ""),
-                datetime.fromisoformat(
-                    str(bet["closing_5m_odds_captured_at"])
-                ).astimezone(UTC),
+                datetime.fromisoformat(str(bet["closing_5m_odds_captured_at"])).astimezone(UTC),
             )
         except (KeyError, TypeError, ValueError):
             continue
 
         prediction = predictions.get(key(bet))
-
-        signal = (
-            str(
-                (prediction or {}).get("signal_id")
-                or (prediction or {}).get("id")
-                or bet.get("signal_id")
-                or bet.get("prediction_id")
-                or ""
-            )
-            or None
-        )
+        signal = str(
+            (prediction or {}).get("signal_id")
+            or (prediction or {}).get("id")
+            or bet.get("signal_id")
+            or bet.get("prediction_id")
+            or ""
+        ) or None
 
         snapshot = store.append_quote(
             quote,
@@ -247,20 +232,13 @@ def closing(settings: Settings) -> int:
     bets = BetStore(settings.bets_file).load()
     snapshots = load_snapshots()
     store = OddsSnapshotStore(SNAP)
-    existing_ids = {
-        str(snapshot["snapshot_id"])
-        for snapshot in snapshots
-        if snapshot.get("snapshot_id")
-    }
+    existing_ids = {str(snapshot["snapshot_id"]) for snapshot in snapshots if snapshot.get("snapshot_id")}
     changed = 0
 
     for bet in bets:
         if str(bet.get("status", "")).upper() not in TERMINAL:
             continue
 
-        # monitor.py is the existing successful closing capture path.
-        # These closing_* fields are the only source eligible for canonical
-        # CLOSING. T5 and INTERMEDIATE are never used as substitutes.
         if any(
             bet.get(field) is None
             for field in (
@@ -275,16 +253,12 @@ def closing(settings: Settings) -> int:
 
         try:
             kickoff = datetime.fromisoformat(str(bet["kickoff"])).astimezone(UTC)
-            captured_at = datetime.fromisoformat(
-                str(bet["closing_odds_captured_at"])
-            ).astimezone(UTC)
+            captured_at = datetime.fromisoformat(str(bet["closing_odds_captured_at"])).astimezone(UTC)
             odd = float(bet["closing_odd"])
             opposite_odd = float(bet["closing_opposite_odd"])
             devig_probability = float(bet["closing_market_probability_devig"])
-
             if odd <= 1 or opposite_odd <= 1 or captured_at > kickoff:
                 raise ValueError("invalid canonical closing quote")
-
             market = Market.parse(str(bet["market"]))
             bookmaker_id = int(bet["bookmaker_id"])
             fixture_id = int(bet["event_id"])
@@ -292,8 +266,12 @@ def closing(settings: Settings) -> int:
             bet["clv_status"] = "NOT_COMPUTABLE"
             continue
 
-        prediction_id = bet.get("prediction_id")
-        signal_id = bet.get("signal_id") or prediction_id
+        entry = next(
+            (snapshot for snapshot in snapshots if snapshot.get("snapshot_id") == bet.get("entry_snapshot_id")),
+            None,
+        )
+        prediction_id = bet.get("prediction_id") or (entry or {}).get("prediction_id")
+        signal_id = bet.get("signal_id") or (entry or {}).get("signal_id") or prediction_id
         overround = (1.0 / odd) + (1.0 / opposite_odd) - 1.0
 
         canonical = {
@@ -317,37 +295,17 @@ def closing(settings: Settings) -> int:
         }
 
         canonical_id = snapshot_id(canonical)
-
         if canonical_id not in existing_ids:
             store.append(canonical)
             existing_ids.add(canonical_id)
             snapshots.append({**canonical, "snapshot_id": canonical_id})
             changed += 1
 
-        # Important: even when the snapshot already existed, use its
-        # deterministic canonical ID. This avoids losing the linkage because
-        # OddsSnapshotStore.append() returns None on an exact duplicate.
         bet["closing_snapshot_id"] = canonical_id
 
-        entry = next(
-            (
-                snapshot
-                for snapshot in snapshots
-                if snapshot.get("snapshot_id") == bet.get("entry_snapshot_id")
-            ),
-            None,
-        )
-
         if entry:
-            bet["clv_odds_pct"] = round(
-                float(entry["odd"]) / float(canonical["odd"]) - 1,
-                6,
-            )
-            bet["clv_probability_pp"] = round(
-                float(canonical["devig_probability"])
-                - float(entry["devig_probability"]),
-                6,
-            )
+            bet["clv_odds_pct"] = round(float(entry["odd"]) / float(canonical["odd"]) - 1, 6)
+            bet["clv_probability_pp"] = round(float(canonical["devig_probability"]) - float(entry["devig_probability"]), 6)
             bet["clv_status"] = "COMPUTABLE"
         else:
             bet["clv_status"] = "NOT_COMPUTABLE"
@@ -358,25 +316,17 @@ def closing(settings: Settings) -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "phase",
-        choices=("entry", "intermediate", "t5", "closing", "all"),
-    )
+    parser.add_argument("phase", choices=("entry", "intermediate", "t5", "closing", "all"))
     phase = parser.parse_args().phase
     settings = Settings.from_env(ROOT)
-
     if phase in {"entry", "all"}:
         print(f"ENTRY snapshots: {entries(settings)}")
-
     if phase in {"intermediate", "all"}:
         print(f"INTERMEDIATE snapshots: {intermediate(settings)}")
-
     if phase in {"t5", "all"}:
         print(f"T5 snapshots: {t5(settings)}")
-
     if phase in {"closing", "all"}:
         print(f"CLOSING snapshots: {closing(settings)}")
-
     return 0
 
 
