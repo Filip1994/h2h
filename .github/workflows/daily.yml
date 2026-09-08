@@ -2,6 +2,12 @@ name: Daily QuantBet bulletin
 
 on:
   workflow_dispatch:
+    inputs:
+      force:
+        description: "Force a new bulletin even if today's bulletin is already marked SUCCESS"
+        required: false
+        default: false
+        type: boolean
   schedule:
     - cron: "51 0 * * *"
       timezone: "Europe/Belgrade"
@@ -15,7 +21,36 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  guard:
+    runs-on: ubuntu-latest
+    outputs:
+      complete: ${{ steps.health.outputs.complete }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Check today's bulletin health
+        id: health
+        env:
+          FORCE_BULLETIN: ${{ github.event_name == 'workflow_dispatch' && inputs.force || false }}
+        run: |
+          if [ "$FORCE_BULLETIN" = "true" ]; then
+            echo "complete=false" >> "$GITHUB_OUTPUT"
+            echo "Forced bulletin run requested."
+            exit 0
+          fi
+          if python tools/bulletin_health.py --guard; then
+            echo "complete=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "complete=false" >> "$GITHUB_OUTPUT"
+          fi
+
   generate:
+    needs: guard
+    if: needs.guard.outputs.complete != 'true'
     runs-on: ubuntu-latest
     env:
       API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
@@ -40,16 +75,37 @@ jobs:
           key: api-cache-${{ runner.os }}-${{ github.run_id }}
           restore-keys: api-cache-${{ runner.os }}-
       - run: pip install -r requirements.txt
+      - name: Capture generation start
+        id: generation-start
+        run: echo "timestamp=$(python -c 'from datetime import datetime,UTC; print(datetime.now(UTC).isoformat())')" >> "$GITHUB_OUTPUT"
       - run: python main.py generate --no-email
+      - name: Capture generation completion
+        id: generation-complete
+        run: echo "timestamp=$(python -c 'from datetime import datetime,UTC; print(datetime.now(UTC).isoformat())')" >> "$GITHUB_OUTPUT"
       - name: Commit ledger and raw API archive
         run: |
+          set -euo pipefail
           if git diff --quiet -- bets.json predictions.json calibration.json ledger_meta.json api_usage.json api_usage_history.json && test -z "$(git status --porcelain -- data/raw_api)"; then
-            exit 0
+            echo "No ledger changes to commit."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add bets.json predictions.json calibration.json ledger_meta.json api_usage.json api_usage_history.json data/raw_api
+            git commit -m "Update QuantBet daily ledger and API archive"
+            git push
           fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add bets.json predictions.json calibration.json ledger_meta.json api_usage.json api_usage_history.json data/raw_api
-          git commit -m "Update QuantBet daily ledger and API archive"
-          git push
       - name: Send committed bulletin
         run: python main.py send-report
+      - name: Write canonical success marker
+        run: |
+          python tools/bulletin_health.py --write-success \
+            --generation-started-at "${{ steps.generation-start.outputs.timestamp }}" \
+            --generation-completed-at "${{ steps.generation-complete.outputs.timestamp }}"
+      - name: Commit bulletin health marker
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add bulletin_health.json
+          git commit -m "Mark daily QuantBet bulletin successful"
+          git push
