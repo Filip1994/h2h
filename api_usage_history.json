@@ -156,5 +156,31 @@
     "timestamp": "2026-09-08T12:59:59.643981+00:00",
     "date": "2026-09-08",
     "new_bets": 0
+  },
+  {
+    "request_count": 60,
+    "request_budget": 7500,
+    "working_budget": 7000,
+    "reserve": 500,
+    "remaining_working": 6940,
+    "cache_hits": 147,
+    "cache_misses": 60,
+    "cache_hit_rate": 0.710145,
+    "rate_limit_events": 0,
+    "http_errors": {},
+    "api_error_events": 0,
+    "network_error_events": 0,
+    "endpoint_requests": {
+      "fixtures": 13,
+      "fixtures/headtohead": 10,
+      "odds": 37
+    },
+    "endpoint_cache_hits": {
+      "fixtures": 68,
+      "fixtures/headtohead": 79
+    },
+    "timestamp": "2026-09-08T17:10:55.668365+00:00",
+    "date": "2026-09-08",
+    "new_bets": 0
   }
 ]
