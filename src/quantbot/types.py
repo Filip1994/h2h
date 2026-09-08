@@ -132,6 +132,7 @@ class MarketCandidate:
             "type": "DC_VALUE",
             "mode": mode,
             "event_id": self.fixture_id,
+            "prediction_id": f"{self.fixture_id}_{self.market.value}_{model_version}",
             "created_at": created_at.isoformat(),
             "decision_timestamp": created_at.isoformat(),
             "data_cutoff": created_at.isoformat(),
