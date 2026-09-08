@@ -16,6 +16,7 @@ def api_fixture(
     *,
     status: str,
     season: int = 2026,
+    league_name: str = "Premier League",
 ) -> dict:
     return {
         "fixture": {
@@ -25,7 +26,7 @@ def api_fixture(
         },
         "league": {
             "id": 10,
-            "name": "Test League",
+            "name": league_name,
             "country": "Testland",
             "season": season,
         },
@@ -45,8 +46,9 @@ def api_fixture(
 
 
 class FakeAPI:
-    def __init__(self, now: datetime) -> None:
+    def __init__(self, now: datetime, league_name: str = "Premier League") -> None:
         self.now = now
+        self.league_name = league_name
         self.request_count = 0
 
     def usage_snapshot(self) -> dict:
@@ -56,7 +58,14 @@ class FakeAPI:
         self.request_count += 1
         return [
             api_fixture(
-                999, self.now + timedelta(hours=4), 1, 2, None, None, status="NS"
+                999,
+                self.now + timedelta(hours=4),
+                1,
+                2,
+                None,
+                None,
+                status="NS",
+                league_name=self.league_name,
             )
         ]
 
@@ -128,6 +137,14 @@ def test_engine_selects_one_market_and_blocks_fixture_on_rerun(settings) -> None
     second = engine.generate(now)
     assert second.new_bets == ()
     assert len(engine.bet_store.load()) == 1
+
+
+def test_engine_blocks_tier_three_before_model_or_odds(settings) -> None:
+    now = datetime(2026, 9, 4, 6, 0, tzinfo=UTC)
+    api = FakeAPI(now, league_name="National League")
+    result = QuantEngine(settings, api=api).generate(now)
+    assert result.new_bets == ()
+    assert api.request_count == 1
 
 
 def test_live_mode_refuses_unvalidated_probabilities(settings, monkeypatch) -> None:
