@@ -155,12 +155,15 @@
     "signal_type": "NEW_OPPORTUNITY",
     "signal_sent_at": "2026-09-08T10:36:58.971172+02:00",
     "linked_bet_id": null,
-    "status": "PENDING",
-    "profit": 0.0,
+    "status": "WIN",
+    "profit": 475.0,
     "closing_5m_odd": null,
     "closing_5m_opposite_odd": null,
     "closing_5m_market_probability_devig": null,
-    "closing_5m_odds_captured_at": null
+    "closing_5m_odds_captured_at": null,
+    "result": "1:1",
+    "settled_at": "2026-09-08T17:42:32.674948+00:00",
+    "settlement_type": "COUNTERFACTUAL_ALERT"
   },
   {
     "id": "1638078_UNDER_2_5_dc-value-v2.1.0:202609081312",
@@ -196,12 +199,15 @@
     "signal_type": "NEW_OPPORTUNITY",
     "signal_sent_at": "2026-09-08T15:12:18.782287+02:00",
     "linked_bet_id": null,
-    "status": "PENDING",
-    "profit": 0.0,
+    "status": "LOSS",
+    "profit": -500.0,
     "closing_5m_odd": null,
     "closing_5m_opposite_odd": null,
     "closing_5m_market_probability_devig": null,
-    "closing_5m_odds_captured_at": null
+    "closing_5m_odds_captured_at": null,
+    "result": "2:1",
+    "settled_at": "2026-09-08T17:42:32.674948+00:00",
+    "settlement_type": "COUNTERFACTUAL_ALERT"
   },
   {
     "id": "1600773_BTTS_YES_dc-value-v2.1.0:202609081312",
@@ -565,12 +571,15 @@
     "signal_type": "NEW_OPPORTUNITY",
     "signal_sent_at": "2026-09-08T15:12:18.782287+02:00",
     "linked_bet_id": null,
-    "status": "PENDING",
-    "profit": 0.0,
+    "status": "LOSS",
+    "profit": -500.0,
     "closing_5m_odd": null,
     "closing_5m_opposite_odd": null,
     "closing_5m_market_probability_devig": null,
-    "closing_5m_odds_captured_at": null
+    "closing_5m_odds_captured_at": null,
+    "result": "2:1",
+    "settled_at": "2026-09-08T17:42:32.674948+00:00",
+    "settlement_type": "COUNTERFACTUAL_ALERT"
   },
   {
     "id": "1563143_UNDER_2_5_dc-value-v2.1.0:202609081720",

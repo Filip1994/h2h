@@ -669,7 +669,11 @@
     "signal_sent_at": "2026-09-08T02:45:18.177343+02:00",
     "prediction_id": "1587799_UNDER_2_5_dc-value-v2.1.0",
     "signal_id": "1587799_UNDER_2_5_dc-value-v2.1.0",
-    "entry_snapshot_id": "19633ce775e9bf877d095d231429660e3114ef5e039b614e1e67600c9d8176bc"
+    "entry_snapshot_id": "19633ce775e9bf877d095d231429660e3114ef5e039b614e1e67600c9d8176bc",
+    "closing_odd": 2.0,
+    "closing_opposite_odd": 1.8,
+    "closing_market_probability_devig": 0.473684,
+    "closing_odds_captured_at": "2026-09-08T17:42:25.217381+00:00"
   },
   {
     "id": "1588347_UNDER_2_5",
@@ -720,7 +724,11 @@
     "signal_sent_at": "2026-09-08T02:45:18.177343+02:00",
     "prediction_id": "1588347_UNDER_2_5_dc-value-v2.1.0",
     "signal_id": "1588347_UNDER_2_5_dc-value-v2.1.0",
-    "entry_snapshot_id": "461679defb484cad505508265dc2e204f4335994341871585f098e673625a1c7"
+    "entry_snapshot_id": "461679defb484cad505508265dc2e204f4335994341871585f098e673625a1c7",
+    "closing_odd": 2.05,
+    "closing_opposite_odd": 1.75,
+    "closing_market_probability_devig": 0.460526,
+    "closing_odds_captured_at": "2026-09-08T17:42:25.217381+00:00"
   },
   {
     "id": "1603995_UNDER_2_5",
