@@ -372,12 +372,15 @@
     "signal_type": "NEW_OPPORTUNITY",
     "signal_sent_at": "2026-09-08T15:12:18.782287+02:00",
     "linked_bet_id": null,
-    "status": "PENDING",
-    "profit": 0.0,
+    "status": "WIN",
+    "profit": 650.0,
     "closing_5m_odd": null,
     "closing_5m_opposite_odd": null,
     "closing_5m_market_probability_devig": null,
-    "closing_5m_odds_captured_at": null
+    "closing_5m_odds_captured_at": null,
+    "result": "1:1",
+    "settled_at": "2026-09-08T22:45:41.284252+00:00",
+    "settlement_type": "COUNTERFACTUAL_ALERT"
   },
   {
     "id": "1587797_UNDER_2_5_dc-value-v2.1.0:202609081312",
@@ -413,12 +416,15 @@
     "signal_type": "NEW_OPPORTUNITY",
     "signal_sent_at": "2026-09-08T15:12:18.782287+02:00",
     "linked_bet_id": null,
-    "status": "PENDING",
-    "profit": 0.0,
+    "status": "LOSS",
+    "profit": -500.0,
     "closing_5m_odd": null,
     "closing_5m_opposite_odd": null,
     "closing_5m_market_probability_devig": null,
-    "closing_5m_odds_captured_at": null
+    "closing_5m_odds_captured_at": null,
+    "result": "2:1",
+    "settled_at": "2026-09-08T22:45:41.284252+00:00",
+    "settlement_type": "COUNTERFACTUAL_ALERT"
   },
   {
     "id": "1587798_UNDER_2_5_dc-value-v2.1.0:202609081312",
@@ -454,12 +460,15 @@
     "signal_type": "NEW_OPPORTUNITY",
     "signal_sent_at": "2026-09-08T15:12:18.782287+02:00",
     "linked_bet_id": null,
-    "status": "PENDING",
-    "profit": 0.0,
+    "status": "LOSS",
+    "profit": -500.0,
     "closing_5m_odd": null,
     "closing_5m_opposite_odd": null,
     "closing_5m_market_probability_devig": null,
-    "closing_5m_odds_captured_at": null
+    "closing_5m_odds_captured_at": null,
+    "result": "2:1",
+    "settled_at": "2026-09-08T22:45:41.284252+00:00",
+    "settlement_type": "COUNTERFACTUAL_ALERT"
   },
   {
     "id": "1588345_UNDER_2_5_dc-value-v2.1.0:202609081312",
@@ -495,12 +504,15 @@
     "signal_type": "NEW_OPPORTUNITY",
     "signal_sent_at": "2026-09-08T15:12:18.782287+02:00",
     "linked_bet_id": null,
-    "status": "PENDING",
-    "profit": 0.0,
+    "status": "WIN",
+    "profit": 600.0,
     "closing_5m_odd": null,
     "closing_5m_opposite_odd": null,
     "closing_5m_market_probability_devig": null,
-    "closing_5m_odds_captured_at": null
+    "closing_5m_odds_captured_at": null,
+    "result": "1:1",
+    "settled_at": "2026-09-08T22:45:41.284252+00:00",
+    "settlement_type": "COUNTERFACTUAL_ALERT"
   },
   {
     "id": "1588348_UNDER_2_5_dc-value-v2.1.0:202609081312",
@@ -536,12 +548,15 @@
     "signal_type": "NEW_OPPORTUNITY",
     "signal_sent_at": "2026-09-08T15:12:18.782287+02:00",
     "linked_bet_id": null,
-    "status": "PENDING",
-    "profit": 0.0,
+    "status": "LOSS",
+    "profit": -500.0,
     "closing_5m_odd": null,
     "closing_5m_opposite_odd": null,
     "closing_5m_market_probability_devig": null,
-    "closing_5m_odds_captured_at": null
+    "closing_5m_odds_captured_at": null,
+    "result": "5:1",
+    "settled_at": "2026-09-08T22:45:41.284252+00:00",
+    "settlement_type": "COUNTERFACTUAL_ALERT"
   },
   {
     "id": "1635413_UNDER_2_5_dc-value-v2.1.0:202609081312",
@@ -621,12 +636,15 @@
     "signal_type": "NEW_OPPORTUNITY",
     "signal_sent_at": "2026-09-08T19:20:50.891650+02:00",
     "linked_bet_id": null,
-    "status": "PENDING",
-    "profit": 0.0,
+    "status": "LOSS",
+    "profit": -500.0,
     "closing_5m_odd": null,
     "closing_5m_opposite_odd": null,
     "closing_5m_market_probability_devig": null,
-    "closing_5m_odds_captured_at": null
+    "closing_5m_odds_captured_at": null,
+    "result": "1:2",
+    "settled_at": "2026-09-08T22:45:41.284252+00:00",
+    "settlement_type": "COUNTERFACTUAL_ALERT"
   },
   {
     "id": "1619668_UNDER_2_5_dc-value-v2.1.0:202609081720",
@@ -662,11 +680,14 @@
     "signal_type": "NEW_OPPORTUNITY",
     "signal_sent_at": "2026-09-08T19:20:50.891650+02:00",
     "linked_bet_id": null,
-    "status": "PENDING",
-    "profit": 0.0,
+    "status": "WIN",
+    "profit": 940.0,
     "closing_5m_odd": null,
     "closing_5m_opposite_odd": null,
     "closing_5m_market_probability_devig": null,
-    "closing_5m_odds_captured_at": null
+    "closing_5m_odds_captured_at": null,
+    "result": "0:2",
+    "settled_at": "2026-09-08T22:45:41.284252+00:00",
+    "settlement_type": "COUNTERFACTUAL_ALERT"
   }
 ]

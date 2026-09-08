@@ -663,8 +663,8 @@
     "xi": 0.0015,
     "model_version": "dc-value-v2.1.0",
     "calibration_status": "IDENTITY_UNVALIDATED",
-    "status": "PENDING",
-    "profit": 0.0,
+    "status": "LOSS",
+    "profit": -500.0,
     "signal_source": "DAILY_BULLETIN",
     "signal_sent_at": "2026-09-08T02:45:18.177343+02:00",
     "prediction_id": "1587799_UNDER_2_5_dc-value-v2.1.0",
@@ -673,7 +673,11 @@
     "closing_odd": 2.0,
     "closing_opposite_odd": 1.8,
     "closing_market_probability_devig": 0.473684,
-    "closing_odds_captured_at": "2026-09-08T17:48:54.766414+00:00"
+    "closing_odds_captured_at": "2026-09-08T17:48:54.766414+00:00",
+    "result": "1:3",
+    "settled_at": "2026-09-08T22:45:35.347651+00:00",
+    "clv_odds_pct": 0.0,
+    "clv_probability_pp": 0.0
   },
   {
     "id": "1588347_UNDER_2_5",
@@ -718,8 +722,8 @@
     "xi": 0.0015,
     "model_version": "dc-value-v2.1.0",
     "calibration_status": "IDENTITY_UNVALIDATED",
-    "status": "PENDING",
-    "profit": 0.0,
+    "status": "LOSS",
+    "profit": -500.0,
     "signal_source": "DAILY_BULLETIN",
     "signal_sent_at": "2026-09-08T02:45:18.177343+02:00",
     "prediction_id": "1588347_UNDER_2_5_dc-value-v2.1.0",
@@ -728,7 +732,11 @@
     "closing_odd": 2.05,
     "closing_opposite_odd": 1.75,
     "closing_market_probability_devig": 0.460526,
-    "closing_odds_captured_at": "2026-09-08T17:48:54.766414+00:00"
+    "closing_odds_captured_at": "2026-09-08T17:48:54.766414+00:00",
+    "result": "0:4",
+    "settled_at": "2026-09-08T22:45:35.347651+00:00",
+    "clv_odds_pct": 0.097561,
+    "clv_probability_pp": 0.041921
   },
   {
     "id": "1603995_UNDER_2_5",
