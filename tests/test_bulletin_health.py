@@ -1,10 +1,15 @@
 from __future__ import annotations
 
+import json
 from datetime import datetime
 from pathlib import Path
 
-from tools.bulletin_health import build_success_marker, business_date, is_successful_for_today, write_success_marker
-
+from tools.bulletin_health import (
+    build_success_marker,
+    business_date,
+    is_successful_for_today,
+    write_success_marker,
+)
 
 TZ = "Europe/Belgrade"
 
@@ -61,7 +66,7 @@ def test_marker_round_trip(tmp_path: Path) -> None:
     path = tmp_path / "bulletin_health.json"
     write_success_marker(marker, path)
     assert path.exists()
-    assert is_successful_for_today(__import__("json").loads(path.read_text()), now)
+    assert is_successful_for_today(json.loads(path.read_text()), now)
 
 
 def test_repeated_health_checks_are_noop_when_success_exists() -> None:
