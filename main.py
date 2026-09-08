@@ -101,6 +101,7 @@ def persist_intraday_strong_signals(
         alerts.append(
             {
                 "id": f"generate:{bet_id}",
+                "signal_id": f"generate:{bet_id}",
                 "prediction_id": bet.get("prediction_id"),
                 "event_id": bet.get("event_id"),
                 "market": bet.get("market"),
@@ -119,6 +120,12 @@ def persist_intraday_strong_signals(
                 "probability_edge": bet.get("probability_edge"),
                 "expected_value": bet.get("expected_value"),
                 "stake": bet.get("stake"),
+                "h2h_enabled": bet.get("h2h_enabled"),
+                "h2h_available": bet.get("h2h_available"),
+                "h2h_rate": bet.get("h2h_rate"),
+                "h2h_n": bet.get("h2h_n"),
+                "h2h_effective_n": bet.get("h2h_effective_n"),
+                "h2h_history": bet.get("h2h_history", []),
                 "signal_source": "INTRADAY_ALERT",
                 "signal_sent_at": timestamp,
                 "linked_bet_id": bet_id,
