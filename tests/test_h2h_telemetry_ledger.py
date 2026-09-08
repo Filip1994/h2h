@@ -74,7 +74,9 @@ def test_market_candidate_telemetry_state_is_configuration_not_h2h_count() -> No
     assert on_no_history["h2h_n"] == 0
 
 
-def test_engine_records_h2h_history_and_availability_when_enabled(settings, monkeypatch) -> None:
+def test_engine_records_h2h_history_and_availability_when_enabled(
+    settings, monkeypatch
+) -> None:
     monkeypatch.setenv("H2H_TELEMETRY_ENABLED", "true")
     now = datetime(2026, 9, 4, 6, 0, tzinfo=UTC)
     engine = QuantEngine(settings, api=FakeAPI(now))
