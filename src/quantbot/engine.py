@@ -198,7 +198,10 @@ class QuantEngine:
                 diagnostics.append(f"fixture_parse: {exc}")
                 continue
             fixture_id = int(fields["fixture_id"])
-            if fixture_id in blocked_fixture_ids or fields["status"] not in {"NS", "TBD"}:
+            if fixture_id in blocked_fixture_ids or fields["status"] not in {
+                "NS",
+                "TBD",
+            }:
                 continue
             if not (
                 decision_timestamp + timedelta(minutes=15)
@@ -220,7 +223,9 @@ class QuantEngine:
             h2h_error = None
             if self.settings.h2h_telemetry_enabled:
                 try:
-                    h2h_raw = self.api.head_to_head(fields["home_id"], fields["away_id"])
+                    h2h_raw = self.api.head_to_head(
+                        fields["home_id"], fields["away_id"]
+                    )
                     h2h, h2h_status = build_h2h_stats_detailed(
                         h2h_raw, now=decision_timestamp, settings=self.settings
                     )
@@ -251,16 +256,22 @@ class QuantEngine:
             snapshot_id = str(snapshot["h2h_snapshot_id"])
             self.h2h_snapshot_store.append(snapshot)
 
-            h2h_rates = h2h.weighted_rates if h2h else {market: 0.0 for market in Market}
+            h2h_rates = (
+                h2h.weighted_rates if h2h else {market: 0.0 for market in Market}
+            )
             h2h_n = len(h2h.matches) if h2h else 0
             h2h_effective_n = h2h.effective_n if h2h else 0.0
             history = format_recent_history(h2h) if h2h else ()
             try:
                 model = self._model_for_fixture(fields, data_cutoff=decision_timestamp)
                 model_probabilities = model.market_probabilities(
-                    fields["home_id"], fields["away_id"], max_goals=self.settings.max_score_goals
+                    fields["home_id"],
+                    fields["away_id"],
+                    max_goals=self.settings.max_score_goals,
                 )
-                lambda_home, lambda_away = model.expected_goals(fields["home_id"], fields["away_id"])
+                lambda_home, lambda_away = model.expected_goals(
+                    fields["home_id"], fields["away_id"]
+                )
                 quotes = extract_best_quotes(
                     self.api.odds(fixture_id),
                     bookmaker_priority=self.settings.bookmaker_priority,
@@ -276,9 +287,13 @@ class QuantEngine:
             fixture_candidates: list[MarketCandidate] = []
             for market in Market:
                 model_probability = model_probabilities[market]
-                calibrated_probability, calibration_status = self.calibrator.apply(market, model_probability)
+                calibrated_probability, calibration_status = self.calibrator.apply(
+                    market, model_probability
+                )
                 quote = quotes.get(market)
-                decision_probability = max(0.0, calibrated_probability - self.settings.probability_haircut)
+                decision_probability = max(
+                    0.0, calibrated_probability - self.settings.probability_haircut
+                )
                 reason = None
                 expected_value = None
                 probability_edge = None
@@ -297,39 +312,80 @@ class QuantEngine:
                         reason = "REJECT_LOW_EDGE"
                 prediction_records.append(
                     self._prediction_record(
-                        fields, market, model_probability, calibrated_probability, calibration_status,
-                        h2h_rates[market], h2h_n, h2h_effective_n, quote, now_local,
-                        h2h_snapshot_id=snapshot_id, h2h_available=bool(snapshot["h2h_available"]),
-                        h2h_status=h2h_status, h2h_error=h2h_error, rejection_reason=reason,
+                        fields,
+                        market,
+                        model_probability,
+                        calibrated_probability,
+                        calibration_status,
+                        h2h_rates[market],
+                        h2h_n,
+                        h2h_effective_n,
+                        quote,
+                        now_local,
+                        h2h_snapshot_id=snapshot_id,
+                        h2h_available=bool(snapshot["h2h_available"]),
+                        h2h_status=h2h_status,
+                        h2h_error=h2h_error,
+                        rejection_reason=reason,
                     )
                 )
-                if reason or quote is None or expected_value is None or probability_edge is None:
+                if (
+                    reason
+                    or quote is None
+                    or expected_value is None
+                    or probability_edge is None
+                ):
                     continue
                 fixture_candidates.append(
                     MarketCandidate(
-                        fixture_id=fixture_id, kickoff=fields["kickoff"], league_id=fields["league_id"],
-                        league_name=fields["league_name"], country=fields["country"],
-                        home_id=fields["home_id"], home_name=fields["home_name"],
-                        away_id=fields["away_id"], away_name=fields["away_name"], market=market,
-                        model_probability=model_probability, calibrated_probability=calibrated_probability,
-                        decision_probability=decision_probability, h2h_rate=h2h_rates[market],
-                        h2h_n=h2h_n, h2h_effective_n=h2h_effective_n, h2h_history=history, quote=quote,
-                        lambda_home=lambda_home, lambda_away=lambda_away, rho=model.rho,
-                        expected_value=expected_value, probability_edge=probability_edge,
+                        fixture_id=fixture_id,
+                        kickoff=fields["kickoff"],
+                        league_id=fields["league_id"],
+                        league_name=fields["league_name"],
+                        country=fields["country"],
+                        home_id=fields["home_id"],
+                        home_name=fields["home_name"],
+                        away_id=fields["away_id"],
+                        away_name=fields["away_name"],
+                        market=market,
+                        model_probability=model_probability,
+                        calibrated_probability=calibrated_probability,
+                        decision_probability=decision_probability,
+                        h2h_rate=h2h_rates[market],
+                        h2h_n=h2h_n,
+                        h2h_effective_n=h2h_effective_n,
+                        h2h_history=history,
+                        quote=quote,
+                        lambda_home=lambda_home,
+                        lambda_away=lambda_away,
+                        rho=model.rho,
+                        expected_value=expected_value,
+                        probability_edge=probability_edge,
                         calibration_status=calibration_status,
                     )
                 )
             if fixture_candidates:
-                candidates.append(max(fixture_candidates, key=lambda item: (item.expected_value, item.probability_edge)))
-        allocations = allocate_stakes(candidates, existing_bets, now=now_local, settings=self.settings)
+                candidates.append(
+                    max(
+                        fixture_candidates,
+                        key=lambda item: (item.expected_value, item.probability_edge),
+                    )
+                )
+        allocations = allocate_stakes(
+            candidates, existing_bets, now=now_local, settings=self.settings
+        )
         if self.settings.intraday_mode:
             allocations = [
-                (candidate, stake) for candidate, stake in allocations
+                (candidate, stake)
+                for candidate, stake in allocations
                 if candidate.expected_value >= self.settings.strong_signal_min_ev
                 and candidate.probability_edge >= self.settings.strong_signal_min_edge
                 and stake >= self.settings.strong_signal_min_stake
             ]
-        selected_ids = {f"{candidate.fixture_id}_{candidate.market.value}_{MODEL_VERSION}" for candidate, _ in allocations}
+        selected_ids = {
+            f"{candidate.fixture_id}_{candidate.market.value}_{MODEL_VERSION}"
+            for candidate, _ in allocations
+        }
         for record in prediction_records:
             if record["id"] in selected_ids:
                 record["selected"] = True
@@ -338,8 +394,12 @@ class QuantEngine:
         mode = "PAPER" if self.settings.paper_mode else "LIVE"
         proposed_bets = [
             candidate.to_bet(
-                bet_id=f"{candidate.fixture_id}_{candidate.market.value}", stake=stake, mode=mode,
-                created_at=now_local, model_version=MODEL_VERSION, xi=self.settings.dc_xi,
+                bet_id=f"{candidate.fixture_id}_{candidate.market.value}",
+                stake=stake,
+                mode=mode,
+                created_at=now_local,
+                model_version=MODEL_VERSION,
+                xi=self.settings.dc_xi,
             )
             for candidate, stake in allocations
         ]
@@ -351,19 +411,26 @@ class QuantEngine:
             bet["h2h_available"] = research.get("h2h_available", False)
             bet["h2h_status"] = research.get("h2h_status", "NOT_REQUESTED")
             bet["h2h_error"] = research.get("h2h_error")
-        signal_source = "INTRADAY_ALERT" if self.settings.intraday_mode else "DAILY_BULLETIN"
+        signal_source = (
+            "INTRADAY_ALERT" if self.settings.intraday_mode else "DAILY_BULLETIN"
+        )
         for bet in proposed_bets:
             bet["signal_source"] = signal_source
             bet["signal_sent_at"] = now_local.isoformat()
         appended = self.bet_store.append_unique_fixtures(proposed_bets)
         final_bets = self.bet_store.load()
-        analytics = portfolio_analytics(final_bets, self.settings.initial_bank, today=now_local.date().isoformat())
+        analytics = portfolio_analytics(
+            final_bets, self.settings.initial_bank, today=now_local.date().isoformat()
+        )
         diagnostics.append(
             f"scan={len(raw_fixtures)} candidates={len(candidates)} selected={len(appended)} "
             f"h2h_telemetry={self.settings.h2h_telemetry_enabled} data_cutoff={decision_timestamp.isoformat()} "
             f"api={self.api.request_count} mode={'intraday' if self.settings.intraday_mode else 'daily'}"
         )
         return GenerationResult(
-            new_bets=tuple(appended), analytics=analytics, diagnostics=tuple(diagnostics),
-            api_requests=self.api.request_count, api_usage=self.api.usage_snapshot(),
+            new_bets=tuple(appended),
+            analytics=analytics,
+            diagnostics=tuple(diagnostics),
+            api_requests=self.api.request_count,
+            api_usage=self.api.usage_snapshot(),
         )

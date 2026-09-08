@@ -49,7 +49,9 @@ def test_snapshot_id_is_fixture_and_cutoff_point_in_time() -> None:
     assert h2h_snapshot_id(123, cutoff) != h2h_snapshot_id(124, cutoff)
 
 
-def test_h2h_excludes_future_match_and_returns_explicit_available_status(settings) -> None:
+def test_h2h_excludes_future_match_and_returns_explicit_available_status(
+    settings,
+) -> None:
     cutoff = datetime(2026, 9, 8, 0, 45, tzinfo=UTC)
     raw = [
         raw_fixture(index, cutoff - timedelta(days=index * 30), 2, 1)
@@ -69,10 +71,7 @@ def test_statuses_are_explicit(settings) -> None:
     assert stats is None
     assert status == "INSUFFICIENT_HISTORY"
 
-    old = [
-        raw_fixture(i, cutoff - timedelta(days=900 + i * 10))
-        for i in range(1, 7)
-    ]
+    old = [raw_fixture(i, cutoff - timedelta(days=900 + i * 10)) for i in range(1, 7)]
     stats, status = build_h2h_stats_detailed(old, now=cutoff, settings=settings)
     assert stats is None
     assert status == "NO_RECENT_HISTORY"
