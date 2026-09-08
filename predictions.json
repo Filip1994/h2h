@@ -107611,7 +107611,9 @@
     "rejection_reason": "REJECT_ODD",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1635413_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "31a50345fe4a86ce30d2074b5f5afb0c92cf447b6f1716014c3463b4b8c71a70"
   },
   {
     "id": "1635413_UNDER_2_5_dc-value-v2.1.0",
@@ -107649,7 +107651,9 @@
     "rejection_reason": null,
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1635413_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "0fa44594f9e408e94e386d4fbe781a2ea9fc3e047bc7b5faa229f90c530bccba"
   },
   {
     "id": "1635413_BTTS_YES_dc-value-v2.1.0",
@@ -107687,7 +107691,9 @@
     "rejection_reason": "REJECT_ODD",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1635413_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "6e7280875b052a89174a0471548c1214b2c94fdfdf9cb0ff180a8356d5e892f1"
   },
   {
     "id": "1635414_OVER_2_5_dc-value-v2.1.0",
@@ -107725,7 +107731,9 @@
     "rejection_reason": "REJECT_ODD",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1635414_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "86cd1d922f565f9176984c5129920d08577f9954d9431470aa6708d9fda4b753"
   },
   {
     "id": "1635414_UNDER_2_5_dc-value-v2.1.0",
@@ -107763,7 +107771,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1635414_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "98c286381c01e9d6e91b7164274e8c9b098fcf075d0f3143913a2d0fcf3ffeab"
   },
   {
     "id": "1635414_BTTS_YES_dc-value-v2.1.0",
@@ -107801,7 +107811,9 @@
     "rejection_reason": "REJECT_ODD",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1635414_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "7aa34eeb2623c45913386934fc1deb56a66450ec4f6392f53b8fb007ca8e175e"
   },
   {
     "id": "1635415_OVER_2_5_dc-value-v2.1.0",
@@ -107839,7 +107851,9 @@
     "rejection_reason": "REJECT_ODD",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1635415_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "d492b611c08f9e113f0d0373432fd3de7861304dec6095a4f8cc82f56afa1a9c"
   },
   {
     "id": "1635415_UNDER_2_5_dc-value-v2.1.0",
@@ -107877,7 +107891,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1635415_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "eaf1f0abb9434a8f2a8729ecc6e1058be8706904d2efb2ac271776e6b355b451"
   },
   {
     "id": "1635415_BTTS_YES_dc-value-v2.1.0",
@@ -107915,7 +107931,9 @@
     "rejection_reason": "REJECT_ODD",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1635415_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "6df5ae47df37bda151e689c640163853a0d9d7d22a0c1007eceb260cf0b8e0a4"
   },
   {
     "id": "1588857_OVER_2_5_dc-value-v2.1.0",
@@ -107953,7 +107971,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1588857_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "1e2892d54fb559ab7556616a4e0a479e07ff609f4cce3a7b88dd369d6fe3e40f"
   },
   {
     "id": "1588857_UNDER_2_5_dc-value-v2.1.0",
@@ -107991,7 +108011,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1588857_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "ec2583a3f5551a2ec160d47b11eeacf1a86c9b52bb763897bb413a3764b6e26f"
   },
   {
     "id": "1588857_BTTS_YES_dc-value-v2.1.0",
@@ -108029,6 +108051,8 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1588857_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "52c519e8ed9d30c7398a0cd2173fcb073e0cfb616ce6df35213d2604f7bff0e6"
   }
 ]

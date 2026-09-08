@@ -107,7 +107,8 @@
     "settled_at": "2026-09-05T18:26:45.595027+00:00",
     "clv_odds_pct": 0.020833,
     "clv_probability_pp": 0.010471,
-    "clv_status": "NOT_COMPUTABLE"
+    "clv_status": "NOT_COMPUTABLE",
+    "closing_snapshot_id": "63303e3653abcd306f6dedc0505b1ade748378c20c337abfca8d182aa3ba862e"
   },
   {
     "id": "1552467_UNDER_2_5",
@@ -165,7 +166,8 @@
     "settled_at": "2026-09-05T20:32:00.428958+00:00",
     "clv_odds_pct": -0.0181,
     "clv_probability_pp": -0.008922,
-    "clv_status": "NOT_COMPUTABLE"
+    "clv_status": "NOT_COMPUTABLE",
+    "closing_snapshot_id": "a28471028c12f56e22bb84b4f7c5bd28add2cc8e48faf7bcf4f037e6b0adad96"
   },
   {
     "id": "1548523_UNDER_2_5",
@@ -223,7 +225,8 @@
     "settled_at": "2026-09-05T22:25:35.434888+00:00",
     "clv_odds_pct": 0.072917,
     "clv_probability_pp": 0.034336,
-    "clv_status": "NOT_COMPUTABLE"
+    "clv_status": "NOT_COMPUTABLE",
+    "closing_snapshot_id": "a00f3ef9a820bc2a3fb9fb237286bebc18bad7f23950471055c54d075dd744de"
   },
   {
     "id": "1629829_UNDER_2_5",
@@ -281,7 +284,8 @@
     "prediction_id": "1629829_UNDER_2_5_dc-value-v2.1.0",
     "signal_id": "1629829_UNDER_2_5_dc-value-v2.1.0",
     "entry_snapshot_id": "4864863d40d1a1cce4ca13bdfa8257de8451034bd25db95bfabe543b6a5570f6",
-    "clv_status": "NOT_COMPUTABLE"
+    "clv_status": "COMPUTABLE",
+    "closing_snapshot_id": "17dc870780bb59be7571964a63ec757566f2a582823c2d4bbe3141da1286a3f5"
   },
   {
     "id": "1490444_UNDER_2_5",
@@ -339,7 +343,8 @@
     "prediction_id": "1490444_UNDER_2_5_dc-value-v2.1.0",
     "signal_id": "1490444_UNDER_2_5_dc-value-v2.1.0",
     "entry_snapshot_id": "ad0fb03e44c422fe9d7d1402279690b0eaac0b67c0a6eca79bf54fadd131fb83",
-    "clv_status": "NOT_COMPUTABLE"
+    "clv_status": "COMPUTABLE",
+    "closing_snapshot_id": "de99cdf3f33dcb6499993222d913e6b9209b7d9c2805e24a30d69232c22c9b4b"
   },
   {
     "id": "1601522_OVER_2_5",
@@ -449,7 +454,8 @@
     "prediction_id": "1601424_UNDER_2_5_dc-value-v2.1.0",
     "signal_id": "1601424_UNDER_2_5_dc-value-v2.1.0",
     "entry_snapshot_id": "eb467de9a644407de608fc76e0523545ae318e1ffc1cf2eab58610eeac95d8c4",
-    "clv_status": "NOT_COMPUTABLE"
+    "clv_status": "COMPUTABLE",
+    "closing_snapshot_id": "2fca46e8d75d5bfe37b7c359071f879e6fd97afcf428102282f135c02cece820"
   },
   {
     "id": "1636736_OVER_2_5",
@@ -507,7 +513,8 @@
     "prediction_id": "1636736_OVER_2_5_dc-value-v2.1.0",
     "signal_id": "1636736_OVER_2_5_dc-value-v2.1.0",
     "entry_snapshot_id": "52943a101b018c0e6e4e788f5cb2b5777fcfbff22f4e31d025ee89ce78f74263",
-    "clv_status": "NOT_COMPUTABLE"
+    "clv_status": "COMPUTABLE",
+    "closing_snapshot_id": "5b7b19ce745ef473b69c98998702cc16107b186b4eba0255313ada6699947af9"
   },
   {
     "id": "1585746_UNDER_2_5",
