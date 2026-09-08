@@ -1,0 +1,15 @@
+{
+  "business_date": "2026-09-08",
+  "status": "SUCCESS",
+  "generation_status": "SUCCESS",
+  "commit_status": "SUCCESS",
+  "send_status": "SUCCESS",
+  "generation_started_at": "2026-09-08T00:45:16.703409+00:00",
+  "generation_completed_at": "2026-09-08T00:55:07.488757+00:00",
+  "completed_at": "2026-09-08T00:55:13.470725+00:00",
+  "workflow": "daily.yml",
+  "workflow_run_id": "34174322947",
+  "workflow_run_attempt": "1",
+  "workflow_sha": "a0afb61aa860093aa22fc6f6aeb10bddb16279e9",
+  "timezone": "Europe/Belgrade"
+}
