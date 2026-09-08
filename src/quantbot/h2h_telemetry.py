@@ -27,9 +27,7 @@ def h2h_snapshot_id(fixture_id: int, data_cutoff: datetime) -> str:
 
 
 def source_request_hash(endpoint: str, params: dict[str, Any]) -> str:
-    canonical = json.dumps(
-        [endpoint, sorted(params.items())], ensure_ascii=True, separators=(",", ":")
-    )
+    canonical = json.dumps([endpoint, sorted(params.items())], ensure_ascii=True, separators=(",", ":"))
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
@@ -50,31 +48,12 @@ def _match_payload(record: Any) -> dict[str, Any]:
     }
 
 
-def build_snapshot(
-    *,
-    fixture_id: int,
-    decision_timestamp: datetime,
-    home_id: int,
-    away_id: int,
-    home_name: str,
-    away_name: str,
-    league_id: int,
-    league: str,
-    h2h_enabled: bool,
-    status: str,
-    stats: H2HStats | None = None,
-    error: str | None = None,
-    captured_at: datetime | None = None,
-) -> dict[str, Any]:
+def build_snapshot(*, fixture_id: int, decision_timestamp: datetime, home_id: int, away_id: int, home_name: str, away_name: str, league_id: int, league: str, h2h_enabled: bool, status: str, stats: H2HStats | None = None, error: str | None = None, captured_at: datetime | None = None) -> dict[str, Any]:
     if status not in VALID_STATUSES:
         raise ValueError(f"Unknown H2H status: {status}")
     cutoff = decision_timestamp.astimezone(UTC)
     available = status == "AVAILABLE" and stats is not None
-    rates: dict[str, float | None] = {
-        Market.OVER_25.value: None,
-        Market.UNDER_25.value: None,
-        Market.BTTS_YES.value: None,
-    }
+    rates: dict[str, float | None] = {Market.OVER_25.value: None, Market.UNDER_25.value: None, Market.BTTS_YES.value: None}
     matches: list[dict[str, Any]] = []
     effective_n: float | None = None
     has_recent = False
@@ -88,7 +67,7 @@ def build_snapshot(
         has_recent = bool(stats.has_recent_match)
         matches = [_match_payload(record) for record in stats.matches]
         h2h_rate = rates.get(Market.UNDER_25.value)
-
+    request_attempted = status != "NOT_REQUESTED"
     return {
         "schema_version": SCHEMA_VERSION,
         "h2h_snapshot_id": h2h_snapshot_id(fixture_id, cutoff),
@@ -112,10 +91,8 @@ def build_snapshot(
         "h2h_rates": rates,
         "h2h_matches": matches,
         "captured_at": (captured_at or cutoff).astimezone(UTC).isoformat(),
-        "source_endpoint": "fixtures/headtohead",
-        "source_request_hash": source_request_hash(
-            "fixtures/headtohead", {"h2h": f"{home_id}-{away_id}"}
-        ),
+        "source_endpoint": "fixtures/headtohead" if request_attempted else None,
+        "source_request_hash": source_request_hash("fixtures/headtohead", {"h2h": f"{home_id}-{away_id}"}) if request_attempted else None,
         "captured_by": "engine.generate",
     }
 
@@ -146,15 +123,7 @@ class H2HSnapshotStore:
         if sid in self._ids:
             return None
         with self.path.open("a", encoding="utf-8") as handle:
-            handle.write(
-                json.dumps(
-                    snapshot,
-                    ensure_ascii=False,
-                    sort_keys=True,
-                    separators=(",", ":"),
-                )
-                + "\n"
-            )
+            handle.write(json.dumps(snapshot, ensure_ascii=False, sort_keys=True, separators=(",", ":")) + "\n")
             handle.flush()
         self._ids.add(sid)
         return sid
@@ -181,20 +150,10 @@ class H2HOutcomeStore:
                 ids.add(str(item["h2h_snapshot_id"]))
         return ids
 
-    def append(
-        self,
-        *,
-        snapshot_id: str,
-        fixture_id: int,
-        home_goals: int,
-        away_goals: int,
-        captured_at: datetime,
-    ) -> bool:
+    def append(self, *, snapshot_id: str, fixture_id: int, home_goals: int, away_goals: int, captured_at: datetime) -> bool:
         if snapshot_id in self._ids:
             return False
-        result = (
-            "1" if home_goals > away_goals else "2" if home_goals < away_goals else "X"
-        )
+        result = "1" if home_goals > away_goals else "2" if home_goals < away_goals else "X"
         item = {
             "schema_version": SCHEMA_VERSION,
             "h2h_snapshot_id": snapshot_id,
@@ -207,10 +166,7 @@ class H2HOutcomeStore:
             "source": "prediction_ledger.settlement",
         }
         with self.path.open("a", encoding="utf-8") as handle:
-            handle.write(
-                json.dumps(item, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
-                + "\n"
-            )
+            handle.write(json.dumps(item, ensure_ascii=False, sort_keys=True, separators=(",", ":")) + "\n")
             handle.flush()
         self._ids.add(snapshot_id)
         return True
