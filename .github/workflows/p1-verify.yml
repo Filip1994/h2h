@@ -1,4 +1,4 @@
-name: P1 H2H verification
+name: P1 H2H verification final
 on:
   push:
     branches: [p1/h2h-removal-final3]
@@ -21,16 +21,14 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
-          import re
           pats=['head_to_head','fixtures/headtohead','h2h_telemetry_enabled','quantbot.h2h','h2h_rate','h2h_effective_n','h2h_history','h2h_snapshot_id','h2h_eligible']
           bad=[]
           for p in Path('.').rglob('*'):
-              if not p.is_file() or '.git' in p.parts or 'data' in p.parts: continue
+              if not p.is_file() or '.git' in p.parts or 'data' in p.parts or p.as_posix() in {'.github/workflows/p1-verify.yml','.github/workflows/p1-final-scan.yml'}: continue
               if p.suffix.lower() not in {'.py','.yml','.yaml','.toml','.env','.example','.html'}: continue
               t=p.read_text(encoding='utf-8',errors='ignore')
               hits=[x for x in pats if x.lower() in t.lower()]
-              if hits: bad.append((str(p),hits))
-          if bad:
-              print(bad); raise SystemExit(1)
+              if hits: bad.append((p.as_posix(),hits))
+          if bad: print(bad); raise SystemExit(1)
           print('No executable H2H production references.')
           PY
