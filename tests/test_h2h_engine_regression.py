@@ -3,9 +3,9 @@ from __future__ import annotations
 from dataclasses import replace
 from datetime import UTC, datetime
 
-from quantbot.engine import QuantEngine
-
 from test_engine_integration import FakeAPI
+
+from quantbot.engine import QuantEngine
 
 
 def test_h2h_telemetry_on_off_has_identical_decisions(settings) -> None:
@@ -27,8 +27,7 @@ def test_h2h_telemetry_on_off_has_identical_decisions(settings) -> None:
     ]
     off_predictions = {p["id"]: p for p in off_engine.prediction_store.load()}
     on_predictions = {p["id"]: p for p in on_engine.prediction_store.load()}
-    for prediction_id in off_predictions:
-        left = off_predictions[prediction_id]
+    for prediction_id, left in off_predictions.items():
         right = on_predictions[prediction_id]
         for key in ("model_probability", "calibrated_probability", "selected", "odd"):
             assert left[key] == right[key]
