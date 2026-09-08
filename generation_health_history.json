@@ -1,0 +1,42 @@
+[
+  {
+    "schema_version": 1,
+    "timestamp": "2026-09-08T12:59:59.643981+00:00",
+    "status": "DEGRADED",
+    "classification_reasons": [
+      "DIXON_COLES_FIXTURE_FAILURE",
+      "FIXTURE_PROCESSING_FAILURE"
+    ],
+    "fixture_failures": {
+      "api": 0,
+      "dixon_coles": 33,
+      "other": 32
+    },
+    "api": {
+      "request_count": 296,
+      "request_budget": 7500,
+      "working_budget": 7000,
+      "reserve": 500,
+      "remaining_working": 6704,
+      "cache_hits": 24,
+      "cache_misses": 296,
+      "cache_hit_rate": 0.075,
+      "rate_limit_events": 0,
+      "http_errors": {},
+      "api_error_events": 0,
+      "network_error_events": 0,
+      "endpoint_requests": {
+        "fixtures": 113,
+        "fixtures/headtohead": 124,
+        "odds": 59
+      },
+      "endpoint_cache_hits": {
+        "fixtures": 24
+      }
+    },
+    "new_bets": 0,
+    "diagnostic_count": 66,
+    "observation_only": true,
+    "threshold_action": "NO_AUTOMATIC_BLOCKING"
+  }
+]
