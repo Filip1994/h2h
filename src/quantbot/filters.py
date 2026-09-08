@@ -19,6 +19,15 @@ _TEAM_SUFFIX_PATTERNS = (
     re.compile(r"(?:^|[\s._()/-])b\)?$", re.IGNORECASE),
 )
 
+_ENGLAND_TOP_FOUR_LEAGUES = frozenset(
+    {
+        "premier league",
+        "championship",
+        "league one",
+        "league two",
+    }
+)
+
 
 def normalize_text(value: str | None) -> str:
     text = unicodedata.normalize("NFKD", value or "")
@@ -40,6 +49,11 @@ def is_allowed_match(
 ) -> bool:
     normalized_country = normalize_text(country)
     if normalized_country in {normalize_text(item) for item in excluded_countries}:
+        return False
+    if (
+        normalized_country == "england"
+        and normalize_text(league_name) not in _ENGLAND_TOP_FOUR_LEAGUES
+    ):
         return False
     if contains_excluded_keyword(league_name, home_name, away_name):
         return False
