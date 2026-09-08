@@ -1,0 +1,160 @@
+name: P1 H2H removal runner
+
+on:
+  push:
+    branches: [p1/finalize-h2h-removal]
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: p1/finalize-h2h-removal
+      - name: Apply removal-only cleanup
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          import subprocess
+
+          root = Path('.')
+
+          def edit(path, fn):
+              p = root / path
+              text = p.read_text(encoding='utf-8')
+              new = fn(text)
+              if new == text:
+                  print(f'NO CHANGE {path}')
+              else:
+                  p.write_text(new, encoding='utf-8')
+                  print(f'UPDATED {path}')
+
+          # Config: remove H2H-only settings and validation, preserving all other values.
+          edit('src/quantbot/config.py', lambda s: re.sub(
+              r'\n    h2h_telemetry_enabled: bool\n', '',
+              re.sub(r'\n    min_h2h_matches: int\n    h2h_years: int\n    max_recent_h2h_days: int\n    min_h2h_rate: float\n', '', s)
+          ))
+          edit('src/quantbot/config.py', lambda s: re.sub(
+              r'\n            h2h_telemetry_enabled=_bool\("H2H_TELEMETRY_ENABLED", False\),', '',
+              re.sub(r'\n            min_h2h_matches=_int\("MIN_H2H_MATCHES", 5\),\n            h2h_years=_int\("H2H_YEARS", 4\),\n            max_recent_h2h_days=_int\("MAX_RECENT_H2H_DAYS", 730\),\n            min_h2h_rate=_float\("MIN_H2H_RATE", 0.75\),', '', s)
+          ))
+          edit('src/quantbot/config.py', lambda s: re.sub(r'\n            "MIN_H2H_RATE": self\.min_h2h_rate,', '', s))
+          edit('src/quantbot/config.py', lambda s: re.sub(r'\n        if self\.min_h2h_matches < 5:\n            raise ValueError\("MIN_H2H_MATCHES ne sme biti manji od 5"\)\n        if self\.h2h_years < 1 or self\.max_recent_h2h_days < 1:\n            raise ValueError\("H2H prozor i prag svežine moraju biti pozitivni"\)', '', s))
+
+          # API: remove only the H2H endpoint wrapper.
+          edit('src/quantbot/api.py', lambda s: re.sub(
+              r'\n    def head_to_head\(self, home_id: int, away_id: int\) -> list\[dict\[str, Any\]\]:\n        return self\.get\(\n            "fixtures/headtohead",\n            \{"h2h": f"\{home_id\}-\{away_id\}"\},\n            ttl_seconds=43_200,\n        \)\n', '\n', s))
+
+          # Types: remove H2HStats and H2H fields from production candidate/bet surface.
+          edit('src/quantbot/types.py', lambda s: re.sub(
+              r'\n@dataclass\(frozen=True, slots=True\)\nclass H2HStats:.*?\n\n@dataclass\(frozen=True, slots=True\)\nclass OddsQuote:',
+              '\n@dataclass(frozen=True, slots=True)\nclass OddsQuote:', s, flags=re.S))
+          edit('src/quantbot/types.py', lambda s: re.sub(
+              r'\n    h2h_rate: float\n    h2h_n: int\n    h2h_effective_n: float\n    h2h_history: tuple\[str, \.\.\.\]\n', '', s))
+          edit('src/quantbot/types.py', lambda s: re.sub(r'\n    h2h_enabled: bool = False', '', s))
+          edit('src/quantbot/types.py', lambda s: re.sub(
+              r'\n            "h2h_enabled": self\.h2h_enabled,\n            "h2h_rate": round\(self\.h2h_rate, 6\),\n            "h2h_n": self\.h2h_n,\n            "h2h_effective_n": round\(self\.h2h_effective_n, 3\),\n            "h2h_history": list\(self\.h2h_history\),', '', s))
+
+          # Engine: remove H2H telemetry path while leaving model/odds/EV/risk flow intact.
+          edit('src/quantbot/engine.py', lambda s: s.replace('from .h2h import build_h2h_stats_detailed, format_recent_history\n', '').replace('from .h2h_telemetry import H2HSnapshotStore, build_snapshot\n', ''))
+          edit('src/quantbot/engine.py', lambda s: s.replace('        self.h2h_snapshot_store = H2HSnapshotStore(settings.root)\n', ''))
+          edit('src/quantbot/engine.py', lambda s: re.sub(
+              r'        h2h_rate,\n        h2h_n,\n        h2h_effective_n,\n', '', s))
+          edit('src/quantbot/engine.py', lambda s: re.sub(
+              r'            "h2h_enabled": self\.settings\.h2h_telemetry_enabled,\n            "h2h_available": h2h_available,\n            "h2h_status": h2h_status,\n            "h2h_error": h2h_error,\n            "h2h_snapshot_id": h2h_snapshot_id,\n            "h2h_rate": round\(h2h_rate, 6\),\n            "h2h_n": h2h_n,\n            "h2h_effective_n": round\(h2h_effective_n, 3\),\n            "h2h_eligible": \(h2h_rate >= self\.settings\.min_h2h_rate if h2h_n else None\),\n', '', s))
+          edit('src/quantbot/engine.py', lambda s: re.sub(
+              r'\n            h2h = None\n            h2h_status = "NOT_REQUESTED".*?\n            history = format_recent_history\(h2h\) if h2h else \(\)\n', '\n', s, flags=re.S))
+          edit('src/quantbot/engine.py', lambda s: re.sub(
+              r'\n            snapshot = build_snapshot\(.*?self\.h2h_snapshot_store\.append\(snapshot\)\n', '\n', s, flags=re.S))
+          edit('src/quantbot/engine.py', lambda s: re.sub(
+              r'\n            h2h_rates = \(.*?history = format_recent_history\(h2h\) if h2h else \(\)\n', '\n', s, flags=re.S))
+          edit('src/quantbot/engine.py', lambda s: re.sub(
+              r'                        h2h_rates\[market\],\n                        h2h_n,\n                        h2h_effective_n,\n                        quote,\n                        now_local,\n                        h2h_snapshot_id=snapshot_id,\n                        h2h_available=bool\(snapshot\["h2h_available"\]\),\n                        h2h_status=h2h_status,\n                        h2h_error=h2h_error,\n                        rejection_reason=reason,',
+              '                        quote,\n                        now_local,\n                        rejection_reason=reason,', s))
+          edit('src/quantbot/engine.py', lambda s: re.sub(
+              r'                        h2h_rate=h2h_rates\[market\],\n                        h2h_enabled=self\.settings\.h2h_telemetry_enabled,\n                        h2h_n=h2h_n,\n                        h2h_effective_n=h2h_effective_n,\n                        h2h_history=history,\n', '', s))
+          edit('src/quantbot/engine.py', lambda s: re.sub(
+              r'        for bet in proposed_bets:\n            prediction_id = f"\{bet\[\'event_id\'\]\}_\{bet\[\'market\'\]\}_\{MODEL_VERSION\}"\n            research = prediction_by_id\.get\(prediction_id, \{\}\)\n            bet\["h2h_snapshot_id"\] = research\.get\("h2h_snapshot_id"\)\n            bet\["h2h_available"\] = research\.get\("h2h_available", False\)\n            bet\["h2h_status"\] = research\.get\("h2h_status", "NOT_REQUESTED"\)\n            bet\["h2h_error"\] = research\.get\("h2h_error"\)\n', '', s))
+          edit('src/quantbot/engine.py', lambda s: re.sub(r'        prediction_by_id = \{str\(item\["id"\]\): item for item in prediction_records\}\n', '', s))
+          edit('src/quantbot/engine.py', lambda s: re.sub(r' f"h2h_telemetry=\{self\.settings\.h2h_telemetry_enabled\} "', ' ', s))
+
+          # Watchlist: retain quote/EV/edge/stake behavior, remove H2H metadata only.
+          edit('src/quantbot/watchlist.py', lambda s: re.sub(
+              r'\n        "h2h_enabled": prediction\.get\("h2h_enabled"\),\n        "h2h_available": prediction\.get\("h2h_available"\),\n        "h2h_rate": prediction\.get\("h2h_rate"\),\n        "h2h_n": prediction\.get\("h2h_n"\),\n        "h2h_effective_n": prediction\.get\("h2h_effective_n"\),\n        "h2h_history": prediction\.get\("h2h_history", \[\]\),\n        "h2h_snapshot_id": prediction\.get\("h2h_snapshot_id"\),\n        "h2h_status": prediction\.get\("h2h_status"\),\n        "h2h_error": prediction\.get\("h2h_error"\),', '', s))
+
+          # Main metadata/Strong Signal persistence: no H2H production fields.
+          edit('main.py', lambda s: re.sub(r'\n        "h2h_telemetry_enabled": settings\.h2h_telemetry_enabled,', '', s))
+          edit('main.py', lambda s: re.sub(
+              r'\n                "h2h_enabled": bet\.get\("h2h_enabled"\),\n                "h2h_available": bet\.get\("h2h_available"\),\n                "h2h_rate": bet\.get\("h2h_rate"\),\n                "h2h_n": bet\.get\("h2h_n"\),\n                "h2h_effective_n": bet\.get\("h2h_effective_n"\),\n                "h2h_history": bet\.get\("h2h_history", \[\]\),\n                "h2h_snapshot_id": bet\.get\("h2h_snapshot_id"\),\n                "h2h_status": bet\.get\("h2h_status"\),\n                "h2h_error": bet\.get\("h2h_error"\),', '', s))
+          edit('main.py', lambda s: s.replace('description="QuantBet H2H v2"', 'description="QuantBet Football v2"'))
+
+          # Backtest: remove H2H data dependency/eligibility gate; keep DC + odds + EV/edge.
+          edit('backtest.py', lambda s: s.replace('from quantbot.h2h import build_h2h_stats_from_records, subtract_years\n', ''))
+          edit('backtest.py', lambda s: s.replace('                record\n                for record in history\n                if record.date\n                >= subtract_years(reference_time, settings.training_seasons)\n', '                record\n                for record in history\n                if record.date\n                >= reference_time - timedelta(days=365 * settings.training_seasons)\n'))
+          edit('backtest.py', lambda s: re.sub(
+              r'                    pair = \{record\.home_id, record\.away_id\}\n                    prior_h2h = \[.*?                    h2h = build_h2h_stats_from_records\(\n                        prior_h2h, now=record\.date, settings=settings\n                    \)\n                    if h2h is None:\n                        continue\n', '', s, flags=re.S))
+          edit('backtest.py', lambda s: re.sub(
+              r'                            "h2h_rate": round\(h2h\.weighted_rates\[market\], 8\),\n                            "h2h_n": len\(h2h\.matches\),\n                            "h2h_effective_n": round\(h2h\.effective_n, 4\),\n                            "h2h_eligible": h2h\.weighted_rates\[market\]\n                            >= settings\.min_h2h_rate,\n', '', s))
+          edit('backtest.py', lambda s: re.sub(
+              r'                        if \(\n                            not prediction\["h2h_eligible"\]\n                            or odd is None',
+              '                        if (\n                            odd is None', s))
+
+          # Environment/workflows: remove H2H configuration injection.
+          edit('.env.example', lambda s: re.sub(r'\nMIN_H2H_MATCHES=.*\nH2H_YEARS=.*\nMAX_RECENT_H2H_DAYS=.*\nMIN_H2H_RATE=.*', '', s))
+          for p in list((root / '.github/workflows').glob('*.yml')) + list((root / '.github/workflows').glob('*.yaml')):
+              text = p.read_text(encoding='utf-8')
+              new = re.sub(r'^\s*H2H_TELEMETRY_ENABLED:.*\n', '', text, flags=re.M)
+              if new != text:
+                  p.write_text(new, encoding='utf-8')
+                  print(f'UPDATED {p}')
+
+          # Reporting footer only: remove stale statement; no rendering logic change.
+          edit('src/quantbot/reporting.py', lambda s: s.replace(' H2H telemetry is informational and does not alter the production decision while disabled.', ''))
+          edit('src/quantbot/__init__.py', lambda s: s.replace('QuantBet H2H v2 package.', 'QuantBet Football package.'))
+
+          # Remove H2H-specific production executables/tests. Historical ledger/data are untouched.
+          for rel in [
+              'src/quantbot/h2h.py',
+              'src/quantbot/h2h_telemetry.py',
+              'tools/persist_h2h.py',
+              'tools/h2h_telemetry_health.py',
+              '.github/workflows/h2h-research.yml',
+              'tests/test_h2h.py',
+              'tests/test_h2h_engine_regression.py',
+              'tests/test_h2h_research_dataset.py',
+          ]:
+              p = root / rel
+              if p.exists():
+                  p.unlink()
+                  subprocess.run(['git', 'rm', '-f', rel], check=True)
+
+          # Remove this one-shot workflow before committing the final cleanup.
+          subprocess.run(['git', 'rm', '-f', '.github/workflows/p1-h2h-removal.yml'], check=True)
+
+          # Repository-wide executable scan; docs/history are allowed to retain historical H2H mentions.
+          forbidden = []
+          for p in root.rglob('*'):
+              if not p.is_file() or '.git' in p.parts or 'data' in p.parts:
+                  continue
+              if p.suffix.lower() not in {'.py', '.yml', '.yaml', '.toml', '.env', '.example', '.html'}:
+                  continue
+              text = p.read_text(encoding='utf-8', errors='ignore')
+              if re.search(r'(?i)head_to_head|fixtures/headtohead|h2h_telemetry_enabled|h2h_rate|h2h_effective_n|h2h_history|h2h_snapshot_id|h2h_eligible|quantbot\.h2h', text):
+                  forbidden.append(str(p))
+          if forbidden:
+              print('FORBIDDEN EXECUTABLE H2H REFERENCES:')
+              print('\n'.join(forbidden))
+              raise SystemExit(1)
+
+          subprocess.run(['git', 'config', 'user.name', 'github-actions[bot]'], check=True)
+          subprocess.run(['git', 'config', 'user.email', '41898282+github-actions[bot]@users.noreply.github.com'], check=True)
+          subprocess.run(['git', 'add', '-A'], check=True)
+          subprocess.run(['git', 'commit', '-m', 'chore: complete H2H production removal'], check=True)
+          subprocess.run(['git', 'push', 'origin', 'p1/finalize-h2h-removal'], check=True)
+          PY
