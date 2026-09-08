@@ -1,0 +1,66 @@
+name: Daily QuantBet bulletin watchdog
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "5 1 * * *"
+      timezone: "Europe/Belgrade"
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: quantbet-bulletin-watchdog
+  cancel-in-progress: false
+
+jobs:
+  watchdog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Check bulletin health
+        id: health
+        continue-on-error: true
+        run: python tools/bulletin_health.py --guard
+      - name: No-op when today's bulletin is healthy
+        if: steps.health.outcome == 'success'
+        run: echo "Daily bulletin HEALTHY; no recovery required."
+      - name: Trigger daily bulletin recovery
+        if: steps.health.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          echo "Daily bulletin missing; triggering existing daily.yml recovery path."
+          gh workflow run daily.yml --ref main --field force=false
+      - name: Wait for recovery result
+        if: steps.health.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 30); do
+            run_id="$(gh run list --workflow daily.yml --event workflow_dispatch --branch main --limit 1 --json databaseId --jq '.[0].databaseId // empty')"
+            if [ -n "$run_id" ]; then
+              status="$(gh run view "$run_id" --json status --jq '.status')"
+              conclusion="$(gh run view "$run_id" --json conclusion --jq '.conclusion')"
+              echo "Recovery run $run_id: status=$status conclusion=$conclusion"
+              if [ "$status" = "completed" ]; then
+                if [ "$conclusion" = "success" ]; then
+                  echo "Daily bulletin recovery: SUCCESS"
+                  exit 0
+                fi
+                echo "Daily bulletin recovery: FAIL" >&2
+                exit 1
+              fi
+            fi
+            sleep 20
+          done
+          echo "Timed out waiting for daily bulletin recovery." >&2
+          exit 1
