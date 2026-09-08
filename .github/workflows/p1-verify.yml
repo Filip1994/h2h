@@ -12,7 +12,7 @@ jobs:
         with: {fetch-depth: 0, ref: p1/h2h-removal-final3}
       - uses: actions/setup-python@v5
         with: {python-version: '3.12', cache: pip}
-      - run: pip install -r requirements.txt
+      - run: pip install -r requirements-dev.txt
       - name: Compile
         run: python -m compileall -q src main.py backtest.py tests
       - name: Test suite
