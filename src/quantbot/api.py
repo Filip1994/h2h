@@ -32,6 +32,10 @@ class APIFootballClient:
         self.request_count = 0
         self.cache_hits = 0
         self.cache_misses = 0
+        self.rate_limit_events = 0
+        self.http_errors: Counter[str] = Counter()
+        self.api_error_events = 0
+        self.network_error_events = 0
         self.endpoint_requests: Counter[str] = Counter()
         self.endpoint_cache_hits: Counter[str] = Counter()
         self.settings.cache_dir.mkdir(parents=True, exist_ok=True)
@@ -169,6 +173,9 @@ class APIFootballClient:
                     raw = response.read().decode("utf-8")
                 break
             except HTTPError as exc:
+                self.http_errors[str(exc.code)] += 1
+                if exc.code == 429:
+                    self.rate_limit_events += 1
                 retryable = exc.code == 429 or 500 <= exc.code <= 599
                 if retryable and attempt + 1 < self.settings.api_max_attempts:
                     headers = exc.headers or {}
@@ -177,6 +184,7 @@ class APIFootballClient:
                 detail = exc.read().decode("utf-8", errors="replace")[:500]
                 raise APIError(f"API HTTP {exc.code} za {endpoint}: {detail}") from exc
             except (URLError, TimeoutError) as exc:
+                self.network_error_events += 1
                 if attempt + 1 < self.settings.api_max_attempts:
                     self._retry_delay(attempt)
                     continue
@@ -186,13 +194,16 @@ class APIFootballClient:
         try:
             payload = json.loads(raw)
         except json.JSONDecodeError as exc:
+            self.api_error_events += 1
             raise APIError(f"API nije vratio validan JSON za {endpoint}") from exc
 
         errors = payload.get("errors")
         if errors:
+            self.api_error_events += 1
             raise APIError(f"API greška za {endpoint}: {errors}")
         result = payload.get("response")
         if not isinstance(result, list):
+            self.api_error_events += 1
             raise APIError(f"Neočekivan API odgovor za {endpoint}")
 
         captured_at = datetime.now(UTC)
@@ -218,6 +229,10 @@ class APIFootballClient:
             "cache_hit_rate": round(
                 self.cache_hits / max(1, self.cache_hits + self.cache_misses), 6
             ),
+            "rate_limit_events": self.rate_limit_events,
+            "http_errors": dict(sorted(self.http_errors.items())),
+            "api_error_events": self.api_error_events,
+            "network_error_events": self.network_error_events,
             "endpoint_requests": dict(sorted(self.endpoint_requests.items())),
             "endpoint_cache_hits": dict(sorted(self.endpoint_cache_hits.items())),
         }
