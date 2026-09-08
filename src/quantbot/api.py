@@ -33,6 +33,8 @@ class APIFootballClient:
         self.cache_hits = 0
         self.cache_misses = 0
         self.rate_limit_events = 0
+        self.retry_events = 0
+        self.budget_exhaustion_events = 0
         self.http_errors: Counter[str] = Counter()
         self.api_error_events = 0
         self.network_error_events = 0
@@ -154,6 +156,7 @@ class APIFootballClient:
                 0 if reserve_protected else self.settings.api_budget_reserve
             )
             if self.request_count >= usable_budget:
+                self.budget_exhaustion_events += 1
                 raise APIBudgetExceeded(
                     "Run je dostigao API radni budžet od "
                     f"{usable_budget} zahteva; rezerva={self.settings.api_budget_reserve}"
@@ -178,6 +181,7 @@ class APIFootballClient:
                     self.rate_limit_events += 1
                 retryable = exc.code == 429 or 500 <= exc.code <= 599
                 if retryable and attempt + 1 < self.settings.api_max_attempts:
+                    self.retry_events += 1
                     headers = exc.headers or {}
                     self._retry_delay(attempt, headers.get("Retry-After"))
                     continue
@@ -186,6 +190,7 @@ class APIFootballClient:
             except (URLError, TimeoutError) as exc:
                 self.network_error_events += 1
                 if attempt + 1 < self.settings.api_max_attempts:
+                    self.retry_events += 1
                     self._retry_delay(attempt)
                     continue
                 reason = getattr(exc, "reason", str(exc))
@@ -204,7 +209,7 @@ class APIFootballClient:
         result = payload.get("response")
         if not isinstance(result, list):
             self.api_error_events += 1
-            raise APIError(f"Neočekivan API odgovor za {endpoint}")
+            raise APIError(f"Neočekivan API odgovor za endpoint {endpoint}")
 
         captured_at = datetime.now(UTC)
         self._archive_response(endpoint, params, payload, captured_at, url)
@@ -230,6 +235,8 @@ class APIFootballClient:
                 self.cache_hits / max(1, self.cache_hits + self.cache_misses), 6
             ),
             "rate_limit_events": self.rate_limit_events,
+            "retry_events": self.retry_events,
+            "budget_exhaustion_events": self.budget_exhaustion_events,
             "http_errors": dict(sorted(self.http_errors.items())),
             "api_error_events": self.api_error_events,
             "network_error_events": self.network_error_events,
