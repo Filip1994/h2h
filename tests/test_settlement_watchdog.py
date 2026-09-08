@@ -1,7 +1,9 @@
 from pathlib import Path
 
 
-WORKFLOW = Path(__file__).parents[1] / ".github" / "workflows" / "settlement-watchdog.yml"
+WORKFLOW = (
+    Path(__file__).parents[1] / ".github" / "workflows" / "settlement-watchdog.yml"
+)
 
 
 def test_watchdog_keeps_monitor_as_only_settlement_executor():
@@ -21,5 +23,5 @@ def test_watchdog_has_health_gate_and_recovery_verification():
 
 def test_watchdog_preserves_separate_concurrency_and_monitor_is_responsible_for_ledger_lock():
     text = WORKFLOW.read_text(encoding="utf-8")
-    assert 'group: quantbet-settlement-watchdog' in text
-    assert 'contents: read' in text
+    assert "group: quantbet-settlement-watchdog" in text
+    assert "contents: read" in text
