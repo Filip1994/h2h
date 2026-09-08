@@ -352,6 +352,7 @@ class QuantEngine:
                         calibrated_probability=calibrated_probability,
                         decision_probability=decision_probability,
                         h2h_rate=h2h_rates[market],
+                        h2h_enabled=self.settings.h2h_telemetry_enabled,
                         h2h_n=h2h_n,
                         h2h_effective_n=h2h_effective_n,
                         h2h_history=history,

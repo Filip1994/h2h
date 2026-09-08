@@ -26,6 +26,8 @@ def test_h2h_telemetry_on_off_has_identical_decisions(settings, tmp_path) -> Non
         (b["market"], b["stake"], b["expected_value"], b["probability_edge"])
         for b in on_result.new_bets
     ]
+    assert off_result.new_bets[0]["h2h_enabled"] is False
+    assert on_result.new_bets[0]["h2h_enabled"] is True
     off_predictions = {p["id"]: p for p in off_engine.prediction_store.load()}
     on_predictions = {p["id"]: p for p in on_engine.prediction_store.load()}
     for prediction_id, left in off_predictions.items():
