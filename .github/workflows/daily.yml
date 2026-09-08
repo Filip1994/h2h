@@ -82,16 +82,23 @@ jobs:
       - name: Capture generation completion
         id: generation-complete
         run: echo "timestamp=$(python -c 'from datetime import datetime,UTC; print(datetime.now(UTC).isoformat())')" >> "$GITHUB_OUTPUT"
-      - name: Commit ledger and raw API archive
+      - name: Commit ledger, health and raw API archive
         run: |
           set -euo pipefail
-          if git diff --quiet -- bets.json predictions.json calibration.json ledger_meta.json api_usage.json api_usage_history.json && test -z "$(git status --porcelain -- data/raw_api)"; then
-            echo "No ledger changes to commit."
+          files=(bets.json predictions.json calibration.json ledger_meta.json api_usage.json api_usage_history.json generation_health.json generation_health_history.json)
+          changed=0
+          for file in "${files[@]}"; do
+            if [ -e "$file" ] && ! git diff --quiet -- "$file"; then changed=1; fi
+            if [ -e "$file" ] && git ls-files --error-unmatch "$file" >/dev/null 2>&1; then :; elif [ -e "$file" ]; then changed=1; fi
+          done
+          if git status --porcelain -- data/raw_api | grep -q .; then changed=1; fi
+          if [ "$changed" -eq 0 ]; then
+            echo "No ledger, health or API archive changes to commit."
           else
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add bets.json predictions.json calibration.json ledger_meta.json api_usage.json api_usage_history.json data/raw_api
-            git commit -m "Update QuantBet daily ledger and API archive"
+            git add --ignore-errors "${files[@]}" data/raw_api
+            git commit -m "Update QuantBet daily ledger, health and API archive"
             for attempt in 1 2 3; do
               if git push; then
                 git fetch origin main
@@ -116,8 +123,8 @@ jobs:
       - name: Write canonical success marker
         run: |
           python tools/bulletin_health.py --write-success \
-            --generation-started-at "${{ steps/generation-start.outputs.timestamp }}" \
-            --generation-completed-at "${{ steps/generation-complete.outputs.timestamp }}"
+            --generation-started-at "${{ steps.generation-start.outputs.timestamp }}" \
+            --generation-completed-at "${{ steps.generation-complete.outputs.timestamp }}"
       - name: Commit bulletin health marker
         run: |
           set -euo pipefail
