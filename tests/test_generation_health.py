@@ -16,7 +16,12 @@ def _result(*diagnostics: str, telemetry=None, **usage):
 
 
 def test_429_is_classified_as_degraded_without_blocking() -> None:
-    result = _result(rate_limit_events=1, retry_events=1, api_error_events=0, network_error_events=0)
+    result = _result(
+        rate_limit_events=1,
+        retry_events=1,
+        api_error_events=0,
+        network_error_events=0,
+    )
     health = build_success_health(datetime.now(UTC), result)
     assert health["status"] == "DEGRADED"
     assert "API_RATE_LIMIT" in health["classification_reasons"]
