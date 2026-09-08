@@ -1,0 +1,93 @@
+name: P1 H2H removal runner
+on:
+  push:
+    branches: [p1/h2h-removal-v2]
+permissions:
+  contents: write
+jobs:
+  cleanup:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: p1/h2h-removal-v2
+      - name: Apply removal-only cleanup
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re, subprocess
+          root=Path('.')
+          def edit(path, fn):
+              p=root/path; s=p.read_text(encoding='utf-8'); n=fn(s)
+              if n!=s: p.write_text(n,encoding='utf-8'); print('UPDATED',path)
+          def remove_between(path,start,end):
+              p=root/path; lines=p.read_text(encoding='utf-8').splitlines(True); out=[]; rm=False; changed=False
+              for line in lines:
+                  if not rm and line.startswith(start): rm=True; changed=True; continue
+                  if rm and line.startswith(end): rm=False
+                  if not rm: out.append(line)
+              if rm: raise SystemExit(f'unclosed block {path}: {start}')
+              if changed: p.write_text(''.join(out),encoding='utf-8'); print('UPDATED BLOCK',path)
+
+          for rel in ['src/quantbot/h2h.py','src/quantbot/h2h_telemetry.py','tools/persist_h2h.py','tools/h2h_telemetry_health.py','.github/workflows/h2h-research.yml','tests/test_h2h.py','tests/test_h2h_engine_regression.py','tests/test_h2h_research_dataset.py']:
+              if (root/rel).exists(): subprocess.run(['git','rm','-f',rel],check=True)
+
+          p=root/'src/quantbot/config.py'; s=p.read_text(encoding='utf-8')
+          for pat in [r'^    h2h_telemetry_enabled: bool\n',r'^    min_h2h_matches: int\n    h2h_years: int\n    max_recent_h2h_days: int\n    min_h2h_rate: float\n',r'^            h2h_telemetry_enabled=_bool\("H2H_TELEMETRY_ENABLED", False\),\n',r'^            min_h2h_matches=_int\("MIN_H2H_MATCHES", 5\),\n            h2h_years=_int\("H2H_YEARS", 4\),\n            max_recent_h2h_days=_int\("MAX_RECENT_H2H_DAYS", 730\),\n            min_h2h_rate=_float\("MIN_H2H_RATE", 0.75\),\n',r'^            "MIN_H2H_RATE": self\.min_h2h_rate,\n',r'^        if self\.min_h2h_matches < 5:\n            raise ValueError\("MIN_H2H_MATCHES ne sme biti manji od 5"\)\n        if self\.h2h_years < 1 or self\.max_recent_h2h_days < 1:\n            raise ValueError\("H2H prozor i prag svežine moraju biti pozitivni"\)\n']:
+              s=re.sub(pat,'',s,flags=re.M)
+          p.write_text(s,encoding='utf-8')
+
+          remove_between('src/quantbot/api.py','    def head_to_head(','    def league_season_fixtures(')
+          remove_between('src/quantbot/types.py','class H2HStats:','class OddsQuote:')
+          edit('src/quantbot/types.py',lambda s:re.sub(r'^    h2h_rate: float\n    h2h_n: int\n    h2h_effective_n: float\n    h2h_history: tuple\[str, \.\.\.\]\n','',s,flags=re.M))
+          edit('src/quantbot/types.py',lambda s:re.sub(r'^    h2h_enabled: bool = False\n','',s,flags=re.M))
+          edit('src/quantbot/types.py',lambda s:re.sub(r'^            "h2h_enabled": self\.h2h_enabled,\n            "h2h_rate": round\(self\.h2h_rate, 6\),\n            "h2h_n": self\.h2h_n,\n            "h2h_effective_n": round\(self\.h2h_effective_n, 3\),\n            "h2h_history": list\(self\.h2h_history\),\n','',s,flags=re.M))
+
+          e=root/'src/quantbot/engine.py'; s=e.read_text(encoding='utf-8')
+          s=''.join(l for l in s.splitlines(True) if '.h2h' not in l)
+          s=re.sub(r'^        self\.h2h_snapshot_store = .*\n','',s,flags=re.M)
+          s=re.sub(r'^        h2h_rate,\n        h2h_n,\n        h2h_effective_n,\n','',s,flags=re.M)
+          s=re.sub(r'^            "h2h_[^"]+":.*\n','',s,flags=re.M)
+          e.write_text(s,encoding='utf-8')
+          remove_between('src/quantbot/engine.py','            h2h = None','            try:')
+          edit('src/quantbot/engine.py',lambda s:re.sub(r'^                        h2h_rates\[market\],\n                        h2h_n,\n                        h2h_effective_n,\n                        quote,\n                        now_local,\n                        h2h_snapshot_id=snapshot_id,\n                        h2h_available=bool\(snapshot\["h2h_available"\]\),\n                        h2h_status=h2h_status,\n                        h2h_error=h2h_error,\n                        rejection_reason=reason,\n','                        quote,\n                        now_local,\n                        rejection_reason=reason,\n',s,flags=re.M))
+          edit('src/quantbot/engine.py',lambda s:re.sub(r'^                        h2h_rate=h2h_rates\[market\],\n                        h2h_enabled=self\.settings\.h2h_telemetry_enabled,\n                        h2h_n=h2h_n,\n                        h2h_effective_n=h2h_effective_n,\n                        h2h_history=history,\n','',s,flags=re.M))
+          remove_between('src/quantbot/engine.py','        prediction_by_id = {','        signal_source =')
+          edit('src/quantbot/engine.py',lambda s:re.sub(r' f"h2h_telemetry=\{self\.settings\.h2h_telemetry_enabled\} "',' ',s))
+
+          edit('src/quantbot/watchlist.py',lambda s:re.sub(r'^        "h2h_[^\n]+\n','',s,flags=re.M))
+          edit('main.py',lambda s:re.sub(r'^        "h2h_telemetry_enabled": settings\.h2h_telemetry_enabled,\n','',s,flags=re.M))
+          edit('main.py',lambda s:re.sub(r'^                "h2h_[^\n]+\n','',s,flags=re.M))
+          edit('main.py',lambda s:s.replace('description="QuantBet H2H v2"','description="QuantBet Football"'))
+          edit('src/quantbot/reporting.py',lambda s:s.replace(' H2H telemetry is informational and does not alter the production decision while disabled.',''))
+          edit('src/quantbot/__init__.py',lambda s:s.replace('QuantBet H2H v2 package.','QuantBet Football package.'))
+
+          edit('backtest.py',lambda s:s.replace('from quantbot.h2h import build_h2h_stats_from_records, subtract_years\n',''))
+          edit('backtest.py',lambda s:s.replace('                >= subtract_years(reference_time, settings.training_seasons)\n','                >= reference_time - timedelta(days=365 * settings.training_seasons)\n'))
+          remove_between('backtest.py','                    pair = {record.home_id, record.away_id}','                    probabilities = model.market_probabilities')
+          edit('backtest.py',lambda s:re.sub(r'^                            "h2h_[^\n]+\n','',s,flags=re.M))
+          edit('backtest.py',lambda s:s.replace('                            not prediction["h2h_eligible"]\n                            or odd is None','                            odd is None'))
+
+          edit('.env.example',lambda s:re.sub(r'\nMIN_H2H_MATCHES=.*\nH2H_YEARS=.*\nMAX_RECENT_H2H_DAYS=.*\nMIN_H2H_RATE=.*','',s))
+          for p in (root/'.github/workflows').glob('*.yml'):
+              edit(p,lambda s:re.sub(r'^\s*H2H_TELEMETRY_ENABLED:.*\n','',s,flags=re.M))
+          remove_between('tests/test_engine_integration.py','    def head_to_head(','    def league_season_fixtures(')
+
+          # Do not touch historical ledger/data.
+          forbidden=[]
+          pats=[r'head_to_head',r'fixtures/headtohead',r'h2h_telemetry_enabled',r'quantbot\.h2h',r'h2h_rate',r'h2h_effective_n',r'h2h_history',r'h2h_snapshot_id',r'h2h_eligible']
+          for p in root.rglob('*'):
+              if not p.is_file() or '.git' in p.parts or 'data' in p.parts: continue
+              if p.suffix.lower() not in {'.py','.yml','.yaml','.toml','.env','.example','.html'}: continue
+              t=p.read_text(encoding='utf-8',errors='ignore')
+              if any(re.search(x,t,re.I) for x in pats): forbidden.append(str(p))
+          if forbidden: print('\n'.join(forbidden)); raise SystemExit(1)
+          subprocess.run(['git','config','user.name','github-actions[bot]'],check=True)
+          subprocess.run(['git','config','user.email','41898282+github-actions[bot]@users.noreply.github.com'],check=True)
+          subprocess.run(['python','-m','compileall','-q','src','main.py','backtest.py','tests'],check=True)
+          subprocess.run(['git','add','-A'],check=True)
+          subprocess.run(['git','commit','-m','chore: complete H2H production removal'],check=True)
+          subprocess.run(['git','push','origin','p1/h2h-removal-v2'],check=True)
+          PY
