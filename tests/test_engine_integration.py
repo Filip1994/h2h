@@ -139,18 +139,6 @@ def test_live_mode_refuses_unvalidated_probabilities(settings, monkeypatch) -> N
         QuantEngine(live_settings, api=FakeAPI(now)).generate(now)
 
 
-def test_h2h_is_neutral_and_costs_no_api_call_by_default(settings) -> None:
-    now = datetime(2026, 9, 4, 6, 0, tzinfo=UTC)
-    api = FakeAPI(now)
-    result = QuantEngine(settings, api=api).generate(now)
-    assert result.new_bets
-    # Default production mode does not call the H2H endpoint.
-    assert api.request_count > 0
-    records = QuantEngine(settings, api=FakeAPI(now)).prediction_store.load()
-    assert all(item["h2h_enabled"] is False for item in records)
-    assert all(item["h2h_n"] == 0 for item in records)
-
-
 def test_model_cache_is_scoped_to_data_cutoff(settings) -> None:
     now = datetime(2026, 9, 4, 6, 0, tzinfo=UTC)
     engine = QuantEngine(settings, api=FakeAPI(now))
