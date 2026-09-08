@@ -90,6 +90,7 @@ def _event_from_prediction(
     event_id = f"{prediction['id']}:{now.astimezone(UTC).strftime('%Y%m%d%H%M')}"
     return {
         "id": event_id,
+        "signal_id": event_id,
         "prediction_id": prediction["id"],
         "event_id": int(prediction["event_id"]),
         "market": prediction["market"],
@@ -108,6 +109,15 @@ def _event_from_prediction(
         "probability_edge": round(probability_edge, 6),
         "expected_value": round(expected_value, 6),
         "stake": round(float(linked_bet.get("stake") if linked_bet else stake), 2),
+        "h2h_enabled": prediction.get("h2h_enabled"),
+        "h2h_available": prediction.get("h2h_available"),
+        "h2h_rate": prediction.get("h2h_rate"),
+        "h2h_n": prediction.get("h2h_n"),
+        "h2h_effective_n": prediction.get("h2h_effective_n"),
+        "h2h_history": prediction.get("h2h_history", []),
+        "h2h_snapshot_id": prediction.get("h2h_snapshot_id"),
+        "h2h_status": prediction.get("h2h_status"),
+        "h2h_error": prediction.get("h2h_error"),
         "signal_source": "INTRADAY_ALERT",
         "signal_type": signal_type,
         "signal_sent_at": now.isoformat(),
