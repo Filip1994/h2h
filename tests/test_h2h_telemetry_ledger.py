@@ -1,11 +1,11 @@
 from datetime import UTC, datetime
 
+from test_engine_integration import FakeAPI
+
 from quantbot.api import APIError
 from quantbot.config import Settings
 from quantbot.engine import QuantEngine
 from quantbot.types import Market, MarketCandidate, OddsQuote
-
-from test_engine_integration import FakeAPI
 
 
 class ErrorH2HAPI(FakeAPI):
@@ -22,32 +22,32 @@ def _settings(root, monkeypatch, enabled: bool):
 def test_market_candidate_telemetry_state_is_configuration_not_h2h_count() -> None:
     now = datetime(2026, 9, 4, 6, 0, tzinfo=UTC)
     quote = OddsQuote(Market.OVER_25, 2.0, 1.8, 8, "Test Book", now)
-    base = dict(
-        fixture_id=1,
-        kickoff=now,
-        league_id=10,
-        league_name="Test League",
-        country="Testland",
-        home_id=1,
-        home_name="Home",
-        away_id=2,
-        away_name="Away",
-        market=Market.OVER_25,
-        model_probability=0.55,
-        calibrated_probability=0.54,
-        decision_probability=0.54,
-        h2h_rate=0.0,
-        h2h_n=0,
-        h2h_effective_n=0.0,
-        h2h_history=(),
-        quote=quote,
-        lambda_home=1.2,
-        lambda_away=1.0,
-        rho=0.0,
-        expected_value=0.08,
-        probability_edge=0.04,
-        calibration_status="UNCALIBRATED",
-    )
+    base = {
+        "fixture_id": 1,
+        "kickoff": now,
+        "league_id": 10,
+        "league_name": "Test League",
+        "country": "Testland",
+        "home_id": 1,
+        "home_name": "Home",
+        "away_id": 2,
+        "away_name": "Away",
+        "market": Market.OVER_25,
+        "model_probability": 0.55,
+        "calibrated_probability": 0.54,
+        "decision_probability": 0.54,
+        "h2h_rate": 0.0,
+        "h2h_n": 0,
+        "h2h_effective_n": 0.0,
+        "h2h_history": (),
+        "quote": quote,
+        "lambda_home": 1.2,
+        "lambda_away": 1.0,
+        "rho": 0.0,
+        "expected_value": 0.08,
+        "probability_edge": 0.04,
+        "calibration_status": "UNCALIBRATED",
+    }
 
     off = MarketCandidate(h2h_enabled=False, h2h_available=False, **base).to_bet(
         bet_id="1_OVER_2_5",
