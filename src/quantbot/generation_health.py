@@ -9,7 +9,11 @@ def _fixture_failure_counts(diagnostics: tuple[str, ...]) -> dict[str, int]:
     for diagnostic in diagnostics:
         if not diagnostic.startswith("fixture_"):
             continue
-        if "API " in diagnostic or "API greška" in diagnostic or "API mrežna" in diagnostic:
+        if (
+            "API " in diagnostic
+            or "API greška" in diagnostic
+            or "API mrežna" in diagnostic
+        ):
             counts["api"] += 1
         elif "Dixon" in diagnostic or "dovoljan trening" in diagnostic:
             counts["dixon_coles"] += 1
@@ -18,9 +22,7 @@ def _fixture_failure_counts(diagnostics: tuple[str, ...]) -> dict[str, int]:
     return counts
 
 
-def build_success_health(
-    generated_at: datetime, result: Any
-) -> dict[str, Any]:
+def build_success_health(generated_at: datetime, result: Any) -> dict[str, Any]:
     usage = dict(result.api_usage)
     fixture_failures = _fixture_failure_counts(result.diagnostics)
     degraded_reasons: list[str] = []
