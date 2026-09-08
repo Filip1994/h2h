@@ -3,8 +3,7 @@
   "paper_mode": true,
   "model_version": "dc-value-v2.1.0",
   "github_repository": "Filip1994/h2h",
-  "updated_at": "2026-09-08T19:10:55.668365+02:00",
-  "decision_timestamp": "2026-09-08T17:10:55.668365+00:00",
-  "data_cutoff": "2026-09-08T17:10:55.668365+00:00",
-  "h2h_telemetry_enabled": true
+  "updated_at": "2026-09-08T22:00:52.948386+02:00",
+  "decision_timestamp": "2026-09-08T20:00:52.948386+00:00",
+  "data_cutoff": "2026-09-08T20:00:52.948386+00:00"
 }

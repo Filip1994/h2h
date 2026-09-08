@@ -79,5 +79,41 @@
     "diagnostic_count": 53,
     "observation_only": true,
     "threshold_action": "NO_AUTOMATIC_BLOCKING"
+  },
+  {
+    "schema_version": 1,
+    "timestamp": "2026-09-08T20:00:52.948386+00:00",
+    "status": "HEALTHY",
+    "classification_reasons": [],
+    "fixture_failures": {
+      "api": 0,
+      "dixon_coles": 0,
+      "other": 0
+    },
+    "api": {
+      "request_count": 4,
+      "request_budget": 7500,
+      "working_budget": 7000,
+      "reserve": 500,
+      "remaining_working": 6996,
+      "cache_hits": 8,
+      "cache_misses": 4,
+      "cache_hit_rate": 0.666667,
+      "rate_limit_events": 0,
+      "http_errors": {},
+      "api_error_events": 0,
+      "network_error_events": 0,
+      "endpoint_requests": {
+        "fixtures": 1,
+        "odds": 3
+      },
+      "endpoint_cache_hits": {
+        "fixtures": 8
+      }
+    },
+    "new_bets": 0,
+    "diagnostic_count": 1,
+    "observation_only": true,
+    "threshold_action": "NO_AUTOMATIC_BLOCKING"
   }
 ]
