@@ -37,6 +37,7 @@ jobs:
           python-version: "3.12"
           cache: pip
       - run: pip install -r requirements.txt
+      - run: pip install -e .
       - run: python tools/persist_h2h.py
       - run: python tools/h2h_telemetry_health.py
       - name: Commit H2H research telemetry
