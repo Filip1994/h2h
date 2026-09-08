@@ -1,9 +1,6 @@
 from pathlib import Path
 
-
-WORKFLOW = (
-    Path(__file__).parents[1] / ".github" / "workflows" / "settlement-watchdog.yml"
-)
+WORKFLOW = Path(__file__).parents[1] / ".github" / "workflows" / "settlement-watchdog.yml"
 
 
 def test_watchdog_keeps_monitor_as_only_settlement_executor():
