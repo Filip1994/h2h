@@ -256,13 +256,6 @@ class APIFootballClient:
     def fixture(self, fixture_id: int) -> list[dict[str, Any]]:
         return self.get("fixtures", {"id": fixture_id}, ttl_seconds=300)
 
-    def head_to_head(self, home_id: int, away_id: int) -> list[dict[str, Any]]:
-        return self.get(
-            "fixtures/headtohead",
-            {"h2h": f"{home_id}-{away_id}"},
-            ttl_seconds=43_200,
-        )
-
     def league_season_fixtures(
         self, league_id: int, season: int
     ) -> list[dict[str, Any]]:

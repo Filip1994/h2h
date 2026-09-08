@@ -58,14 +58,6 @@ class MatchRecord:
 
 
 @dataclass(frozen=True, slots=True)
-class H2HStats:
-    matches: tuple[MatchRecord, ...]
-    weighted_rates: dict[Market, float]
-    effective_n: float
-    has_recent_match: bool
-
-
-@dataclass(frozen=True, slots=True)
 class OddsQuote:
     market: Market
     odd: float
@@ -104,10 +96,6 @@ class MarketCandidate:
     model_probability: float
     calibrated_probability: float
     decision_probability: float
-    h2h_rate: float
-    h2h_n: int
-    h2h_effective_n: float
-    h2h_history: tuple[str, ...]
     quote: OddsQuote
     lambda_home: float
     lambda_away: float
@@ -115,7 +103,6 @@ class MarketCandidate:
     expected_value: float
     probability_edge: float
     calibration_status: str
-    h2h_enabled: bool = False
 
     def to_bet(
         self,
@@ -160,11 +147,6 @@ class MarketCandidate:
             "decision_probability": round(self.decision_probability, 6),
             "probability_edge": round(self.probability_edge, 6),
             "expected_value": round(self.expected_value, 6),
-            "h2h_enabled": self.h2h_enabled,
-            "h2h_rate": round(self.h2h_rate, 6),
-            "h2h_n": self.h2h_n,
-            "h2h_effective_n": round(self.h2h_effective_n, 3),
-            "h2h_history": list(self.h2h_history),
             "lambda_home": round(self.lambda_home, 6),
             "lambda_away": round(self.lambda_away, 6),
             "rho": round(self.rho, 6),

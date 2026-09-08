@@ -51,13 +51,8 @@ class Settings:
     initial_bank: float
     paper_mode: bool
     allow_uncalibrated_live: bool
-    h2h_telemetry_enabled: bool
     min_odd: float
     max_market_overround: float
-    min_h2h_matches: int
-    h2h_years: int
-    max_recent_h2h_days: int
-    min_h2h_rate: float
     min_ev: float
     min_edge: float
     probability_haircut: float
@@ -132,13 +127,8 @@ class Settings:
             initial_bank=_float("INITIAL_BANK_RSD", 50_000.0),
             paper_mode=_bool("PAPER_MODE", True),
             allow_uncalibrated_live=_bool("ALLOW_UNCALIBRATED_LIVE", False),
-            h2h_telemetry_enabled=_bool("H2H_TELEMETRY_ENABLED", False),
             min_odd=_float("MIN_ODD", 1.45),
             max_market_overround=_float("MAX_MARKET_OVERROUND", 0.20),
-            min_h2h_matches=_int("MIN_H2H_MATCHES", 5),
-            h2h_years=_int("H2H_YEARS", 4),
-            max_recent_h2h_days=_int("MAX_RECENT_H2H_DAYS", 730),
-            min_h2h_rate=_float("MIN_H2H_RATE", 0.75),
             min_ev=_float("MIN_EV", 0.05),
             min_edge=_float("MIN_EDGE_PP", 0.03),
             probability_haircut=_float("PROBABILITY_HAIRCUT", 0.03),
@@ -170,7 +160,6 @@ class Settings:
 
     def validate(self) -> None:
         probabilities = {
-            "MIN_H2H_RATE": self.min_h2h_rate,
             "MIN_EV": self.min_ev,
             "MIN_EDGE_PP": self.min_edge,
             "PROBABILITY_HAIRCUT": self.probability_haircut,
@@ -190,10 +179,6 @@ class Settings:
                 raise ValueError(f"{name} mora biti između 0 i 1; dobijeno {value}")
         if self.min_odd <= 1.0:
             raise ValueError("MIN_ODD mora biti > 1.0")
-        if self.min_h2h_matches < 5:
-            raise ValueError("MIN_H2H_MATCHES ne sme biti manji od 5")
-        if self.h2h_years < 1 or self.max_recent_h2h_days < 1:
-            raise ValueError("H2H prozor i prag svežine moraju biti pozitivni")
         if self.drawdown_reduce_at >= self.drawdown_stop_at:
             raise ValueError("DRAWDOWN_REDUCE_AT mora biti manji od DRAWDOWN_STOP_AT")
         if self.api_request_budget < 1:

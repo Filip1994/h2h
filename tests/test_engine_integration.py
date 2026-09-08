@@ -60,22 +60,6 @@ class FakeAPI:
             )
         ]
 
-    def head_to_head(self, _home_id: int, _away_id: int) -> list[dict]:
-        self.request_count += 1
-        return [
-            api_fixture(
-                800 + index,
-                self.now - timedelta(days=120 * (index + 1)),
-                1 if index % 2 == 0 else 2,
-                2 if index % 2 == 0 else 1,
-                2,
-                1,
-                status="FT",
-                season=2025,
-            )
-            for index in range(5)
-        ]
-
     def league_season_fixtures(self, _league_id: int, season: int) -> list[dict]:
         self.request_count += 1
         matches: list[dict] = []
