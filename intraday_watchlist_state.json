@@ -114,5 +114,95 @@
   "1603352": {
     "last_scan_at": "2026-09-07T18:53:27.924836+00:00",
     "cadence_seconds": 1800
+  },
+  "1527733": {
+    "last_scan_at": "2026-09-08T08:36:58.971172+00:00",
+    "cadence_seconds": 3600
+  },
+  "1507058": {
+    "last_scan_at": "2026-09-08T08:36:58.971172+00:00",
+    "cadence_seconds": 900
+  },
+  "1507058_UNDER_2_5_dc-value-v2.1.0": {
+    "was_strong": false,
+    "last_seen_at": "2026-09-08T08:36:58.971172+00:00"
+  },
+  "1507059": {
+    "last_scan_at": "2026-09-08T08:36:58.971172+00:00",
+    "cadence_seconds": 900
+  },
+  "1638340": {
+    "last_scan_at": "2026-09-08T08:36:58.971172+00:00",
+    "cadence_seconds": 1800
+  },
+  "1638340_OVER_2_5_dc-value-v2.1.0": {
+    "was_strong": false,
+    "last_seen_at": "2026-09-08T08:36:58.971172+00:00"
+  },
+  "1638340_BTTS_YES_dc-value-v2.1.0": {
+    "was_strong": false,
+    "last_seen_at": "2026-09-08T08:36:58.971172+00:00"
+  },
+  "1605068": {
+    "last_scan_at": "2026-09-08T08:36:58.971172+00:00",
+    "cadence_seconds": 1800
+  },
+  "1527735": {
+    "last_scan_at": "2026-09-08T08:36:58.971172+00:00",
+    "cadence_seconds": 3600
+  },
+  "1600772": {
+    "last_scan_at": "2026-09-08T08:36:58.971172+00:00",
+    "cadence_seconds": 3600
+  },
+  "1627707": {
+    "last_scan_at": "2026-09-08T08:36:58.971172+00:00",
+    "cadence_seconds": 3600
+  },
+  "1627707_UNDER_2_5_dc-value-v2.1.0": {
+    "was_strong": false,
+    "last_seen_at": "2026-09-08T08:36:58.971172+00:00"
+  },
+  "1636638": {
+    "last_scan_at": "2026-09-08T08:36:58.971172+00:00",
+    "cadence_seconds": 3600
+  },
+  "1636638_UNDER_2_5_dc-value-v2.1.0": {
+    "was_strong": false,
+    "last_seen_at": "2026-09-08T08:36:58.971172+00:00"
+  },
+  "1636639": {
+    "last_scan_at": "2026-09-08T08:36:58.971172+00:00",
+    "cadence_seconds": 3600
+  },
+  "1636639_UNDER_2_5_dc-value-v2.1.0": {
+    "was_strong": false,
+    "last_seen_at": "2026-09-08T08:36:58.971172+00:00"
+  },
+  "1606538": {
+    "last_scan_at": "2026-09-08T08:36:58.971172+00:00",
+    "cadence_seconds": 3600
+  },
+  "1606538_UNDER_2_5_dc-value-v2.1.0": {
+    "was_strong": true,
+    "last_seen_at": "2026-09-08T08:36:58.971172+00:00",
+    "last_alert_ev": 0.1034172499999999,
+    "last_alert_edge": 0.07901289473684203
+  },
+  "1638072": {
+    "last_scan_at": "2026-09-08T08:36:58.971172+00:00",
+    "cadence_seconds": 3600
+  },
+  "1638073": {
+    "last_scan_at": "2026-09-08T08:36:58.971172+00:00",
+    "cadence_seconds": 3600
+  },
+  "1513625": {
+    "last_scan_at": "2026-09-08T08:36:58.971172+00:00",
+    "cadence_seconds": 3600
+  },
+  "1552155": {
+    "last_scan_at": "2026-09-08T08:36:58.971172+00:00",
+    "cadence_seconds": 3600
   }
 }
