@@ -26,6 +26,7 @@ from quantbot.closing import (
 )
 from quantbot.config import Settings
 from quantbot.engine import QuantEngine
+from quantbot.generation_health import build_failure_health, build_success_health
 from quantbot.monitor import LedgerMonitor, skip_bet
 from quantbot.reporting import build_email, send_email
 from quantbot.risk import portfolio_analytics
@@ -69,6 +70,21 @@ def write_api_usage(settings: Settings, updated_at: datetime, result) -> None:
             history = []
     history.append(usage)
     atomic_write_json(settings.api_usage_history_file, history[-90:])
+
+
+def write_generation_health(settings: Settings, payload: dict) -> None:
+    atomic_write_json(ROOT / "generation_health.json", payload)
+    history_path = ROOT / "generation_health_history.json"
+    history: list[dict] = []
+    if history_path.exists():
+        try:
+            loaded = json.loads(history_path.read_text(encoding="utf-8"))
+            if isinstance(loaded, list):
+                history = loaded
+        except (OSError, TypeError, ValueError, json.JSONDecodeError):
+            history = []
+    history.append(payload)
+    atomic_write_json(history_path, history[-90:])
 
 
 def persist_intraday_strong_signals(
@@ -141,9 +157,23 @@ def persist_intraday_strong_signals(
 def run_generate(*, deliver_email: bool = True) -> int:
     settings = Settings.from_env(ROOT)
     generated_at = datetime.now(settings.timezone)
-    result = QuantEngine(settings).generate(generated_at)
+    engine = QuantEngine(settings)
+    try:
+        result = engine.generate(generated_at)
+    except Exception as exc:
+        write_generation_health(
+            settings,
+            build_failure_health(
+                generated_at,
+                engine.api.usage_snapshot(),
+                exc,
+            ),
+        )
+        raise
+
     write_ledger_meta(settings, generated_at)
     write_api_usage(settings, generated_at, result)
+    write_generation_health(settings, build_success_health(generated_at, result))
 
     if settings.intraday_mode:
         strong = tuple(
@@ -166,6 +196,7 @@ def run_generate(*, deliver_email: bool = True) -> int:
     for line in result.diagnostics:
         print(line)
     print(f"API usage: {json.dumps(result.api_usage, ensure_ascii=False)}")
+    print(f"Generation health: {json.dumps(build_success_health(generated_at, result), ensure_ascii=False)}")
     print(f"✅ Sačuvano novih tipova: {len(result.new_bets)}")
     return 0
 
