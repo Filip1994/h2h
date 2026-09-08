@@ -50,9 +50,10 @@ def is_allowed_match(
     normalized_country = normalize_text(country)
     if normalized_country in {normalize_text(item) for item in excluded_countries}:
         return False
-    if normalized_country == "england" and normalize_text(
-        league_name
-    ) not in _ENGLAND_TOP_FOUR_LEAGUES:
+    if (
+        normalized_country == "england"
+        and normalize_text(league_name) not in _ENGLAND_TOP_FOUR_LEAGUES
+    ):
         return False
     if contains_excluded_keyword(league_name, home_name, away_name):
         return False
