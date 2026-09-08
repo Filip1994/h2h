@@ -17,7 +17,9 @@ def test_does_not_treat_ii_inside_word_as_reserve() -> None:
 
 
 def test_optional_country_exclusion_is_exact() -> None:
-    assert not is_allowed_match("Brazil", "Serie A", "Flamengo", "Bahia", ("brazil",))
+    assert not is_allowed_match(
+        "Brazil", "Serie A", "Flamengo", "Bahia", ("brazil",)
+    )
     assert is_allowed_match(
         "Brazilian State", "Serie A", "Flamengo", "Bahia", ("brazil",)
     )
