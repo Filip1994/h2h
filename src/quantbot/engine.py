@@ -24,6 +24,7 @@ class GenerationResult:
     diagnostics: tuple[str, ...]
     api_requests: int
     api_usage: dict[str, Any]
+    telemetry: dict[str, Any]
 
 
 class QuantEngine:
@@ -166,7 +167,21 @@ class QuantEngine:
         diagnostics: list[str] = []
         candidates: list[MarketCandidate] = []
         prediction_records: list[dict[str, Any]] = []
+        telemetry: dict[str, Any] = {
+            "fixtures_discovered": 0,
+            "fixtures_parse_failures": 0,
+            "fixtures_eligible": 0,
+            "fixtures_modelled": 0,
+            "predictions_generated": 0,
+            "candidates_evaluated": 0,
+            "candidates_qualified": 0,
+            "selections_produced": 0,
+            "training_sample_insufficiency": 0,
+            "fit_failures": 0,
+            "fixture_failures": {"api": 0, "dixon_coles": 0, "other": 0},
+        }
         raw_fixtures = self.api.fixtures_by_date(now_local.date().isoformat())
+        telemetry["fixtures_discovered"] = len(raw_fixtures)
         upper_hours = (
             self.settings.intraday_lookahead_hours
             if self.settings.intraday_mode
@@ -176,6 +191,8 @@ class QuantEngine:
             try:
                 fields = current_fixture_fields(raw_fixture)
             except (TypeError, ValueError) as exc:
+                telemetry["fixtures_parse_failures"] += 1
+                telemetry["fixture_failures"]["other"] += 1
                 diagnostics.append(f"fixture_parse: {exc}")
                 continue
             fixture_id = int(fields["fixture_id"])
@@ -198,6 +215,7 @@ class QuantEngine:
                 self.settings.excluded_countries,
             ):
                 continue
+            telemetry["fixtures_eligible"] += 1
 
             try:
                 model = self._model_for_fixture(fields, data_cutoff=decision_timestamp)
@@ -215,14 +233,26 @@ class QuantEngine:
                     allow_any_bookmaker=self.settings.allow_any_bookmaker,
                     captured_at=decision_timestamp,
                 )
+                telemetry["fixtures_modelled"] += 1
             except APIBudgetExceeded:
                 diagnostics.append("API budžet dostignut; skeniranje zaustavljeno")
                 break
             except (APIError, DixonColesFitError, ArithmeticError, ValueError) as exc:
+                if isinstance(exc, APIError):
+                    telemetry["fixture_failures"]["api"] += 1
+                elif isinstance(exc, DixonColesFitError):
+                    telemetry["fixture_failures"]["dixon_coles"] += 1
+                    if "dovoljan trening" in str(exc):
+                        telemetry["training_sample_insufficiency"] += 1
+                    else:
+                        telemetry["fit_failures"] += 1
+                else:
+                    telemetry["fixture_failures"]["other"] += 1
                 diagnostics.append(f"fixture_{fixture_id}: {exc}")
                 continue
             fixture_candidates: list[MarketCandidate] = []
             for market in Market:
+                telemetry["candidates_evaluated"] += 1
                 model_probability = model_probabilities[market]
                 calibrated_probability, calibration_status = self.calibrator.apply(
                     market, model_probability
@@ -259,6 +289,7 @@ class QuantEngine:
                         rejection_reason=reason,
                     )
                 )
+                telemetry["predictions_generated"] += 1
                 if (
                     reason
                     or quote is None
@@ -291,6 +322,7 @@ class QuantEngine:
                     )
                 )
             if fixture_candidates:
+                telemetry["candidates_qualified"] += len(fixture_candidates)
                 candidates.append(
                     max(
                         fixture_candidates,
@@ -336,6 +368,7 @@ class QuantEngine:
             bet["signal_source"] = signal_source
             bet["signal_sent_at"] = now_local.isoformat()
         appended = self.bet_store.append_unique_fixtures(proposed_bets)
+        telemetry["selections_produced"] = len(appended)
         final_bets = self.bet_store.load()
         analytics = portfolio_analytics(
             final_bets, self.settings.initial_bank, today=now_local.date().isoformat()
@@ -350,4 +383,5 @@ class QuantEngine:
             diagnostics=tuple(diagnostics),
             api_requests=self.api.request_count,
             api_usage=self.api.usage_snapshot(),
+            telemetry=telemetry,
         )
