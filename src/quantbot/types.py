@@ -130,6 +130,7 @@ class MarketCandidate:
     ) -> dict[str, Any]:
         return {
             "id": bet_id,
+            "prediction_id": f"{self.fixture_id}_{self.market.value}_{model_version}",
             "type": "DC_VALUE",
             "mode": mode,
             "event_id": self.fixture_id,
