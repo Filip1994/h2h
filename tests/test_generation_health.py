@@ -84,7 +84,7 @@ def test_clean_generation_is_healthy_with_pipeline_counts() -> None:
     assert health["pipeline"]["selections_produced"] == 1
 
 
-def test_legacy_candidate_counter_does_not_override_canonical_candidate_count() -> None:
+def test_missing_canonical_candidate_counter_is_not_reconstructed_from_market_count() -> None:
     result = _result(
         telemetry={
             "fixtures_discovered": 3,
@@ -96,7 +96,7 @@ def test_legacy_candidate_counter_does_not_override_canonical_candidate_count() 
         },
     )
     health = build_success_health(datetime.now(UTC), result)
-    assert health["funnel"]["candidates"] == 5
+    assert health["funnel"]["candidates"] == 0
 
 
 def test_budget_exhaustion_is_degraded_and_not_a_rpm_threshold() -> None:
