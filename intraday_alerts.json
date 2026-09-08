@@ -121,11 +121,14 @@
     "signal_source": "INTRADAY_ALERT",
     "signal_sent_at": "2026-09-07T20:53:27.924836+02:00",
     "linked_bet_id": null,
-    "status": "PENDING",
-    "profit": 0.0,
+    "status": "WIN",
+    "profit": 335.0,
     "closing_5m_odd": null,
     "closing_5m_opposite_odd": null,
     "closing_5m_market_probability_devig": null,
-    "closing_5m_odds_captured_at": null
+    "closing_5m_odds_captured_at": null,
+    "result": "1:0",
+    "settled_at": "2026-09-08T00:39:45.565571+00:00",
+    "settlement_type": "COUNTERFACTUAL_ALERT"
   }
 ]
