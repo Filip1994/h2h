@@ -1,17 +1,21 @@
 {
-  "request_count": 1,
+  "request_count": 446,
   "request_budget": 7500,
   "working_budget": 7000,
   "reserve": 500,
-  "remaining_working": 6999,
-  "cache_hits": 0,
-  "cache_misses": 1,
-  "cache_hit_rate": 0.0,
+  "remaining_working": 6554,
+  "cache_hits": 4,
+  "cache_misses": 446,
+  "cache_hit_rate": 0.008889,
   "endpoint_requests": {
-    "fixtures": 1
+    "fixtures": 201,
+    "fixtures/headtohead": 167,
+    "odds": 78
   },
-  "endpoint_cache_hits": {},
-  "timestamp": "2026-09-07T21:53:16.685961+00:00",
-  "date": "2026-09-07",
-  "new_bets": 0
+  "endpoint_cache_hits": {
+    "fixtures": 4
+  },
+  "timestamp": "2026-09-08T00:45:18.177343+00:00",
+  "date": "2026-09-08",
+  "new_bets": 3
 }
