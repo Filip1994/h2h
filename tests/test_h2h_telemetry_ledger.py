@@ -1,6 +1,7 @@
 from datetime import UTC, datetime
 
 from quantbot.api import APIError
+from quantbot.config import Settings
 from quantbot.engine import QuantEngine
 from quantbot.types import Market, MarketCandidate, OddsQuote
 
@@ -15,7 +16,7 @@ class ErrorH2HAPI(FakeAPI):
 
 def _settings(root, monkeypatch, enabled: bool):
     monkeypatch.setenv("H2H_TELEMETRY_ENABLED", "true" if enabled else "false")
-    return __import__("quantbot.config", fromlist=["Settings"]).Settings.from_env(root)
+    return Settings.from_env(root)
 
 
 def test_market_candidate_telemetry_state_is_configuration_not_h2h_count() -> None:
@@ -49,14 +50,22 @@ def test_market_candidate_telemetry_state_is_configuration_not_h2h_count() -> No
     )
 
     off = MarketCandidate(h2h_enabled=False, h2h_available=False, **base).to_bet(
-        bet_id="1_OVER_2_5", stake=10, mode="PAPER", created_at=now,
-        model_version="v2", xi=0.1,
+        bet_id="1_OVER_2_5",
+        stake=10,
+        mode="PAPER",
+        created_at=now,
+        model_version="v2",
+        xi=0.1,
     )
     on_no_history = MarketCandidate(
         h2h_enabled=True, h2h_available=False, **base
     ).to_bet(
-        bet_id="1_OVER_2_5", stake=10, mode="PAPER", created_at=now,
-        model_version="v2", xi=0.1,
+        bet_id="1_OVER_2_5",
+        stake=10,
+        mode="PAPER",
+        created_at=now,
+        model_version="v2",
+        xi=0.1,
     )
     assert off["h2h_enabled"] is False
     assert off["h2h_available"] is False
@@ -117,10 +126,14 @@ def test_h2h_on_off_does_not_change_betting_decision(tmp_path, monkeypatch) -> N
     monkeypatch.setenv("MIN_EV", "0")
 
     settings_off = _settings(off_root, monkeypatch, False)
-    settings_on = _settings(on_root, monkeypatch, True)
     result_off = QuantEngine(settings_off, api=FakeAPI(now)).generate(now)
+    settings_on = _settings(on_root, monkeypatch, True)
     result_on = QuantEngine(settings_on, api=FakeAPI(now)).generate(now)
     assert len(result_off.new_bets) == len(result_on.new_bets) == 1
+    assert result_off.new_bets[0]["h2h_enabled"] is False
+    assert result_off.new_bets[0]["h2h_available"] is False
+    assert result_on.new_bets[0]["h2h_enabled"] is True
+    assert result_on.new_bets[0]["h2h_available"] is True
 
     decision_fields = (
         "event_id",
