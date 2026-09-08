@@ -17,9 +17,7 @@ def test_does_not_treat_ii_inside_word_as_reserve() -> None:
 
 
 def test_optional_country_exclusion_is_exact() -> None:
-    assert not is_allowed_match(
-        "Brazil", "Serie A", "Flamengo", "Bahia", ("brazil",)
-    )
+    assert not is_allowed_match("Brazil", "Serie A", "Flamengo", "Bahia", ("brazil",))
     assert is_allowed_match(
         "Brazilian State", "Serie A", "Flamengo", "Bahia", ("brazil",)
     )
@@ -28,12 +26,6 @@ def test_optional_country_exclusion_is_exact() -> None:
 def test_england_allows_only_top_four_leagues() -> None:
     for league in ("Premier League", "Championship", "League One", "League Two"):
         assert is_allowed_match("England", league, "Team A", "Team B")
-    assert not is_allowed_match(
-        "England", "National League", "Team A", "Team B"
-    )
-    assert not is_allowed_match(
-        "England", "National League North", "Team A", "Team B"
-    )
-    assert not is_allowed_match(
-        "England", "National League South", "Team A", "Team B"
-    )
+    assert not is_allowed_match("England", "National League", "Team A", "Team B")
+    assert not is_allowed_match("England", "National League North", "Team A", "Team B")
+    assert not is_allowed_match("England", "National League South", "Team A", "Team B")
