@@ -22,7 +22,6 @@ jobs:
       GMAIL_APP_PASS: ${{ secrets.GMAIL_APP_PASS }}
       EMAIL_TO: ${{ secrets.EMAIL_TO }}
       PAPER_MODE: ${{ vars.PAPER_MODE || 'true' }}
-      H2H_TELEMETRY_ENABLED: ${{ vars.H2H_TELEMETRY_ENABLED || 'false' }}
       API_REQUEST_BUDGET: ${{ vars.API_REQUEST_BUDGET || '7500' }}
       API_BUDGET_RESERVE: ${{ vars.API_BUDGET_RESERVE || '500' }}
       INTRADAY_LOOKAHEAD_HOURS: "6"

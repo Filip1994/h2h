@@ -22,7 +22,6 @@ from quantbot import MODEL_VERSION
 from quantbot.calibration import refit_calibration
 from quantbot.config import Settings
 from quantbot.dixon_coles import DixonColesFitError, DixonColesModel
-from quantbot.h2h import build_h2h_stats_from_records, subtract_years
 from quantbot.monitor import market_outcome
 from quantbot.parsing import parse_datetime
 from quantbot.types import Market, MatchRecord
@@ -217,7 +216,7 @@ def run_backtest(
                 record
                 for record in history
                 if record.date
-                >= subtract_years(reference_time, settings.training_seasons)
+                >= reference_time - timedelta(days=365 * settings.training_seasons)
             ]
             needs_refit = (
                 model is None
@@ -256,17 +255,6 @@ def run_backtest(
                         or counts[record.away_id] < settings.min_team_matches
                     ):
                         continue
-                    pair = {record.home_id, record.away_id}
-                    prior_h2h = [
-                        past
-                        for past in rolling_history
-                        if {past.home_id, past.away_id} == pair
-                    ]
-                    h2h = build_h2h_stats_from_records(
-                        prior_h2h, now=record.date, settings=settings
-                    )
-                    if h2h is None:
-                        continue
                     probabilities = model.market_probabilities(
                         record.home_id, record.away_id, settings.max_score_goals
                     )
@@ -294,11 +282,6 @@ def run_backtest(
                             "model_probability": round(probability, 8),
                             "calibrated_probability": round(probability, 8),
                             "calibration_status": "WALK_FORWARD_RAW",
-                            "h2h_rate": round(h2h.weighted_rates[market], 8),
-                            "h2h_n": len(h2h.matches),
-                            "h2h_effective_n": round(h2h.effective_n, 4),
-                            "h2h_eligible": h2h.weighted_rates[market]
-                            >= settings.min_h2h_rate,
                             "odd": odd,
                             "opposite_odd": opposite_odd,
                             "bookmaker_id": raw_row.get("bookmaker_id") or None,
@@ -311,8 +294,7 @@ def run_backtest(
                         predictions.append(prediction)
 
                         if (
-                            not prediction["h2h_eligible"]
-                            or odd is None
+                            odd is None
                             or opposite_odd is None
                             or odd < settings.min_odd
                         ):

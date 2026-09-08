@@ -43,7 +43,6 @@ def write_ledger_meta(settings: Settings, updated_at: datetime) -> None:
         "updated_at": updated_at.isoformat(),
         "decision_timestamp": updated_at.astimezone(UTC).isoformat(),
         "data_cutoff": updated_at.astimezone(UTC).isoformat(),
-        "h2h_telemetry_enabled": settings.h2h_telemetry_enabled,
     }
     atomic_write_json(ROOT / "ledger_meta.json", payload)
 
@@ -136,15 +135,6 @@ def persist_intraday_strong_signals(
                 "probability_edge": bet.get("probability_edge"),
                 "expected_value": bet.get("expected_value"),
                 "stake": bet.get("stake"),
-                "h2h_enabled": bet.get("h2h_enabled"),
-                "h2h_available": bet.get("h2h_available"),
-                "h2h_rate": bet.get("h2h_rate"),
-                "h2h_n": bet.get("h2h_n"),
-                "h2h_effective_n": bet.get("h2h_effective_n"),
-                "h2h_history": bet.get("h2h_history", []),
-                "h2h_snapshot_id": bet.get("h2h_snapshot_id"),
-                "h2h_status": bet.get("h2h_status"),
-                "h2h_error": bet.get("h2h_error"),
                 "signal_source": "INTRADAY_ALERT",
                 "signal_sent_at": timestamp,
                 "linked_bet_id": bet_id,
@@ -332,7 +322,7 @@ def run_analytics() -> int:
 
 
 def parser() -> argparse.ArgumentParser:
-    cli = argparse.ArgumentParser(description="QuantBet H2H v2")
+    cli = argparse.ArgumentParser(description="QuantBet Football")
     subcommands = cli.add_subparsers(dest="command", required=True)
     generate = subcommands.add_parser(
         "generate", help="Generiši dnevni ili intraday bilten"
