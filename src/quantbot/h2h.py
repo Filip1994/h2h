@@ -28,15 +28,11 @@ def _market_won(record: MatchRecord, market: Market) -> bool:
     raise ValueError(f"Nepoznat market: {market}")
 
 
-def build_h2h_stats(
-    raw_matches: list[dict[str, Any]],
-    *,
-    now: datetime,
-    settings: Settings,
-) -> H2HStats | None:
+def _filtered_matches(
+    raw_matches: list[dict[str, Any]], *, now: datetime, settings: Settings
+) -> list[MatchRecord]:
     cutoff = subtract_years(now, settings.h2h_years)
     matches: list[MatchRecord] = []
-
     for raw in raw_matches:
         try:
             record = match_record_from_api(raw, require_ft=True)
@@ -53,15 +49,58 @@ def build_h2h_stats(
         ):
             continue
         matches.append(record)
+    return sorted(matches, key=lambda item: item.date)
 
-    return build_h2h_stats_from_records(matches, now=now, settings=settings)
 
-
-def build_h2h_stats_from_records(
-    records: list[MatchRecord],
+def build_h2h_stats(
+    raw_matches: list[dict[str, Any]],
     *,
     now: datetime,
     settings: Settings,
+) -> H2HStats | None:
+    stats, _ = build_h2h_stats_detailed(raw_matches, now=now, settings=settings)
+    return stats
+
+
+def build_h2h_stats_detailed(
+    raw_matches: list[dict[str, Any]],
+    *,
+    now: datetime,
+    settings: Settings,
+) -> tuple[H2HStats | None, str]:
+    matches = _filtered_matches(raw_matches, now=now, settings=settings)
+    if len(matches) < settings.min_h2h_matches:
+        return None, "INSUFFICIENT_HISTORY"
+    recent_cutoff = now - timedelta(days=settings.max_recent_h2h_days)
+    has_recent = any(record.date >= recent_cutoff for record in matches)
+    if not has_recent:
+        return None, "NO_RECENT_HISTORY"
+    weights = [
+        math.exp(
+            -settings.dc_xi * max(0.0, (now - record.date).total_seconds() / 86_400.0)
+        )
+        for record in matches
+    ]
+    total_weight = sum(weights)
+    if total_weight <= 0.0:
+        return None, "INSUFFICIENT_HISTORY"
+    effective_n = (total_weight * total_weight) / sum(
+        weight * weight for weight in weights
+    )
+    rates = {
+        market: sum(
+            weight
+            for record, weight in zip(matches, weights, strict=True)
+            if _market_won(record, market)
+        )
+        / total_weight
+        for market in Market
+    }
+    return H2HStats(tuple(matches), rates, effective_n, has_recent), "AVAILABLE"
+
+
+def build_h2h_stats_from_records(
+    records: list[MatchRecord], *, now: datetime, settings: Settings
 ) -> H2HStats | None:
     cutoff = subtract_years(now, settings.h2h_years)
     recent_cutoff = now - timedelta(days=settings.max_recent_h2h_days)
@@ -71,11 +110,9 @@ def build_h2h_stats_from_records(
     )
     if len(matches) < settings.min_h2h_matches:
         return None
-
     has_recent = any(record.date >= recent_cutoff for record in matches)
     if not has_recent:
         return None
-
     weights = [
         math.exp(
             -settings.dc_xi * max(0.0, (now - record.date).total_seconds() / 86_400.0)
@@ -88,7 +125,6 @@ def build_h2h_stats_from_records(
     effective_n = (total_weight * total_weight) / sum(
         weight * weight for weight in weights
     )
-
     rates = {
         market: sum(
             weight
@@ -98,12 +134,7 @@ def build_h2h_stats_from_records(
         / total_weight
         for market in Market
     }
-    return H2HStats(
-        matches=tuple(matches),
-        weighted_rates=rates,
-        effective_n=effective_n,
-        has_recent_match=has_recent,
-    )
+    return H2HStats(tuple(matches), rates, effective_n, has_recent)
 
 
 def format_recent_history(stats: H2HStats, limit: int = 5) -> tuple[str, ...]:
