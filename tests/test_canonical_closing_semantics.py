@@ -80,9 +80,7 @@ def test_case_a_missing_closing_does_not_promote_t5(tmp_path, monkeypatch):
     assert [s["snapshot_type"] for s in snapshots] == ["ENTRY", "T5"]
 
 
-def test_case_b_real_closing_is_persisted_and_t5_stays_t5(
-    tmp_path, monkeypatch
-):
+def test_case_b_real_closing_is_persisted_and_t5_stays_t5(tmp_path, monkeypatch):
     import tools.persist_clv as module
 
     snap = tmp_path / "odds_snapshots.jsonl"
@@ -122,9 +120,7 @@ def test_case_b_real_closing_is_persisted_and_t5_stays_t5(
                     "closing_market_probability_devig": (
                         1 / 1.90 / (1 / 1.90 + 1 / 1.80)
                     ),
-                    "closing_odds_captured_at": (
-                        "2026-09-08T09:59:30+00:00"
-                    ),
+                    "closing_odds_captured_at": "2026-09-08T09:59:30+00:00",
                 }
             ]
         )
@@ -134,9 +130,7 @@ def test_case_b_real_closing_is_persisted_and_t5_stays_t5(
 
     bet = json.loads((tmp_path / "bets.json").read_text())[0]
     snapshots = _read_snapshots(snap)
-    closing_rows = [
-        s for s in snapshots if s["snapshot_type"] == "CLOSING"
-    ]
+    closing_rows = [s for s in snapshots if s["snapshot_type"] == "CLOSING"]
 
     assert len(closing_rows) == 1
     assert closing_rows[0]["odd"] == 1.9
