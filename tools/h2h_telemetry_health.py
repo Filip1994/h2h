@@ -27,7 +27,9 @@ def main() -> int:
                 snapshots.append(item)
     selected = [p for p in predictions if p.get("selected") is True]
     signals = [
-        a for a in alerts if a.get("signal_type") in {"NEW_OPPORTUNITY", "SIGNAL_UPDATE"}
+        a
+        for a in alerts
+        if a.get("signal_type") in {"NEW_OPPORTUNITY", "SIGNAL_UPDATE"}
     ]
     linked_predictions = [p for p in predictions if p.get("h2h_snapshot_id")]
     available = [p for p in predictions if p.get("h2h_available") is True]

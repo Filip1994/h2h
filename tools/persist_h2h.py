@@ -30,7 +30,9 @@ def main() -> int:
     predictions = load_list(settings.predictions_file)
     alerts_path = settings.root / "intraday_alerts.json"
     alerts = load_list(alerts_path)
-    by_prediction = {str(item.get("id")): item for item in predictions if item.get("id")}
+    by_prediction = {
+        str(item.get("id")): item for item in predictions if item.get("id")
+    }
 
     alert_changed = False
     signal_count = 0
