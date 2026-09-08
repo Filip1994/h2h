@@ -5,13 +5,14 @@ from datetime import UTC, datetime
 
 from test_engine_integration import FakeAPI
 
+from quantbot.config import Settings
 from quantbot.engine import QuantEngine
 
 
-def test_h2h_telemetry_on_off_has_identical_decisions(settings) -> None:
+def test_h2h_telemetry_on_off_has_identical_decisions(settings, tmp_path) -> None:
     now = datetime(2026, 9, 4, 6, 0, tzinfo=UTC)
-    off = replace(settings, h2h_telemetry_enabled=False)
-    on = replace(settings, h2h_telemetry_enabled=True)
+    off = replace(Settings.from_env(tmp_path / "off"), h2h_telemetry_enabled=False)
+    on = replace(Settings.from_env(tmp_path / "on"), h2h_telemetry_enabled=True)
 
     off_engine = QuantEngine(off, api=FakeAPI(now))
     on_engine = QuantEngine(on, api=FakeAPI(now))
