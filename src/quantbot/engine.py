@@ -106,9 +106,12 @@ class QuantEngine:
         model_probability,
         calibrated_probability,
         calibration_status,
+        h2h_enabled,
+        h2h_available,
         h2h_rate,
         h2h_n,
         h2h_effective_n,
+        h2h_history,
         quote,
         created_at,
         *,
@@ -131,10 +134,12 @@ class QuantEngine:
             "model_probability": round(model_probability, 6),
             "calibrated_probability": round(calibrated_probability, 6),
             "calibration_status": calibration_status,
-            "h2h_enabled": self.settings.h2h_telemetry_enabled,
+            "h2h_enabled": h2h_enabled,
+            "h2h_available": h2h_available,
             "h2h_rate": round(h2h_rate, 6),
             "h2h_n": h2h_n,
             "h2h_effective_n": round(h2h_effective_n, 3),
+            "h2h_history": list(h2h_history),
             "h2h_eligible": (h2h_rate >= self.settings.min_h2h_rate if h2h_n else None),
             "odd": round(quote.odd, 4) if quote else None,
             "opposite_odd": round(quote.opposite_odd, 4) if quote else None,
@@ -208,7 +213,8 @@ class QuantEngine:
             ):
                 continue
             h2h = None
-            if self.settings.h2h_telemetry_enabled:
+            h2h_enabled = self.settings.h2h_telemetry_enabled
+            if h2h_enabled:
                 try:
                     h2h = build_h2h_stats(
                         self.api.head_to_head(fields["home_id"], fields["away_id"]),
@@ -217,6 +223,7 @@ class QuantEngine:
                     )
                 except (APIError, ValueError, TypeError) as exc:
                     diagnostics.append(f"fixture_{fixture_id}_h2h: {exc}")
+            h2h_available = bool(h2h and h2h.matches)
             h2h_rates = (
                 h2h.weighted_rates if h2h else {market: 0.0 for market in Market}
             )
@@ -278,9 +285,12 @@ class QuantEngine:
                         model_probability,
                         calibrated_probability,
                         calibration_status,
+                        h2h_enabled,
+                        h2h_available,
                         h2h_rates[market],
                         h2h_n,
                         h2h_effective_n,
+                        history,
                         quote,
                         now_local,
                         rejection_reason=reason,
@@ -308,6 +318,8 @@ class QuantEngine:
                         model_probability=model_probability,
                         calibrated_probability=calibrated_probability,
                         decision_probability=decision_probability,
+                        h2h_enabled=h2h_enabled,
+                        h2h_available=h2h_available,
                         h2h_rate=h2h_rates[market],
                         h2h_n=h2h_n,
                         h2h_effective_n=h2h_effective_n,
