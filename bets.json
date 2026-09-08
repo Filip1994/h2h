@@ -787,6 +787,8 @@
     "result": "0:1",
     "settled_at": "2026-09-08T17:48:54.766414+00:00",
     "clv_odds_pct": 0.088235,
-    "clv_probability_pp": 0.039474
+    "clv_probability_pp": 0.039474,
+    "closing_snapshot_id": "c85afeb26894505071f901a739989c4bf0115ffeb64c9004d487a542b622854b",
+    "clv_status": "COMPUTABLE"
   }
 ]
