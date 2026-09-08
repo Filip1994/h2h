@@ -659,7 +659,10 @@
     "status": "PENDING",
     "profit": 0.0,
     "signal_source": "DAILY_BULLETIN",
-    "signal_sent_at": "2026-09-08T02:45:18.177343+02:00"
+    "signal_sent_at": "2026-09-08T02:45:18.177343+02:00",
+    "prediction_id": "1587799_UNDER_2_5_dc-value-v2.1.0",
+    "signal_id": "1587799_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "19633ce775e9bf877d095d231429660e3114ef5e039b614e1e67600c9d8176bc"
   },
   {
     "id": "1588347_UNDER_2_5",
@@ -707,7 +710,10 @@
     "status": "PENDING",
     "profit": 0.0,
     "signal_source": "DAILY_BULLETIN",
-    "signal_sent_at": "2026-09-08T02:45:18.177343+02:00"
+    "signal_sent_at": "2026-09-08T02:45:18.177343+02:00",
+    "prediction_id": "1588347_UNDER_2_5_dc-value-v2.1.0",
+    "signal_id": "1588347_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "461679defb484cad505508265dc2e204f4335994341871585f098e673625a1c7"
   },
   {
     "id": "1603995_UNDER_2_5",
@@ -755,6 +761,9 @@
     "status": "PENDING",
     "profit": 0.0,
     "signal_source": "DAILY_BULLETIN",
-    "signal_sent_at": "2026-09-08T02:45:18.177343+02:00"
+    "signal_sent_at": "2026-09-08T02:45:18.177343+02:00",
+    "prediction_id": "1603995_UNDER_2_5_dc-value-v2.1.0",
+    "signal_id": "1603995_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "e47ea93fe48b3f4cf99cd8d11ae86669b2f49708d22ad30afff89d9077359508"
   }
 ]
