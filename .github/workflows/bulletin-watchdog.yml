@@ -33,20 +33,23 @@ jobs:
         run: echo "Daily bulletin HEALTHY; no recovery required."
       - name: Trigger daily bulletin recovery
         if: steps.health.outcome == 'failure'
+        id: recovery-trigger
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           echo "Daily bulletin missing; triggering existing daily.yml recovery path."
+          echo "started_at=$(date -u +%s)" >> "$GITHUB_OUTPUT"
           gh workflow run daily.yml --ref main --field force=false
       - name: Wait for recovery result
         if: steps.health.outcome == 'failure'
         env:
           GH_TOKEN: ${{ github.token }}
+          RECOVERY_STARTED_AT: ${{ steps.recovery-trigger.outputs.started_at }}
         run: |
           set -euo pipefail
           for attempt in $(seq 1 30); do
-            run_id="$(gh run list --workflow daily.yml --event workflow_dispatch --branch main --limit 1 --json databaseId --jq '.[0].databaseId // empty')"
+            run_id="$(gh run list --workflow daily.yml --event workflow_dispatch --branch main --limit 10 --json databaseId,createdAt --jq --arg start "$RECOVERY_STARTED_AT" '.[] | select((.createdAt | fromdateiso8601) >= ($start | tonumber)) | .databaseId' | head -n1)"
             if [ -n "$run_id" ]; then
               status="$(gh run view "$run_id" --json status --jq '.status')"
               conclusion="$(gh run view "$run_id" --json conclusion --jq '.conclusion')"
