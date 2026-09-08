@@ -17,6 +17,7 @@ def api_fixture(
     status: str,
     season: int = 2026,
     league_name: str = "Premier League",
+    country: str = "England",
 ) -> dict:
     return {
         "fixture": {
@@ -27,7 +28,7 @@ def api_fixture(
         "league": {
             "id": 10,
             "name": league_name,
-            "country": "Testland",
+            "country": country,
             "season": season,
         },
         "teams": {
