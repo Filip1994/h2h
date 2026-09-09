@@ -8,6 +8,7 @@ on:
 jobs:
   tests:
     permissions:
+      actions: read
       contents: read
     runs-on: ubuntu-latest
     steps:
@@ -19,4 +20,9 @@ jobs:
       - run: pip install -r requirements-dev.txt
       - run: ruff format --check .
       - run: ruff check .
+      - name: Forensic odds lifecycle audit
+        if: github.event_name == 'pull_request'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python tools/audit_odds_lifecycle.py --output /tmp/odds-lifecycle-audit.md
       - run: pytest
