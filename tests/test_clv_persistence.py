@@ -41,6 +41,23 @@ def test_identical_odds_at_different_times_are_distinct(tmp_path):
     assert a != b
 
 
+def test_snapshot_store_loads_valid_persisted_records(tmp_path):
+    path = tmp_path / "odds_snapshots.jsonl"
+    store = OddsSnapshotStore(path)
+    snapshot = store.append_quote(
+        quote(), fixture_id=1, snapshot_type="INTERMEDIATE", prediction_id="p1"
+    )
+    path.write_text(
+        path.read_text()
+        + "not-json\n"
+        + json.dumps({"snapshot_id": "second", "snapshot_type": "ENTRY"})
+        + "\n",
+        encoding="utf-8",
+    )
+    loaded = store.load()
+    assert [row["snapshot_id"] for row in loaded] == [snapshot, "second"]
+
+
 def test_stable_prediction_and_bet_linkage(tmp_path):
     class Settings:
         root = tmp_path
