@@ -3,7 +3,7 @@ name: QuantBet adaptive watchlist monitor
 on:
   workflow_dispatch:
   schedule:
-    - cron: "*/5 6-23 * * *"
+    - cron: "*/2 6-23 * * *"
       timezone: "Europe/Belgrade"
 
 permissions:
@@ -46,16 +46,18 @@ jobs:
       - run: python main.py watchlist
       - name: Build public strong-signal dataset
         run: python tools/build_public_strong_signals.py
-      - name: Commit watchlist, strong-signal state and raw API archive
+      - name: Commit watchlist, market-timing state and bounded API archive
         run: |
           set -euo pipefail
-          if git diff --quiet -- intraday_watchlist_state.json intraday_alerts.json strong_signals.json && test -z "$(git status --porcelain -- data/raw_api)"; then
+          if git diff --quiet -- intraday_watchlist_state.json intraday_alerts.json strong_signals.json market_timing_metrics.json && test -z "$(git status --porcelain -- data/market_timing_snapshots.jsonl data/raw_api)"; then
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add intraday_watchlist_state.json intraday_alerts.json strong_signals.json data/raw_api
-          git commit -m "Update QuantBet watchlist and API archive"
+          git add intraday_watchlist_state.json intraday_alerts.json strong_signals.json market_timing_metrics.json
+          while IFS= read -r file; do git add "$file"; done < <(find data/raw_api -type f -size -90M -print)
+          git add data/market_timing_snapshots.jsonl
+          git commit -m "Update QuantBet market intelligence observations"
           for attempt in 1 2 3; do
             if git push; then exit 0; fi
             git fetch origin main
