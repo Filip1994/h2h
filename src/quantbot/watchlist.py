@@ -8,7 +8,6 @@ from typing import Any
 from .alerts import (
     build_new_opportunity_email,
     build_signal_update_email,
-    is_strong_signal,
     send_strong_signal_email,
 )
 from .api import APIBudgetExceeded, APIError, APIFootballClient
@@ -16,6 +15,7 @@ from .config import Settings
 from .market_timing import append_snapshots, build_snapshot
 from .markets import extract_best_quotes
 from .risk import kelly_stake, portfolio_analytics
+from .signal_classification import classify_signal, classification_fields
 from .storage import BetStore, atomic_write_json
 from .types import Market
 
@@ -23,6 +23,7 @@ from .types import Market
 
 STATE_FILE = "intraday_watchlist_state.json"
 ALERT_FILE = "intraday_alerts.json"
+EVENT_FILE = "data/intraday_signal_events.jsonl"
 SIGNAL_UPDATE_MIN_EV_DELTA = 0.03
 SIGNAL_UPDATE_MIN_EDGE_DELTA = 0.02
 
@@ -68,19 +69,6 @@ def cadence_seconds(seconds_to_kickoff: float) -> int:
     return 120
 
 
-def _near_miss(
-    model_probability: float,
-    calibrated_probability: float,
-    odd: float,
-    devig: float,
-    settings: Settings,
-) -> bool:
-    decision = max(0.0, calibrated_probability - settings.probability_haircut)
-    ev = decision * odd - 1.0
-    edge = decision - devig
-    return ev >= settings.min_ev - 0.03 or edge >= settings.min_edge - 0.02
-
-
 def _event_from_prediction(
     prediction: dict[str, Any],
     *,
@@ -92,6 +80,8 @@ def _event_from_prediction(
     now: datetime,
     linked_bet: dict[str, Any] | None,
     signal_type: str,
+    signal_class: str,
+    near_miss_reason: str | None,
 ) -> dict[str, Any]:
     event_id = f"{prediction['id']}:{now.astimezone(UTC).strftime('%Y%m%d%H%M')}"
     return {
@@ -117,6 +107,8 @@ def _event_from_prediction(
         "stake": round(float(linked_bet.get("stake") if linked_bet else stake), 2),
         "signal_source": "INTRADAY_ALERT",
         "signal_type": signal_type,
+        "signal_class": signal_class,
+        "near_miss_reason": near_miss_reason,
         "signal_sent_at": now.isoformat(),
         "linked_bet_id": linked_bet.get("id") if linked_bet else None,
         "status": "PENDING",
@@ -126,6 +118,52 @@ def _event_from_prediction(
         "closing_5m_market_probability_devig": None,
         "closing_5m_odds_captured_at": None,
     }
+
+
+def _append_transition_event(
+    root: Path,
+    *,
+    prediction: dict[str, Any],
+    quote: Any,
+    signal_class: str,
+    near_miss_reason: str | None,
+    previous_class: str | None,
+    captured_at: datetime,
+    expected_value: float,
+    probability_edge: float,
+    decision_probability: float,
+    stake: float,
+    seconds_to_kickoff: float,
+) -> None:
+    if previous_class == signal_class:
+        return
+    path = root / EVENT_FILE
+    path.parent.mkdir(parents=True, exist_ok=True)
+    event = {
+        "event_id": f"{prediction['id']}:{captured_at.astimezone(UTC).isoformat()}:{signal_class}",
+        "prediction_id": prediction["id"],
+        "fixture_id": int(prediction["event_id"]),
+        "market": prediction["market"],
+        "bookmaker_id": quote.bookmaker_id,
+        "bookmaker": quote.bookmaker_name,
+        "odd": round(float(quote.odd), 4),
+        "opposite_odd": round(float(quote.opposite_odd), 4),
+        "captured_at": captured_at.astimezone(UTC).isoformat(),
+        "kickoff": prediction.get("kickoff"),
+        "seconds_to_kickoff": round(seconds_to_kickoff, 3),
+        "expected_value": round(expected_value, 6),
+        "probability_edge": round(probability_edge, 6),
+        "decision_probability": round(decision_probability, 6),
+        "stake": round(float(stake), 2),
+        "signal_class": signal_class,
+        "near_miss_reason": near_miss_reason,
+        "previous_signal_class": previous_class,
+        "transition": (
+            f"{previous_class}->{signal_class}" if previous_class else f"INITIAL->{signal_class}"
+        ),
+    }
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(event, ensure_ascii=False, separators=(",", ":")) + "\n")
 
 
 def _apply_linked_result(event: dict[str, Any], bet: dict[str, Any] | None) -> None:
@@ -253,44 +291,51 @@ def run_watchlist(settings: Settings, now: datetime | None = None) -> dict[str, 
                 if linked_bet
                 else kelly_stake(analytics.current_bank, decision, quote.odd, settings)
             )
-            near_miss = _near_miss(
-                float(prediction.get("model_probability") or 0.0),
-                calibrated,
-                quote.odd,
-                quote.devig_probability,
-                settings,
+            classification = classify_signal(
+                expected_value=ev,
+                probability_edge=edge,
+                stake=suggested_stake,
+                settings=settings,
             )
+            fields = classification_fields(classification)
             key = str(prediction["id"])
             previous = state.setdefault(key, {})
-            was_strong = bool(previous.get("was_strong"))
-            strong = is_strong_signal(
-                {
-                    "id": linked_bet.get("id") if linked_bet else key,
-                    "event_id": fixture_id,
-                    "market": market.value,
-                    "stake": suggested_stake,
-                    "expected_value": ev,
-                    "probability_edge": edge,
-                },
-                settings,
+            previous_class = previous.get("signal_class")
+            _append_transition_event(
+                root,
+                prediction=prediction,
+                quote=quote,
+                signal_class=classification.signal_class,
+                near_miss_reason=classification.near_miss_reason,
+                previous_class=str(previous_class) if previous_class else None,
+                captured_at=now_utc,
+                expected_value=ev,
+                probability_edge=edge,
+                decision_probability=decision,
+                stake=suggested_stake,
+                seconds_to_kickoff=seconds,
             )
-            signal_state = "STRONG" if strong else "NEAR_MISS" if near_miss else "OBSERVED"
+            was_strong = previous_class == "STRONG_SIGNAL"
+            strong = classification.signal_class == "STRONG_SIGNAL"
             snapshots.append(
-                build_snapshot(
-                    fixture_id=fixture_id,
-                    prediction=prediction,
-                    quote=quote,
-                    decision_probability=decision,
-                    expected_value=ev,
-                    probability_edge=edge,
-                    seconds_to_kickoff=seconds,
-                    signal_state=signal_state,
-                    captured_at=now_utc,
-                )
+                {
+                    **build_snapshot(
+                        fixture_id=fixture_id,
+                        prediction=prediction,
+                        quote=quote,
+                        decision_probability=decision,
+                        expected_value=ev,
+                        probability_edge=edge,
+                        seconds_to_kickoff=seconds,
+                        signal_state=classification.signal_class,
+                        captured_at=now_utc,
+                    ),
+                    **fields,
+                }
             )
-            previous["was_strong"] = strong
+            previous.update(fields)
             previous["last_seen_at"] = now_utc.isoformat()
-
+            previous["last_observation_id"] = snapshots[-1]["observation_id"]
             if strong and linked_bet:
                 baseline_ev = float(
                     previous.get(
@@ -313,6 +358,8 @@ def run_watchlist(settings: Settings, now: datetime | None = None) -> dict[str, 
                         now=now_local,
                         linked_bet=linked_bet,
                         signal_type="SIGNAL_UPDATE",
+                        signal_class=classification.signal_class,
+                        near_miss_reason=classification.near_miss_reason,
                     )
                     if not any(a.get("id") == event["id"] for a in alerts):
                         alerts.append(event)
@@ -330,6 +377,8 @@ def run_watchlist(settings: Settings, now: datetime | None = None) -> dict[str, 
                     now=now_local,
                     linked_bet=None,
                     signal_type="NEW_OPPORTUNITY",
+                    signal_class=classification.signal_class,
+                    near_miss_reason=classification.near_miss_reason,
                 )
                 alerts.append(event)
                 new_opportunities.append(event)
