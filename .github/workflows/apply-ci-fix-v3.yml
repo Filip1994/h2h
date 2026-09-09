@@ -1,0 +1,38 @@
+name: Apply CI repair v3
+on:
+  push:
+    branches: [fix/ci-formatting-v3]
+permissions:
+  contents: write
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Repair known CI blockers
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('src/quantbot/engine.py')
+          s = p.read_text()
+          old = '''        blocked_market_keys = self.bet_store.blocked_market_keys(existing_bets)\n        blocked_fixture_ids = {\n            fixture_id for fixture_id, market in blocked_market_keys if market is None\n        }\n'''
+          if old in s:
+              p.write_text(s.replace(old, ''))
+          p = Path('tools/build_public_current_odds.py')
+          s = p.read_text()
+          s = s.replace('str(row["captured_at"]).replace("Z", "+00:00")', 'str(row["captured_at"])')
+          s = s.replace('str(row["kickoff"]).replace("Z", "+00:00")', 'str(row["kickoff"])')
+          p.write_text(s)
+          PY
+          pip install ruff
+          ruff format .
+          ruff check . --fix
+          rm -f .github/workflows/apply-ci-fix-v3.yml
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add .
+          git diff --cached --quiet || git commit -m 'chore: repair CI formatting and lint blockers'
+          git push
