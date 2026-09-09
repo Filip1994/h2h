@@ -153,8 +153,7 @@ def build(
     strong_updates = [
         x
         for x in alerts
-        if str(x.get("signal_class") or "").upper()
-        in {"STRONG_SIGNAL", "STRONG"}
+        if str(x.get("signal_class") or "").upper() in {"STRONG_SIGNAL", "STRONG"}
     ]
     strong = merge(ledger + strong_updates)
     (root / LEDGER_FILE).write_text(
