@@ -1,23 +1,28 @@
-# QuantBet H2H v2
+# QuantBet Football v2
 
-Launch-ready **paper-trading** architecture for football market screening. The engine combines:
+Launch-ready **paper-trading** architecture for football market screening. The current Production decision path uses:
 
 - API-Football as the data and odds feeder;
 - a fitted Dixon–Coles score model;
-- strict, time-decayed H2H eligibility rules;
+- deterministic Football league/competition eligibility;
 - paired-market de-vig and expected-value gates;
 - capped fractional Kelly and portfolio drawdown limits;
+- canonical odds lifecycle, settlement and CLV persistence;
 - Gmail delivery, GitHub Pages dashboard and auditable JSON ledgers.
 
-`PAPER_MODE=true` is the safe default. The code refuses uncalibrated live mode unless that guard is explicitly bypassed.
+**H2H is not part of the current Production decision path.** Historical H2H datasets and documentation may remain for research/provenance, but they do not determine Production eligibility, probability, EV, edge, stake or fixture selection.
 
-## 1. Replace the old architecture
+`PAPER_MODE=true` is the safe default.
 
-Use this project as the repository root. Remove the old `value_engine.py`, `market_drop_engine.py` and `quant_math.py`; their responsibilities are now separated under `src/quantbot/`.
+## 1. Current architecture
 
-Preserve the existing `bets.json` before replacing files. Legacy market names are supported by settlement, and every existing `PENDING`, `WIN`, `LOSS` or `SKIPPED` fixture remains blocked from future bulletins.
+Production flow is:
 
-The supplied ledger preserves the five uploaded `PENDING` bets. Their open stake is 5,000 RSD, above the new 5% cap for a 50,000 RSD bank, so new allocation is intentionally frozen until exposure falls through settlement or an authorized skip.
+`fixture discovery → eligibility → Dixon–Coles fit → market probabilities → odds/de-vig → EV/edge → risk allocation → Production ledger → Opening/Pick/Closing → settlement/CLV`
+
+Production, Strong Signals and Near Misses share compatible canonical observation/lifecycle data but remain separate accounting/presentation surfaces. Strong Signals are virtual/counterfactual and do not change Production P/L or bankroll.
+
+Historical H2H artifacts are retained only as historical/research provenance and are not required for the current Production runtime.
 
 ## 2. Local verification
 
@@ -32,8 +37,6 @@ cp .env.example .env
 python main.py analytics
 ```
 
-Environment variables are read directly by the process. Load `.env` with your preferred local mechanism; the application deliberately does not add another dependency for it.
-
 ## 3. GitHub configuration
 
 Repository secrets:
@@ -47,30 +50,31 @@ Repository variable:
 
 - `PAPER_MODE=true`
 
-In **Settings → Pages**, select **GitHub Actions** as the publishing source. `pages.yml` deploys only `index.html`, `bets.json` and `ledger_meta.json`; secrets, source code and calibration data are not published. Relative reads keep forks and renamed repositories working.
+GitHub Pages publishes only the intended public dashboard/data artifacts. Secrets, source code and calibration data are not published.
 
-Workflow permissions must allow GitHub Actions to write repository contents. The workflows use explicit `contents: write`, serialize all ledger mutations through one concurrency group, and never embed API or Gmail credentials in files.
+Football API requests are governed by the global quota mechanism and workflow serialization. The API client uses atomic TTL caching and bounded retries for transient failures.
 
-The API client uses atomic TTL caching, a hard per-run request budget and at most three bounded exponential-backoff attempts for HTTP `429`/`5xx` or transient network failures.
+## 4. Core workflows
 
-## 4. Workflows
+| Workflow | Function |
+|---|---|
+| `daily.yml` | Scheduled Production generation and bulletin delivery |
+| `odds-capture.yml` | Exhaustive eligible-football odds observation |
+| `intraday.yml` | Scheduled Production/Strong/Near scanning |
+| `watchlist.yml` | Strong/Near market observation and lifecycle persistence |
+| `monitor.yml` | Settlement and lifecycle monitoring |
+| `closing-capture.yml` | Canonical closing observation capture |
+| `clv-persistence.yml` | Opening/Pick/Closing/CLV persistence |
+| `pages.yml` | Public dashboard deployment |
+| `calibrate.yml` | Chronological calibration evaluation |
 
-| Workflow | Schedule | Function |
-|---|---:|---|
-| `daily.yml` | 06:00 UTC daily | Generate, commit, then email bulletin |
-| `monitor.yml` | Every 30 minutes | Capture last available pre-kickoff quote and settle ledgers |
-| `calibrate.yml` | Sunday 05:30 UTC | Refit per-market Platt calibration |
-| `skip.yml` | Authorized GitHub Issue opened | Exact ID transition `PENDING → SKIPPED` |
-| `pages.yml` | State change + hourly fallback | Deploy the current dashboard artifact |
-| `tests.yml` | Push/PR | Run the regression suite |
-
-GitHub schedules are UTC and can be delayed by platform load. Match display uses `Europe/Belgrade`, including daylight-saving transitions. State-writing workflows always check out the latest default branch and serialize mutations. They explicitly dispatch `pages.yml` after their commit because bot-authored commits do not trigger another ordinary workflow run. Skip issues are accepted only from an owner, organization member or repository collaborator.
+Schedules use GitHub Actions cron semantics; public timestamps are interpreted/displayed in `Europe/Belgrade`.
 
 ## 5. Commands
 
 ```bash
-python main.py generate             # generate + email
-python main.py generate --no-email  # two-phase GitHub workflow
+python main.py generate
+python main.py generate --no-email
 python main.py send-report
 python main.py monitor
 python main.py skip --id 1590051_UNDER_2_5
@@ -78,22 +82,13 @@ python main.py calibrate
 python main.py analytics
 ```
 
-## 6. Selection contract
+## 6. Production decision contract
 
-A fixture is considered only when all conditions hold:
+A fixture must pass the central Football eligibility gate, have sufficient Dixon–Coles training data, valid supported market odds, valid same-bookmaker paired odds for de-vig, minimum odds and the configured EV/edge strategy gates, and available portfolio risk capacity.
 
-1. Senior/professional league and teams pass the league + both-team exclusion check.
-2. Fixture does not already exist in `bets.json` under a blocking status.
-3. At least five valid H2H matches fall inside the exact rolling four-year window.
-4. At least one H2H match is newer than 730 days.
-5. A market's time-decayed H2H hit rate is at least 75%.
-6. Dixon–Coles training has enough league and team history.
-7. Both sides from one bookmaker exist and market overround is between 0% and 20%, permitting a credible de-vig.
-8. Offered decimal odds are at least 1.45.
-9. Conservative probability passes both `EV >= 5%` and edge `>= 3 percentage points`.
-10. Portfolio and drawdown budgets permit the stake.
+The current supported production markets are `OVER_2_5`, `UNDER_2_5` and `BTTS_YES`; these machine codes are rendered as canonical human-readable labels in public presentation.
 
-At most one market is selected per fixture. The three supported markets are `OVER_2_5`, `UNDER_2_5` and `BTTS_YES`. Goals in both halves remain excluded because a full-time Dixon–Coles model cannot price the two half-specific intensities rigorously.
+There is no artificial fixed daily Production pick count. Independently qualifying markets reach the risk allocator; risk, exposure, drawdown and circuit-breaker controls remain authoritative.
 
 ## 7. Risk defaults
 
@@ -101,42 +96,36 @@ At most one market is selected per fixture. The three supported markets are `OVE
 - maximum 1% bankroll per bet;
 - maximum 3% new daily exposure;
 - maximum 5% total open exposure;
-- stake step 50 RSD and minimum stake 100 RSD;
+- configured stake step/minimum;
 - stakes halved at 5% current drawdown;
 - new positions stopped at 10% current drawdown.
 
-These are environment-configurable limits, not evidence that the strategy has positive expected return.
+These are environment-configurable limits and are not evidence that the strategy has positive expected return.
 
 ## 8. Calibration and live-mode guard
 
-`predictions.json` records every modelled market in the H2H-qualified fixture universe, including unselected predictions. Settlement supplies binary outcomes. Weekly calibration uses a chronological 70/30 split. Platt scaling is accepted only if both Brier score and log-loss do not worsen on the held-out 30%; the selected Platt or identity mapping is valid only when held-out 10-bin ECE is at most 5%.
+`predictions.json` records modelled markets for out-of-sample calibration. Weekly calibration uses a chronological split and requires the configured validation sample and calibration-quality criteria before being marked valid.
 
-By default, each market needs at least 200 settled out-of-sample predictions. Until all three markets validate, `PAPER_MODE=false` is rejected unless `ALLOW_UNCALIBRATED_LIVE=true`. Do not use that bypass for real staking.
+Until all required markets validate, live mode remains blocked by default. Calibration validity alone is not evidence of profitability; CLV, uncertainty and out-of-sample performance must also be reviewed.
 
-## 9. Historical walk-forward backtest
+## 9. Odds lifecycle and provenance
 
-Populate `data/backtest_template.csv`, then run:
+The canonical lifecycle is:
 
-```bash
-python backtest.py --input data/history.csv
-```
+`Opening → Pick → Closing → CLV`
 
-The backtest trains only on earlier dates, predicts a full day before adding that day's outcomes, periodically refits the model, applies the H2H and EV contracts, reports Brier/log-loss, per-market ROI, drawdown, losing streak and a deterministic day-cluster bootstrap 95% ROI interval, and writes a candidate `calibration.json`. The interval is withheld until at least 30 independent matchdays exist. Selection ROI uses raw out-of-sample probabilities minus the configured haircut; the candidate calibration is fitted afterward and is never retroactively applied to those same selections.
+Opening is the earliest valid observed pre-Pick quote for the exact lifecycle identity. Pick is the exact decision-entry observation. Closing is the canonical valid pre-kickoff closing observation. Missing stages remain explicitly unavailable; no Pick-as-Opening or bookmaker substitution is allowed.
 
-Historical odds must represent prices genuinely available at the decision timestamp. Closing or retrospectively selected best prices create leakage and invalidate ROI.
+Every Production Pick carries immutable decision provenance sufficient to reconstruct its decision context, subject to the availability of referenced source observations.
 
-Each CSV row containing odds must also contain `bookmaker_id` and an ISO-8601 `odds_captured_at` strictly earlier than fixture `date`. All paired prices in that row must come from that bookmaker snapshot; the backtest fails instead of reporting ROI when timestamp proof is absent or post-kickoff.
+## 10. Research boundary
 
-## 10. Launch sequence
+Research work may evaluate Model V2, drift, signal strength, market-vs-model benchmarks and timing intelligence, but research changes must not silently alter Production. Promotion requires the explicit research-to-production gate.
 
-1. Preserve the current ledger and push this code on a review branch.
-2. Run `tests.yml`.
-3. Add secrets and keep `PAPER_MODE=true`.
-4. Manually dispatch `daily.yml`; verify email, API usage and `bets.json` commit.
-5. Manually dispatch `monitor.yml`; verify quote snapshots and settlement.
-6. Set Pages source to **GitHub Actions**, dispatch `pages.yml`, and inspect mobile rendering.
-7. Accumulate or import valid out-of-sample predictions.
-8. Review calibration, CLV, drawdown and the day-cluster ROI interval; do not consider live mode while its lower 95% bound is non-positive.
+Historical H2H data is research/provenance only and is not a Production feature.
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for the mathematical contract.
+## 11. Operating posture
 
+Keep Production in paper mode while the operational readiness gate and genuine out-of-sample evidence accumulate. Do not infer readiness from a green UI or a small ROI sample.
+
+See `ARCHITECTURE.md` for the mathematical and runtime contract.
