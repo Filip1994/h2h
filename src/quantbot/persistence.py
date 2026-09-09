@@ -64,6 +64,21 @@ class OddsSnapshotStore:
                     ids.add(str(item["snapshot_id"]))
         return ids
 
+    def load(self) -> list[dict[str, Any]]:
+        """Load valid persisted snapshots without changing the append-only store."""
+        if not self.path.exists():
+            return []
+        records: list[dict[str, Any]] = []
+        with self.path.open("r", encoding="utf-8", errors="replace") as handle:
+            for line in handle:
+                try:
+                    item = json.loads(line)
+                except (TypeError, ValueError, json.JSONDecodeError):
+                    continue
+                if isinstance(item, dict):
+                    records.append(item)
+        return records
+
     def append(self, record: dict[str, Any]) -> str | None:
         snapshot_type = str(record.get("snapshot_type") or "")
         if snapshot_type not in SNAPSHOT_TYPES:
