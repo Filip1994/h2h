@@ -25,8 +25,10 @@ def test_status_display_maps_loss_and_skip_without_collapsing_them() -> None:
 def test_clv_display_preserves_canonical_decimal_math() -> None:
     assert clv_label(0.133333) == "+13.33%"
     assert clv_label(-0.0421) == "−4.21%"
+    assert clv_label(0.0) == "0.00%"
     assert clv_interpretation(0.01) == "Beat close"
     assert clv_interpretation(-0.01) == "Lost to close"
+    assert clv_interpretation(0.0) == "Even"
     assert clv_label(None) == "—"
 
 
