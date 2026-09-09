@@ -3,7 +3,6 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from typing import Any
 
-
 FUNNEL_SEMANTICS = {
     "discovered": "Raw fixtures returned by the fixture discovery call for the run.",
     "eligible": "Discovered fixtures that pass status, time-window, duplicate-block and league eligibility checks.",
