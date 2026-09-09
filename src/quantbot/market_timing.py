@@ -126,6 +126,7 @@ def append_snapshots(
             if snapshot.get("signal_state") in {
                 "NEAR_MISS",
                 "STRONG",
+                "STRONG_SIGNAL",
                 "SIGNAL_UPDATE",
             }:
                 useful += 1
@@ -155,7 +156,7 @@ def append_snapshots(
                 canonical_store.append({**base, "snapshot_type": snapshot_type})
                 prediction_id = str(snapshot.get("prediction_id") or "")
                 if (
-                    snapshot.get("signal_state") == "STRONG"
+                    snapshot.get("signal_state") in {"STRONG", "STRONG_SIGNAL"}
                     and prediction_id
                     and prediction_id not in entry_prediction_ids
                 ):
