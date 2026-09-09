@@ -9,7 +9,7 @@ from .api import APIBudgetExceeded, APIError, APIFootballClient
 from .calibration import ProbabilityCalibrator
 from .config import Settings
 from .dixon_coles import DixonColesFitError, DixonColesModel
-from .filters import is_allowed_match
+from .filters import eligibility_decision
 from .markets import extract_best_quotes
 from .parsing import current_fixture_fields, match_record_from_api
 from .risk import PortfolioAnalytics, allocate_stakes, portfolio_analytics
@@ -63,13 +63,14 @@ class QuantEngine:
                     continue
                 if record.date >= cutoff:
                     continue
-                if not is_allowed_match(
+                if not eligibility_decision(
                     record.country,
+                    record.league_id,
                     record.league_name,
                     record.home_name,
                     record.away_name,
                     self.settings.excluded_countries,
-                ):
+                ).eligible:
                     continue
                 records_by_id[record.fixture_id] = record
         records = sorted(records_by_id.values(), key=lambda item: item.date)
@@ -181,6 +182,7 @@ class QuantEngine:
             "fit_failures": 0,
             "fixtures_without_odds": 0,
             "fixture_failures": {"api": 0, "dixon_coles": 0, "other": 0},
+            "eligibility_rejections": {},
         }
         raw_fixtures = self.api.fixtures_by_date(now_local.date().isoformat())
         telemetry["fixtures_discovered"] = len(raw_fixtures)
@@ -209,13 +211,18 @@ class QuantEngine:
                 < decision_timestamp + timedelta(hours=upper_hours)
             ):
                 continue
-            if not is_allowed_match(
+            decision = eligibility_decision(
                 fields["country"],
+                fields["league_id"],
                 fields["league_name"],
                 fields["home_name"],
                 fields["away_name"],
                 self.settings.excluded_countries,
-            ):
+            )
+            if not decision.eligible:
+                telemetry["eligibility_rejections"][decision.reason] = (
+                    int(telemetry["eligibility_rejections"].get(decision.reason, 0)) + 1
+                )
                 continue
             telemetry["fixtures_eligible"] += 1
 

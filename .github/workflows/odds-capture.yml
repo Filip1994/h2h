@@ -22,6 +22,7 @@ jobs:
       API_REQUEST_BUDGET: ${{ vars.API_REQUEST_BUDGET || '7500' }}
       API_BUDGET_RESERVE: ${{ vars.API_BUDGET_RESERVE || '500' }}
       TIMEZONE: Europe/Belgrade
+      QUANTBOT_ELIGIBILITY_LEDGER: data/eligibility_coverage.jsonl
     steps:
       - uses: actions/checkout@v7
         with:
@@ -41,12 +42,12 @@ jobs:
       - name: Commit immutable observations and coverage state
         run: |
           set -euo pipefail
-          if git diff --quiet -- odds_collection_budget.json odds_collection_state.json odds_collection_metrics.json data/odds_snapshots.jsonl data/odds_collection_coverage.jsonl; then
+          if git diff --quiet -- odds_collection_budget.json odds_collection_state.json odds_collection_metrics.json data/odds_snapshots.jsonl data/odds_collection_coverage.jsonl data/eligibility_coverage.jsonl; then
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add odds_collection_budget.json odds_collection_state.json odds_collection_metrics.json data/odds_snapshots.jsonl data/odds_collection_coverage.jsonl
+          git add odds_collection_budget.json odds_collection_state.json odds_collection_metrics.json data/odds_snapshots.jsonl data/odds_collection_coverage.jsonl data/eligibility_coverage.jsonl
           git commit -m "Capture exhaustive Football odds observations"
           for attempt in 1 2 3; do
             if git push; then exit 0; fi

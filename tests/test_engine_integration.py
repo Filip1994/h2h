@@ -24,9 +24,9 @@ def api_fixture(
             "status": {"short": status},
         },
         "league": {
-            "id": 10,
-            "name": "Test League",
-            "country": "Testland",
+            "id": 39,
+            "name": "Premier League",
+            "country": "England",
             "season": season,
         },
         "teams": {
@@ -157,7 +157,7 @@ def test_live_mode_refuses_unvalidated_probabilities(settings, monkeypatch) -> N
 def test_model_cache_is_scoped_to_data_cutoff(settings) -> None:
     now = datetime(2026, 9, 4, 6, 0, tzinfo=UTC)
     engine = QuantEngine(settings, api=FakeAPI(now))
-    fields = {"league_id": 10, "season": 2026, "home_id": 1, "away_id": 2}
+    fields = {"league_id": 39, "season": 2026, "home_id": 1, "away_id": 2}
     first = engine._model_for_fixture(fields, data_cutoff=now)
     second = engine._model_for_fixture(fields, data_cutoff=now + timedelta(hours=1))
     assert first is not second

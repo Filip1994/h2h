@@ -14,7 +14,12 @@ def fixture_payload(fixture_id: int, kickoff: datetime) -> dict:
             "date": kickoff.isoformat(),
             "status": {"short": "NS"},
         },
-        "league": {"id": 1, "name": "Test League", "country": "Test", "season": 2026},
+        "league": {
+            "id": 39,
+            "name": "Premier League",
+            "country": "England",
+            "season": 2026,
+        },
         "teams": {
             "home": {"id": 10, "name": "Home"},
             "away": {"id": 11, "name": "Away"},
