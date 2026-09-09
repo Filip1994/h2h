@@ -1,0 +1,32 @@
+name: Temporary dashboard renderer patch
+on:
+  push:
+    branches: [main]
+
+jobs:
+  patch:
+    if: github.actor == 'Filip1994'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch renderer and remove workflow
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('assets/qb-dashboard.js')
+          s = p.read_text()
+          old = "const historyRows=document.getElementById('history-rows');if(historyRows)historyRows.innerHTML=history.slice().reverse().slice(0,200).map(row).join('');"
+          new = "const historyRows=document.getElementById('history-cards');if(historyRows)historyRows.innerHTML=history.slice().reverse().slice(0,200).map(row).join('');"
+          if old not in s:
+              raise SystemExit('expected Strong history renderer definition not found')
+          p.write_text(s.replace(old, new, 1))
+          workflow = Path('.github/workflows/patch-dashboard-renderer.yml')
+          workflow.unlink()
+          PY
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add assets/qb-dashboard.js .github/workflows/patch-dashboard-renderer.yml
+          git commit -m 'fix: render strong signal history in production table'
+          git push
