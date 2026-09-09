@@ -1,8 +1,8 @@
+# ruff: noqa
 # fmt: off
 import json
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-
 from tools.build_near_miss_lifecycle import build
 
 
@@ -29,13 +29,8 @@ def canonical(snapshot_row: dict, captured: datetime, snapshot_type: str) -> dic
 
 
 def test_identity_lifecycle_and_exact_bookmaker(tmp_path):
-    now = datetime(2026, 9, 10, 12, tzinfo=UTC)
-    prediction = base_prediction(now)
-    first = snapshot(prediction, now - timedelta(minutes=30), 1.55)
-    near = snapshot(prediction, now - timedelta(minutes=10), 1.58)
-    write_json(tmp_path / "predictions.json", [prediction]); write_json(tmp_path / "bets.json", []); write_json(tmp_path / "intraday_alerts.json", []); write_json(tmp_path / "near_misses.json", [])
-    write_jsonl(tmp_path / "data" / "market_timing_snapshots.jsonl", [first, near])
-    write_jsonl(tmp_path / "data" / "odds_snapshots.jsonl", [canonical(first, now - timedelta(minutes=40), "INTERMEDIATE"), canonical(first, now - timedelta(minutes=5), "T5")])
+    now = datetime(2026, 9, 10, 12, tzinfo=UTC); prediction = base_prediction(now); first = snapshot(prediction, now - timedelta(minutes=30), 1.55); near = snapshot(prediction, now - timedelta(minutes=10), 1.58)
+    write_json(tmp_path / "predictions.json", [prediction]); write_json(tmp_path / "bets.json", []); write_json(tmp_path / "intraday_alerts.json", []); write_json(tmp_path / "near_misses.json", []); write_jsonl(tmp_path / "data" / "market_timing_snapshots.jsonl", [first, near]); write_jsonl(tmp_path / "data" / "odds_snapshots.jsonl", [canonical(first, now - timedelta(minutes=40), "INTERMEDIATE"), canonical(first, now - timedelta(minutes=5), "T5")])
     row = build(tmp_path, now=now)[0]
     assert row["home_name"] == "Alpha FC"; assert row["away_name"] == "Beta FC"; assert row["match"] == "Alpha FC vs Beta FC"; assert row["bookmaker_id"] == 8; assert row["opening_odd"] == 1.55; assert row["closing_odd"] == 1.55; assert row["status"] == "PENDING"; assert row["not_a_production_bet"] is True
 
