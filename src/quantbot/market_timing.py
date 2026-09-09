@@ -154,10 +154,13 @@ def append_snapshots(
                 }
                 canonical_store.append({**base, "snapshot_type": snapshot_type})
                 prediction_id = str(snapshot.get("prediction_id") or "")
-                if snapshot.get("signal_state") == "STRONG" and prediction_id:
-                    if prediction_id not in entry_prediction_ids:
-                        canonical_store.append({**base, "snapshot_type": "ENTRY"})
-                        entry_prediction_ids.add(prediction_id)
+                if (
+                    snapshot.get("signal_state") == "STRONG"
+                    and prediction_id
+                    and prediction_id not in entry_prediction_ids
+                ):
+                    canonical_store.append({**base, "snapshot_type": "ENTRY"})
+                    entry_prediction_ids.add(prediction_id)
             except (KeyError, TypeError, ValueError):
                 continue
         handle.flush()
