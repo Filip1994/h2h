@@ -54,7 +54,9 @@ def audit(root: Path = ROOT) -> dict[str, Any]:
 
     dates = sorted({d for row in timing if (d := iso_date(row.get("captured_at")))})
     if not dates:
-        dates = sorted({d for row in alerts if (d := iso_date(row.get("signal_sent_at")))})
+        dates = sorted(
+            {d for row in alerts if (d := iso_date(row.get("signal_sent_at")))}
+        )
     selected_dates = dates[-3:]
 
     by_date: dict[str, dict[str, int]] = {}
@@ -70,10 +72,14 @@ def audit(root: Path = ROOT) -> dict[str, Any]:
             ),
             "markets_evaluated": len(rows),
             "valid_odds_observations": len(rows),
-            "strong_signals": classes.get("STRONG_SIGNAL", classes.get("STRONG", 0)),
+            "strong_signals": classes.get(
+                "STRONG_SIGNAL", classes.get("STRONG", 0)
+            ),
             "near_misses": classes.get("NEAR_MISS", 0),
             "observed_only": classes.get("OBSERVED", 0),
-            "alerts": sum(1 for a in alerts if iso_date(a.get("signal_sent_at")) == date),
+            "alerts": sum(
+                1 for a in alerts if iso_date(a.get("signal_sent_at")) == date
+            ),
             "public_strong": sum(
                 1
                 for a in alerts
@@ -167,5 +173,4 @@ def render_report(result: dict[str, Any]) -> str:
 
 if __name__ == "__main__":
     result = audit()
-    report = render_report(result)
-    print(report)
+    print(render_report(result))
