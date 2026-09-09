@@ -63,7 +63,9 @@ def clv_label(value: Any) -> str:
     percent = clv_percent(value)
     if percent is None:
         return "—"
-    sign = "+" if percent >= 0 else "−"
+    if percent == 0.0:
+        return "0.00%"
+    sign = "+" if percent > 0 else "−"
     return f"{sign}{abs(percent):.2f}%"
 
 
@@ -71,7 +73,9 @@ def clv_interpretation(value: Any) -> str:
     percent = clv_percent(value)
     if percent is None:
         return "Unavailable"
-    return "Beat close" if percent >= 0 else "Lost to close"
+    if percent == 0.0:
+        return "Even"
+    return "Beat close" if percent > 0 else "Lost to close"
 
 
 def odds_lifecycle(bet: dict[str, Any]) -> dict[str, Any]:
