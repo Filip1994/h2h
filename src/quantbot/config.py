@@ -89,7 +89,7 @@ class Settings:
         root = (root or Path(__file__).resolve().parents[2]).resolve()
         bookmaker_priority = tuple(
             int(value.strip())
-            for value in os.getenv("BOOKMAKER_PRIORITY", "8,11,6").split(",")
+            for value in os.getenv("BOOKMAKER_PRIORITY", "8,11,34").split(",")
             if value.strip()
         )
         excluded_countries = tuple(
@@ -109,7 +109,7 @@ class Settings:
             api_max_attempts=_int("API_MAX_ATTEMPTS", 3),
             api_retry_base_seconds=_float("API_RETRY_BASE_SECONDS", 1.0),
             bookmaker_priority=bookmaker_priority,
-            allow_any_bookmaker=_bool("ALLOW_ANY_BOOKMAKER", True),
+            allow_any_bookmaker=_bool("ALLOW_ANY_BOOKMAKER", False),
             excluded_countries=excluded_countries,
             intraday_mode=_bool("INTRADAY_MODE", False),
             intraday_lookahead_hours=_int("INTRADAY_LOOKAHEAD_HOURS", 6),
