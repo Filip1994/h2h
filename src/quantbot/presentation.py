@@ -75,7 +75,7 @@ def clv_interpretation(value: Any) -> str:
 
 
 def odds_lifecycle(bet: dict[str, Any]) -> dict[str, Any]:
-    """Return only persisted canonical Opening → Pick → Closing values."""
+    """Return the persisted canonical Opening → Pick → Closing values."""
     return {
         "opening": bet.get("opening_odd"),
         "pick": bet.get("odd"),
@@ -83,10 +83,6 @@ def odds_lifecycle(bet: dict[str, Any]) -> dict[str, Any]:
         "opening_at": bet.get("opening_odds_captured_at"),
         "pick_at": bet.get("odds_captured_at"),
         "closing_at": bet.get("closing_odds_captured_at"),
-        "opening_status": bet.get("opening_coverage", "UNAVAILABLE"),
-        "pick_status": bet.get("pick_coverage", "UNAVAILABLE"),
-        "closing_status": bet.get("closing_coverage", "UNAVAILABLE"),
-        "coverage": bet.get("lifecycle_coverage", "UNRECOVERABLE"),
     }
 
 
