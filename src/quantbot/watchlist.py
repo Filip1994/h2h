@@ -108,6 +108,7 @@ def _event_from_prediction(
         "signal_source": "INTRADAY_ALERT",
         "signal_type": signal_type,
         "signal_class": signal_class,
+        "virtual_portfolio": "STRONG_SIGNALS_VIRTUAL",
         "near_miss_reason": near_miss_reason,
         "signal_sent_at": now.isoformat(),
         "linked_bet_id": linked_bet.get("id") if linked_bet else None,
