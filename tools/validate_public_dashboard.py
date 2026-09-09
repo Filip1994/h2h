@@ -64,6 +64,23 @@ def validate_record_shape(name: str, rows: list[object], required: set[str]):
                 )
 
 
+def validate_script_reference(page_name: str, script_basename: str) -> str:
+    """Validate the page's actual JS asset reference, including optional cache-busting."""
+    text = (ROOT / page_name).read_text(encoding="utf-8")
+    pattern = re.compile(
+        rf'<script[^>]+src=["\'](?P<src>\./assets/{re.escape(script_basename)}(?:\?[^"\']*)?)["\']',
+        re.IGNORECASE,
+    )
+    match = pattern.search(text)
+    assert match, f"{page_name}: missing reference to {script_basename}"
+    src = match.group("src")
+    asset_path = src.removeprefix("./").split("?", 1)[0]
+    assert (ROOT / asset_path).is_file(), (
+        f"{page_name}: referenced asset does not exist: {src}"
+    )
+    return src
+
+
 def main() -> int:
     for name, expected_type in REQUIRED_JSON.items():
         value = load_json(name)
@@ -121,7 +138,9 @@ def main() -> int:
             f"{name}: missing active navigation"
         )
         assert "./assets/qb-dashboard.css" in text
-        assert 'meta name="viewport" content="width=device-width,initial-scale=1"' in text
+        assert (
+            'meta name="viewport" content="width=device-width,initial-scale=1"' in text
+        )
 
     js = (ROOT / "assets" / "qb-dashboard.js").read_text(encoding="utf-8")
     strong_js = (ROOT / "assets" / "strong-signals.js").read_text(encoding="utf-8")
@@ -151,10 +170,10 @@ def main() -> int:
     assert "strong_signals_portfolio.json" in strong_js
     assert "STRONG SIGNAL" in strong_js
     assert "Promise.all" in strong_js
-    strong_page = (ROOT / "strong-signals.html").read_text(encoding="utf-8")
-    assert "./assets/strong-signals.js?v=20260909-1" in strong_page
+    referenced = validate_script_reference("strong-signals.html", "strong-signals.js")
     print(
-        f"PASS public dashboard contract: bets={len(bets)} strong={len(strong)} near={len(near)}"
+        f"PASS public dashboard contract: bets={len(bets)} strong={len(strong)} near={len(near)} "
+        f"strong_asset={referenced}"
     )
     return 0
 

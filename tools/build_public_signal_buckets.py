@@ -375,7 +375,9 @@ def build(root: Path = ROOT) -> tuple[list[dict[str, Any]], list[dict[str, Any]]
         if not transition.endswith("->STRONG_SIGNAL"):
             continue
         prediction_key = str(event.get("prediction_id") or "")
-        source = observation_lookup.get(prediction_key) or alert_lookup.get(prediction_key)
+        source = observation_lookup.get(prediction_key) or alert_lookup.get(
+            prediction_key
+        )
         strong_updates.append(signal_event_public(event, source))
 
     strong = merge(ledger + strong_updates, settlements)

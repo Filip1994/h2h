@@ -6,7 +6,9 @@ import os
 from datetime import UTC, datetime
 from typing import Any
 
-PACKET_SCHEMA_VERSION = 1
+from .league_registry import REGISTRY, classification_for
+
+PACKET_SCHEMA_VERSION = 2
 STRATEGY_VERSION = "production-decision-v1"
 BOOKMAKER_POLICY_VERSION = "all-provider-bookmakers-best-price-v1"
 
@@ -31,6 +33,38 @@ def settings_hash(settings: Any) -> str:
     return _hash(payload)
 
 
+def registry_snapshot(league_id: int | None) -> dict[str, Any]:
+    """Return the exact registry fingerprint and classification used by a decision."""
+    registry_payload = {
+        str(key): {
+            "provider_league_id": value.provider_league_id,
+            "country": value.country,
+            "league_name": value.league_name,
+            "tier": value.tier,
+            "enabled": value.enabled,
+            "source": value.source,
+        }
+        for key, value in sorted(REGISTRY.items())
+    }
+    classification = classification_for(league_id)
+    return {
+        "version": _hash(registry_payload),
+        "league_id": league_id,
+        "classification": (
+            {
+                "provider_league_id": classification.provider_league_id,
+                "country": classification.country,
+                "league_name": classification.league_name,
+                "tier": classification.tier,
+                "enabled": classification.enabled,
+                "source": classification.source,
+            }
+            if classification is not None
+            else None
+        ),
+    }
+
+
 def build_packet(
     candidate: Any,
     stake: float,
@@ -53,6 +87,7 @@ def build_packet(
         "snapshot_type": "ENTRY",
     }
     observation_id = _hash(observation_payload)
+    registry = registry_snapshot(candidate.league_id)
     packet = {
         "schema_version": PACKET_SCHEMA_VERSION,
         "packet_id": _hash(
@@ -115,7 +150,9 @@ def build_packet(
             "config_hash": settings_hash(settings),
             "bookmaker_policy_version": BOOKMAKER_POLICY_VERSION,
             "eligibility": "PASSED",
-            "registry_version": None,
+            "registry_version": registry["version"],
+            "registry_league_id": registry["league_id"],
+            "registry_classification": registry["classification"],
         },
         "risk": {
             "stake": round(float(stake), 2),

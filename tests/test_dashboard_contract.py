@@ -1,3 +1,4 @@
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -34,12 +35,18 @@ def test_dashboard_has_one_shared_design_system_and_all_primary_sectors():
     css = read("assets/qb-dashboard.css")
     js = read("assets/qb-dashboard.js")
     assert ".shell" in css and ".lifecycle" in css and ".clv" in css
-    assert "const productionCard" in js and "const signalCard" in js and "const lifecycle" in js
+    assert (
+        "const productionCard" in js
+        and "const signalCard" in js
+        and "const lifecycle" in js
+    )
     for page in PAGES:
         text = read(page)
         assert "./assets/qb-dashboard.css" in text
         if page == "strong-signals.html":
-            assert "./assets/strong-signals.js?v=20260909-1" in text
+            match = re.search(r'\./assets/strong-signals\.js(?:\?[^"\']*)?', text)
+            assert match
+            assert (ROOT / "assets" / "strong-signals.js").is_file()
         else:
             assert "./assets/qb-dashboard.js" in text
         for href in NAV_PAGES:
@@ -77,7 +84,14 @@ def test_dashboard_zero_pick_contract_and_truthful_state_labels():
         assert 'id="roi"' in text
         assert "data-generation" in text
         assert "data-capture" in text
-    for state in ("RUNNING", "NO SIGNALS", "NO ELIGIBLE FIXTURES", "STALE", "NO DATA", "ERROR"):
+    for state in (
+        "RUNNING",
+        "NO SIGNALS",
+        "NO ELIGIBLE FIXTURES",
+        "STALE",
+        "NO DATA",
+        "ERROR",
+    ):
         assert state in js
     assert "const status =" in js
 
@@ -101,7 +115,10 @@ def test_strong_page_cannot_fall_through_to_production_overview_accounting():
     js = read("assets/strong-signals.js")
     assert '<body data-page="strong">' in strong
     assert "VIRTUAL / COUNTERFACTUAL · 10,000 RSD BASE" in strong
-    assert "Promise.all([load('strong_signals.json'), load('strong_signals_portfolio.json')])" in js
+    assert (
+        "Promise.all([load('strong_signals.json'), "
+        "load('strong_signals_portfolio.json')])" in js
+    )
     assert "strong_signals.json" in js
     assert "strong_signals_portfolio.json" in js
     assert "strong_signal" in js.lower()
