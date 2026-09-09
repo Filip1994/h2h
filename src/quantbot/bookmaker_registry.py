@@ -30,10 +30,11 @@ def bookmaker_identity(
         bid = None
     entry = dict(BOOKMAKER_REGISTRY.get(bid, {}))
     name = str(bookmaker_name or entry.get("name") or "Bookmaker")
+    verified = bool(entry.get("source_verified"))
     return {
         "bookmaker_id": bid,
         "bookmaker": name,
-        "logo_url": entry.get("logo_url") if entry.get("source_verified") else None,
-        "logo_source": entry.get("logo_source") if entry.get("source_verified") else None,
-        "logo_verified": bool(entry.get("source_verified")),
+        "logo_url": entry.get("logo_url") if verified else None,
+        "logo_source": entry.get("logo_source") if verified else None,
+        "logo_verified": verified,
     }
