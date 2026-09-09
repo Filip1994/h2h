@@ -36,6 +36,7 @@ on:
       - intraday_health.json
       - deployment_meta.json
       - tools/build_public_signal_buckets.py
+      - tools/validate_public_dashboard.py
       - strong_signal_legacy_settlements.json
       - src/quantbot/strong_signal_bankroll.py
       - .github/workflows/pages.yml
@@ -62,6 +63,8 @@ jobs:
           fetch-depth: 1
       - name: Build isolated public signal datasets
         run: python tools/build_public_signal_buckets.py
+      - name: Validate full public dashboard data contract
+        run: python tools/validate_public_dashboard.py
       - name: Validate isolated Strong Signal publication contract
         run: |
           python - <<'PY'
