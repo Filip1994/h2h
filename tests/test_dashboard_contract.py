@@ -34,15 +34,14 @@ def test_dashboard_has_one_shared_design_system_and_all_primary_sectors():
     css = read("assets/qb-dashboard.css")
     js = read("assets/qb-dashboard.js")
     assert ".shell" in css and ".lifecycle" in css and ".clv" in css
-    assert (
-        "const productionCard" in js
-        and "const signalCard" in js
-        and "const lifecycle" in js
-    )
+    assert "const productionCard" in js and "const signalCard" in js and "const lifecycle" in js
     for page in PAGES:
         text = read(page)
         assert "./assets/qb-dashboard.css" in text
-        assert "./assets/qb-dashboard.js" in text
+        if page == "strong-signals.html":
+            assert "./assets/strong-signals.js?v=20260909-1" in text
+        else:
+            assert "./assets/qb-dashboard.js" in text
         for href in NAV_PAGES:
             assert f'href="{href}"' in text
 
@@ -78,14 +77,7 @@ def test_dashboard_zero_pick_contract_and_truthful_state_labels():
         assert 'id="roi"' in text
         assert "data-generation" in text
         assert "data-capture" in text
-    for state in (
-        "RUNNING",
-        "NO SIGNALS",
-        "NO ELIGIBLE FIXTURES",
-        "STALE",
-        "NO DATA",
-        "ERROR",
-    ):
+    for state in ("RUNNING", "NO SIGNALS", "NO ELIGIBLE FIXTURES", "STALE", "NO DATA", "ERROR"):
         assert state in js
     assert "const status =" in js
 
@@ -106,12 +98,13 @@ def test_dashboard_pages_have_explicit_sector_identity_and_active_navigation():
 
 def test_strong_page_cannot_fall_through_to_production_overview_accounting():
     strong = read("strong-signals.html")
-    js = read("assets/qb-dashboard.js")
+    js = read("assets/strong-signals.js")
     assert '<body data-page="strong">' in strong
     assert "VIRTUAL / COUNTERFACTUAL · 10,000 RSD BASE" in strong
-    assert "renderStrong" in js
-    assert "strong_signals_portfolio.json" in js
+    assert "Promise.all([load('strong_signals.json'), load('strong_signals_portfolio.json')])" in js
     assert "strong_signals.json" in js
+    assert "strong_signals_portfolio.json" in js
+    assert "strong_signal" in js.lower()
 
 
 def test_strong_and_near_pages_have_active_and_history_contract():
@@ -164,11 +157,13 @@ def test_high_volume_observational_buckets_use_compact_list_layout():
     near = read("near-misses.html")
     strong = read("strong-signals.html")
     js = read("assets/qb-dashboard.js")
+    strong_js = read("assets/strong-signals.js")
     assert 'class="cards signal-list"' in near
     assert 'class="cards signal-list"' in strong
     assert ".signal-list{display:flex;flex-direction:column" in css
     assert ".overview-snapshot{display:flex;flex-direction:column" in css
     assert "signal-row" in js
+    assert "signal-row" in strong_js
     assert "fixtureTeams" in js
     assert "home_name" in js
     assert "away_name" in js
