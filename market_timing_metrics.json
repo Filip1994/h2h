@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-09-09T11:34:13.139619+00:00",
-  "last_run_api_requests": 17,
-  "last_run_snapshots": 48,
-  "last_run_useful_observations": 15,
-  "total_snapshots": 93,
-  "total_useful_observations": 30,
-  "api_requests_per_useful_observation": 1.1333
+  "updated_at": "2026-09-09T13:32:07.647510+00:00",
+  "last_run_api_requests": 23,
+  "last_run_snapshots": 69,
+  "last_run_useful_observations": 22,
+  "total_snapshots": 162,
+  "total_useful_observations": 52,
+  "api_requests_per_useful_observation": 1.0455
 }
