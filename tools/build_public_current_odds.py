@@ -60,35 +60,50 @@ def build(root: Path) -> dict[str, Any]:
                 continue
             if key not in latest or observed > latest[key]["_observed"]:
                 latest[key] = {**row, "_observed": observed}
+        except (KeyError, TypeError, ValueError, json.JSONDecodeError):
+            continue
 
     output = []
     for key, target in sorted(targets.items()):
         row = latest.get(key)
         if row is None:
-            output.append({**target, "current_odds": None, "current_observed_at": None, "current_observation_id": None, "current_freshness_state": "UNAVAILABLE"})
+            output.append(
+                {
+                    **target,
+                    "current_odds": None,
+                    "current_observed_at": None,
+                    "current_observation_id": None,
+                    "current_freshness_state": "UNAVAILABLE",
+                }
+            )
             continue
         age = max(0.0, (now - row["_observed"]).total_seconds() / 60.0)
         kickoff = datetime.fromisoformat(str(row["kickoff"]).replace("Z", "+00:00")).astimezone(UTC)
         state = "CLOSED" if now >= kickoff else ("LIVE" if age <= FRESHNESS_MINUTES else "STALE")
-        output.append({
-            **target,
-            "bookmaker_name": row.get("bookmaker") or target.get("bookmaker_name"),
-            "current_odds": row.get("odd"),
-            "current_observed_at": row.get("captured_at"),
-            "current_observation_id": row.get("observation_id"),
-            "current_observation_type": row.get("signal_state") or "OBSERVED",
-            "current_freshness_state": state,
-        })
+        output.append(
+            {
+                **target,
+                "bookmaker_name": row.get("bookmaker") or target.get("bookmaker_name"),
+                "current_odds": row.get("odd"),
+                "current_observed_at": row.get("captured_at"),
+                "current_observation_id": row.get("observation_id"),
+                "current_observation_type": row.get("signal_state") or "OBSERVED",
+                "current_freshness_state": state,
+            }
+        )
     return {"generated_at": now.isoformat(), "freshness_window_minutes": FRESHNESS_MINUTES, "items": output}
 
 
 def main() -> int:
     import argparse
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", type=Path, default=Path("."))
     args = parser.parse_args()
     payload = build(args.root)
-    (args.root / "current_odds.json").write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    (args.root / "current_odds.json").write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
     print(f"published current odds for {len(payload['items'])} active records")
     return 0
 
