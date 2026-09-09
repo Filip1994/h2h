@@ -41,10 +41,10 @@ jobs:
         run: python main.py capture-odds
       - name: Audit production operations gate
         run: python tools/audit_production_operations.py
-      - name: Commit immutable observations, coverage state and operations evidence
+      - name: Commit immutable observations, coverage, quota state and operations evidence
         run: |
           set -euo pipefail
-          files=(odds_collection_budget.json odds_collection_state.json odds_collection_metrics.json production_operations_gate.md data/odds_snapshots.jsonl data/odds_collection_coverage.jsonl data/eligibility_coverage.jsonl)
+          files=(odds_collection_budget.json odds_collection_state.json odds_collection_metrics.json production_operations_gate.md data/odds_snapshots.jsonl data/odds_collection_coverage.jsonl data/eligibility_coverage.jsonl data/football_api_quota.json)
           changed=0
           for file in "${files[@]}"; do
             if [ -e "$file" ] && ! git diff --quiet -- "$file"; then changed=1; fi
