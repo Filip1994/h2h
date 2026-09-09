@@ -189,6 +189,14 @@ class QuantEngine:
             "fixtures_without_odds": 0,
             "fixture_failures": {"api": 0, "dixon_coles": 0, "other": 0},
             "eligibility_rejections": {},
+            "funnel_rejections": [],
+            "odds_available": 0,
+            "valid_quotes": 0,
+            "ev_pass": 0,
+            "edge_pass": 0,
+            "risk_rejections": 0,
+            "duplicate_rejections": 0,
+            "persistence_failures": 0,
         }
         raw_fixtures = self.api.fixtures_by_date(now_local.date().isoformat())
         telemetry["fixtures_discovered"] = len(raw_fixtures)
@@ -223,6 +231,7 @@ class QuantEngine:
                 self.settings.excluded_countries,
             )
             if not decision.eligible:
+                telemetry["funnel_rejections"].append({"fixture_id": fixture_id, "stage": "eligible", "reason": decision.reason})
                 telemetry["eligibility_rejections"][decision.reason] = (
                     int(telemetry["eligibility_rejections"].get(decision.reason, 0)) + 1
                 )
@@ -246,20 +255,26 @@ class QuantEngine:
                     allow_any_bookmaker=self.settings.allow_any_bookmaker,
                     captured_at=decision_timestamp,
                 )
-                if not quotes:
+                if quotes:
+                    telemetry["odds_available"] += 1
+                else:
                     telemetry["fixtures_without_odds"] += 1
+                    telemetry["funnel_rejections"].append({"fixture_id": fixture_id, "stage": "odds_available", "reason": "NO_ODDS_RESPONSE"})
             except APIBudgetExceeded:
                 diagnostics.append("API budžet dostignut; skeniranje zaustavljeno")
                 break
             except (APIError, DixonColesFitError, ArithmeticError, ValueError) as exc:
                 if isinstance(exc, APIError):
                     telemetry["fixture_failures"]["api"] += 1
+                    telemetry["funnel_rejections"].append({"fixture_id": fixture_id, "stage": "modelled", "reason": "API_ERROR"})
                 elif isinstance(exc, DixonColesFitError):
                     telemetry["fixture_failures"]["dixon_coles"] += 1
                     if "dovoljan trening" in str(exc):
                         telemetry["training_sample_insufficiency"] += 1
+                        telemetry["funnel_rejections"].append({"fixture_id": fixture_id, "stage": "modelled", "reason": "NO_TRAINING_SAMPLE"})
                     else:
                         telemetry["fit_failures"] += 1
+                        telemetry["funnel_rejections"].append({"fixture_id": fixture_id, "stage": "modelled", "reason": "MODEL_FIT_FAILURE"})
                 else:
                     telemetry["fixture_failures"]["other"] += 1
                 diagnostics.append(f"fixture_{fixture_id}: {exc}")
@@ -289,8 +304,14 @@ class QuantEngine:
                     probability_edge = decision_probability - quote.devig_probability
                     if expected_value < self.settings.min_ev:
                         reason = "REJECT_LOW_EV"
-                    elif probability_edge < self.settings.min_edge:
-                        reason = "REJECT_LOW_EDGE"
+                    else:
+                        telemetry["ev_pass"] += 1
+                        if probability_edge < self.settings.min_edge:
+                            reason = "REJECT_LOW_EDGE"
+                        else:
+                            telemetry["edge_pass"] += 1
+                if quote is not None:
+                    telemetry["valid_quotes"] += 1
                 prediction_records.append(
                     self._prediction_record(
                         fields,
@@ -304,6 +325,8 @@ class QuantEngine:
                     )
                 )
                 telemetry["predictions_generated"] += 1
+                if reason:
+                    telemetry["funnel_rejections"].append({"fixture_id": fixture_id, "market": market.value, "stage": "strategy", "reason": reason})
                 if (
                     reason
                     or quote is None
@@ -349,6 +372,15 @@ class QuantEngine:
         allocations = allocate_stakes(
             candidates, existing_bets, now=now_local, settings=self.settings
         )
+        telemetry["risk_checks"] = len(candidates)
+        allocated_before_strength = {
+            f"{candidate.fixture_id}_{candidate.market.value}_{MODEL_VERSION}" for candidate, _ in allocations
+        }
+        for candidate in candidates:
+            key = f"{candidate.fixture_id}_{candidate.market.value}_{MODEL_VERSION}"
+            if key not in allocated_before_strength:
+                telemetry["risk_rejections"] += 1
+                telemetry["funnel_rejections"].append({"fixture_id": candidate.fixture_id, "market": candidate.market.value, "stage": "risk_staking", "reason": "RISK_OR_CAPACITY"})
         if self.settings.intraday_mode:
             allocations = [
                 (candidate, stake)
@@ -357,10 +389,14 @@ class QuantEngine:
                 and candidate.probability_edge >= self.settings.strong_signal_min_edge
                 and stake >= self.settings.strong_signal_min_stake
             ]
-        selected_ids = {
+        allocated_ids = {
             f"{candidate.fixture_id}_{candidate.market.value}_{MODEL_VERSION}"
             for candidate, _ in allocations
         }
+        if self.settings.intraday_mode:
+            # Intraday strength filtering is a signal-classification rule, not risk capacity.
+            pass
+        selected_ids = allocated_ids
         for record in prediction_records:
             if record["id"] in selected_ids:
                 record["selected"] = True
@@ -408,6 +444,11 @@ class QuantEngine:
                 bet["decision_packet_integrity_hash"] = packet["integrity_hash"]
         appended = self.bet_store.append_unique_fixtures(proposed_bets)
         telemetry["selections_produced"] = len(appended)
+        proposed_ids = {str(b.get("id")) for b in proposed_bets}
+        appended_ids = {str(b.get("id")) for b in appended}
+        telemetry["duplicate_rejections"] += max(0, len(proposed_ids - appended_ids))
+        for bet_id in sorted(proposed_ids - appended_ids):
+            telemetry["funnel_rejections"].append({"bet_id": bet_id, "stage": "persisted_bet", "reason": "DUPLICATE_OR_BLOCKED"})
         telemetry["funnel"] = {
             "discovered": telemetry["fixtures_discovered"],
             "eligible": telemetry["fixtures_eligible"],
