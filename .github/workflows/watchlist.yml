@@ -10,7 +10,7 @@ jobs:
   watchlist:
     runs-on: ubuntu-latest
     concurrency:
-      group: quantbet-ledger
+      group: quantbet-football-api-global
       cancel-in-progress: false
     env:
       API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}

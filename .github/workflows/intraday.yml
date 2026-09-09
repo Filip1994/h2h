@@ -10,7 +10,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: quantbet-ledger
+  group: quantbet-football-api-global
   cancel-in-progress: false
 
 jobs:
