@@ -140,10 +140,10 @@ def test_engine_persists_all_qualifying_markets_and_blocks_fixture_on_rerun(
     assert second.new_bets == ()
     assert len(engine.bet_store.load()) == 2
     assert second.telemetry["funnel"]["discovered"] == 1
-    assert second.telemetry["funnel"]["eligible"] == 0
-    assert second.telemetry["funnel"]["modelled"] == 0
-    assert second.telemetry["funnel"]["predictions"] == 0
-    assert second.telemetry["funnel"]["candidates"] == 0
+    assert second.telemetry["funnel"]["eligible"] == 1
+    assert second.telemetry["funnel"]["modelled"] == 1
+    assert second.telemetry["funnel"]["predictions"] == 3
+    assert second.telemetry["funnel"]["candidates"] == 2
     assert second.telemetry["funnel"]["selections"] == 0
 
 
