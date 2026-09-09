@@ -25,7 +25,11 @@ def _fixture_failure_counts(diagnostics: tuple[str, ...]) -> dict[str, int]:
     for diagnostic in diagnostics:
         if not diagnostic.startswith("fixture_"):
             continue
-        if "API " in diagnostic or "API greška" in diagnostic or "API mrežna" in diagnostic:
+        if (
+            "API " in diagnostic
+            or "API greška" in diagnostic
+            or "API mrežna" in diagnostic
+        ):
             counts["api"] += 1
         elif "Dixon" in diagnostic or "dovoljan trening" in diagnostic:
             counts["dixon_coles"] += 1
@@ -50,17 +54,25 @@ def _funnel(telemetry: dict[str, Any]) -> dict[str, int]:
         "predictions": int(telemetry.get("predictions_generated", 0)),
         "odds_available": int(telemetry.get("odds_available", 0)),
         "valid_quotes": int(telemetry.get("valid_quotes", 0)),
-        "candidates": int(telemetry.get("candidates_qualified", telemetry.get("candidates", 0))),
+        "candidates": int(
+            telemetry.get("candidates_qualified", telemetry.get("candidates", 0))
+        ),
         "ev_pass": int(telemetry.get("ev_pass", 0)),
         "edge_pass": int(telemetry.get("edge_pass", 0)),
-        "risk_checks": int(telemetry.get("risk_checks", telemetry.get("candidates_qualified", 0))),
-        "selected": int(telemetry.get("selected", telemetry.get("selections_produced", 0))),
+        "risk_checks": int(
+            telemetry.get("risk_checks", telemetry.get("candidates_qualified", 0))
+        ),
+        "selected": int(
+            telemetry.get("selected", telemetry.get("selections_produced", 0))
+        ),
         "persisted_bets": int(telemetry.get("selections_produced", 0)),
         "settled": int(telemetry.get("settled", 0)),
     }
 
 
-def _classification_reasons(usage: dict[str, Any], telemetry: dict[str, Any]) -> list[str]:
+def _classification_reasons(
+    usage: dict[str, Any], telemetry: dict[str, Any]
+) -> list[str]:
     reasons: list[str] = []
     if usage.get("rate_limit_events", 0):
         reasons.append("API_RATE_LIMIT")
@@ -70,7 +82,10 @@ def _classification_reasons(usage: dict[str, Any], telemetry: dict[str, Any]) ->
         reasons.append("NETWORK_ERROR")
     if usage.get("budget_exhaustion_events", 0):
         reasons.append("API_BUDGET_EXHAUSTED")
-    if telemetry.get("global_quota", {}).get("quota_pressure_state") not in (None, "HEALTHY"):
+    if telemetry.get("global_quota", {}).get("quota_pressure_state") not in (
+        None,
+        "HEALTHY",
+    ):
         reasons.append("GLOBAL_QUOTA_PRESSURE")
     fixture_failures = telemetry.get("fixture_failures", {})
     if fixture_failures.get("api", 0):
@@ -87,7 +102,9 @@ def _classification_reasons(usage: dict[str, Any], telemetry: dict[str, Any]) ->
 def build_success_health(generated_at: datetime, result: Any) -> dict[str, Any]:
     usage = dict(result.api_usage)
     telemetry = _telemetry(result)
-    fixture_failures = telemetry.get("fixture_failures") or _fixture_failure_counts(result.diagnostics)
+    fixture_failures = telemetry.get("fixture_failures") or _fixture_failure_counts(
+        result.diagnostics
+    )
     telemetry["fixture_failures"] = fixture_failures
     funnel = _funnel(telemetry)
     telemetry["funnel"] = funnel
@@ -111,7 +128,12 @@ def build_success_health(generated_at: datetime, result: Any) -> dict[str, Any]:
     }
 
 
-def build_failure_health(generated_at: datetime, api_usage: dict[str, Any], error: BaseException, telemetry: dict[str, Any] | None = None) -> dict[str, Any]:
+def build_failure_health(
+    generated_at: datetime,
+    api_usage: dict[str, Any],
+    error: BaseException,
+    telemetry: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     pipeline = dict(telemetry or {})
     pipeline.setdefault("fixture_failures", {"api": 0, "dixon_coles": 0, "other": 0})
     funnel = _funnel(pipeline)

@@ -31,7 +31,14 @@ def settings_hash(settings: Any) -> str:
     return _hash(payload)
 
 
-def build_packet(candidate: Any, stake: float, *, settings: Any, decision_timestamp: datetime, calibration_hash: str | None) -> dict[str, Any]:
+def build_packet(
+    candidate: Any,
+    stake: float,
+    *,
+    settings: Any,
+    decision_timestamp: datetime,
+    calibration_hash: str | None,
+) -> dict[str, Any]:
     quote = candidate.quote
     decision_at = decision_timestamp.astimezone(UTC).isoformat()
     code_sha = os.getenv("GITHUB_SHA") or "LOCAL_UNPINNED"
@@ -48,7 +55,16 @@ def build_packet(candidate: Any, stake: float, *, settings: Any, decision_timest
     observation_id = _hash(observation_payload)
     packet = {
         "schema_version": PACKET_SCHEMA_VERSION,
-        "packet_id": _hash([candidate.fixture_id, candidate.market.value, quote.bookmaker_id, quote.captured_at.astimezone(UTC).isoformat(), decision_at, code_sha]),
+        "packet_id": _hash(
+            [
+                candidate.fixture_id,
+                candidate.market.value,
+                quote.bookmaker_id,
+                quote.captured_at.astimezone(UTC).isoformat(),
+                decision_at,
+                code_sha,
+            ]
+        ),
         "fixture": {
             "fixture_id": candidate.fixture_id,
             "league_id": candidate.league_id,
@@ -90,7 +106,9 @@ def build_packet(candidate: Any, stake: float, *, settings: Any, decision_timest
             "overround": round(quote.overround, 8),
             "expected_value": round(candidate.expected_value, 8),
             "probability_edge": round(candidate.probability_edge, 8),
-            "haircut": round(candidate.model_probability - candidate.decision_probability, 8),
+            "haircut": round(
+                candidate.model_probability - candidate.decision_probability, 8
+            ),
         },
         "strategy": {
             "version": STRATEGY_VERSION,
@@ -109,8 +127,14 @@ def build_packet(candidate: Any, stake: float, *, settings: Any, decision_timest
         "provenance": {
             "canonical_observation_id": observation_id,
             "canonical_observation": observation_payload,
-            "opening": {"status": "UNAVAILABLE_AT_DECISION_TIME", "reason": "NO_EARLIER_OBSERVATION"},
-            "closing": {"status": "UNAVAILABLE_AT_DECISION_TIME", "reason": "NOT_YET_OBSERVED"},
+            "opening": {
+                "status": "UNAVAILABLE_AT_DECISION_TIME",
+                "reason": "NO_EARLIER_OBSERVATION",
+            },
+            "closing": {
+                "status": "UNAVAILABLE_AT_DECISION_TIME",
+                "reason": "NOT_YET_OBSERVED",
+            },
         },
     }
     packet["integrity_hash"] = _hash(packet)

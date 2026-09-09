@@ -41,16 +41,19 @@ def test_observation_id_is_stable_and_contract_exposes_provenance() -> None:
         kickoff=base + timedelta(hours=2),
     )
     assert opening["observation_id"]
-    assert opening["observation_id"] == canonical_observation(
-        fixture_id=1,
-        market="OVER_2_5",
-        bookmaker_id=8,
-        bookmaker="Book",
-        odd=2.0,
-        opposite_odd=1.8,
-        captured_at=base,
-        snapshot_type="OPENING",
-    )["observation_id"]
+    assert (
+        opening["observation_id"]
+        == canonical_observation(
+            fixture_id=1,
+            market="OVER_2_5",
+            bookmaker_id=8,
+            bookmaker="Book",
+            odd=2.0,
+            opposite_odd=1.8,
+            captured_at=base,
+            snapshot_type="OPENING",
+        )["observation_id"]
+    )
     assert contract["opening_observation_id"] == opening["observation_id"]
     assert contract["pick_observation_id"] == pick["observation_id"]
     assert contract["closing_observation_id"] == closing["observation_id"]

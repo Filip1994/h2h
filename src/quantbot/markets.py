@@ -109,9 +109,7 @@ def extract_best_quotes(
     bookmakers = _bookmakers(raw_odds)
 
     if only_bookmaker_id is not None:
-        pool = [
-            item for item in bookmakers if _bookmaker_id(item) == only_bookmaker_id
-        ]
+        pool = [item for item in bookmakers if _bookmaker_id(item) == only_bookmaker_id]
     else:
         pool = bookmakers
 

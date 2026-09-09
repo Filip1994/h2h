@@ -2,7 +2,9 @@ from quantbot.quota import GlobalQuotaExceeded, GlobalQuotaGovernor
 
 
 def test_global_quota_reserve_and_consume_reconcile(tmp_path) -> None:
-    governor = GlobalQuotaGovernor(tmp_path / "quota.json", daily_capacity=3, safety_reserve=1)
+    governor = GlobalQuotaGovernor(
+        tmp_path / "quota.json", daily_capacity=3, safety_reserve=1
+    )
     first = governor.reserve("daily", "fixtures")
     second = governor.reserve("watchlist", "odds")
     snapshot = governor.snapshot()

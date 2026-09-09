@@ -167,9 +167,13 @@ class APIFootballClient:
                     "Run je dostigao API radni budžet od "
                     f"{usable_budget} zahteva; rezerva={self.settings.api_budget_reserve}"
                 )
-            workflow = os.getenv("GITHUB_WORKFLOW") or os.getenv("GITHUB_JOB") or "local"
+            workflow = (
+                os.getenv("GITHUB_WORKFLOW") or os.getenv("GITHUB_JOB") or "local"
+            )
             try:
-                reservation_id = self.quota.reserve(workflow, endpoint, "GET", protected=reserve_protected)
+                reservation_id = self.quota.reserve(
+                    workflow, endpoint, "GET", protected=reserve_protected
+                )
             except GlobalQuotaExceeded as exc:
                 self.budget_exhaustion_events += 1
                 raise APIBudgetExceeded(str(exc)) from exc
