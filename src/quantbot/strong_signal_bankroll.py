@@ -21,15 +21,15 @@ class StrongSignalPortfolio:
 
 
 def _terminal(row: dict[str, Any]) -> bool:
-    """Only explicit virtual settlement can affect the virtual portfolio.
-
-    Production settlement fields are deliberately ignored. A linked Production
-    bet may be referenced by a Strong Signal, but its result/P&L is not a
-    Strong Signal result.
-    """
+    """Only explicit virtual settlement can affect the virtual portfolio."""
     return bool(row.get("virtual_settled")) and str(
         row.get("status") or ""
-    ).upper() in {"WIN", "LOSS", "VOID", "REVIEW"}
+    ).upper() in {
+        "WIN",
+        "LOSS",
+        "VOID",
+        "REVIEW",
+    }
 
 
 def _is_virtual(row: dict[str, Any]) -> bool:
