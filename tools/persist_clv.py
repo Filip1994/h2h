@@ -69,7 +69,9 @@ def refresh_lifecycle_fields(
         ),
         None,
     )
-    pick_timestamp = bet.get("odds_captured_at") or (entry or {}).get("odds_captured_at")
+    pick_timestamp = bet.get("odds_captured_at") or (entry or {}).get(
+        "odds_captured_at"
+    )
     try:
         pick_at = datetime.fromisoformat(str(pick_timestamp)).astimezone(UTC)
         kickoff = datetime.fromisoformat(str(bet["kickoff"])).astimezone(UTC)
@@ -115,7 +117,9 @@ def refresh_lifecycle_fields(
         and pick
         and bet.get("closing_odd") is not None
         else "PARTIAL"
-        if bet.get("opening_odd") is not None or pick or bet.get("closing_odd") is not None
+        if bet.get("opening_odd") is not None
+        or pick
+        or bet.get("closing_odd") is not None
         else "UNRECOVERABLE"
     )
     if bet.get("odd") is not None and bet.get("closing_odd") is not None:
