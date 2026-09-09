@@ -1,0 +1,33 @@
+name: Apply immutable decision packet integration
+on:
+  push:
+    branches: [fix/79-immutable-decision-packets-v2]
+
+jobs:
+  patch:
+    if: github.actor == 'Filip1994'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Integrate packet creation
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('src/quantbot/engine.py')
+          s = p.read_text()
+          s = s.replace('from .dixon_coles import DixonColesFitError, DixonColesModel\n', 'from .dixon_coles import DixonColesFitError, DixonColesModel\nfrom .decision_packet import build_packet\n', 1)
+          old = '''        signal_source = (\n            "INTRADAY_ALERT" if self.settings.intraday_mode else "DAILY_BULLETIN"\n        )\n        for bet in proposed_bets:\n            bet["signal_source"] = signal_source\n            bet["signal_sent_at"] = now_local.isoformat()\n'''
+          new = '''        signal_source = (\n            "INTRADAY_ALERT" if self.settings.intraday_mode else "DAILY_BULLETIN"\n        )\n        candidate_by_id = {\n            f"{candidate.fixture_id}_{candidate.market.value}_{MODEL_VERSION}": (candidate, stake)\n            for candidate, stake in allocations\n        }\n        calibration_hash = None\n        try:\n            import hashlib\n            calibration_hash = hashlib.sha256(self.settings.calibration_file.read_bytes()).hexdigest()\n        except OSError:\n            calibration_hash = None\n        for bet in proposed_bets:\n            bet["signal_source"] = signal_source\n            bet["signal_sent_at"] = now_local.isoformat()\n            packet_key = str(bet.get("prediction_id") or "")\n            if packet_key in candidate_by_id:\n                candidate, stake = candidate_by_id[packet_key]\n                bet["decision_packet"] = build_packet(\n                    candidate,\n                    stake,\n                    settings=self.settings,\n                    model=self._model_for_fixture(\n                        {\n                            "league_id": candidate.league_id,\n                            "season": int(str(candidate.kickoff.year)),\n                            "home_id": candidate.home_id,\n                            "away_id": candidate.away_id,\n                        },\n                        data_cutoff=decision_timestamp,\n                    ),\n                    decision_timestamp=decision_timestamp,\n                    calibration_hash=calibration_hash,\n                )\n                bet["decision_packet_id"] = bet["decision_packet"]["packet_id"]\n                bet["decision_packet_integrity_hash"] = bet["decision_packet"]["integrity_hash"]\n'''
+          if old not in s:
+              raise SystemExit('signal source block not found')
+          s = s.replace(old, new, 1)
+          p.write_text(s)
+          PY
+          rm -f .github/workflows/apply-79-packet.yml
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add src/quantbot/engine.py .github/workflows/apply-79-packet.yml
+          git commit -m 'feat: attach immutable decision packet to production bet'
+          git push
