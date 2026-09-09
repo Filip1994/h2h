@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import json
 
-from tools.build_public_signal_buckets import build
 from src.quantbot.strong_signal_bankroll import portfolio
+from tools.build_public_signal_buckets import build
 
 
 def test_public_buckets_migrate_history_and_keep_strong_ledger_separate(
