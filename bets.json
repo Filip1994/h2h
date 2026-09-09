@@ -967,5 +967,433 @@
     "settled_at": "2026-09-09T20:19:09.803045+00:00",
     "clv_odds_pct": -0.042553,
     "clv_probability_pp": -0.018095
+  },
+  {
+    "id": "1490461_UNDER_2_5",
+    "type": "DC_VALUE",
+    "mode": "PAPER",
+    "event_id": 1490461,
+    "prediction_id": "1490461_UNDER_2_5_dc-value-v2.1.0",
+    "created_at": "2026-09-10T00:23:24.071011+02:00",
+    "decision_timestamp": "2026-09-10T00:23:24.071011+02:00",
+    "data_cutoff": "2026-09-09T22:23:24.071011+00:00",
+    "date": "2026-09-10",
+    "kickoff": "2026-09-10T02:30:00+00:00",
+    "sport": "Football",
+    "match": "Los Angeles FC vs New York Red Bulls",
+    "home_id": 1616,
+    "away_id": 1602,
+    "league": "USA - Major League Soccer",
+    "league_id": 253,
+    "market": "UNDER_2_5",
+    "market_display": "Under 2.5",
+    "stake": 500.0,
+    "odd": 3.45,
+    "opening_odd": null,
+    "opposite_odd": 1.29,
+    "opening_opposite_odd": null,
+    "bookmaker_id": 16,
+    "bookmaker": "Unibet",
+    "odds_captured_at": "2026-09-09T22:23:24.071011+00:00",
+    "opening_odds_captured_at": null,
+    "implied_probability": 0.289855,
+    "market_probability_devig": 0.272152,
+    "market_overround": 0.065049,
+    "model_probability": 0.446819,
+    "calibrated_probability": 0.446819,
+    "decision_probability": 0.416819,
+    "probability_edge": 0.144667,
+    "expected_value": 0.438024,
+    "lambda_home": 2.024782,
+    "lambda_away": 0.871541,
+    "rho": -0.044213,
+    "xi": 0.0015,
+    "model_version": "dc-value-v2.1.0",
+    "model_fitted_matches": 1904,
+    "model_team_count": 30,
+    "model_training_cutoff": "2026-09-09T22:23:24.071011+00:00",
+    "model_training_identity": "b5806b0f876aaf4f5bee17bdba2fb7d817b4cb034afc4903639dd181c18e088f",
+    "calibration_status": "IDENTITY_UNVALIDATED",
+    "status": "PENDING",
+    "profit": 0.0,
+    "signal_source": "DAILY_BULLETIN",
+    "signal_sent_at": "2026-09-10T00:23:24.071011+02:00",
+    "decision_packet": {
+      "schema_version": 2,
+      "packet_id": "2cc18a69ae1202eb38e7457e9ca104608171767679ac2d5a66bae6b8ee004cb9",
+      "fixture": {
+        "fixture_id": 1490461,
+        "league_id": 253,
+        "league": "USA - Major League Soccer",
+        "home_id": 1616,
+        "home": "Los Angeles FC",
+        "away_id": 1602,
+        "away": "New York Red Bulls",
+        "kickoff": "2026-09-10T02:30:00+00:00"
+      },
+      "decision": {
+        "market": "UNDER_2_5",
+        "selection": "UNDER_2_5",
+        "bookmaker_id": 16,
+        "bookmaker": "Unibet",
+        "pick_odd": 3.45,
+        "pick_observed_at": "2026-09-09T22:23:24.071011+00:00",
+        "pick_observation_id": "1aaff1d6c03573d1941c6df808c2295bb1a4c0b96e820ae00ddfb1b21fcec6bd",
+        "decision_timestamp": "2026-09-09T22:23:24.071011+00:00"
+      },
+      "model": {
+        "version": "dc-value-v2.1.0",
+        "code_sha": "3c91cded5c4bd7349bedc953bd8efca396d40eb7",
+        "training_cutoff": "2026-09-09T22:23:24.071011+00:00",
+        "training_sample": {
+          "fitted_matches": 1904,
+          "team_count": 30,
+          "identity": "b5806b0f876aaf4f5bee17bdba2fb7d817b4cb034afc4903639dd181c18e088f"
+        },
+        "raw_probability": 0.44681861,
+        "calibrated_probability": 0.44681861,
+        "decision_probability": 0.41681861,
+        "calibration_status": "IDENTITY_UNVALIDATED",
+        "calibration_hash": "db20ea934654f4e897da255ee1418059db0117864000186544ac1ba9abd9a328"
+      },
+      "market_inputs": {
+        "opposite_odd": 1.29,
+        "devig_probability": 0.2721519,
+        "overround": 0.06504887,
+        "expected_value": 0.4380242,
+        "probability_edge": 0.14466671,
+        "haircut": 0.03
+      },
+      "strategy": {
+        "version": "production-decision-v1",
+        "config_hash": "7fdf3494c3a3720a6774586f142ba51a2c4878612f0f13ed34c92ec37a6cb53f",
+        "bookmaker_policy_version": "all-provider-bookmakers-best-price-v1",
+        "eligibility": "PASSED",
+        "registry_version": "6d27ef1a7c19ac21ad7f4899aac611d7e9da1a84a2c7bfab6a2f9c8111173db5",
+        "registry_league_id": 253,
+        "registry_classification": {
+          "provider_league_id": 253,
+          "country": "USA",
+          "league_name": "Major League Soccer",
+          "tier": 1,
+          "enabled": true,
+          "source": "API-Football provider league ID + project tier audit"
+        }
+      },
+      "risk": {
+        "stake": 500.0,
+        "kelly_fraction": 0.25,
+        "max_bet_stake_pct": 0.01,
+        "max_daily_risk_pct": 0.03,
+        "max_open_risk_pct": 0.05
+      },
+      "provenance": {
+        "canonical_observation_id": "1aaff1d6c03573d1941c6df808c2295bb1a4c0b96e820ae00ddfb1b21fcec6bd",
+        "canonical_observation": {
+          "fixture_id": 1490461,
+          "market": "UNDER_2_5",
+          "bookmaker_id": 16,
+          "bookmaker": "Unibet",
+          "odd": 3.45,
+          "opposite_odd": 1.29,
+          "captured_at": "2026-09-09T22:23:24.071011+00:00",
+          "snapshot_type": "ENTRY"
+        },
+        "opening": {
+          "status": "UNAVAILABLE_AT_DECISION_TIME",
+          "reason": "NO_EARLIER_OBSERVATION"
+        },
+        "closing": {
+          "status": "UNAVAILABLE_AT_DECISION_TIME",
+          "reason": "NOT_YET_OBSERVED"
+        }
+      },
+      "integrity_hash": "cc1cf80589b53fca8c5519421153cb02e4634dbd0b643a2bbd78a512fd194ed9"
+    },
+    "decision_packet_id": "2cc18a69ae1202eb38e7457e9ca104608171767679ac2d5a66bae6b8ee004cb9",
+    "decision_packet_integrity_hash": "cc1cf80589b53fca8c5519421153cb02e4634dbd0b643a2bbd78a512fd194ed9"
+  },
+  {
+    "id": "1634287_BTTS_YES",
+    "type": "DC_VALUE",
+    "mode": "PAPER",
+    "event_id": 1634287,
+    "prediction_id": "1634287_BTTS_YES_dc-value-v2.1.0",
+    "created_at": "2026-09-10T00:23:24.071011+02:00",
+    "decision_timestamp": "2026-09-10T00:23:24.071011+02:00",
+    "data_cutoff": "2026-09-09T22:23:24.071011+00:00",
+    "date": "2026-09-10",
+    "kickoff": "2026-09-10T13:40:00+00:00",
+    "sport": "Football",
+    "match": "Dubai United vs Shabab Al Ahli Dubai",
+    "home_id": 22321,
+    "away_id": 2870,
+    "league": "United-Arab-Emirates - Pro League",
+    "league_id": 301,
+    "market": "BTTS_YES",
+    "market_display": "BTTS — Yes",
+    "stake": 500.0,
+    "odd": 1.73,
+    "opening_odd": null,
+    "opposite_odd": 2.05,
+    "opening_opposite_odd": null,
+    "bookmaker_id": 3,
+    "bookmaker": "Betfair",
+    "odds_captured_at": "2026-09-09T22:23:24.071011+00:00",
+    "opening_odds_captured_at": null,
+    "implied_probability": 0.578035,
+    "market_probability_devig": 0.542328,
+    "market_overround": 0.06584,
+    "model_probability": 0.81292,
+    "calibrated_probability": 0.81292,
+    "decision_probability": 0.78292,
+    "probability_edge": 0.240592,
+    "expected_value": 0.354451,
+    "lambda_home": 1.730842,
+    "lambda_away": 4.440552,
+    "rho": 0.011406,
+    "xi": 0.0015,
+    "model_version": "dc-value-v2.1.0",
+    "model_fitted_matches": 574,
+    "model_team_count": 19,
+    "model_training_cutoff": "2026-09-09T22:23:24.071011+00:00",
+    "model_training_identity": "8af2ad1ed431a385010b39fa3abd3d8acccd0c38866fd791b821e097ab3d8341",
+    "calibration_status": "IDENTITY_UNVALIDATED",
+    "status": "PENDING",
+    "profit": 0.0,
+    "signal_source": "DAILY_BULLETIN",
+    "signal_sent_at": "2026-09-10T00:23:24.071011+02:00",
+    "decision_packet": {
+      "schema_version": 2,
+      "packet_id": "e0f393aab3c3ebca4c0ab3ba77f8cf824b57dc2af390b7150fc14386b67f1502",
+      "fixture": {
+        "fixture_id": 1634287,
+        "league_id": 301,
+        "league": "United-Arab-Emirates - Pro League",
+        "home_id": 22321,
+        "home": "Dubai United",
+        "away_id": 2870,
+        "away": "Shabab Al Ahli Dubai",
+        "kickoff": "2026-09-10T13:40:00+00:00"
+      },
+      "decision": {
+        "market": "BTTS_YES",
+        "selection": "BTTS_YES",
+        "bookmaker_id": 3,
+        "bookmaker": "Betfair",
+        "pick_odd": 1.73,
+        "pick_observed_at": "2026-09-09T22:23:24.071011+00:00",
+        "pick_observation_id": "5ff5b6380d6614c1c98d9379517619be5f4072117fefbcb12aecccf061765f6e",
+        "decision_timestamp": "2026-09-09T22:23:24.071011+00:00"
+      },
+      "model": {
+        "version": "dc-value-v2.1.0",
+        "code_sha": "3c91cded5c4bd7349bedc953bd8efca396d40eb7",
+        "training_cutoff": "2026-09-09T22:23:24.071011+00:00",
+        "training_sample": {
+          "fitted_matches": 574,
+          "team_count": 19,
+          "identity": "8af2ad1ed431a385010b39fa3abd3d8acccd0c38866fd791b821e097ab3d8341"
+        },
+        "raw_probability": 0.81291984,
+        "calibrated_probability": 0.81291984,
+        "decision_probability": 0.78291984,
+        "calibration_status": "IDENTITY_UNVALIDATED",
+        "calibration_hash": "db20ea934654f4e897da255ee1418059db0117864000186544ac1ba9abd9a328"
+      },
+      "market_inputs": {
+        "opposite_odd": 2.05,
+        "devig_probability": 0.54232804,
+        "overround": 0.06583956,
+        "expected_value": 0.35445132,
+        "probability_edge": 0.2405918,
+        "haircut": 0.03
+      },
+      "strategy": {
+        "version": "production-decision-v1",
+        "config_hash": "7fdf3494c3a3720a6774586f142ba51a2c4878612f0f13ed34c92ec37a6cb53f",
+        "bookmaker_policy_version": "all-provider-bookmakers-best-price-v1",
+        "eligibility": "PASSED",
+        "registry_version": "6d27ef1a7c19ac21ad7f4899aac611d7e9da1a84a2c7bfab6a2f9c8111173db5",
+        "registry_league_id": 301,
+        "registry_classification": {
+          "provider_league_id": 301,
+          "country": "United-Arab-Emirates",
+          "league_name": "Pro League",
+          "tier": 1,
+          "enabled": true,
+          "source": "API-Football provider league ID + project tier audit"
+        }
+      },
+      "risk": {
+        "stake": 500.0,
+        "kelly_fraction": 0.25,
+        "max_bet_stake_pct": 0.01,
+        "max_daily_risk_pct": 0.03,
+        "max_open_risk_pct": 0.05
+      },
+      "provenance": {
+        "canonical_observation_id": "5ff5b6380d6614c1c98d9379517619be5f4072117fefbcb12aecccf061765f6e",
+        "canonical_observation": {
+          "fixture_id": 1634287,
+          "market": "BTTS_YES",
+          "bookmaker_id": 3,
+          "bookmaker": "Betfair",
+          "odd": 1.73,
+          "opposite_odd": 2.05,
+          "captured_at": "2026-09-09T22:23:24.071011+00:00",
+          "snapshot_type": "ENTRY"
+        },
+        "opening": {
+          "status": "UNAVAILABLE_AT_DECISION_TIME",
+          "reason": "NO_EARLIER_OBSERVATION"
+        },
+        "closing": {
+          "status": "UNAVAILABLE_AT_DECISION_TIME",
+          "reason": "NOT_YET_OBSERVED"
+        }
+      },
+      "integrity_hash": "01b7483cc26dc2e03d30ba432b2ad40fd021af29c802e34c8bad67c47e8def51"
+    },
+    "decision_packet_id": "e0f393aab3c3ebca4c0ab3ba77f8cf824b57dc2af390b7150fc14386b67f1502",
+    "decision_packet_integrity_hash": "01b7483cc26dc2e03d30ba432b2ad40fd021af29c802e34c8bad67c47e8def51"
+  },
+  {
+    "id": "1594824_OVER_2_5",
+    "type": "DC_VALUE",
+    "mode": "PAPER",
+    "event_id": 1594824,
+    "prediction_id": "1594824_OVER_2_5_dc-value-v2.1.0",
+    "created_at": "2026-09-10T00:23:24.071011+02:00",
+    "decision_timestamp": "2026-09-10T00:23:24.071011+02:00",
+    "data_cutoff": "2026-09-09T22:23:24.071011+00:00",
+    "date": "2026-09-10",
+    "kickoff": "2026-09-10T13:30:00+00:00",
+    "sport": "Football",
+    "match": "Kahraba Ismailia vs El Dakhleya",
+    "home_id": 20458,
+    "away_id": 1032,
+    "league": "Egypt - Second League",
+    "league_id": 887,
+    "market": "OVER_2_5",
+    "market_display": "Over 2.5",
+    "stake": 500.0,
+    "odd": 2.5,
+    "opening_odd": null,
+    "opposite_odd": 1.5,
+    "opening_opposite_odd": null,
+    "bookmaker_id": 8,
+    "bookmaker": "Bet365",
+    "odds_captured_at": "2026-09-09T22:23:24.071011+00:00",
+    "opening_odds_captured_at": null,
+    "implied_probability": 0.4,
+    "market_probability_devig": 0.375,
+    "market_overround": 0.066667,
+    "model_probability": 0.570151,
+    "calibrated_probability": 0.570151,
+    "decision_probability": 0.540151,
+    "probability_edge": 0.165151,
+    "expected_value": 0.350378,
+    "lambda_home": 2.221289,
+    "lambda_away": 0.749176,
+    "rho": -0.18497,
+    "xi": 0.0015,
+    "model_version": "dc-value-v2.1.0",
+    "model_fitted_matches": 997,
+    "model_team_count": 37,
+    "model_training_cutoff": "2026-09-09T22:23:24.071011+00:00",
+    "model_training_identity": "5ccefc2bf90627d761fb9a92940a296488f6ca1b2285dc6a3f25cd76e6b5492e",
+    "calibration_status": "IDENTITY_UNVALIDATED",
+    "status": "PENDING",
+    "profit": 0.0,
+    "signal_source": "DAILY_BULLETIN",
+    "signal_sent_at": "2026-09-10T00:23:24.071011+02:00",
+    "decision_packet": {
+      "schema_version": 2,
+      "packet_id": "30f9592e2e53ce659287a79cb7cd5a6dba6be0b2abe26e39c7bff1e347a05257",
+      "fixture": {
+        "fixture_id": 1594824,
+        "league_id": 887,
+        "league": "Egypt - Second League",
+        "home_id": 20458,
+        "home": "Kahraba Ismailia",
+        "away_id": 1032,
+        "away": "El Dakhleya",
+        "kickoff": "2026-09-10T13:30:00+00:00"
+      },
+      "decision": {
+        "market": "OVER_2_5",
+        "selection": "OVER_2_5",
+        "bookmaker_id": 8,
+        "bookmaker": "Bet365",
+        "pick_odd": 2.5,
+        "pick_observed_at": "2026-09-09T22:23:24.071011+00:00",
+        "pick_observation_id": "56a25c423fc81d98f8c3e1ec17d87f81880aded925cb20a36636b1c1eb02f3bf",
+        "decision_timestamp": "2026-09-09T22:23:24.071011+00:00"
+      },
+      "model": {
+        "version": "dc-value-v2.1.0",
+        "code_sha": "3c91cded5c4bd7349bedc953bd8efca396d40eb7",
+        "training_cutoff": "2026-09-09T22:23:24.071011+00:00",
+        "training_sample": {
+          "fitted_matches": 997,
+          "team_count": 37,
+          "identity": "5ccefc2bf90627d761fb9a92940a296488f6ca1b2285dc6a3f25cd76e6b5492e"
+        },
+        "raw_probability": 0.57015113,
+        "calibrated_probability": 0.57015113,
+        "decision_probability": 0.54015113,
+        "calibration_status": "IDENTITY_UNVALIDATED",
+        "calibration_hash": "db20ea934654f4e897da255ee1418059db0117864000186544ac1ba9abd9a328"
+      },
+      "market_inputs": {
+        "opposite_odd": 1.5,
+        "devig_probability": 0.375,
+        "overround": 0.06666667,
+        "expected_value": 0.35037783,
+        "probability_edge": 0.16515113,
+        "haircut": 0.03
+      },
+      "strategy": {
+        "version": "production-decision-v1",
+        "config_hash": "7fdf3494c3a3720a6774586f142ba51a2c4878612f0f13ed34c92ec37a6cb53f",
+        "bookmaker_policy_version": "all-provider-bookmakers-best-price-v1",
+        "eligibility": "PASSED",
+        "registry_version": "6d27ef1a7c19ac21ad7f4899aac611d7e9da1a84a2c7bfab6a2f9c8111173db5",
+        "registry_league_id": 887,
+        "registry_classification": null
+      },
+      "risk": {
+        "stake": 500.0,
+        "kelly_fraction": 0.25,
+        "max_bet_stake_pct": 0.01,
+        "max_daily_risk_pct": 0.03,
+        "max_open_risk_pct": 0.05
+      },
+      "provenance": {
+        "canonical_observation_id": "56a25c423fc81d98f8c3e1ec17d87f81880aded925cb20a36636b1c1eb02f3bf",
+        "canonical_observation": {
+          "fixture_id": 1594824,
+          "market": "OVER_2_5",
+          "bookmaker_id": 8,
+          "bookmaker": "Bet365",
+          "odd": 2.5,
+          "opposite_odd": 1.5,
+          "captured_at": "2026-09-09T22:23:24.071011+00:00",
+          "snapshot_type": "ENTRY"
+        },
+        "opening": {
+          "status": "UNAVAILABLE_AT_DECISION_TIME",
+          "reason": "NO_EARLIER_OBSERVATION"
+        },
+        "closing": {
+          "status": "UNAVAILABLE_AT_DECISION_TIME",
+          "reason": "NOT_YET_OBSERVED"
+        }
+      },
+      "integrity_hash": "288836d9709f66ef73dd4769a7cc09a053a43268c7517831d0e68f260ab26fdc"
+    },
+    "decision_packet_id": "30f9592e2e53ce659287a79cb7cd5a6dba6be0b2abe26e39c7bff1e347a05257",
+    "decision_packet_integrity_hash": "288836d9709f66ef73dd4769a7cc09a053a43268c7517831d0e68f260ab26fdc"
   }
 ]
