@@ -1,0 +1,61 @@
+name: QuantBet exhaustive odds capture
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/5 * * * *"
+      timezone: "Europe/Belgrade"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: quantbet-exhaustive-odds-capture
+  cancel-in-progress: false
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    env:
+      API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+      PAPER_MODE: ${{ vars.PAPER_MODE || 'true' }}
+      API_REQUEST_BUDGET: ${{ vars.API_REQUEST_BUDGET || '7500' }}
+      API_BUDGET_RESERVE: ${{ vars.API_BUDGET_RESERVE || '500' }}
+      TIMEZONE: Europe/Belgrade
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+      - uses: actions/cache@v4
+        with:
+          path: .cache/api
+          key: odds-capture-api-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: odds-capture-api-${{ runner.os }}-
+      - run: pip install -r requirements.txt
+      - name: Capture complete eligible Football universe
+        run: python main.py capture-odds
+      - name: Commit immutable observations and coverage state
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- odds_collection_budget.json odds_collection_state.json odds_collection_metrics.json data/odds_snapshots.jsonl data/odds_collection_coverage.jsonl; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add odds_collection_budget.json odds_collection_state.json odds_collection_metrics.json data/odds_snapshots.jsonl data/odds_collection_coverage.jsonl
+          git commit -m "Capture exhaustive Football odds observations"
+          for attempt in 1 2 3; do
+            if git push; then exit 0; fi
+            git fetch origin main
+            if ! git rebase origin/main; then
+              git rebase --abort || true
+              echo "Odds collection reconciliation conflict; capture update failed." >&2
+              exit 1
+            fi
+          done
+          echo "Unable to push after retries" >&2
+          exit 1
