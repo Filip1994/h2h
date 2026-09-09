@@ -13,8 +13,8 @@ from .alerts import (
 )
 from .api import APIBudgetExceeded, APIError, APIFootballClient
 from .config import Settings
-from .markets import extract_best_quotes
 from .market_timing import append_snapshots, build_snapshot
+from .markets import extract_best_quotes
 from .risk import kelly_stake, portfolio_analytics
 from .storage import BetStore, atomic_write_json
 from .types import Market
@@ -293,7 +293,9 @@ def run_watchlist(settings: Settings, now: datetime | None = None) -> dict[str, 
 
             if strong and linked_bet:
                 baseline_ev = float(
-                    previous.get("last_alert_ev", linked_bet.get("expected_value") or 0.0)
+                    previous.get(
+                        "last_alert_ev", linked_bet.get("expected_value") or 0.0
+                    )
                 )
                 baseline_edge = float(
                     previous.get(
