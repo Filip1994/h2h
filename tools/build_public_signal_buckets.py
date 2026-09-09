@@ -8,7 +8,7 @@ from quantbot.strong_signal_bankroll import STRONG_SIGNAL_PORTFOLIO, portfolio
 
 ROOT = Path(__file__).resolve().parents[1]
 LEDGER_FILE = "strong_signal_ledger.json"
-TERMINAL = {"WIN", "LOSS", "VOID", "REVIEW", "SKIPPED"}
+TERMINAL = {"WIN", "LOSS", "VOID", "REVIEW"}
 
 
 def load_json(path: Path) -> list[dict[str, Any]]:
@@ -46,10 +46,42 @@ def _canonical_key(item: dict[str, Any]) -> str:
 
 
 def _as_virtual(item: dict[str, Any]) -> dict[str, Any]:
+    """Normalize a signal into the isolated virtual portfolio contract.
+
+    Historical rows may contain Production-derived status/profit fields from the
+    old implementation. Those fields are retained only as `production_*`
+    context when explicitly available; they can never settle the virtual
+    portfolio.
+    """
     row = dict(item)
     row["virtual_portfolio"] = STRONG_SIGNAL_PORTFOLIO
     row["signal_class"] = "STRONG_SIGNAL"
     row["not_a_production_bet"] = True
+
+    if not row.get("virtual_settled"):
+        if row.get("status") not in (None, "PENDING"):
+            row["production_status"] = row.get("status")
+        if row.get("profit") not in (None, 0, 0.0):
+            row["production_profit"] = row.get("profit")
+        if row.get("result") is not None:
+            row["production_result"] = row.get("result")
+        if row.get("settled_at") is not None:
+            row["production_settled_at"] = row.get("settled_at")
+        if row.get("settlement_type") is not None:
+            row["production_settlement_type"] = row.get("settlement_type")
+        for key in (
+            "status",
+            "profit",
+            "result",
+            "settled_at",
+            "settlement_type",
+            "virtual_profit",
+        ):
+            row.pop(key, None)
+        row["status"] = "PENDING"
+        row["profit"] = 0.0
+        row["virtual_profit"] = 0.0
+        row["virtual_settled"] = False
     return row
 
 
@@ -58,8 +90,6 @@ def load_or_migrate_ledger(root: Path) -> list[dict[str, Any]]:
     if ledger_path.exists():
         return [_as_virtual(x) for x in load_json(ledger_path)]
 
-    # One-time deterministic migration: recover the pre-isolation Strong Signal
-    # dataset exactly as persisted, adding only the new portfolio boundary marker.
     legacy = load_json(root / "strong_signals.json")
     migrated = [_as_virtual(x) for x in legacy]
     ledger_path.write_text(
@@ -76,13 +106,8 @@ def merge(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
             continue
         current = merged.setdefault(key, {})
         current.update(item)
-        if str(item.get("status") or "").upper() in TERMINAL:
-            current["virtual_profit"] = item.get(
-                "virtual_profit", item.get("profit", current.get("virtual_profit", 0))
-            )
-        current["virtual_portfolio"] = STRONG_SIGNAL_PORTFOLIO
-        current["signal_class"] = "STRONG_SIGNAL"
-        current["not_a_production_bet"] = True
+        current = _as_virtual(current)
+        merged[key] = current
     return sorted(
         merged.values(),
         key=lambda item: str(
@@ -127,8 +152,6 @@ def build(root: Path = ROOT) -> tuple[list[dict[str, Any]], list[dict[str, Any]]
     alerts = load_json(root / "intraday_alerts.json")
     observations = load_jsonl(root / "data" / "market_timing_snapshots.jsonl")
 
-    # Alerts are lifecycle updates for the dedicated signal ledger. Production
-    # bets are deliberately excluded from Strong Signal reconstruction.
     strong_updates = [
         x
         for x in alerts
