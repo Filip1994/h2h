@@ -53,28 +53,46 @@ class BetStore:
 
     @staticmethod
     def blocked_fixture_ids(bets: list[dict[str, Any]]) -> set[int]:
+        """Return fixtures containing legacy records with no market identity."""
         blocked: set[int] = set()
         for bet in bets:
             if str(bet.get("status", "")).upper() not in BLOCKING_STATUSES:
                 continue
             fixture_id = bet.get("event_id")
-            if fixture_id is not None:
+            if fixture_id is not None and not bet.get("market"):
                 blocked.add(int(fixture_id))
+        return blocked
+
+    @staticmethod
+    def blocked_market_keys(bets: list[dict[str, Any]]) -> set[tuple[int, str | None]]:
+        blocked: set[tuple[int, str | None]] = set()
+        for bet in bets:
+            if str(bet.get("status", "")).upper() not in BLOCKING_STATUSES:
+                continue
+            fixture_id = bet.get("event_id")
+            if fixture_id is None:
+                continue
+            market = bet.get("market")
+            blocked.add((int(fixture_id), str(market) if market else None))
         return blocked
 
     def append_unique_fixtures(
         self, new_bets: list[dict[str, Any]]
     ) -> list[dict[str, Any]]:
+        """Append bets idempotently by fixture + market, not fixture alone."""
         bets = self.load()
-        blocked = self.blocked_fixture_ids(bets)
+        blocked = self.blocked_market_keys(bets)
+        blocked_fixtures = {fixture_id for fixture_id, market in blocked if market is None}
         appended: list[dict[str, Any]] = []
         for bet in new_bets:
             fixture_id = int(bet["event_id"])
-            if fixture_id in blocked:
+            market = str(bet.get("market")) if bet.get("market") else None
+            key = (fixture_id, market)
+            if fixture_id in blocked_fixtures or key in blocked:
                 continue
             bets.append(bet)
             appended.append(bet)
-            blocked.add(fixture_id)
+            blocked.add(key)
         if appended:
             self.save(bets)
         return appended
