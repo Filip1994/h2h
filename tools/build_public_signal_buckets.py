@@ -40,7 +40,9 @@ def load_jsonl(path: Path) -> list[dict[str, Any]]:
 
 
 def _canonical_key(item: dict[str, Any]) -> str:
-    return str(item.get("id") or item.get("signal_id") or item.get("observation_id") or "")
+    return str(
+        item.get("id") or item.get("signal_id") or item.get("observation_id") or ""
+    )
 
 
 def _as_virtual(item: dict[str, Any]) -> dict[str, Any]:
@@ -83,7 +85,9 @@ def merge(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
         current["not_a_production_bet"] = True
     return sorted(
         merged.values(),
-        key=lambda item: str(item.get("signal_sent_at") or item.get("captured_at") or ""),
+        key=lambda item: str(
+            item.get("signal_sent_at") or item.get("captured_at") or ""
+        ),
     )
 
 
