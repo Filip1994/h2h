@@ -25,7 +25,8 @@ def _terminal(row: dict[str, Any]) -> bool:
 
 def portfolio(rows: list[dict[str, Any]]) -> StrongSignalPortfolio:
     strong = [
-        row for row in rows
+        row
+        for row in rows
         if str(row.get("signal_class") or "").upper() == "STRONG_SIGNAL"
     ]
     completed = [row for row in strong if _terminal(row)]
@@ -42,7 +43,12 @@ def portfolio(rows: list[dict[str, Any]]) -> StrongSignalPortfolio:
     )
     equity = STRONG_SIGNAL_INITIAL_BANK
     peak = equity
-    for row in sorted(completed, key=lambda item: str(item.get("settled_at") or item.get("signal_sent_at") or "")):
+    for row in sorted(
+        completed,
+        key=lambda item: str(
+            item.get("settled_at") or item.get("signal_sent_at") or ""
+        ),
+    ):
         equity += float(row.get("virtual_profit", row.get("profit") or 0.0) or 0.0)
         peak = max(peak, equity)
     current_bank = STRONG_SIGNAL_INITIAL_BANK + total_profit
