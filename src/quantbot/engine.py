@@ -334,13 +334,8 @@ class QuantEngine:
                 )
             if fixture_candidates:
                 telemetry["candidates_qualified"] += len(fixture_candidates)
-                telemetry["candidates"] += 1
-                candidates.append(
-                    max(
-                        fixture_candidates,
-                        key=lambda item: (item.expected_value, item.probability_edge),
-                    )
-                )
+                telemetry["candidates"] += len(fixture_candidates)
+                candidates.extend(fixture_candidates)
         allocations = allocate_stakes(
             candidates, existing_bets, now=now_local, settings=self.settings
         )

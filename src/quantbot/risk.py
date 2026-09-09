@@ -113,8 +113,6 @@ def allocate_stakes(
         0.0, analytics.current_bank * settings.max_open_risk_pct - analytics.open_stake
     )
     remaining = min(daily_remaining, open_remaining)
-    today_count = sum(1 for bet in existing_bets if _bet_date(bet) == today)
-    pick_slots = max(0, settings.max_daily_picks - today_count)
 
     selected: list[tuple[MarketCandidate, float]] = []
     for candidate in sorted(
@@ -122,8 +120,6 @@ def allocate_stakes(
         key=lambda item: (item.expected_value, item.probability_edge),
         reverse=True,
     ):
-        if len(selected) >= pick_slots:
-            break
         stake = kelly_stake(
             analytics.current_bank,
             candidate.decision_probability,

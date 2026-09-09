@@ -17,7 +17,6 @@ def settings(tmp_path, monkeypatch) -> Settings:
         "PROBABILITY_HAIRCUT",
         "MIN_EDGE_PP",
         "MIN_EV",
-        "MAX_DAILY_PICKS",
         "MAX_BET_STAKE_PCT",
         "MAX_DAILY_RISK_PCT",
         "MAX_OPEN_RISK_PCT",
