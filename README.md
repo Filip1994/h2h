@@ -139,3 +139,4 @@ Each CSV row containing odds must also contain `bookmaker_id` and an ISO-8601 `o
 8. Review calibration, CLV, drawdown and the day-cluster ROI interval; do not consider live mode while its lower 95% bound is non-positive.
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for the mathematical contract.
+
