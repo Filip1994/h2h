@@ -4,6 +4,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+from quantbot.strong_signal_bankroll import portfolio
+
 ROOT = Path(__file__).resolve().parents[1]
 TERMINAL = {"WIN", "LOSS", "VOID", "REVIEW"}
 
@@ -63,6 +65,29 @@ def build_public_strong_signals(root: Path = ROOT) -> list[dict[str, Any]]:
     )
     (root / "strong_signals.json").write_text(
         json.dumps(data, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    metrics = portfolio(data)
+    (root / "strong_signals_portfolio.json").write_text(
+        json.dumps(
+            {
+                "portfolio": "STRONG_SIGNALS_VIRTUAL",
+                "production": False,
+                "not_a_production_bet": True,
+                "initial_bank": metrics.initial_bank,
+                "current_bank": metrics.current_bank,
+                "total_profit": metrics.total_profit,
+                "total_stake": metrics.total_stake,
+                "roi": metrics.roi,
+                "win_rate": metrics.win_rate,
+                "completed_count": metrics.completed_count,
+                "open_stake": metrics.open_stake,
+                "current_drawdown": metrics.current_drawdown,
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+        + "\n",
         encoding="utf-8",
     )
     return data
