@@ -65,6 +65,7 @@ def test_clean_generation_is_healthy_with_full_pipeline_funnel() -> None:
         network_error_events=0,
     )
     health = build_success_health(datetime.now(UTC), result)
+    assert health["schema_version"] == 4
     assert health["status"] == "HEALTHY"
     assert health["classification_reasons"] == []
     assert health["funnel"] == {
@@ -164,6 +165,7 @@ def test_fatal_generation_failure_is_classified_blocked_but_observation_only() -
         RuntimeError("generation failed"),
         telemetry={"fixtures_discovered": 5},
     )
+    assert health["schema_version"] == 4
     assert health["status"] == "BLOCKED"
     assert health["classification_reasons"] == ["RuntimeError"]
     assert health["pipeline"]["fixtures_discovered"] == 5
