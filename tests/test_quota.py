@@ -2,7 +2,11 @@ import json
 
 import pytest
 
-from quantbot.quota import GlobalQuotaExceeded, GlobalQuotaGovernor, GlobalQuotaStateError
+from quantbot.quota import (
+    GlobalQuotaExceeded,
+    GlobalQuotaGovernor,
+    GlobalQuotaStateError,
+)
 
 
 def test_global_quota_reserve_and_consume_reconcile(tmp_path) -> None:
