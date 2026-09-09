@@ -22,14 +22,11 @@ class StrongSignalPortfolio:
 
 def _terminal(row: dict[str, Any]) -> bool:
     """Only explicit virtual settlement can affect the virtual portfolio."""
-    return bool(row.get("virtual_settled")) and str(
-        row.get("status") or ""
-    ).upper() in {
-        "WIN",
-        "LOSS",
-        "VOID",
-        "REVIEW",
-    }
+    return (
+        bool(row.get("virtual_settled"))
+        and str(row.get("status") or "").upper()
+        in {"WIN", "LOSS", "VOID", "REVIEW"}
+    )
 
 
 def _is_virtual(row: dict[str, Any]) -> bool:
