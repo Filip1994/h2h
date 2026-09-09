@@ -53,7 +53,7 @@ jobs:
         run: python main.py generate
       - name: Persist intraday generation health
         if: always()
-        run: python tools/intraday_health.py --run-status "${{ steps.scan.outcome || 'failure' }}"
+        run: python tools/intraday_health.py --run-status "${{ steps.scan.outcome == 'success' && 'success' || 'failure' }}"
       - name: Commit intraday ledger, signals, quota, health and safe raw API archives
         if: always()
         run: |
