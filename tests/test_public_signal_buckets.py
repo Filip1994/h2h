@@ -26,7 +26,9 @@ def test_public_buckets_are_separate(tmp_path) -> None:
         '"captured_at":"2026-09-09T10:00:00+00:00"}\n'
     )
     (tmp_path / "data").mkdir()
-    (tmp_path / "data" / "market_timing_snapshots.jsonl").write_text(data, encoding="utf-8")
+    (tmp_path / "data" / "market_timing_snapshots.jsonl").write_text(
+        data, encoding="utf-8"
+    )
 
     strong, near = build(tmp_path)
     assert [x["id"] for x in strong] == ["strong-1", "strong-2"]
