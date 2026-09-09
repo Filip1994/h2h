@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 
 from tools.build_public_signal_buckets import build
+from src.quantbot.strong_signal_bankroll import portfolio
 
 
 def test_public_buckets_migrate_history_and_keep_strong_ledger_separate(
@@ -36,7 +37,6 @@ def test_public_buckets_migrate_history_and_keep_strong_ledger_separate(
         ),
         encoding="utf-8",
     )
-    # A Production ledger row must never become Strong Signal history.
     (tmp_path / "bets.json").write_text(
         json.dumps(
             [
@@ -71,10 +71,45 @@ def test_public_buckets_migrate_history_and_keep_strong_ledger_separate(
     assert all("profit" in x for x in near)
     assert all(float(x["profit"]) == 0.0 for x in near)
     assert not any(x["id"] == "production-only" for x in strong)
+    assert all(x["status"] == "PENDING" for x in strong)
+    assert all(float(x["virtual_profit"]) == 0.0 for x in strong)
+    metrics = portfolio(strong)
+    assert metrics.initial_bank == 10_000.0
+    assert metrics.current_bank == 10_000.0
+    assert metrics.total_profit == 0.0
+    assert metrics.completed_count == 0
     ledger = json.loads(
         (tmp_path / "strong_signal_ledger.json").read_text(encoding="utf-8")
     )
     assert [x["id"] for x in ledger] == ["strong-1", "strong-2"]
+
+
+def test_explicit_virtual_settlement_is_the_only_source_of_signal_profit() -> None:
+    rows = [
+        {
+            "id": "linked-production",
+            "signal_class": "STRONG_SIGNAL",
+            "virtual_portfolio": "STRONG_SIGNALS_VIRTUAL",
+            "status": "WIN",
+            "profit": 500.0,
+            "virtual_profit": 500.0,
+            "linked_bet_id": "production-1",
+        },
+        {
+            "id": "real-virtual",
+            "signal_class": "STRONG_SIGNAL",
+            "virtual_portfolio": "STRONG_SIGNALS_VIRTUAL",
+            "status": "WIN",
+            "profit": 200.0,
+            "virtual_profit": 200.0,
+            "virtual_settled": True,
+            "stake": 500.0,
+        },
+    ]
+    metrics = portfolio(rows)
+    assert metrics.total_profit == 200.0
+    assert metrics.current_bank == 10_200.0
+    assert metrics.completed_count == 1
 
 
 def test_missing_observation_ledger_does_not_create_fake_near_miss(tmp_path) -> None:
