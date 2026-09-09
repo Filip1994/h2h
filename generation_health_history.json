@@ -1729,5 +1729,270 @@
     "diagnostic_count": 2,
     "observation_only": true,
     "threshold_action": "NO_AUTOMATIC_BLOCKING"
+  },
+  {
+    "schema_version": 4,
+    "timestamp": "2026-09-09T19:58:07.550340+00:00",
+    "status": "HEALTHY",
+    "classification_reasons": [],
+    "pipeline": {
+      "fixtures_discovered": 303,
+      "fixtures_parse_failures": 0,
+      "fixtures_eligible": 2,
+      "fixtures_modelled": 2,
+      "predictions_generated": 6,
+      "candidates_evaluated": 6,
+      "candidates_qualified": 0,
+      "candidates": 0,
+      "selections_produced": 0,
+      "training_sample_insufficiency": 0,
+      "fit_failures": 0,
+      "fixtures_without_odds": 1,
+      "fixture_failures": {
+        "api": 0,
+        "dixon_coles": 0,
+        "other": 0
+      },
+      "eligibility_rejections": {
+        "UNKNOWN_LEAGUE_TIER": 5
+      },
+      "funnel_rejections": [
+        {
+          "fixture_id": 1549589,
+          "stage": "odds_available",
+          "reason": "NO_ODDS_RESPONSE"
+        },
+        {
+          "fixture_id": 1549589,
+          "market": "OVER_2_5",
+          "stage": "strategy",
+          "reason": "REJECT_NO_ODDS"
+        },
+        {
+          "fixture_id": 1549589,
+          "market": "UNDER_2_5",
+          "stage": "strategy",
+          "reason": "REJECT_NO_ODDS"
+        },
+        {
+          "fixture_id": 1549589,
+          "market": "BTTS_YES",
+          "stage": "strategy",
+          "reason": "REJECT_NO_ODDS"
+        },
+        {
+          "fixture_id": 1511687,
+          "market": "OVER_2_5",
+          "stage": "strategy",
+          "reason": "REJECT_LOW_EV"
+        },
+        {
+          "fixture_id": 1511687,
+          "market": "UNDER_2_5",
+          "stage": "strategy",
+          "reason": "REJECT_LOW_EV"
+        },
+        {
+          "fixture_id": 1511687,
+          "market": "BTTS_YES",
+          "stage": "strategy",
+          "reason": "REJECT_LOW_EV"
+        },
+        {
+          "fixture_id": 1559633,
+          "stage": "eligible",
+          "reason": "UNKNOWN_LEAGUE_TIER"
+        },
+        {
+          "fixture_id": 1600589,
+          "stage": "eligible",
+          "reason": "UNKNOWN_LEAGUE_TIER"
+        },
+        {
+          "fixture_id": 1638865,
+          "stage": "eligible",
+          "reason": "UNKNOWN_LEAGUE_TIER"
+        },
+        {
+          "fixture_id": 1560828,
+          "stage": "eligible",
+          "reason": "UNKNOWN_LEAGUE_TIER"
+        },
+        {
+          "fixture_id": 1606302,
+          "stage": "eligible",
+          "reason": "UNKNOWN_LEAGUE_TIER"
+        }
+      ],
+      "odds_available": 1,
+      "valid_quotes": 3,
+      "ev_pass": 0,
+      "edge_pass": 0,
+      "risk_rejections": 0,
+      "duplicate_rejections": 0,
+      "persistence_failures": 0,
+      "risk_checks": 0,
+      "funnel": {
+        "discovered": 303,
+        "eligible": 2,
+        "modelled": 2,
+        "predictions": 6,
+        "odds_available": 0,
+        "valid_quotes": 0,
+        "candidates": 0,
+        "ev_pass": 0,
+        "edge_pass": 0,
+        "risk_checks": 0,
+        "selected": 0,
+        "persisted_bets": 0,
+        "settled": 0
+      }
+    },
+    "funnel": {
+      "discovered": 303,
+      "eligible": 2,
+      "modelled": 2,
+      "predictions": 6,
+      "odds_available": 0,
+      "valid_quotes": 0,
+      "candidates": 0,
+      "ev_pass": 0,
+      "edge_pass": 0,
+      "risk_checks": 0,
+      "selected": 0,
+      "persisted_bets": 0,
+      "settled": 0
+    },
+    "funnel_semantics": {
+      "discovered": "Raw fixtures returned by the fixture discovery call for the run.",
+      "eligible": "Discovered fixtures that pass status, time-window and league eligibility checks.",
+      "modelled": "Eligible fixtures for which the model successfully produced probabilities and expected goals.",
+      "predictions": "Market-level prediction records produced from successfully modelled fixtures.",
+      "odds_available": "Modelled fixtures for which the provider returned at least one valid market quote.",
+      "valid_quotes": "Market-level quotes accepted by the quote normalizer and available for strategy evaluation.",
+      "candidates": "Market-level candidates that pass all existing odds/EV/edge gates.",
+      "ev_pass": "Market-level evaluations that pass the configured EV threshold.",
+      "edge_pass": "Market-level candidates that pass the configured probability-edge threshold.",
+      "risk_checks": "Candidates presented to the existing staking/risk allocator.",
+      "selected": "Candidates selected by the existing allocator before persistence.",
+      "persisted_bets": "Production bets successfully appended by the idempotent BetStore.",
+      "settled": "Production bets that subsequently reach a terminal settlement state."
+    },
+    "funnel_rejections": [
+      {
+        "fixture_id": 1549589,
+        "stage": "odds_available",
+        "reason": "NO_ODDS_RESPONSE"
+      },
+      {
+        "fixture_id": 1549589,
+        "market": "OVER_2_5",
+        "stage": "strategy",
+        "reason": "REJECT_NO_ODDS"
+      },
+      {
+        "fixture_id": 1549589,
+        "market": "UNDER_2_5",
+        "stage": "strategy",
+        "reason": "REJECT_NO_ODDS"
+      },
+      {
+        "fixture_id": 1549589,
+        "market": "BTTS_YES",
+        "stage": "strategy",
+        "reason": "REJECT_NO_ODDS"
+      },
+      {
+        "fixture_id": 1511687,
+        "market": "OVER_2_5",
+        "stage": "strategy",
+        "reason": "REJECT_LOW_EV"
+      },
+      {
+        "fixture_id": 1511687,
+        "market": "UNDER_2_5",
+        "stage": "strategy",
+        "reason": "REJECT_LOW_EV"
+      },
+      {
+        "fixture_id": 1511687,
+        "market": "BTTS_YES",
+        "stage": "strategy",
+        "reason": "REJECT_LOW_EV"
+      },
+      {
+        "fixture_id": 1559633,
+        "stage": "eligible",
+        "reason": "UNKNOWN_LEAGUE_TIER"
+      },
+      {
+        "fixture_id": 1600589,
+        "stage": "eligible",
+        "reason": "UNKNOWN_LEAGUE_TIER"
+      },
+      {
+        "fixture_id": 1638865,
+        "stage": "eligible",
+        "reason": "UNKNOWN_LEAGUE_TIER"
+      },
+      {
+        "fixture_id": 1560828,
+        "stage": "eligible",
+        "reason": "UNKNOWN_LEAGUE_TIER"
+      },
+      {
+        "fixture_id": 1606302,
+        "stage": "eligible",
+        "reason": "UNKNOWN_LEAGUE_TIER"
+      }
+    ],
+    "fixture_failures": {
+      "api": 0,
+      "dixon_coles": 0,
+      "other": 0
+    },
+    "api": {
+      "request_count": 3,
+      "request_budget": 7500,
+      "working_budget": 7000,
+      "reserve": 500,
+      "remaining_working": 6997,
+      "cache_hits": 8,
+      "cache_misses": 3,
+      "cache_hit_rate": 0.727273,
+      "rate_limit_events": 0,
+      "retry_events": 0,
+      "budget_exhaustion_events": 0,
+      "http_errors": {},
+      "api_error_events": 0,
+      "network_error_events": 0,
+      "endpoint_requests": {
+        "fixtures": 1,
+        "odds": 2
+      },
+      "endpoint_cache_hits": {
+        "fixtures": 8
+      },
+      "global_quota": {
+        "date": "2026-09-09",
+        "daily_capacity": 7500,
+        "safety_reserve": 500,
+        "consumed": 47,
+        "reserved": 0,
+        "remaining_unallocated": 7453,
+        "consumed_by_workflow": {
+          "QuantBet intraday strong-signal scanner": 47
+        },
+        "reserved_by_workflow": {
+          "QuantBet intraday strong-signal scanner": 0
+        },
+        "quota_pressure_state": "HEALTHY",
+        "request_count": 47
+      }
+    },
+    "new_bets": 0,
+    "diagnostic_count": 1,
+    "observation_only": true,
+    "threshold_action": "NO_AUTOMATIC_BLOCKING"
   }
 ]
