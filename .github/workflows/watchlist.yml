@@ -85,22 +85,32 @@ jobs:
           set -euo pipefail
           python - <<'PY'
           import json
+          from datetime import datetime, timezone
           from pathlib import Path
 
           rows = json.loads(Path("near_misses.json").read_text())
           assert isinstance(rows, list)
           required = {
-              "id", "prediction_id", "fixture_id", "event_id", "market", "selection",
+              "id", "schema_version", "prediction_id", "fixture_id", "event_id", "market", "selection",
               "home_name", "away_name", "match", "league", "kickoff",
               "bookmaker_id", "bookmaker", "near_miss_reason", "status",
               "not_a_production_bet", "opening_odd", "opening_captured_at",
               "near_miss_odd", "near_miss_captured_at", "pick_odd",
               "pick_captured_at", "closing_odd", "closing_captured_at",
+              "transition_history", "result", "settled_at", "settlement_type",
           }
           for row in rows:
               assert required <= set(row), f"Near Miss contract missing fields: {sorted(required - set(row))}"
+              assert row["schema_version"] >= 3
               assert row["not_a_production_bet"] is True
-              assert row["status"] != "PENDING" or row.get("kickoff")
+              assert isinstance(row["transition_history"], list)
+              kickoff_raw = row.get("kickoff")
+              if kickoff_raw:
+                  kickoff = datetime.fromisoformat(str(kickoff_raw).replace("Z", "+00:00"))
+                  if kickoff.tzinfo is None:
+                      kickoff = kickoff.replace(tzinfo=timezone.utc)
+                  if datetime.now(timezone.utc) >= kickoff:
+                      assert row["status"] != "PENDING", f"Stale Near Miss PENDING after kickoff: {row['id']}"
           print(f"Near Miss lifecycle contract OK: rows={len(rows)}")
           PY
       - name: Create canonical writer provenance marker
