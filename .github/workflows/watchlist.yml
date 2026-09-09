@@ -56,6 +56,8 @@ jobs:
         run: python tools/watchlist_runtime_gate.py --run-output watchlist_run_output.json
       - name: Build public Strong and Near Miss datasets
         run: python tools/build_public_signal_buckets.py
+      - name: Rebuild canonical Near Miss lifecycle dataset
+        run: python tools/build_near_miss_lifecycle.py
       - name: Validate Strong Signal publication contract
         run: |
           set -euo pipefail
@@ -77,6 +79,29 @@ jobs:
           strong_public = [r for r in public_rows if str(r.get("signal_class", "")).upper() == "STRONG_SIGNAL"]
           assert len(strong_public) <= len(ledger_rows)
           print(f"Strong publication contract OK: ledger={len(ledger_rows)} public_strong={len(strong_public)}")
+          PY
+      - name: Validate Near Miss lifecycle contract
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          rows = json.loads(Path("near_misses.json").read_text())
+          assert isinstance(rows, list)
+          required = {
+              "id", "prediction_id", "fixture_id", "event_id", "market",
+              "home_name", "away_name", "match", "league", "kickoff",
+              "bookmaker_id", "bookmaker", "near_miss_reason", "status",
+              "not_a_production_bet", "opening_odd", "opening_captured_at",
+              "near_miss_odd", "near_miss_captured_at", "pick_odd",
+              "pick_captured_at", "closing_odd", "closing_captured_at",
+          }
+          for row in rows:
+              assert required <= set(row), f"Near Miss contract missing fields: {sorted(required - set(row))}"
+              assert row["not_a_production_bet"] is True
+              assert row["status"] != "PENDING" or row.get("kickoff")
+          print(f"Near Miss lifecycle contract OK: rows={len(rows)}")
           PY
       - name: Create canonical writer provenance marker
         env:
