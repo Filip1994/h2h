@@ -203,8 +203,18 @@ def merge(
 
 
 def observation_public(row: dict[str, Any]) -> dict[str, Any]:
-    home = row.get("home_name") or row.get("home_team") or row.get("home") or row.get("home_team_name")
-    away = row.get("away_name") or row.get("away_team") or row.get("away") or row.get("away_team_name")
+    home = (
+        row.get("home_name")
+        or row.get("home_team")
+        or row.get("home")
+        or row.get("home_team_name")
+    )
+    away = (
+        row.get("away_name")
+        or row.get("away_team")
+        or row.get("away")
+        or row.get("away_team_name")
+    )
     match = row.get("match") or (f"{home} vs {away}" if home and away else None)
     return {
         "id": row.get("observation_id")
