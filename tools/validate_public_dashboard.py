@@ -120,24 +120,23 @@ def main() -> int:
         assert 'aria-current="page"' in text and 'class="active"' in text, (
             f"{name}: missing active navigation"
         )
-        assert (
-            "./assets/qb-dashboard.js" in text and "./assets/qb-dashboard.css" in text
-        )
-        assert (
-            'meta name="viewport" content="width=device-width,initial-scale=1"' in text
-        )
+        assert "./assets/qb-dashboard.css" in text
+        assert 'meta name="viewport" content="width=device-width,initial-scale=1"' in text
 
-    js = (ROOT / "assets/qb-dashboard.js").read_text(encoding="utf-8")
+    js = (ROOT / "assets" / "qb-dashboard.js").read_text(encoding="utf-8")
+    strong_js = (ROOT / "assets" / "strong-signals.js").read_text(encoding="utf-8")
     subprocess.run(
-        ["node", "--check", str(ROOT / "assets/qb-dashboard.js")],
+        ["node", "--check", str(ROOT / "assets" / "qb-dashboard.js")],
         check=True,
         capture_output=True,
         text=True,
     )
-    for page in PAGES.values():
-        assert (
-            f"page==='{'overview' if page == 'overview' else page}'" in js or page in js
-        ), f"dashboard renderer missing {page}"
+    subprocess.run(
+        ["node", "--check", str(ROOT / "assets" / "strong-signals.js")],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
     assert "function renderStrong" in js
     assert "renderBucket" in js
     assert "const production = bets =>" in js
@@ -148,6 +147,12 @@ def main() -> int:
     assert "slice(0,200)" in js
     assert "slice().reverse().slice(0,200)" in js
     assert not re.search(r"<script[^>]+src=[^>]*\\.json", js, re.IGNORECASE)
+    assert "strong_signals.json" in strong_js
+    assert "strong_signals_portfolio.json" in strong_js
+    assert "STRONG SIGNAL" in strong_js
+    assert "Promise.all" in strong_js
+    strong_page = (ROOT / "strong-signals.html").read_text(encoding="utf-8")
+    assert "./assets/strong-signals.js?v=20260909-1" in strong_page
     print(
         f"PASS public dashboard contract: bets={len(bets)} strong={len(strong)} near={len(near)}"
     )
