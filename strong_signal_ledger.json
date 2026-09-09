@@ -431,9 +431,6 @@
     "signal_class": "STRONG_SIGNAL",
     "not_a_production_bet": true,
     "virtual_settled": false,
-    "status": "PENDING",
-    "profit": 0.0,
-    "virtual_profit": 0.0,
     "opening_odd": null,
     "opening_opposite_odd": null,
     "opening_odds_captured_at": null,
@@ -454,7 +451,10 @@
     "closing_unavailable_reason": "NO_VALID_PRE_KICKOFF_CLOSE",
     "clv_odds_pct": null,
     "clv_available": false,
-    "clv_status": "NOT_COMPUTABLE"
+    "clv_status": "NOT_COMPUTABLE",
+    "status": "PENDING",
+    "profit": 0.0,
+    "virtual_profit": 0.0
   },
   {
     "id": "1612235_UNDER_2_5_dc-value-v2.1.0:202609081312",

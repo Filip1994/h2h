@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "checked_at": "2026-09-09T20:25:56.549715+00:00",
+  "stale_minutes": 30,
+  "status": "OK",
+  "production_active_count": 0,
+  "intraday_active_count": 0,
+  "active_count": 0,
+  "errors": [],
+  "sources": {
+    "bets.json": {
+      "records": 17,
+      "active_count": 0,
+      "active": [],
+      "errors": []
+    },
+    "intraday_alerts.json": {
+      "records": 17,
+      "active_count": 0,
+      "active": [],
+      "errors": []
+    }
+  }
+}
