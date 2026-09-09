@@ -124,7 +124,8 @@ def test_strong_and_near_pages_have_active_and_history_contract():
         assert 'id="active-cards"' in page
         assert 'id="history-cards"' in page
     assert "renderBucket" in js
-    assert "String(x.status||'PENDING')" in js
+    assert "const isActive = x =>" in js
+    assert "String(x?.status || 'PENDING').toUpperCase()" in js
 
 
 def test_history_preserves_accounting_buckets_and_does_not_invent_lifecycle():
