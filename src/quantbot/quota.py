@@ -56,7 +56,11 @@ class GlobalQuotaGovernor:
         active = []
         expired = 0
         for item in payload.get("requests", []):
-            if item.get("status") == "reserved" and now - float(item.get("timestamp_epoch", now)) > self.RESERVATION_TTL_SECONDS:
+            if (
+                item.get("status") == "reserved"
+                and now - float(item.get("timestamp_epoch", now))
+                > self.RESERVATION_TTL_SECONDS
+            ):
                 item["status"] = "expired"
                 expired += 1
                 workflow = str(item.get("workflow", "unknown"))
@@ -70,10 +74,18 @@ class GlobalQuotaGovernor:
         return payload
 
     def _save_unlocked(self, payload: dict[str, Any]) -> None:
-        fd, name = tempfile.mkstemp(prefix=f".{self.path.name}.", suffix=".tmp", dir=self.path.parent)
+        fd, name = tempfile.mkstemp(
+            prefix=f".{self.path.name}.", suffix=".tmp", dir=self.path.parent
+        )
         try:
             with os.fdopen(fd, "w", encoding="utf-8") as handle:
-                json.dump(payload, handle, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
+                json.dump(
+                    payload,
+                    handle,
+                    ensure_ascii=False,
+                    separators=(",", ":"),
+                    sort_keys=True,
+                )
                 handle.write("\n")
                 handle.flush()
                 os.fsync(handle.fileno())
@@ -82,12 +94,23 @@ class GlobalQuotaGovernor:
             if os.path.exists(name):
                 os.unlink(name)
 
-    def reserve(self, workflow: str, endpoint: str, request_type: str = "GET", *, protected: bool = False) -> str:
+    def reserve(
+        self,
+        workflow: str,
+        endpoint: str,
+        request_type: str = "GET",
+        *,
+        protected: bool = False,
+    ) -> str:
         cost = 1
         lock = self._lock()
         try:
             payload = self._load()
-            available = int(payload["daily_capacity"]) - int(payload["consumed"]) - int(payload["reserved"])
+            available = (
+                int(payload["daily_capacity"])
+                - int(payload["consumed"])
+                - int(payload["reserved"])
+            )
             floor = 0 if protected else int(payload["safety_reserve"])
             if available < cost + floor:
                 raise GlobalQuotaExceeded(
@@ -96,7 +119,9 @@ class GlobalQuotaGovernor:
             reservation_id = uuid.uuid4().hex
             now = datetime.now(UTC)
             payload["reserved"] += cost
-            payload.setdefault("reserved_by_workflow", {})[workflow] = payload.setdefault("reserved_by_workflow", {}).get(workflow, 0) + cost
+            payload.setdefault("reserved_by_workflow", {})[workflow] = (
+                payload.setdefault("reserved_by_workflow", {}).get(workflow, 0) + cost
+            )
             payload.setdefault("requests", []).append(
                 {
                     "reservation_id": reservation_id,
@@ -120,7 +145,10 @@ class GlobalQuotaGovernor:
         try:
             payload = self._load()
             for item in payload.get("requests", []):
-                if item.get("reservation_id") != reservation_id or item.get("status") != "reserved":
+                if (
+                    item.get("reservation_id") != reservation_id
+                    or item.get("status") != "reserved"
+                ):
                     continue
                 cost = int(item.get("cost", 1))
                 workflow = str(item.get("workflow", "unknown"))
@@ -141,7 +169,12 @@ class GlobalQuotaGovernor:
         lock = self._lock()
         try:
             payload = self._load()
-            remaining = max(0, int(payload["daily_capacity"]) - int(payload["consumed"]) - int(payload["reserved"]))
+            remaining = max(
+                0,
+                int(payload["daily_capacity"])
+                - int(payload["consumed"])
+                - int(payload["reserved"]),
+            )
             if remaining <= 0:
                 state = "RESERVE_EXHAUSTED"
             elif remaining <= int(payload["safety_reserve"]):
@@ -155,8 +188,12 @@ class GlobalQuotaGovernor:
                 "consumed": int(payload["consumed"]),
                 "reserved": int(payload["reserved"]),
                 "remaining_unallocated": remaining,
-                "consumed_by_workflow": dict(sorted(payload.get("consumed_by_workflow", {}).items())),
-                "reserved_by_workflow": dict(sorted(payload.get("reserved_by_workflow", {}).items())),
+                "consumed_by_workflow": dict(
+                    sorted(payload.get("consumed_by_workflow", {}).items())
+                ),
+                "reserved_by_workflow": dict(
+                    sorted(payload.get("reserved_by_workflow", {}).items())
+                ),
                 "quota_pressure_state": state,
                 "request_count": len(payload.get("requests", [])),
             }

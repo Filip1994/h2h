@@ -28,9 +28,22 @@ def test_decision_packet_is_self_verifying(settings) -> None:
         model_team_count=30,
         model_training_cutoff="2026-09-10T10:00:00+00:00",
         model_training_identity="train-hash",
-        quote=OddsQuote(Market.OVER_25, 2.1, 1.7, 99, "TestBook", datetime(2026, 9, 10, 12, tzinfo=UTC)),
+        quote=OddsQuote(
+            Market.OVER_25,
+            2.1,
+            1.7,
+            99,
+            "TestBook",
+            datetime(2026, 9, 10, 12, tzinfo=UTC),
+        ),
     )
-    packet = build_packet(candidate, 250.0, settings=settings, decision_timestamp=datetime(2026, 9, 10, 12, tzinfo=UTC), calibration_hash="cal-hash")
+    packet = build_packet(
+        candidate,
+        250.0,
+        settings=settings,
+        decision_timestamp=datetime(2026, 9, 10, 12, tzinfo=UTC),
+        calibration_hash="cal-hash",
+    )
     assert verify_packet(packet)
     assert packet["decision"]["pick_observation_id"]
     assert packet["model"]["training_sample"]["identity"] == "train-hash"

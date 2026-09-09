@@ -29,7 +29,12 @@ def validate(package: dict) -> list[str]:
     errors = sorted(REQUIRED - package.keys())
     if package.get("point_in_time_safe") is not True:
         errors.append("point_in_time_safe must be true")
-    for review in ("ablation_complete", "leakage_review", "selection_bias_review", "stability_review"):
+    for review in (
+        "ablation_complete",
+        "leakage_review",
+        "selection_bias_review",
+        "stability_review",
+    ):
         if package.get(review) is not True:
             errors.append(f"{review} must be true")
     if int(package.get("sample_size", 0)) <= 0:
