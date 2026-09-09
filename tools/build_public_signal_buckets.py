@@ -11,6 +11,19 @@ sys.path.insert(0, str(ROOT / "src"))
 from quantbot.strong_signal_bankroll import STRONG_SIGNAL_PORTFOLIO, portfolio
 
 LEDGER_FILE = "strong_signal_ledger.json"
+LEGACY_SETTLEMENTS_FILE = "strong_signal_legacy_settlements.json"
+LEGACY_H2H_KEYS = {
+    "h2h_enabled",
+    "h2h_available",
+    "h2h_rate",
+    "h2h_n",
+    "h2h_effective_n",
+    "h2h_history",
+    "h2h_snapshot_id",
+    "h2h_status",
+    "h2h_error",
+}
+TERMINAL_STATUSES = {"WIN", "LOSS", "VOID", "REVIEW"}
 
 
 def load_json(path: Path) -> list[dict[str, Any]]:
@@ -47,15 +60,27 @@ def _canonical_key(item: dict[str, Any]) -> str:
     )
 
 
+def _strip_legacy_h2h(row: dict[str, Any]) -> None:
+    for key in LEGACY_H2H_KEYS:
+        row.pop(key, None)
+
+
 def _as_virtual(item: dict[str, Any]) -> dict[str, Any]:
     """Normalize a signal without importing Production settlement into it."""
     row = dict(item)
     row["virtual_portfolio"] = STRONG_SIGNAL_PORTFOLIO
     row["signal_class"] = "STRONG_SIGNAL"
     row["not_a_production_bet"] = True
+    _strip_legacy_h2h(row)
 
     if row.get("virtual_settled") is True:
+        virtual_status = str(
+            row.get("virtual_status") or row.get("status") or "PENDING"
+        ).upper()
+        row["virtual_status"] = virtual_status
+        row["status"] = virtual_status
         row["virtual_profit"] = float(row.get("virtual_profit") or 0.0)
+        row["profit"] = row["virtual_profit"]
         return row
 
     if row.get("status") not in (None, "PENDING"):
@@ -84,27 +109,93 @@ def _as_virtual(item: dict[str, Any]) -> dict[str, Any]:
     return row
 
 
+def _legacy_settlement_map(root: Path) -> dict[str, dict[str, Any]]:
+    rows = load_json(root / LEGACY_SETTLEMENTS_FILE)
+    return {
+        _canonical_key(row): row
+        for row in rows
+        if _canonical_key(row)
+        and str(row.get("status") or "").upper() in TERMINAL_STATUSES
+    }
+
+
+def _restore_legacy_virtual_settlement(
+    row: dict[str, Any], settlements: dict[str, dict[str, Any]]
+) -> dict[str, Any]:
+    """Recover the frozen historical Strong Signal ledger snapshot."""
+    if row.get("virtual_settled") is True:
+        return row
+    recovery = settlements.get(_canonical_key(row))
+    if not recovery:
+        return row
+    status = str(recovery.get("status") or "PENDING").upper()
+    if status not in TERMINAL_STATUSES:
+        return row
+    profit = float(recovery.get("profit") or 0.0)
+    row["status"] = status
+    row["virtual_status"] = status
+    row["profit"] = profit
+    row["virtual_profit"] = profit
+    row["virtual_settled"] = True
+    if recovery.get("result") is not None:
+        row["result"] = recovery["result"]
+    if recovery.get("settled_at") is not None:
+        row["settled_at"] = recovery["settled_at"]
+        row["virtual_settled_at"] = recovery["settled_at"]
+    row["settlement_type"] = "COUNTERFACTUAL_ALERT"
+    return row
+
+
 def load_or_migrate_ledger(root: Path) -> list[dict[str, Any]]:
     ledger_path = root / LEDGER_FILE
+    settlements = _legacy_settlement_map(root)
     if ledger_path.exists():
-        return [_as_virtual(x) for x in load_json(ledger_path)]
-    legacy = load_json(root / "strong_signals.json")
-    migrated = [_as_virtual(x) for x in legacy]
-    ledger_path.write_text(
-        json.dumps(migrated, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-    )
-    return migrated
+        rows = [_as_virtual(x) for x in load_json(ledger_path)]
+    else:
+        legacy = load_json(root / "strong_signals.json")
+        rows = [_as_virtual(x) for x in legacy]
+    recovered = [
+        _restore_legacy_virtual_settlement(row, settlements) for row in rows
+    ]
+    if not ledger_path.exists():
+        ledger_path.write_text(
+            json.dumps(recovered, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        )
+    return recovered
 
 
-def merge(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def merge(
+    items: list[dict[str, Any]], settlements: dict[str, dict[str, Any]]
+) -> list[dict[str, Any]]:
     merged: dict[str, dict[str, Any]] = {}
     for item in items:
         key = _canonical_key(item)
         if not key:
             continue
         current = merged.setdefault(key, {})
-        current.update(item)
-        merged[key] = _as_virtual(current)
+        was_virtual_settled = current.get("virtual_settled") is True
+        if was_virtual_settled and item.get("virtual_settled") is not True:
+            protected = {
+                field: current.get(field)
+                for field in (
+                    "virtual_settled",
+                    "virtual_status",
+                    "virtual_profit",
+                    "status",
+                    "profit",
+                    "result",
+                    "settled_at",
+                    "settlement_type",
+                    "virtual_settled_at",
+                )
+            }
+            current.update(item)
+            current.update({k: v for k, v in protected.items() if v is not None})
+        else:
+            current.update(item)
+        current = _as_virtual(current)
+        current = _restore_legacy_virtual_settlement(current, settlements)
+        merged[key] = current
     return sorted(
         merged.values(),
         key=lambda item: str(
@@ -148,6 +239,7 @@ def build(
     root: Path = ROOT,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     ledger = load_or_migrate_ledger(root)
+    settlements = _legacy_settlement_map(root)
     alerts = load_json(root / "intraday_alerts.json")
     observations = load_jsonl(root / "data" / "market_timing_snapshots.jsonl")
     strong_updates = [
@@ -155,7 +247,7 @@ def build(
         for x in alerts
         if str(x.get("signal_class") or "").upper() in {"STRONG_SIGNAL", "STRONG"}
     ]
-    strong = merge(ledger + strong_updates)
+    strong = merge(ledger + strong_updates, settlements)
     (root / LEDGER_FILE).write_text(
         json.dumps(strong, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
