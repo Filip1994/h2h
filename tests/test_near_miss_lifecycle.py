@@ -1,5 +1,5 @@
 # fmt: off
-import json  # noqa: I001
+import json
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
