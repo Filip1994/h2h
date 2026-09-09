@@ -11,7 +11,7 @@ from urllib.parse import urlencode
 
 from .config import Settings
 from .engine import GenerationResult
-from .presentation import (  # noqa: I001
+from .presentation import (
     clv_label,
     market_display,
     odds_lifecycle,
