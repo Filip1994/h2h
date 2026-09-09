@@ -133,6 +133,39 @@ def test_promoted_near_miss_is_linked_without_becoming_production(tmp_path):
     assert row["not_a_production_bet"] is True
 
 
+def test_other_bookmaker_cannot_promote_exact_near_miss(tmp_path):
+    now = datetime(2026, 9, 10, 12, tzinfo=UTC)
+    prediction = base_prediction(now)
+    near = snapshot(prediction, now - timedelta(minutes=10), 1.60)
+    write_json(tmp_path / "predictions.json", [prediction])
+    write_json(tmp_path / "bets.json", [])
+    write_json(
+        tmp_path / "intraday_alerts.json",
+        [
+            {
+                "id": "signal-wrong-book",
+                "signal_id": "signal-wrong-book",
+                "prediction_id": prediction["id"],
+                "event_id": 101,
+                "market": "UNDER_2_5",
+                "bookmaker_id": 11,
+                "bookmaker": "1xBet",
+                "signal_class": "STRONG_SIGNAL",
+                "odd": 1.80,
+                "signal_sent_at": (now - timedelta(minutes=5)).isoformat(),
+            }
+        ],
+    )
+    write_json(tmp_path / "near_misses.json", [])
+    write_jsonl(tmp_path / "data" / "market_timing_snapshots.jsonl", [near])
+    write_jsonl(tmp_path / "data" / "odds_snapshots.jsonl", [])
+
+    row = build(tmp_path, now=now)[0]
+    assert row["status"] == "PENDING"
+    assert row["promoted_to_signal_id"] is None
+    assert row["bookmaker_id"] == 8
+
+
 def test_non_promoted_near_miss_expires_after_kickoff(tmp_path):
     now = datetime(2026, 9, 10, 14, tzinfo=UTC)
     prediction = base_prediction(datetime(2026, 9, 10, 12, tzinfo=UTC))
