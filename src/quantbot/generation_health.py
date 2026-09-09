@@ -14,7 +14,7 @@ FUNNEL_SEMANTICS = {
     "ev_pass": "Market-level evaluations that pass the configured EV threshold.",
     "edge_pass": "Market-level candidates that pass the configured probability-edge threshold.",
     "risk_checks": "Candidates presented to the existing staking/risk allocator.",
-    "selected": "Candidates selected by the existing allocator before persistence.",
+    "selected": "Candidates selected after risk/staking and intraday strength classification, before bet persistence.",
     "persisted_bets": "Production bets successfully appended by the idempotent BetStore.",
     "settled": "Production bets that subsequently reach a terminal settlement state.",
 }
@@ -94,6 +94,14 @@ def _classification_reasons(
         reasons.append("FIXTURE_PROCESSING_FAILURE")
     if telemetry.get("training_sample_insufficiency", 0):
         reasons.append("TRAINING_SAMPLE_INSUFFICIENT")
+    if telemetry.get("risk_rejections", 0):
+        reasons.append("RISK_OR_CAPACITY_REJECTIONS")
+    if telemetry.get("strength_rejections", 0):
+        reasons.append("STRONG_SIGNAL_THRESHOLD_REJECTIONS")
+    if telemetry.get("duplicate_rejections", 0):
+        reasons.append("DUPLICATE_OR_BLOCKED_REJECTIONS")
+    if telemetry.get("persistence_failures", 0):
+        reasons.append("PERSISTENCE_FAILURE")
     return reasons
 
 
@@ -109,7 +117,7 @@ def build_success_health(generated_at: datetime, result: Any) -> dict[str, Any]:
     degraded_reasons = _classification_reasons(usage, telemetry)
 
     return {
-        "schema_version": 4,
+        "schema_version": 5,
         "timestamp": generated_at.astimezone(UTC).isoformat(),
         "status": "DEGRADED" if degraded_reasons else "HEALTHY",
         "classification_reasons": degraded_reasons,
@@ -132,15 +140,22 @@ def build_failure_health(
     error: BaseException,
     telemetry: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
+    attached = getattr(error, "telemetry", None)
+    if telemetry is None and isinstance(attached, dict):
+        telemetry = attached
     pipeline = dict(telemetry or {})
     pipeline.setdefault("fixture_failures", {"api": 0, "dixon_coles": 0, "other": 0})
+    pipeline.setdefault("funnel_rejections", [])
+    pipeline.setdefault("persistence_failures", 0)
     funnel = _funnel(pipeline)
     pipeline["funnel"] = funnel
+    reasons = [type(error).__name__]
+    reasons.extend(reason for reason in _classification_reasons(dict(api_usage), pipeline) if reason not in reasons)
     return {
-        "schema_version": 4,
+        "schema_version": 5,
         "timestamp": generated_at.astimezone(UTC).isoformat(),
         "status": "BLOCKED",
-        "classification_reasons": [type(error).__name__],
+        "classification_reasons": reasons,
         "pipeline": pipeline,
         "funnel": funnel,
         "funnel_semantics": FUNNEL_SEMANTICS,
