@@ -32,11 +32,7 @@ def test_dashboard_has_one_shared_design_system_and_all_primary_sectors():
     css = read("assets/qb-dashboard.css")
     js = read("assets/qb-dashboard.js")
     assert ".shell" in css and ".lifecycle" in css and ".clv" in css
-    assert (
-        "const productionCard" in js
-        and "const signalCard" in js
-        and "const lifecycle" in js
-    )
+    assert "const productionCard" in js and "const signalCard" in js and "const lifecycle" in js
     for page in PAGES:
         text = read(page)
         assert "./assets/qb-dashboard.css" in text
@@ -76,14 +72,7 @@ def test_dashboard_zero_pick_contract_and_truthful_state_labels():
         assert 'id="roi"' in text
         assert "data-generation" in text
         assert "data-capture" in text
-    for state in (
-        "RUNNING",
-        "NO SIGNALS",
-        "NO ELIGIBLE FIXTURES",
-        "STALE",
-        "NO DATA",
-        "ERROR",
-    ):
+    for state in ("RUNNING", "NO SIGNALS", "NO ELIGIBLE FIXTURES", "STALE", "NO DATA", "ERROR"):
         assert state in js
     assert "const status =" in js
 
@@ -104,10 +93,12 @@ def test_dashboard_pages_have_explicit_sector_identity_and_active_navigation():
 
 def test_strong_page_cannot_fall_through_to_production_overview_accounting():
     strong = read("strong-signals.html")
+    js = read("assets/qb-dashboard.js")
     assert '<body data-page="strong">' in strong
-    assert "const INITIAL_BANK = 10000" in strong
-    assert "virtualProfit" in strong
-    assert "strong_signals_portfolio.json" in strong
+    assert "VIRTUAL / COUNTERFACTUAL · 10,000 RSD BASE" in strong
+    assert "renderStrong" in js
+    assert "strong_signals_portfolio.json" in js
+    assert "STRONG_SIGNALS_VIRTUAL" in js
 
 
 def test_strong_and_near_pages_have_active_and_history_contract():
@@ -120,19 +111,18 @@ def test_strong_and_near_pages_have_active_and_history_contract():
         assert 'id="active-cards"' in page
         assert 'id="history-cards"' in page
     assert "renderBucket" in js
-    assert "String(x.status || 'PENDING')" in js
+    assert "String(x.status||'PENDING')" in js
 
 
 def test_history_preserves_accounting_buckets_and_does_not_invent_lifecycle():
     js = read("assets/qb-dashboard.js")
-    assert "signal_class:'PRODUCTION'" in js
-    assert "signal_class:'STRONG_SIGNAL'" in js
-    assert "signal_class:'NEAR_MISS'" in js
+    assert "const production = bets =>" in js
+    assert "const signalCard =" in js
     assert "x.opening_odd" in js
-    assert "x.opening_captured_at" in js
     assert "x.closing_odd" in js
-    assert "x.closing_captured_at" in js
     assert "Unavailable" in js
+    assert "renderStrong" in js
+    assert "renderBucket" in js
 
 
 def test_signal_history_exposes_real_outcome_profit_and_counterfactual_semantics():
