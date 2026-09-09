@@ -1,5 +1,5 @@
-from datetime import UTC, datetime
 import json
+from datetime import UTC, datetime
 
 import pytest
 
@@ -49,11 +49,15 @@ def test_assert_not_stale_rejects_older_candidate(tmp_path):
     candidate_path = tmp_path / "candidate.json"
     current_path = tmp_path / "current.json"
     candidate_path.write_text(
-        json.dumps(build_metadata(run_id=10, run_attempt=1, workflow="watchlist", sha="old")),
+        json.dumps(
+            build_metadata(run_id=10, run_attempt=1, workflow="watchlist", sha="old")
+        ),
         encoding="utf-8",
     )
     current_path.write_text(
-        json.dumps(build_metadata(run_id=11, run_attempt=1, workflow="watchlist", sha="new")),
+        json.dumps(
+            build_metadata(run_id=11, run_attempt=1, workflow="watchlist", sha="new")
+        ),
         encoding="utf-8",
     )
     with pytest.raises(RuntimeError, match="Stale watchlist writer rejected"):
@@ -64,11 +68,15 @@ def test_assert_not_stale_allows_newer_candidate(tmp_path):
     candidate_path = tmp_path / "candidate.json"
     current_path = tmp_path / "current.json"
     candidate_path.write_text(
-        json.dumps(build_metadata(run_id=12, run_attempt=1, workflow="watchlist", sha="new")),
+        json.dumps(
+            build_metadata(run_id=12, run_attempt=1, workflow="watchlist", sha="new")
+        ),
         encoding="utf-8",
     )
     current_path.write_text(
-        json.dumps(build_metadata(run_id=11, run_attempt=1, workflow="watchlist", sha="old")),
+        json.dumps(
+            build_metadata(run_id=11, run_attempt=1, workflow="watchlist", sha="old")
+        ),
         encoding="utf-8",
     )
     assert_not_stale(candidate_path, current_path)
