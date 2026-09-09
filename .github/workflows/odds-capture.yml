@@ -9,9 +9,6 @@ on:
 permissions:
   contents: write
 
-authorization:
-  contents: write
-
 concurrency:
   group: quantbet-ledger
   cancel-in-progress: false
