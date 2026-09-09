@@ -14,9 +14,9 @@ class Market(StrEnum):
     @property
     def display_name(self) -> str:
         return {
-            Market.OVER_25: "Ukupno Golova - Više 2.5",
-            Market.UNDER_25: "Ukupno Golova - Manje 2.5",
-            Market.BTTS_YES: "Oba Tima Daju Gol (GG)",
+            Market.OVER_25: "Over 2.5",
+            Market.UNDER_25: "Under 2.5",
+            Market.BTTS_YES: "BTTS — Yes",
         }[self]
 
     @classmethod
@@ -29,6 +29,12 @@ class Market(StrEnum):
             "Ukupno Golova - Manje 2.5": cls.UNDER_25,
             "Oba Tima Daju Gol (GG)": cls.BTTS_YES,
             "Više 2.5 Golova": cls.OVER_25,
+            "Više 2.5": cls.OVER_25,
+            "Manje 2.5": cls.UNDER_25,
+            "Less than 2.5": cls.UNDER_25,
+            "Under 2.5": cls.UNDER_25,
+            "Over 2.5": cls.OVER_25,
+            "GG": cls.BTTS_YES,
         }
         if value in aliases:
             return aliases[value]
