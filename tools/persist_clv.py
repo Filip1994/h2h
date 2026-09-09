@@ -145,6 +145,7 @@ def refresh_lifecycle_fields(
 def entries(settings: Settings) -> int:
     predictions = load_list(settings.predictions_file)
     bets = BetStore(settings.bets_file).load()
+    snapshots = load_snapshots()
     bet_by_key = {key(b): str(b["id"]) for b in bets if key(b) and b.get("id")}
     store = OddsSnapshotStore(SNAP)
     changed = 0
@@ -167,6 +168,13 @@ def entries(settings: Settings) -> int:
             )
             prediction["entry_snapshot_id"] = snapshot
             changed += 1
+            snapshots.append(
+                next(
+                    row
+                    for row in store.load()
+                    if row.get("snapshot_id") == snapshot
+                )
+            )
 
     pred_map = {key(p): p for p in predictions if key(p)}
     for bet in bets:
@@ -175,7 +183,7 @@ def entries(settings: Settings) -> int:
             bet["prediction_id"] = prediction.get("id")
             bet["signal_id"] = prediction.get("signal_id") or prediction.get("id")
             bet["entry_snapshot_id"] = prediction.get("entry_snapshot_id")
-            refresh_lifecycle_fields(bet, [], prediction=prediction)
+            refresh_lifecycle_fields(bet, snapshots, prediction=prediction)
     if changed or bets:
         atomic_write_json(settings.predictions_file, predictions)
         BetStore(settings.bets_file).save(bets)
@@ -379,8 +387,8 @@ def closing(settings: Settings) -> int:
             existing_ids.add(canonical_id)
             snapshots.append({**canonical, "snapshot_id": canonical_id})
             changed += 1
-        bet["closing_snapshot_id"] = canonical_id
         refresh_lifecycle_fields(bet, snapshots)
+        bet["closing_snapshot_id"] = canonical_id
     BetStore(settings.bets_file).save(bets)
     return changed
 
