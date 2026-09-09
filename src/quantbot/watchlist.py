@@ -380,7 +380,10 @@ def run_watchlist(settings: Settings, now: datetime | None = None) -> dict[str, 
                         signal_updates.append(event)
                         previous["last_alert_ev"] = ev
                         previous["last_alert_edge"] = edge
-            elif strong and not linked_bet and not was_strong:
+            elif strong and not was_strong:
+                # Strong Signals are an independent virtual stream.  A matching
+                # Production bet is linkage metadata, not a reason to suppress
+                # creation of the Strong Signal itself.
                 event = _event_from_prediction(
                     prediction,
                     quote=quote,
@@ -389,15 +392,16 @@ def run_watchlist(settings: Settings, now: datetime | None = None) -> dict[str, 
                     probability_edge=edge,
                     stake=virtual_stake,
                     now=now_local,
-                    linked_bet=None,
+                    linked_bet=linked_bet,
                     signal_type="NEW_OPPORTUNITY",
                     signal_class=classification.signal_class,
                     near_miss_reason=classification.near_miss_reason,
                 )
-                alerts.append(event)
-                new_opportunities.append(event)
-                previous["last_alert_ev"] = ev
-                previous["last_alert_edge"] = edge
+                if not any(a.get("id") == event["id"] for a in alerts):
+                    alerts.append(event)
+                    new_opportunities.append(event)
+                    previous["last_alert_ev"] = ev
+                    previous["last_alert_edge"] = edge
 
             if strong and 120 <= seconds <= 480:
                 event_matches = [a for a in alerts if a.get("prediction_id") == key]
@@ -440,4 +444,4 @@ def run_watchlist(settings: Settings, now: datetime | None = None) -> dict[str, 
         "useful_observations": timing_stats["useful_observations"],
         "api_requests": api.request_count,
     }
-# fmt: on
+ # fmt: on
