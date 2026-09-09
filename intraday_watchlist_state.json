@@ -814,528 +814,557 @@
     "last_observation_id": "2f55af4a86cb7264cdbef0a192b4a6e1f5920a6b52f16f70a694eb3c683c14d4"
   },
   "1603023": {
-    "last_scan_at": "2026-09-09T14:14:16.044723+00:00",
-    "cadence_seconds": 600
+    "last_scan_at": "2026-09-09T15:06:50.113042+00:00",
+    "cadence_seconds": 300
   },
   "1603023_OVER_2_5_dc-value-v2.1.0": {
     "signal_class": "NEAR_MISS",
     "qualified_candidate": false,
     "near_miss_reason": "EDGE_NEAR_THRESHOLD",
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "c0e73da3456b2d6370c126ff22c112d299118284d3086d48e1f7e6afbc5b3d09"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "bc8df5c1b7e54a4d38989af0c1dd1b4730b3aea90ff9bc54b2aadcfa3ed0eafd"
   },
   "1603023_UNDER_2_5_dc-value-v2.1.0": {
     "signal_class": "OBSERVED",
     "qualified_candidate": false,
     "near_miss_reason": null,
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "d5a18c50c7948b27c8cbcafb6acd917cadf734108c07482c9175ebd333ba7581"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "103f1104c6043a4f55a1b5a391efa207d3ee963b348cf089a6691d143213b331"
   },
   "1603023_BTTS_YES_dc-value-v2.1.0": {
     "signal_class": "NEAR_MISS",
     "qualified_candidate": false,
     "near_miss_reason": "EDGE_NEAR_THRESHOLD",
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "96ce0f2738dc8e682999e32a2d4b2194effd1f9208a165b3a1fccc56f88a5f6a"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "9234076f69227ff93f4963f71bb2b2f6a6aacad6ec352d34b9597f187a967ea3"
   },
   "1582774": {
-    "last_scan_at": "2026-09-09T14:14:16.044723+00:00",
-    "cadence_seconds": 600
+    "last_scan_at": "2026-09-09T15:06:50.113042+00:00",
+    "cadence_seconds": 300
   },
   "1582774_OVER_2_5_dc-value-v2.1.0": {
     "signal_class": "OBSERVED",
     "qualified_candidate": false,
     "near_miss_reason": null,
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "0cda43ec288daa9a835a4afbe795a73a003f7be1cbb04b0ae18253e9b651a5a0"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "cdb1b5a7d5302e4e357389b8e68bf61e8c5abce63d33f143f1e6eb4139a1f490"
   },
   "1582774_UNDER_2_5_dc-value-v2.1.0": {
     "signal_class": "OBSERVED",
     "qualified_candidate": false,
     "near_miss_reason": null,
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "ce9a031cfa440465a6ce6928f793cad6369394820b22df95fbff333528f038a9"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "d05114e9a4ed68d249b062d7e5c21eb06efed3d587f3842296e71558200cffdb"
   },
   "1582774_BTTS_YES_dc-value-v2.1.0": {
     "signal_class": "OBSERVED",
     "qualified_candidate": false,
     "near_miss_reason": null,
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "dc82de57edc5e6825f9c4268b08c14b3f95c8425f6f65020fcddc5850af5fa70"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "46b60435b67b377998a4427eb6f87bb90223de7654afb7480c434d3a7b8fa457"
   },
   "1603998": {
-    "last_scan_at": "2026-09-09T14:14:16.044723+00:00",
+    "last_scan_at": "2026-09-09T15:06:50.113042+00:00",
     "cadence_seconds": 600
   },
   "1603998_OVER_2_5_dc-value-v2.1.0": {
     "signal_class": "OBSERVED",
     "qualified_candidate": false,
     "near_miss_reason": null,
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "6adc469473ab381b29e96c2d59577627208d4baa68c2aeff5ea18b522c99deac"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "9d027bee01fa513d7f25920d3c8f08bc63211455517231bda221b9e31b1d1a4e"
   },
   "1603998_UNDER_2_5_dc-value-v2.1.0": {
     "signal_class": "NEAR_MISS",
     "qualified_candidate": false,
     "near_miss_reason": "EV_AND_EDGE_NEAR_THRESHOLD",
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "22c7f15ba9f8dc8bcbd17fddbaa40d1d0810efca5d189bbd37faa248ecb611fb"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "d980eb48d1b70e7d518be2741eac287a4fdabb2bd58bc8c8001787137139afaf"
   },
   "1603998_BTTS_YES_dc-value-v2.1.0": {
     "signal_class": "OBSERVED",
     "qualified_candidate": false,
     "near_miss_reason": null,
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "47dedb1c8e02bb492c97ed8c462a7da2eb1a9478baea664c7f13bb69fb84ef5e"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "1bb54eb7cff30f8facea26b8058f24f35204929d0e8ee0ef5681336161644c8a"
   },
   "1552142": {
-    "last_scan_at": "2026-09-09T14:14:16.044723+00:00",
-    "cadence_seconds": 900
+    "last_scan_at": "2026-09-09T15:06:50.113042+00:00",
+    "cadence_seconds": 600
   },
   "1552142_OVER_2_5_dc-value-v2.1.0": {
     "signal_class": "OBSERVED",
     "qualified_candidate": false,
     "near_miss_reason": null,
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "ebc31561c3d4f86cbb012651904a7200ef0ff7f8b516ac87018957a14ba7083e"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "b263e2b4ca6f6b7dd4d834aec3edf1ee6501f3c04384a31abce8db1a7cbc6200"
   },
   "1552142_UNDER_2_5_dc-value-v2.1.0": {
     "signal_class": "NEAR_MISS",
     "qualified_candidate": true,
     "near_miss_reason": "EV_AND_EDGE_NEAR_THRESHOLD",
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "4c65813187c2b47e7c4443a7d468210967df30b61b63faff0e58524028d4572f"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "06c42afdfbc0dc548473d6a68e00d17a8340d167cfa8ebf08cb1a5fdbaac9eea"
   },
   "1552142_BTTS_YES_dc-value-v2.1.0": {
     "signal_class": "OBSERVED",
     "qualified_candidate": false,
     "near_miss_reason": null,
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "fb87e72f855d1619d0a9de32d0a3f23ee1579565020c93bc76d5113ef0517839"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "984731239f8803b1eb19dc6153d687aaaf27a7080c3e13793c9f3b43046995fb"
   },
   "1497690": {
-    "last_scan_at": "2026-09-09T14:14:16.044723+00:00",
-    "cadence_seconds": 900
+    "last_scan_at": "2026-09-09T15:06:50.113042+00:00",
+    "cadence_seconds": 600
   },
   "1497690_OVER_2_5_dc-value-v2.1.0": {
     "signal_class": "OBSERVED",
     "qualified_candidate": false,
     "near_miss_reason": null,
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "cbb929b89ee9f650f17ddc7f4822f8cd6144eb41e3ce3c427a30ad5a964987d6"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "3915279503447ea6f2cf437c07ad798a59c3a14a231f7ad05f4b7751e35dcd82"
   },
   "1497690_UNDER_2_5_dc-value-v2.1.0": {
     "signal_class": "NEAR_MISS",
     "qualified_candidate": false,
     "near_miss_reason": "EDGE_NEAR_THRESHOLD",
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "1fd43e5cf145e97c8a8616dd5e8465954c8d878db539a62c56f1b9b2a9c1c52d"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "03c3a3587459c091d40240eac8aa6c3c609823256465eda3604bc799a12b5993"
   },
   "1497690_BTTS_YES_dc-value-v2.1.0": {
     "signal_class": "OBSERVED",
     "qualified_candidate": false,
     "near_miss_reason": null,
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "4f4d82831cb5c2912f42f8e9a82e0c0ec9d712e6e23f40f3c9e35c406cd3862f"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "270ec6e006988781ba7fae6711313ee45b4085ac7ddfd4150e5d88714beacdc4"
   },
   "1497691": {
-    "last_scan_at": "2026-09-09T14:14:16.044723+00:00",
-    "cadence_seconds": 900
+    "last_scan_at": "2026-09-09T15:06:50.113042+00:00",
+    "cadence_seconds": 600
   },
   "1497691_OVER_2_5_dc-value-v2.1.0": {
     "signal_class": "OBSERVED",
     "qualified_candidate": false,
     "near_miss_reason": null,
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "835a27949fe590c0a9fbea9bb8acae9e9f841b02816be0d9cc6556ea619f9bf6"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "7ca061d32a6369b98d87e912fe2b29a5a975f7c59dcf6861fcb383b1255634bb"
   },
   "1497691_UNDER_2_5_dc-value-v2.1.0": {
     "signal_class": "NEAR_MISS",
     "qualified_candidate": true,
     "near_miss_reason": "EV_AND_EDGE_NEAR_THRESHOLD",
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "864535feca89b57a9654468bf59434723a01b903655dfcd138d704462940f6b2"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "2a5772880b9dd67bdbf70b0b12455dd47f6211d8b98325b02c39f89722612516"
   },
   "1497691_BTTS_YES_dc-value-v2.1.0": {
     "signal_class": "OBSERVED",
     "qualified_candidate": false,
     "near_miss_reason": null,
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "63dd6f2abb3a51ba11d958f837de3114b56e0a40a5086f16ed973e9b1fe671be"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "7ba814e8e7cb153bc0b788108dd6de90a5d0d5cd8c52c353a4f2de0fa48f5a38"
   },
   "1497692": {
-    "last_scan_at": "2026-09-09T14:14:16.044723+00:00",
-    "cadence_seconds": 900
+    "last_scan_at": "2026-09-09T15:06:50.113042+00:00",
+    "cadence_seconds": 600
   },
   "1497692_OVER_2_5_dc-value-v2.1.0": {
     "signal_class": "OBSERVED",
     "qualified_candidate": false,
     "near_miss_reason": null,
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "7df4d7fcc0f5beb26e9ee653b28ba7b28068cd23f93adc562c7b4cdd5cca26a7"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "6de666876d46f34ef99ad2698ce9247c148928e786bcdfc8f7d15e544a36023e"
   },
   "1497692_UNDER_2_5_dc-value-v2.1.0": {
     "signal_class": "OBSERVED",
     "qualified_candidate": false,
     "near_miss_reason": null,
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "53ebb82c3f92e23c8007007237147273be7b3f65e20dbd994456731139d114c3"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "0cb9d6a4c765992ed253312a88231456252294201179245e239576a1093aff25"
   },
   "1497692_BTTS_YES_dc-value-v2.1.0": {
     "signal_class": "OBSERVED",
     "qualified_candidate": false,
     "near_miss_reason": null,
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "f6b3ed3bea11ec64dd1b3551de691d66eac3a7dc087e9fea3da45f5323efcfc6"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "63ef3a2d24e0baa667aa58009dd318b27250cb9bdfacbcc24dabb31823995279"
   },
   "1497694": {
-    "last_scan_at": "2026-09-09T14:14:16.044723+00:00",
-    "cadence_seconds": 900
+    "last_scan_at": "2026-09-09T15:06:50.113042+00:00",
+    "cadence_seconds": 600
   },
   "1497694_OVER_2_5_dc-value-v2.1.0": {
     "signal_class": "NEAR_MISS",
     "qualified_candidate": false,
     "near_miss_reason": "EV_AND_EDGE_NEAR_THRESHOLD",
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "c549dd2077f32d73656d10aefab0312e100e484f1b8e12c268baaf3239ea9f38"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "c0f55d929839df4ea59253cc6c6c5bcf42698f63f1c04c99f5474a592fdc0410"
   },
   "1497694_UNDER_2_5_dc-value-v2.1.0": {
     "signal_class": "OBSERVED",
     "qualified_candidate": false,
     "near_miss_reason": null,
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "a6ccc54667f682ee4c40389a38d58769f52752ce4cb37b44c3a8b395c30d7e8d"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "d8419349ee411e3a085355ef7728efe92b2dae67271a4f08ba069b62966060ea"
   },
   "1497694_BTTS_YES_dc-value-v2.1.0": {
     "signal_class": "NEAR_MISS",
     "qualified_candidate": false,
     "near_miss_reason": "EDGE_NEAR_THRESHOLD",
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "d83621602e3803126bcaf0d0f9191e057ee3053bc63a15ca218a6aaa154a03d9"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "03c9df913c1df2984939bd82d0d6c18610fff472df822f60e6fc2eeed16eedde"
   },
   "1559993": {
-    "last_scan_at": "2026-09-09T14:14:16.044723+00:00",
-    "cadence_seconds": 900
+    "last_scan_at": "2026-09-09T15:06:50.113042+00:00",
+    "cadence_seconds": 600
   },
   "1559993_OVER_2_5_dc-value-v2.1.0": {
     "signal_class": "OBSERVED",
     "qualified_candidate": false,
     "near_miss_reason": null,
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "a4008955285de586d87776e392c99357201ea775600d8ec61e2392bab8cc725d"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "c0c22e2a17a573953615e90482ab2e0dacbe912c44eba8194797391766857dd1"
   },
   "1559993_UNDER_2_5_dc-value-v2.1.0": {
     "signal_class": "NEAR_MISS",
     "qualified_candidate": false,
     "near_miss_reason": "EDGE_NEAR_THRESHOLD",
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "bf2de4cc33fe36b0ea8dcc40a4c4b2d42de6369bcb522105c5a18777a80e43a4"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "4763b3f966f9991552ad9a8a6b8ddf6e98ce7ea302fcfb78e0ba30da524630e3"
   },
   "1559993_BTTS_YES_dc-value-v2.1.0": {
     "signal_class": "OBSERVED",
     "qualified_candidate": false,
     "near_miss_reason": null,
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "0ed14372c23c30679c0b9b6b03455f4b45c6c15ce1928e50388d5173a754575e"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "06b8e9254a078229cb17358966a7fc4283724061b503d28dca11745445845700"
   },
   "1612237": {
-    "last_scan_at": "2026-09-09T14:14:16.044723+00:00",
-    "cadence_seconds": 900
+    "last_scan_at": "2026-09-09T15:06:50.113042+00:00",
+    "cadence_seconds": 600
   },
   "1612237_OVER_2_5_dc-value-v2.1.0": {
     "signal_class": "NEAR_MISS",
     "qualified_candidate": true,
     "near_miss_reason": "EV_AND_EDGE_NEAR_THRESHOLD",
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "fe8f36cbfa79cc3cc8352dc500d952ba8804a9e1ddc1f43615aae1739ce3c8d2"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "022731fe25ffd72c343819e83bf7011d2d135e87c78040ebb477e6819d00d179"
   },
   "1612237_UNDER_2_5_dc-value-v2.1.0": {
     "signal_class": "OBSERVED",
     "qualified_candidate": false,
     "near_miss_reason": null,
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "e7bda0ac485fc47fab3e35a85fed547a7502fc3b23c1e3a66d5f087e9d64bec2"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "e2d0d896efc1429e6e5bf0166ceb0e4ee2d4cc7a36220f493e2aa85b1f9186df"
   },
   "1612237_BTTS_YES_dc-value-v2.1.0": {
     "signal_class": "NEAR_MISS",
     "qualified_candidate": false,
     "near_miss_reason": "EDGE_NEAR_THRESHOLD",
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "c6f259de2b033752ae20b5542eaa5f791abca7c1c0dd295a13f49fa2338dea72"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "98dcd527cf208a910b9ea43a495c8805fbdf840efb1cbd0bfa89cc031fb150ab"
   },
   "1612238": {
-    "last_scan_at": "2026-09-09T14:14:16.044723+00:00",
-    "cadence_seconds": 900
+    "last_scan_at": "2026-09-09T15:06:50.113042+00:00",
+    "cadence_seconds": 600
   },
   "1612238_OVER_2_5_dc-value-v2.1.0": {
     "signal_class": "NEAR_MISS",
     "qualified_candidate": true,
     "near_miss_reason": "EV_AND_EDGE_NEAR_THRESHOLD",
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "0f754c443b217033c363c18bbca55003a92cdfadd18bb2e8c8e818987bb81f35"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "6810787ce7feba19609b4a4c32dd87a6969277a671ccdbb27e5c00620602cc52"
   },
   "1612238_UNDER_2_5_dc-value-v2.1.0": {
     "signal_class": "OBSERVED",
     "qualified_candidate": false,
     "near_miss_reason": null,
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "d2b8de24b77c2e5ee6798af0b9c6ec34222c7a472443a825dd33cf72d3135fc3"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "e9fffd52ef22c80d49329dc178e689e36a1a6c742c384939669ecc021da9bed6"
   },
   "1612238_BTTS_YES_dc-value-v2.1.0": {
     "signal_class": "NEAR_MISS",
     "qualified_candidate": false,
     "near_miss_reason": "EV_AND_EDGE_NEAR_THRESHOLD",
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "3011633585cd200d6ed606f74f8a8072d469eef654062f23d9507931131a518f"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "d3e6621300d5812308f8a0a6faf4d35034a409a212f49a4ab9fffd532fcb61ff"
   },
   "1603999": {
-    "last_scan_at": "2026-09-09T14:14:16.044723+00:00",
-    "cadence_seconds": 1800
+    "last_scan_at": "2026-09-09T15:06:50.113042+00:00",
+    "cadence_seconds": 900
   },
   "1603999_OVER_2_5_dc-value-v2.1.0": {
     "signal_class": "OBSERVED",
     "qualified_candidate": false,
     "near_miss_reason": null,
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "d9692b35ccbdcd12eefee8a03c46cf04e83d27762f946c0414edbb55f062fd0e"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "9ea7f1d05974e5fb5cc25ce359e735a0f8f254e89534a9f696721e490b897f7d"
   },
   "1603999_UNDER_2_5_dc-value-v2.1.0": {
     "signal_class": "NEAR_MISS",
     "qualified_candidate": false,
     "near_miss_reason": "EDGE_NEAR_THRESHOLD",
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "a1c1f48d731f9b18196c4aaf964d1d6c8f6dcaca217a28b34bcb5a10221b3a5f"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "5c0adda5641aaf1411ff71aba422be9d0ef8e9cb3a2cda831729b48658b057e2"
   },
   "1603999_BTTS_YES_dc-value-v2.1.0": {
     "signal_class": "OBSERVED",
     "qualified_candidate": false,
     "near_miss_reason": null,
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "363d1b767f38b2540b72408c48a3be2c36a21e04d879cfe0b73c175405d50ca2"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "c7e41194c2a00bfa86f3ca31b2fd90ee86693ca8a4342a65f766f88fa89473ae"
   },
   "1603024": {
-    "last_scan_at": "2026-09-09T14:14:16.044723+00:00",
-    "cadence_seconds": 1800
+    "last_scan_at": "2026-09-09T15:06:50.113042+00:00",
+    "cadence_seconds": 900
   },
   "1603024_OVER_2_5_dc-value-v2.1.0": {
     "signal_class": "OBSERVED",
     "qualified_candidate": false,
     "near_miss_reason": null,
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "722db2af90b4747a0e34edea118bb79b31a60b4516beb92ac8cf238d47455f81"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "e928b67c8e3b552944f361b003aa3b73800b038237c693587ffa28a5dc458575"
   },
   "1603024_UNDER_2_5_dc-value-v2.1.0": {
     "signal_class": "NEAR_MISS",
     "qualified_candidate": true,
     "near_miss_reason": "EV_AND_EDGE_NEAR_THRESHOLD",
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "6d6a8378ee3612d16830ae1699559fb3ef534de9dbfa23c2bd76956405e38959"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "728a4676dd59ac278b765466364721ae04e8c4303f25d4227c6b795118cf4889"
   },
   "1603024_BTTS_YES_dc-value-v2.1.0": {
     "signal_class": "OBSERVED",
     "qualified_candidate": false,
     "near_miss_reason": null,
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "9a3e2d99f6ef198b4b177215b7370e780a46ecd56094e6cc05e306fbc6e17baf"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "ae886728943ea32e0eba32ab44846ee95243769edb6a4fe8c60f021582ded1a1"
   },
   "1603025": {
-    "last_scan_at": "2026-09-09T14:14:16.044723+00:00",
-    "cadence_seconds": 1800
+    "last_scan_at": "2026-09-09T15:06:50.113042+00:00",
+    "cadence_seconds": 900
   },
   "1603025_OVER_2_5_dc-value-v2.1.0": {
     "signal_class": "NEAR_MISS",
     "qualified_candidate": true,
     "near_miss_reason": "EV_AND_EDGE_NEAR_THRESHOLD",
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "1ecbcd2b45c8995d5f33f94f8e39b7e42d1adaa52f09f3a92555850673a06514"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "558c536b17cbc0083cfe499bd33c89cd52d4c298a1a74696223ad91a3b745619"
   },
   "1603025_UNDER_2_5_dc-value-v2.1.0": {
     "signal_class": "OBSERVED",
     "qualified_candidate": false,
     "near_miss_reason": null,
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "886c09f6a15104bc1c48843688cd9b90bea294636c0436cd0511019b8d7a015c"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "7c391ca434cb19f2e02de3367d67a872dedeadd43d7bfaf5c3de54c016850dc5"
   },
   "1603025_BTTS_YES_dc-value-v2.1.0": {
     "signal_class": "OBSERVED",
     "qualified_candidate": false,
     "near_miss_reason": null,
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "7a0534561a1e7bdd7ff9d6ae78a0857373cc0d0fe3c9e464c452ff17efe1b138"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "61733e01e78ed1496b67311e4cab888c7b5b4669f9dae5309566a098cbf8a3ac"
   },
   "1498658": {
-    "last_scan_at": "2026-09-09T14:14:16.044723+00:00",
+    "last_scan_at": "2026-09-09T15:06:50.113042+00:00",
     "cadence_seconds": 1800
   },
   "1498658_OVER_2_5_dc-value-v2.1.0": {
     "signal_class": "OBSERVED",
     "qualified_candidate": false,
     "near_miss_reason": null,
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "522a74607e3a3dba214e28fb1fd35dd7d3d79d2bdc87c95bd7f2da057ddedc53"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "217ece92b86a77f8537a2e8d855383df5ae5e58f2364c09e72861f18dd023f41"
   },
   "1498658_UNDER_2_5_dc-value-v2.1.0": {
     "signal_class": "NEAR_MISS",
     "qualified_candidate": true,
     "near_miss_reason": "EV_AND_EDGE_NEAR_THRESHOLD",
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "b23d36dea87c5685aaa15ce89afdab214d934831a47f8f04a4538bf97ad97395"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "5fe57a6522af6bbea8b92cbdecefda527b85090a47cd245851458a9012b1f857"
   },
   "1498658_BTTS_YES_dc-value-v2.1.0": {
     "signal_class": "OBSERVED",
     "qualified_candidate": false,
     "near_miss_reason": null,
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "f5b8892258a99fbfd85564852f4c41c3b555970722fb256576d282ffce11718d"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "b3716d4ba94c56a4bf42048a197a94b4725017de8542cd99d89d36cbf5941a83"
   },
   "1556644": {
-    "last_scan_at": "2026-09-09T14:14:16.044723+00:00",
+    "last_scan_at": "2026-09-09T15:06:50.113042+00:00",
     "cadence_seconds": 1800
   },
   "1556644_OVER_2_5_dc-value-v2.1.0": {
     "signal_class": "OBSERVED",
     "qualified_candidate": false,
     "near_miss_reason": null,
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "260d83b02ff4ed5109e508f1341977d5ac8c725ac02754f1eeb2db8646397c23"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "90d705bcc30a2baf9757907e5e84d9bc0505e96741ac564601011315c4721b82"
   },
   "1556644_UNDER_2_5_dc-value-v2.1.0": {
     "signal_class": "NEAR_MISS",
     "qualified_candidate": true,
     "near_miss_reason": "EV_AND_EDGE_NEAR_THRESHOLD",
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "56b0a4fca57732bd0cc3cfbbf489d84b9d60413127068c4b1aeb37c80ba23534"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "2bafe9c2b728696a34505c414cd562de0e8b18ca604cb4986b9eb1b09fc41b5b"
   },
   "1556644_BTTS_YES_dc-value-v2.1.0": {
     "signal_class": "OBSERVED",
     "qualified_candidate": false,
     "near_miss_reason": null,
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "5471dec35b52f7271eac2636012e68069b5f7ae92451efcfc33a24ebbd1f344a"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "00b6fee7626899cb8b51d8068e53e89e13ad02493f677699e010b3e6d0c0ba3b"
   },
   "1563152": {
-    "last_scan_at": "2026-09-09T14:14:16.044723+00:00",
+    "last_scan_at": "2026-09-09T15:06:50.113042+00:00",
     "cadence_seconds": 1800
   },
   "1563152_OVER_2_5_dc-value-v2.1.0": {
     "signal_class": "OBSERVED",
     "qualified_candidate": false,
     "near_miss_reason": null,
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "c5f81c227bbaa5825ff7d1563baed0fcadc1ac6404ac8fdecd5e3099e0187743"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "0c3fc447038ab76c97ae4510caea249adf0ef88767184bd0f32f2ba7e333aaee"
   },
   "1563152_UNDER_2_5_dc-value-v2.1.0": {
     "signal_class": "NEAR_MISS",
     "qualified_candidate": false,
     "near_miss_reason": "EV_AND_EDGE_NEAR_THRESHOLD",
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "32ec3076fb59d8835af9a452bbc3dfadd31face5ebcb144de27ab0ae83977c1b"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "eb49e0b8a4e3ced4622222d63d3f1fdf2a98ce7136988aca93443c55ecc4199f"
   },
   "1563152_BTTS_YES_dc-value-v2.1.0": {
     "signal_class": "OBSERVED",
     "qualified_candidate": false,
     "near_miss_reason": null,
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "35a2173c38045c67993d79b88784677f6f06364675518c6065a2e7b52b129286"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "1aa66c74eef4a2353bcb9c2062e3b4abe9bd5a3819ceb8aa3e80acb1b61aa28f"
   },
   "1563153": {
-    "last_scan_at": "2026-09-09T14:14:16.044723+00:00",
+    "last_scan_at": "2026-09-09T15:06:50.113042+00:00",
     "cadence_seconds": 1800
   },
   "1563153_OVER_2_5_dc-value-v2.1.0": {
     "signal_class": "OBSERVED",
     "qualified_candidate": false,
     "near_miss_reason": null,
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "028b8a0101606e04293094145b5a8825d797b85154ea1f09a700c75bcd88d402"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "9be914ca40ba14609cbb307fbfa3535385593f57226218b734e9b3333baa9422"
   },
   "1563153_UNDER_2_5_dc-value-v2.1.0": {
     "signal_class": "OBSERVED",
     "qualified_candidate": false,
     "near_miss_reason": null,
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "4bc1445efa199d0af51dc09d853e7fba3a87d3a7e4be810c7103b791d224d0b9"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "cce5c9ab026f481b3bb34d636571ba32ed2e90b9a6b666cb8ea52076512e6f33"
   },
   "1563153_BTTS_YES_dc-value-v2.1.0": {
     "signal_class": "OBSERVED",
     "qualified_candidate": false,
     "near_miss_reason": null,
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "0f8127299898bee3fc6063d596d146d4b0e42806959321f8c8a30a18e5d6c2f0"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "127df1a06fc0b054766689f25ee1a4ce19dc4525fcec50bb97a0ec64d8278421"
   },
   "1556645": {
-    "last_scan_at": "2026-09-09T14:14:16.044723+00:00",
+    "last_scan_at": "2026-09-09T15:06:50.113042+00:00",
     "cadence_seconds": 1800
   },
   "1556645_OVER_2_5_dc-value-v2.1.0": {
     "signal_class": "OBSERVED",
     "qualified_candidate": false,
     "near_miss_reason": null,
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "2b6160a4332f6906e6f40ef1777a110babc637c6c9bd364c74503eb3dc636bea"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "547db6fd647be1cda4cbbd42b98e88b8c1230f7979fbe04706e505e302c7d489"
   },
   "1556645_UNDER_2_5_dc-value-v2.1.0": {
     "signal_class": "OBSERVED",
     "qualified_candidate": false,
     "near_miss_reason": null,
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "205389985638e211c7e24b8b9d31e32d567e1e4211a5e510ffdcbbbb4ce67320"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "69ff26b5ecfc29a52c0f3c9688cac65ebcd0117d52d88cd6e8e97107150536ed"
   },
   "1556645_BTTS_YES_dc-value-v2.1.0": {
     "signal_class": "OBSERVED",
     "qualified_candidate": false,
     "near_miss_reason": null,
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "c3385752e6a26cf90235fcc8f14937a09e5e8263c1919619deaacec61d872b38"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "8b602ef6d9acbbd3db9b9fd4cc4a5c1fa189d069347e0a96f6c8e9a7d1308bbb"
   },
   "1563151": {
-    "last_scan_at": "2026-09-09T14:14:16.044723+00:00",
+    "last_scan_at": "2026-09-09T15:06:50.113042+00:00",
     "cadence_seconds": 1800
   },
   "1563151_OVER_2_5_dc-value-v2.1.0": {
     "signal_class": "OBSERVED",
     "qualified_candidate": false,
     "near_miss_reason": null,
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "45544378eab933b292cba3f6b60306c6ee36f8f8676a89a07d62f511b01391cc"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "0f8656894c96c21261d13a081c783abf20ca3ecdc4e8d7b8025de7b87b7bcadf"
   },
   "1563151_UNDER_2_5_dc-value-v2.1.0": {
     "signal_class": "NEAR_MISS",
     "qualified_candidate": true,
     "near_miss_reason": "EV_AND_EDGE_NEAR_THRESHOLD",
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "42ccb4dbf7696e0cce5593f75fc9066787d512bc7b4cadab922af42f5d3425fb"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "37203630036bd52e77b14cb700020245bf0c02099a46a0ce0418585ef5e6d32d"
   },
   "1563151_BTTS_YES_dc-value-v2.1.0": {
     "signal_class": "OBSERVED",
     "qualified_candidate": false,
     "near_miss_reason": null,
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "7a0d481c3aed8ad4e2d26c3c53a882f1d06f5ee920c63f8a87d984bb9d13975f"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "d0fd765fb952036d6d9932c438e1c380cfcef207abd49b8b9311f8fb8f5101a4"
   },
   "1575469": {
-    "last_scan_at": "2026-09-09T14:14:16.044723+00:00",
+    "last_scan_at": "2026-09-09T15:06:50.113042+00:00",
     "cadence_seconds": 1800
   },
   "1575469_OVER_2_5_dc-value-v2.1.0": {
     "signal_class": "OBSERVED",
     "qualified_candidate": false,
     "near_miss_reason": null,
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "c999514749e50d540f2f6164f28b4a212a7e69b56661ce76ba54e384438ac488"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "d2c976b28e79e579d8bf15deac7b62ce3b88ed2ed3fbfd562b83898ac39bf9f0"
   },
   "1575469_UNDER_2_5_dc-value-v2.1.0": {
     "signal_class": "NEAR_MISS",
     "qualified_candidate": true,
     "near_miss_reason": "EV_AND_EDGE_NEAR_THRESHOLD",
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "23cad9fe8b20b09cf07437656d09cfb4a729dc994e12361b55ec68dd2bdc01a5"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "312804ac6b8c7b7aa390e7858458bdedccfae281be87ccc5210e194f5110bf2d"
   },
   "1575469_BTTS_YES_dc-value-v2.1.0": {
     "signal_class": "NEAR_MISS",
     "qualified_candidate": false,
     "near_miss_reason": "EDGE_NEAR_THRESHOLD",
-    "last_seen_at": "2026-09-09T14:14:16.044723+00:00",
-    "last_observation_id": "1ab6ad487af306cddb0c68fd08c9f22ef2171be63994877ad8df68167e5fe81f"
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "d084df89faeeb2968243db9eabb29ce95313f31ec4a49d43dd3b732ecab1d8e4"
+  },
+  "1549589": {
+    "last_scan_at": "2026-09-09T15:06:50.113042+00:00",
+    "cadence_seconds": 1800
+  },
+  "1511687": {
+    "last_scan_at": "2026-09-09T15:06:50.113042+00:00",
+    "cadence_seconds": 1800
+  },
+  "1511687_OVER_2_5_dc-value-v2.1.0": {
+    "signal_class": "OBSERVED",
+    "qualified_candidate": false,
+    "near_miss_reason": null,
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "1cc07cfc19bb7bee9a3ef701d5c292527b5d8d84ec1fc2d56b2268493931f587"
+  },
+  "1511687_UNDER_2_5_dc-value-v2.1.0": {
+    "signal_class": "NEAR_MISS",
+    "qualified_candidate": false,
+    "near_miss_reason": "EDGE_NEAR_THRESHOLD",
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "176370538513a7456530e9101703f03d6d6d74651284bb84d1a0b53f951160eb"
+  },
+  "1511687_BTTS_YES_dc-value-v2.1.0": {
+    "signal_class": "OBSERVED",
+    "qualified_candidate": false,
+    "near_miss_reason": null,
+    "last_seen_at": "2026-09-09T15:06:50.113042+00:00",
+    "last_observation_id": "f0b90d9eb8afb80256da43f2128aeffead7f89b4c7cbeb4cd7188a5867e70d03"
   }
 }
