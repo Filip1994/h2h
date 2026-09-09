@@ -1,0 +1,46 @@
+name: Serialize Football API workflows
+on:
+  push:
+    branches: [fix/78-global-quota-governor]
+
+jobs:
+  patch:
+    if: github.actor == 'Filip1994'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add global API concurrency
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          files = ['daily.yml', 'monitor.yml', 'calibrate.yml', 'skip.yml']
+          for name in files:
+              p = Path('.github/workflows') / name
+              if not p.exists():
+                  continue
+              s = p.read_text()
+              if 'group: quantbet-football-api-global' in s:
+                  continue
+              marker = 'concurrency:\n'
+              if marker in s:
+                  start = s.index(marker)
+                  end = s.find('\n\njobs:', start)
+                  if end != -1:
+                      s = s[:start] + 'concurrency:\n  group: quantbet-football-api-global\n  cancel-in-progress: false' + s[end:]
+                  else:
+                      s = s.replace(marker, 'concurrency:\n  group: quantbet-football-api-global\n  cancel-in-progress: false\n', 1)
+              else:
+                  insert_at = s.find('\njobs:')
+                  if insert_at == -1:
+                      raise SystemExit(f'jobs marker missing in {name}')
+                  s = s[:insert_at] + '\nconcurrency:\n  group: quantbet-football-api-global\n  cancel-in-progress: false\n' + s[insert_at:]
+              p.write_text(s)
+          PY
+          rm -f .github/workflows/apply-78-concurrency.yml
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add .github/workflows/daily.yml .github/workflows/monitor.yml .github/workflows/calibrate.yml .github/workflows/skip.yml .github/workflows/apply-78-concurrency.yml
+          git commit -m 'chore: serialize Football API workflows globally'
+          git push
