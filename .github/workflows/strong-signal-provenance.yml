@@ -33,7 +33,10 @@ jobs:
           RUN_STARTED_AT: ${{ github.event.workflow_run.run_started_at }}
         run: |
           set -euo pipefail
-          target=$(git log main --since="${RUN_STARTED_AT}" --format='%H' -- strong_signals.json | head -n 1 || true)
+          target=$(git log main --since="${RUN_STARTED_AT}" --format='%H %s' -- strong_signals.json | grep 'Update QuantBet signal classification observations' | head -n 1 | cut -d' ' -f1 || true)
+          if [ -z "${target}" ]; then
+            target=$(git log main --since="${RUN_STARTED_AT}" --format='%H' -- strong_signals.json | head -n 1 || true)
+          fi
           if [ -z "${target}" ]; then
             target=$(git rev-parse main)
           fi
