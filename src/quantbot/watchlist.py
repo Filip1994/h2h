@@ -15,7 +15,7 @@ from .config import Settings
 from .market_timing import append_snapshots, build_snapshot
 from .markets import extract_best_quotes
 from .risk import kelly_stake, portfolio_analytics
-from .signal_classification import classify_signal, classification_fields
+from .signal_classification import classification_fields, classify_signal
 from .storage import BetStore, atomic_write_json
 from .types import Market
 
