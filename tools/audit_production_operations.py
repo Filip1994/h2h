@@ -50,6 +50,17 @@ def parse(value: object) -> datetime | None:
     return parsed.astimezone(UTC)
 
 
+def count_state_outcomes(state_fixtures: object) -> int:
+    """Count fixtures carrying a non-empty outcome without leaking strings into sum()."""
+    if not isinstance(state_fixtures, dict):
+        return 0
+    return sum(
+        1
+        for value in state_fixtures.values()
+        if isinstance(value, dict) and bool(value.get("last_outcome"))
+    )
+
+
 def main() -> int:
     snapshots = load_jsonl(SNAPSHOTS)
     coverage = load_jsonl(COVERAGE)
@@ -101,10 +112,7 @@ def main() -> int:
         str(row.get("reason") or "UNKNOWN") for row in eligibility
     )
     state_fixtures = state.get("fixtures", {}) if isinstance(state, dict) else {}
-    state_with_outcome = sum(
-        isinstance(value, dict) and value.get("last_outcome")
-        for value in state_fixtures.values()
-    )
+    state_with_outcome = count_state_outcomes(state_fixtures)
 
     current_budget = {
         "working": int(budget.get("working_budget") or 0),
