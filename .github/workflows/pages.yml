@@ -106,7 +106,7 @@ jobs:
           rm -rf _site
           mkdir -p _site/assets
           cp index.html production.html strong-signals.html near-misses.html history.html _site/
-          cp assets/qb-dashboard.css assets/qb-dashboard.js _site/assets/
+          cp assets/qb-dashboard.css assets/qb-dashboard.js assets/strong-signals.js _site/assets/
           cp bets.json ledger_meta.json _site/
           for file in intraday_alerts.json strong_signal_ledger.json strong_signals.json strong_signals_portfolio.json near_misses.json bulletin_health.json odds_collection_state.json generation_health.json generation_health_history.json intraday_health.json; do
             [ -f "$file" ] && cp "$file" _site/ || true
@@ -118,6 +118,7 @@ jobs:
           test -s _site/history.html
           test -s _site/assets/qb-dashboard.css
           test -s _site/assets/qb-dashboard.js
+          test -s _site/assets/strong-signals.js
           test -s _site/bets.json
           test -s _site/ledger_meta.json
           test -s _site/strong_signals_portfolio.json
