@@ -4,9 +4,10 @@ import json
 from pathlib import Path
 from typing import Any
 
-from quantbot.strong_signal_bankroll import portfolio
+from quantbot.strong_signal_bankroll import STRONG_SIGNAL_PORTFOLIO, portfolio
 
 ROOT = Path(__file__).resolve().parents[1]
+LEDGER_FILE = "strong_signal_ledger.json"
 TERMINAL = {"WIN", "LOSS", "VOID", "REVIEW", "SKIPPED"}
 
 
@@ -38,25 +39,51 @@ def load_jsonl(path: Path) -> list[dict[str, Any]]:
     return rows
 
 
+def _canonical_key(item: dict[str, Any]) -> str:
+    return str(item.get("id") or item.get("signal_id") or item.get("observation_id") or "")
+
+
+def _as_virtual(item: dict[str, Any]) -> dict[str, Any]:
+    row = dict(item)
+    row["virtual_portfolio"] = STRONG_SIGNAL_PORTFOLIO
+    row["signal_class"] = "STRONG_SIGNAL"
+    row["not_a_production_bet"] = True
+    return row
+
+
+def load_or_migrate_ledger(root: Path) -> list[dict[str, Any]]:
+    ledger_path = root / LEDGER_FILE
+    if ledger_path.exists():
+        return [_as_virtual(x) for x in load_json(ledger_path)]
+
+    # One-time deterministic migration: recover the pre-isolation Strong Signal
+    # dataset exactly as persisted, adding only the new portfolio boundary marker.
+    legacy = load_json(root / "strong_signals.json")
+    migrated = [_as_virtual(x) for x in legacy]
+    ledger_path.write_text(
+        json.dumps(migrated, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+    return migrated
+
+
 def merge(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
     merged: dict[str, dict[str, Any]] = {}
     for item in items:
-        key = str(
-            item.get("id") or item.get("signal_id") or item.get("observation_id") or ""
-        )
+        key = _canonical_key(item)
         if not key:
             continue
         current = merged.setdefault(key, {})
         current.update(item)
         if str(item.get("status") or "").upper() in TERMINAL:
             current["virtual_profit"] = item.get(
-                "profit", item.get("virtual_profit", current.get("virtual_profit", 0))
+                "virtual_profit", item.get("profit", current.get("virtual_profit", 0))
             )
+        current["virtual_portfolio"] = STRONG_SIGNAL_PORTFOLIO
+        current["signal_class"] = "STRONG_SIGNAL"
+        current["not_a_production_bet"] = True
     return sorted(
         merged.values(),
-        key=lambda item: str(
-            item.get("signal_sent_at") or item.get("captured_at") or ""
-        ),
+        key=lambda item: str(item.get("signal_sent_at") or item.get("captured_at") or ""),
     )
 
 
@@ -92,22 +119,21 @@ def observation_public(row: dict[str, Any]) -> dict[str, Any]:
 
 
 def build(root: Path = ROOT) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-    old_strong = load_json(root / "strong_signals.json")
+    ledger = load_or_migrate_ledger(root)
     alerts = load_json(root / "intraday_alerts.json")
-    bets = [
-        x
-        for x in load_json(root / "bets.json")
-        if str(x.get("signal_source")) == "INTRADAY_ALERT"
-    ]
     observations = load_jsonl(root / "data" / "market_timing_snapshots.jsonl")
 
-    strong_candidates = [
+    # Alerts are lifecycle updates for the dedicated signal ledger. Production
+    # bets are deliberately excluded from Strong Signal reconstruction.
+    strong_updates = [
         x
-        for x in old_strong + alerts + bets
+        for x in alerts
         if str(x.get("signal_class") or "").upper() in {"STRONG_SIGNAL", "STRONG"}
-        or ("signal_class" not in x and x in old_strong)
     ]
-    strong = merge(strong_candidates)
+    strong = merge(ledger + strong_updates)
+    (root / LEDGER_FILE).write_text(
+        json.dumps(strong, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
     near = merge(
         [
             observation_public(x)
@@ -126,7 +152,7 @@ def build(root: Path = ROOT) -> tuple[list[dict[str, Any]], list[dict[str, Any]]
     (root / "strong_signals_portfolio.json").write_text(
         json.dumps(
             {
-                "portfolio": "STRONG_SIGNALS_VIRTUAL",
+                "portfolio": STRONG_SIGNAL_PORTFOLIO,
                 "production": False,
                 "not_a_production_bet": True,
                 "initial_bank": metrics.initial_bank,
