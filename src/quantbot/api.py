@@ -177,6 +177,11 @@ class APIFootballClient:
             except GlobalQuotaExceeded as exc:
                 self.budget_exhaustion_events += 1
                 raise APIBudgetExceeded(str(exc)) from exc
+
+            # The provider request is now chargeable. Mark it consumed before
+            # network I/O so a process crash/timeout cannot leave an uncharged
+            # reservation and make the global ledger under-report usage.
+            self.quota.consume(reservation_id)
             request = Request(
                 url,
                 headers={
@@ -190,10 +195,8 @@ class APIFootballClient:
             try:
                 with urlopen(request, timeout=20) as response:
                     raw = response.read().decode("utf-8")
-                self.quota.consume(reservation_id)
                 break
             except HTTPError as exc:
-                self.quota.consume(reservation_id)
                 self.http_errors[str(exc.code)] += 1
                 if exc.code == 429:
                     self.rate_limit_events += 1
@@ -206,7 +209,6 @@ class APIFootballClient:
                 detail = exc.read().decode("utf-8", errors="replace")[:500]
                 raise APIError(f"API HTTP {exc.code} za {endpoint}: {detail}") from exc
             except (URLError, TimeoutError) as exc:
-                self.quota.consume(reservation_id)
                 self.network_error_events += 1
                 if attempt + 1 < self.settings.api_max_attempts:
                     self.retry_events += 1
@@ -224,7 +226,7 @@ class APIFootballClient:
         errors = payload.get("errors")
         if errors:
             self.api_error_events += 1
-            raise APIError(f"API greška za {endpoint}: {errors}")
+            raise APIError(f"API greška za endpoint {endpoint}: {errors}")
         result = payload.get("response")
         if not isinstance(result, list):
             self.api_error_events += 1
@@ -287,9 +289,7 @@ class APIFootballClient:
         self, league_id: int, season: int
     ) -> list[dict[str, Any]]:
         return self.get(
-            "fixtures",
-            {"league": league_id, "season": season, "status": "FT"},
-            ttl_seconds=21_600,
+            "fixtures", {"league": league_id, "season": season, "status": "FT"}, ttl_seconds=21_600
         )
 
     def odds(self, fixture_id: int) -> list[dict[str, Any]]:
