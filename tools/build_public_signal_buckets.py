@@ -362,21 +362,20 @@ def build(root: Path = ROOT) -> tuple[list[dict[str, Any]], list[dict[str, Any]]
         if str(x.get("signal_class") or "").upper() in {"STRONG_SIGNAL", "STRONG"}
     ]
 
-    # A Strong Signal is an independent virtual observation.  It must not
+    # A Strong Signal is an independent virtual observation. It must not
     # disappear merely because the same prediction is also linked to a
-    # Production bet.  watchlist.py records every classification transition
+    # Production bet. watchlist.py records classification transitions
     # durably in intraday_signal_events.jsonl; INITIAL/NEAR_MISS ->
-    # STRONG_SIGNAL transitions are therefore the authoritative fallback for
-    # persistence when no alert email/event was emitted.
+    # STRONG_SIGNAL transitions are the fallback persistence source when
+    # no alert event was emitted.
     for event in signal_events:
         if str(event.get("signal_class") or "").upper() != "STRONG_SIGNAL":
             continue
         transition = str(event.get("transition") or "")
         if not transition.endswith("->STRONG_SIGNAL"):
             continue
-        source = observation_lookup.get(str(event.get("prediction_id") or "")) or alert_lookup.get(
-            str(event.get("prediction_id") or "")
-        )
+        prediction_key = str(event.get("prediction_id") or "")
+        source = observation_lookup.get(prediction_key) or alert_lookup.get(prediction_key)
         strong_updates.append(signal_event_public(event, source))
 
     strong = merge(ledger + strong_updates, settlements)
