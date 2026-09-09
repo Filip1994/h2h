@@ -11,7 +11,14 @@ from .api import APIError, APIFootballClient
 from .config import Settings
 from .markets import extract_best_quotes
 from .parsing import parse_datetime
-from .presentation import clv_interpretation, clv_label, market_display, odds_lifecycle, skip_reason, status_display
+from .presentation import (
+    clv_interpretation,
+    clv_label,
+    market_display,
+    odds_lifecycle,
+    skip_reason,
+    status_display,
+)
 from .storage import BetStore
 from .types import Market
 
@@ -82,17 +89,31 @@ def capture_five_minute_closing_quotes(
 
 def _row(bet: dict[str, Any]) -> str:
     result = status_display(bet.get("status"))
-    result_class = "#45f0a5" if result == "WON" else "#ff6670" if result == "LOST" else "#f5c86b"
+    result_class = (
+        "#45f0a5" if result == "WON" else "#ff6670" if result == "LOST" else "#f5c86b"
+    )
     life = odds_lifecycle(bet)
+
     def fmt(value: Any) -> str:
         return f"{float(value):.2f}" if value is not None else "—"
+
     reason = skip_reason(bet)
-    reason_html = f"<br><span style='color:#ffd166'>Reason: {_esc(reason)}</span>" if reason else ""
-    return f"""<tr><td style="padding:12px 10px;border-bottom:1px solid #203b5c;color:#eef7ff;"><b>{_esc(bet.get('match'))}</b><br><span style="font-size:10px;color:#7f9ab8;">{_esc(market_display(bet.get('market_display') or bet.get('market')))}</span></td><td style="padding:12px 10px;border-bottom:1px solid #203b5c;">{_esc(bet.get('bookmaker', '—'))}</td><td style="padding:12px 10px;border-bottom:1px solid #203b5c;">OPEN {fmt(life['opening'])} → PICK {fmt(life['pick'])} → CLOSE {fmt(life['closing'])}</td><td style="padding:12px 10px;border-bottom:1px solid #203b5c;color:{result_class};font-weight:800;">{_esc(result)}{reason_html}</td><td style="padding:12px 10px;border-bottom:1px solid #203b5c;">{_money(float(bet.get('profit') or 0))} RSD</td><td style="padding:12px 10px;border-bottom:1px solid #203b5c;">{clv_label(bet.get('clv_odds_pct'))}<br><span style="font-size:10px;color:#7f9ab8;">{_esc(clv_interpretation(bet.get('clv_odds_pct')))}</span></td></tr>"""
+    reason_html = (
+        f"<br><span style='color:#ffd166'>Reason: {_esc(reason)}</span>"
+        if reason
+        else ""
+    )
+    return f"""<tr><td style="padding:12px 10px;border-bottom:1px solid #203b5c;color:#eef7ff;"><b>{_esc(bet.get("match"))}</b><br><span style="font-size:10px;color:#7f9ab8;">{_esc(market_display(bet.get("market_display") or bet.get("market")))}</span></td><td style="padding:12px 10px;border-bottom:1px solid #203b5c;">{_esc(bet.get("bookmaker", "—"))}</td><td style="padding:12px 10px;border-bottom:1px solid #203b5c;">OPEN {fmt(life["opening"])} → PICK {fmt(life["pick"])} → CLOSE {fmt(life["closing"])}</td><td style="padding:12px 10px;border-bottom:1px solid #203b5c;color:{result_class};font-weight:800;">{_esc(result)}{reason_html}</td><td style="padding:12px 10px;border-bottom:1px solid #203b5c;">{_money(float(bet.get("profit") or 0))} RSD</td><td style="padding:12px 10px;border-bottom:1px solid #203b5c;">{clv_label(bet.get("clv_odds_pct"))}<br><span style="font-size:10px;color:#7f9ab8;">{_esc(clv_interpretation(bet.get("clv_odds_pct")))}</span></td></tr>"""
 
 
-def build_closing_day_email(settings: Settings, day: str, bets: list[dict[str, Any]]) -> tuple[str, str]:
-    selected = [b for b in bets if str(b.get("signal_source", "")) in {"DAILY_BULLETIN", "INTRADAY_ALERT"}]
+def build_closing_day_email(
+    settings: Settings, day: str, bets: list[dict[str, Any]]
+) -> tuple[str, str]:
+    selected = [
+        b
+        for b in bets
+        if str(b.get("signal_source", "")) in {"DAILY_BULLETIN", "INTRADAY_ALERT"}
+    ]
     selected.sort(key=lambda b: str(b.get("kickoff", "")))
     rows = "".join(_row(b) for b in selected)
     total_profit = sum(float(b.get("profit") or 0.0) for b in selected)
@@ -105,7 +126,9 @@ def build_closing_day_email(settings: Settings, day: str, bets: list[dict[str, A
 
 def send_html_email(subject: str, html_body: str, settings: Settings) -> bool:
     if not settings.gmail_user or not settings.gmail_app_pass or not settings.email_to:
-        print("⚠️ Gmail secrets nisu podešeni; closing report je sačuvan bez slanja emaila.")
+        print(
+            "⚠️ Gmail secrets nisu podešeni; closing report je sačuvan bez slanja emaila."
+        )
         return False
     message = MIMEMultipart("alternative")
     message["Subject"] = subject
@@ -115,7 +138,9 @@ def send_html_email(subject: str, html_body: str, settings: Settings) -> bool:
     try:
         with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=30) as server:
             server.login(settings.gmail_user, settings.gmail_app_pass)
-            server.sendmail(settings.gmail_user, [settings.email_to], message.as_string())
+            server.sendmail(
+                settings.gmail_user, [settings.email_to], message.as_string()
+            )
         return True
     except (OSError, smtplib.SMTPException) as exc:
         print(f"⚠️ Closing email nije poslat: {exc}")
