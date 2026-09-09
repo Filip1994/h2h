@@ -1,3 +1,4 @@
+# fmt: off
 import json
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -81,13 +82,7 @@ def test_identity_lifecycle_and_exact_bookmaker(tmp_path):
     write_json(tmp_path / "intraday_alerts.json", [])
     write_json(tmp_path / "near_misses.json", [])
     write_jsonl(tmp_path / "data" / "market_timing_snapshots.jsonl", [first, near])
-    write_jsonl(
-        tmp_path / "data" / "odds_snapshots.jsonl",
-        [
-            canonical(first, now - timedelta(minutes=40), "INTERMEDIATE"),
-            canonical(first, now - timedelta(minutes=5), "T5"),
-        ],
-    )
+    write_jsonl(tmp_path / "data" / "odds_snapshots.jsonl", [canonical(first, now - timedelta(minutes=40), "INTERMEDIATE"), canonical(first, now - timedelta(minutes=5), "T5")])
     row = build(tmp_path, now=now)[0]
     assert row["home_name"] == "Alpha FC"
     assert row["away_name"] == "Beta FC"
@@ -107,24 +102,7 @@ def test_promoted_near_miss_is_linked_without_becoming_production(tmp_path):
     write_json(tmp_path / "predictions.json", [prediction])
     write_json(tmp_path / "bets.json", [])
     write_json(tmp_path / "near_misses.json", [])
-    write_json(
-        tmp_path / "intraday_alerts.json",
-        [
-            {
-                "id": "signal-101",
-                "signal_id": "signal-101",
-                "prediction_id": prediction["id"],
-                "event_id": 101,
-                "market": "UNDER_2_5",
-                "selection": "UNDER_2_5",
-                "bookmaker_id": 8,
-                "bookmaker": "Bet365",
-                "signal_class": "STRONG_SIGNAL",
-                "odd": 1.70,
-                "signal_sent_at": (now - timedelta(minutes=5)).isoformat(),
-            }
-        ],
-    )
+    write_json(tmp_path / "intraday_alerts.json", [{"id": "signal-101", "signal_id": "signal-101", "prediction_id": prediction["id"], "event_id": 101, "market": "UNDER_2_5", "selection": "UNDER_2_5", "bookmaker_id": 8, "bookmaker": "Bet365", "signal_class": "STRONG_SIGNAL", "odd": 1.70, "signal_sent_at": (now - timedelta(minutes=5)).isoformat()}])
     write_jsonl(tmp_path / "data" / "market_timing_snapshots.jsonl", [near])
     write_jsonl(tmp_path / "data" / "odds_snapshots.jsonl", [])
     row = build(tmp_path, now=now)[0]
@@ -140,24 +118,7 @@ def test_other_prediction_cannot_promote_exact_near_miss(tmp_path):
     write_json(tmp_path / "predictions.json", [prediction])
     write_json(tmp_path / "bets.json", [])
     write_json(tmp_path / "near_misses.json", [])
-    write_json(
-        tmp_path / "intraday_alerts.json",
-        [
-            {
-                "id": "signal-other-prediction",
-                "signal_id": "signal-other-prediction",
-                "prediction_id": "999_OTHER_PREDICTION",
-                "event_id": 101,
-                "market": "UNDER_2_5",
-                "selection": "UNDER_2_5",
-                "bookmaker_id": 8,
-                "bookmaker": "Bet365",
-                "signal_class": "STRONG_SIGNAL",
-                "odd": 1.80,
-                "signal_sent_at": (now - timedelta(minutes=5)).isoformat(),
-            }
-        ],
-    )
+    write_json(tmp_path / "intraday_alerts.json", [{"id": "signal-other-prediction", "signal_id": "signal-other-prediction", "prediction_id": "999_OTHER_PREDICTION", "event_id": 101, "market": "UNDER_2_5", "selection": "UNDER_2_5", "bookmaker_id": 8, "bookmaker": "Bet365", "signal_class": "STRONG_SIGNAL", "odd": 1.80, "signal_sent_at": (now - timedelta(minutes=5)).isoformat()}])
     write_jsonl(tmp_path / "data" / "market_timing_snapshots.jsonl", [near])
     write_jsonl(tmp_path / "data" / "odds_snapshots.jsonl", [])
     row = build(tmp_path, now=now)[0]
@@ -172,24 +133,7 @@ def test_other_bookmaker_cannot_promote_exact_near_miss(tmp_path):
     write_json(tmp_path / "predictions.json", [prediction])
     write_json(tmp_path / "bets.json", [])
     write_json(tmp_path / "near_misses.json", [])
-    write_json(
-        tmp_path / "intraday_alerts.json",
-        [
-            {
-                "id": "signal-wrong-book",
-                "signal_id": "signal-wrong-book",
-                "prediction_id": prediction["id"],
-                "event_id": 101,
-                "market": "UNDER_2_5",
-                "selection": "UNDER_2_5",
-                "bookmaker_id": 11,
-                "bookmaker": "1xBet",
-                "signal_class": "STRONG_SIGNAL",
-                "odd": 1.80,
-                "signal_sent_at": (now - timedelta(minutes=5)).isoformat(),
-            }
-        ],
-    )
+    write_json(tmp_path / "intraday_alerts.json", [{"id": "signal-wrong-book", "signal_id": "signal-wrong-book", "prediction_id": prediction["id"], "event_id": 101, "market": "UNDER_2_5", "selection": "UNDER_2_5", "bookmaker_id": 11, "bookmaker": "1xBet", "signal_class": "STRONG_SIGNAL", "odd": 1.80, "signal_sent_at": (now - timedelta(minutes=5)).isoformat()}])
     write_jsonl(tmp_path / "data" / "market_timing_snapshots.jsonl", [near])
     write_jsonl(tmp_path / "data" / "odds_snapshots.jsonl", [])
     row = build(tmp_path, now=now)[0]
@@ -238,26 +182,7 @@ def test_transition_history_preserves_exact_identity_and_evidence(tmp_path):
     now = datetime(2026, 9, 10, 12, tzinfo=UTC)
     prediction = base_prediction(now)
     near = snapshot(prediction, now - timedelta(minutes=10), 1.60)
-    transition = {
-        "event_id": "transition-101",
-        "prediction_id": prediction["id"],
-        "fixture_id": 101,
-        "market": "UNDER_2_5",
-        "selection": "UNDER_2_5",
-        "bookmaker_id": 8,
-        "bookmaker": "Bet365",
-        "captured_at": (now - timedelta(minutes=9)).isoformat(),
-        "transition": "INITIAL->NEAR_MISS",
-        "signal_class": "NEAR_MISS",
-        "previous_signal_class": None,
-        "near_miss_reason": "EDGE_NEAR_THRESHOLD",
-        "odd": 1.60,
-        "opposite_odd": 2.10,
-        "expected_value": 0.03,
-        "probability_edge": 0.04,
-        "decision_probability": 0.60,
-        "stake": 350.0,
-    }
+    transition = {"event_id": "transition-101", "prediction_id": prediction["id"], "fixture_id": 101, "market": "UNDER_2_5", "selection": "UNDER_2_5", "bookmaker_id": 8, "bookmaker": "Bet365", "captured_at": (now - timedelta(minutes=9)).isoformat(), "transition": "INITIAL->NEAR_MISS", "signal_class": "NEAR_MISS", "previous_signal_class": None, "near_miss_reason": "EDGE_NEAR_THRESHOLD", "odd": 1.60, "opposite_odd": 2.10, "expected_value": 0.03, "probability_edge": 0.04, "decision_probability": 0.60, "stake": 350.0}
     write_json(tmp_path / "predictions.json", [prediction])
     write_json(tmp_path / "bets.json", [])
     write_json(tmp_path / "intraday_alerts.json", [])
@@ -270,3 +195,4 @@ def test_transition_history_preserves_exact_identity_and_evidence(tmp_path):
     assert row["transition_history"][0]["event_id"] == "transition-101"
     assert row["transition_history"][0]["transition"] == "INITIAL->NEAR_MISS"
     assert row["transition_history"][0]["odd"] == 1.60
+# fmt: on
