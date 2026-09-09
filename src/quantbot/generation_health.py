@@ -144,13 +144,19 @@ def build_failure_health(
     if telemetry is None and isinstance(attached, dict):
         telemetry = attached
     pipeline = dict(telemetry or {})
-    pipeline.setdefault("fixture_failures", {"api": 0, "dixon_coles": 0, "other": 0})
+    pipeline.setdefault(
+        "fixture_failures", {"api": 0, "dixon_coles": 0, "other": 0}
+    )
     pipeline.setdefault("funnel_rejections", [])
     pipeline.setdefault("persistence_failures", 0)
     funnel = _funnel(pipeline)
     pipeline["funnel"] = funnel
     reasons = [type(error).__name__]
-    reasons.extend(reason for reason in _classification_reasons(dict(api_usage), pipeline) if reason not in reasons)
+    reasons.extend(
+        reason
+        for reason in _classification_reasons(dict(api_usage), pipeline)
+        if reason not in reasons
+    )
     return {
         "schema_version": 5,
         "timestamp": generated_at.astimezone(UTC).isoformat(),
