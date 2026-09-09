@@ -263,12 +263,15 @@ class QuantEngine:
             except (APIError, DixonColesFitError, ArithmeticError, ValueError) as exc:
                 if isinstance(exc, APIError):
                     telemetry["fixture_failures"]["api"] += 1
+                    telemetry["funnel_rejections"].append({"fixture_id": fixture_id, "stage": "modelled", "reason": "API_ERROR"})
                 elif isinstance(exc, DixonColesFitError):
                     telemetry["fixture_failures"]["dixon_coles"] += 1
                     if "dovoljan trening" in str(exc):
                         telemetry["training_sample_insufficiency"] += 1
+                        telemetry["funnel_rejections"].append({"fixture_id": fixture_id, "stage": "modelled", "reason": "NO_TRAINING_SAMPLE"})
                     else:
                         telemetry["fit_failures"] += 1
+                        telemetry["funnel_rejections"].append({"fixture_id": fixture_id, "stage": "modelled", "reason": "MODEL_FIT_FAILURE"})
                 else:
                     telemetry["fixture_failures"]["other"] += 1
                 diagnostics.append(f"fixture_{fixture_id}: {exc}")
@@ -359,6 +362,15 @@ class QuantEngine:
         allocations = allocate_stakes(
             candidates, existing_bets, now=now_local, settings=self.settings
         )
+        telemetry["risk_checks"] = len(candidates)
+        allocated_before_strength = {
+            f"{candidate.fixture_id}_{candidate.market.value}_{MODEL_VERSION}" for candidate, _ in allocations
+        }
+        for candidate in candidates:
+            key = f"{candidate.fixture_id}_{candidate.market.value}_{MODEL_VERSION}"
+            if key not in allocated_before_strength:
+                telemetry["risk_rejections"] += 1
+                telemetry["funnel_rejections"].append({"fixture_id": candidate.fixture_id, "market": candidate.market.value, "stage": "risk_staking", "reason": "RISK_OR_CAPACITY"})
         if self.settings.intraday_mode:
             allocations = [
                 (candidate, stake)
