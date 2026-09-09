@@ -39,19 +39,27 @@ def load_jsonl(path: Path) -> list[dict[str, Any]]:
 def merge(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
     merged: dict[str, dict[str, Any]] = {}
     for item in items:
-        key = str(item.get("id") or item.get("signal_id") or item.get("observation_id") or "")
+        key = str(
+            item.get("id")
+            or item.get("signal_id")
+            or item.get("observation_id")
+            or ""
+        )
         if not key:
             continue
         merged.setdefault(key, {}).update(item)
     return sorted(
         merged.values(),
-        key=lambda item: str(item.get("signal_sent_at") or item.get("captured_at") or ""),
+        key=lambda item: str(
+            item.get("signal_sent_at") or item.get("captured_at") or ""
+        ),
     )
 
 
 def observation_public(row: dict[str, Any]) -> dict[str, Any]:
     return {
-        "id": row.get("observation_id") or f"{row.get('prediction_id')}:{row.get('captured_at')}",
+        "id": row.get("observation_id")
+        or f"{row.get('prediction_id')}:{row.get('captured_at')}",
         "prediction_id": row.get("prediction_id"),
         "event_id": row.get("fixture_id"),
         "market": row.get("market"),
@@ -82,20 +90,29 @@ def observation_public(row: dict[str, Any]) -> dict[str, Any]:
 def build(root: Path = ROOT) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     old_strong = load_json(root / "strong_signals.json")
     alerts = load_json(root / "intraday_alerts.json")
-    bets = [x for x in load_json(root / "bets.json") if str(x.get("signal_source")) == "INTRADAY_ALERT"]
+    bets = [
+        x
+        for x in load_json(root / "bets.json")
+        if str(x.get("signal_source")) == "INTRADAY_ALERT"
+    ]
     observations = load_jsonl(root / "data" / "market_timing_snapshots.jsonl")
 
     strong_candidates = [
-        x for x in old_strong + alerts + bets
-        if str(x.get("signal_class") or "").upper() in {"STRONG_SIGNAL", "STRONG"}
+        x
+        for x in old_strong + alerts + bets
+        if str(x.get("signal_class") or "").upper()
+        in {"STRONG_SIGNAL", "STRONG"}
         or ("signal_class" not in x and x in old_strong)
     ]
     strong = merge(strong_candidates)
-    near = merge([
-        observation_public(x)
-        for x in observations
-        if str(x.get("signal_class") or x.get("signal_state") or "").upper() == "NEAR_MISS"
-    ])
+    near = merge(
+        [
+            observation_public(x)
+            for x in observations
+            if str(x.get("signal_class") or x.get("signal_state") or "").upper()
+            == "NEAR_MISS"
+        ]
+    )
     (root / "strong_signals.json").write_text(
         json.dumps(strong, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
