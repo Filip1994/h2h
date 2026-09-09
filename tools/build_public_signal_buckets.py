@@ -4,6 +4,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+from quantbot.strong_signal_bankroll import portfolio
+
 ROOT = Path(__file__).resolve().parents[1]
 TERMINAL = {"WIN", "LOSS", "VOID", "REVIEW", "SKIPPED"}
 
@@ -44,7 +46,12 @@ def merge(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
         )
         if not key:
             continue
-        merged.setdefault(key, {}).update(item)
+        current = merged.setdefault(key, {})
+        current.update(item)
+        if str(item.get("status") or "").upper() in TERMINAL:
+            current["virtual_profit"] = item.get(
+                "profit", item.get("virtual_profit", current.get("virtual_profit", 0))
+            )
     return sorted(
         merged.values(),
         key=lambda item: str(
@@ -114,6 +121,29 @@ def build(root: Path = ROOT) -> tuple[list[dict[str, Any]], list[dict[str, Any]]
     )
     (root / "near_misses.json").write_text(
         json.dumps(near, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+    metrics = portfolio(strong)
+    (root / "strong_signals_portfolio.json").write_text(
+        json.dumps(
+            {
+                "portfolio": "STRONG_SIGNALS_VIRTUAL",
+                "production": False,
+                "not_a_production_bet": True,
+                "initial_bank": metrics.initial_bank,
+                "current_bank": metrics.current_bank,
+                "total_profit": metrics.total_profit,
+                "total_stake": metrics.total_stake,
+                "roi": metrics.roi,
+                "win_rate": metrics.win_rate,
+                "completed_count": metrics.completed_count,
+                "open_stake": metrics.open_stake,
+                "current_drawdown": metrics.current_drawdown,
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
     )
     return strong, near
 
