@@ -15,6 +15,24 @@ def _load_json(path: Path, default):
     return value
 
 
+def _load_run_result(path: Path) -> dict | None:
+    try:
+        lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+    except OSError:
+        return None
+    for line in reversed(lines):
+        candidate = line.strip()
+        if not candidate.startswith("{"):
+            continue
+        try:
+            value = json.loads(candidate)
+        except (TypeError, ValueError, json.JSONDecodeError):
+            continue
+        if isinstance(value, dict):
+            return value
+    return None
+
+
 def _parse(value: object) -> datetime | None:
     try:
         parsed = datetime.fromisoformat(str(value))
@@ -46,7 +64,9 @@ def evaluate(
     scanned = _first_number(run_result, "fixtures_scanned", "scanned")
     api_requests = _first_number(run_result, "api_requests", "request_count")
     if api_requests is None and isinstance(run_result.get("api_usage"), dict):
-        api_requests = _first_number(run_result["api_usage"], "request_count", "requests")
+        api_requests = _first_number(
+            run_result["api_usage"], "request_count", "requests"
+        )
 
     eligible: set[int] = set()
     for prediction in predictions:
@@ -95,14 +115,22 @@ def evaluate(
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Fail-closed scheduled watchlist runtime gate")
+    parser = argparse.ArgumentParser(
+        description="Fail-closed scheduled watchlist runtime gate"
+    )
     parser.add_argument("--run-output", type=Path, required=True)
     parser.add_argument("--predictions", type=Path, default=Path("predictions.json"))
-    parser.add_argument("--output", type=Path, default=Path("watchlist_runtime_health.json"))
-    parser.add_argument("--lookahead-hours", type=float, default=float(os.getenv("INTRADAY_LOOKAHEAD_HOURS", "6")))
+    parser.add_argument(
+        "--output", type=Path, default=Path("watchlist_runtime_health.json")
+    )
+    parser.add_argument(
+        "--lookahead-hours",
+        type=float,
+        default=float(os.getenv("INTRADAY_LOOKAHEAD_HOURS", "6")),
+    )
     args = parser.parse_args()
 
-    run_result = _load_json(args.run_output, None)
+    run_result = _load_run_result(args.run_output)
     predictions = _load_json(args.predictions, [])
     if not isinstance(run_result, dict):
         payload = {
@@ -112,7 +140,9 @@ def main() -> int:
             "errors": ["WATCHLIST_RESULT_NOT_VALID_JSON_OBJECT"],
             "observation_only": True,
         }
-        args.output.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+        args.output.write_text(
+            json.dumps(payload, indent=2) + "\n", encoding="utf-8"
+        )
         return 1
     if not isinstance(predictions, list):
         predictions = []
@@ -123,7 +153,9 @@ def main() -> int:
         now=datetime.now(UTC),
         lookahead_hours=args.lookahead_hours,
     )
-    args.output.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    args.output.write_text(
+        json.dumps(payload, indent=2) + "\n", encoding="utf-8"
+    )
     print(json.dumps(payload, ensure_ascii=False))
     return 1 if payload["status"] == "ERROR" else 0
 
