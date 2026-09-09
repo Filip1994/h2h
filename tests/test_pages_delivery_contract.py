@@ -1,6 +1,5 @@
 from pathlib import Path
 
-
 PAGES = Path(__file__).parents[1] / ".github" / "workflows" / "pages.yml"
 
 
