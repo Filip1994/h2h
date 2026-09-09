@@ -2,9 +2,6 @@ name: QuantBet adaptive watchlist monitor
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "*/5 * * * *"
-      timezone: "Europe/Belgrade"
 
 permissions:
   contents: write
