@@ -91,7 +91,23 @@ def append_snapshots(
         except OSError:
             existing_ids = set()
 
-    canonical_store = OddsSnapshotStore(root / "data" / "odds_snapshots.jsonl")
+    canonical_path = root / "data" / "odds_snapshots.jsonl"
+    canonical_store = OddsSnapshotStore(canonical_path)
+    entry_prediction_ids: set[str] = set()
+    if canonical_path.exists():
+        with canonical_path.open("r", encoding="utf-8", errors="replace") as handle:
+            for line in handle:
+                try:
+                    row = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                if (
+                    isinstance(row, dict)
+                    and row.get("snapshot_type") == "ENTRY"
+                    and row.get("prediction_id")
+                ):
+                    entry_prediction_ids.add(str(row["prediction_id"]))
+
     appended = 0
     useful = 0
     with path.open("a", encoding="utf-8") as handle:
@@ -117,28 +133,31 @@ def append_snapshots(
             try:
                 seconds = float(snapshot.get("seconds_to_kickoff") or 0.0)
                 snapshot_type = "T5" if 120 <= seconds <= 480 else "INTERMEDIATE"
-                canonical_store.append(
-                    {
-                        "fixture_id": int(snapshot["fixture_id"]),
-                        "market": str(snapshot["market"]),
-                        "bookmaker_id": int(snapshot["bookmaker_id"]),
-                        "bookmaker": str(snapshot["bookmaker"]),
-                        "selection": str(snapshot["market"]),
-                        "odd": snapshot["odd"],
-                        "opposite_odd": snapshot["opposite_odd"],
-                        "devig_probability": snapshot["market_probability_devig"],
-                        "overround": snapshot["market_overround"],
-                        "odds_captured_at": snapshot["captured_at"],
-                        "snapshot_type": snapshot_type,
-                        "prediction_id": snapshot.get("prediction_id"),
-                        "signal_id": snapshot.get("prediction_id"),
-                        "source_endpoint": "odds",
-                        "source_request_hash": source_request_hash(
-                            "odds", {"fixture": int(snapshot["fixture_id"])}
-                        ),
-                        "captured_by": "watchlist",
-                    }
-                )
+                base = {
+                    "fixture_id": int(snapshot["fixture_id"]),
+                    "market": str(snapshot["market"]),
+                    "bookmaker_id": int(snapshot["bookmaker_id"]),
+                    "bookmaker": str(snapshot["bookmaker"]),
+                    "selection": str(snapshot["market"]),
+                    "odd": snapshot["odd"],
+                    "opposite_odd": snapshot["opposite_odd"],
+                    "devig_probability": snapshot["market_probability_devig"],
+                    "overround": snapshot["market_overround"],
+                    "odds_captured_at": snapshot["captured_at"],
+                    "prediction_id": snapshot.get("prediction_id"),
+                    "signal_id": snapshot.get("prediction_id"),
+                    "source_endpoint": "odds",
+                    "source_request_hash": source_request_hash(
+                        "odds", {"fixture": int(snapshot["fixture_id"])}
+                    ),
+                    "captured_by": "watchlist",
+                }
+                canonical_store.append({**base, "snapshot_type": snapshot_type})
+                prediction_id = str(snapshot.get("prediction_id") or "")
+                if snapshot.get("signal_state") == "STRONG" and prediction_id:
+                    if prediction_id not in entry_prediction_ids:
+                        canonical_store.append({**base, "snapshot_type": "ENTRY"})
+                        entry_prediction_ids.add(prediction_id)
             except (KeyError, TypeError, ValueError):
                 continue
         handle.flush()
