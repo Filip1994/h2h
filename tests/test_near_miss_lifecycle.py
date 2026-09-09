@@ -6,10 +6,12 @@ from tools.build_near_miss_lifecycle import build
 
 
 def write_json(path: Path, value) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(value), encoding="utf-8")
 
 
 def write_jsonl(path: Path, rows) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
         "".join(json.dumps(row) + "\n" for row in rows), encoding="utf-8"
     )
