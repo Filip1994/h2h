@@ -48,7 +48,7 @@ jobs:
       - name: Commit watchlist, signal history and bounded API archive
         run: |
           set -euo pipefail
-          files=(intraday_watchlist_state.json intraday_alerts.json strong_signals.json strong_signals_portfolio.json near_misses.json market_timing_metrics.json)
+          files=(intraday_watchlist_state.json intraday_alerts.json strong_signal_ledger.json strong_signals.json strong_signals_portfolio.json near_misses.json market_timing_metrics.json)
           changed=0
           for file in "${files[@]}"; do
             if [ -e "$file" ] && ! git diff --quiet -- "$file"; then changed=1; fi
