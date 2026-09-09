@@ -9,8 +9,11 @@ on:
 permissions:
   contents: write
 
+authorization:
+  contents: write
+
 concurrency:
-  group: quantbet-exhaustive-odds-capture
+  group: quantbet-ledger
   cancel-in-progress: false
 
 jobs:
@@ -39,15 +42,23 @@ jobs:
       - run: pip install -r requirements.txt
       - name: Capture complete eligible Football universe
         run: python main.py capture-odds
-      - name: Commit immutable observations and coverage state
+      - name: Audit production operations gate
+        run: python tools/audit_production_operations.py
+      - name: Commit immutable observations, coverage state and operations evidence
         run: |
           set -euo pipefail
-          if git diff --quiet -- odds_collection_budget.json odds_collection_state.json odds_collection_metrics.json data/odds_snapshots.jsonl data/odds_collection_coverage.jsonl data/eligibility_coverage.jsonl; then
+          files=(odds_collection_budget.json odds_collection_state.json odds_collection_metrics.json production_operations_gate.md data/odds_snapshots.jsonl data/odds_collection_coverage.jsonl data/eligibility_coverage.jsonl)
+          changed=0
+          for file in "${files[@]}"; do
+            if [ -e "$file" ] && ! git diff --quiet -- "$file"; then changed=1; fi
+            if [ -e "$file" ] && ! git ls-files --error-unmatch "$file" >/dev/null 2>&1; then changed=1; fi
+          done
+          if [ "$changed" -eq 0 ]; then
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add odds_collection_budget.json odds_collection_state.json odds_collection_metrics.json data/odds_snapshots.jsonl data/odds_collection_coverage.jsonl data/eligibility_coverage.jsonl
+          git add --ignore-errors "${files[@]}"
           git commit -m "Capture exhaustive Football odds observations"
           for attempt in 1 2 3; do
             if git push; then exit 0; fi
