@@ -144,9 +144,7 @@ def build_failure_health(
     if telemetry is None and isinstance(attached, dict):
         telemetry = attached
     pipeline = dict(telemetry or {})
-    pipeline.setdefault(
-        "fixture_failures", {"api": 0, "dixon_coles": 0, "other": 0}
-    )
+    pipeline.setdefault("fixture_failures", {"api": 0, "dixon_coles": 0, "other": 0})
     pipeline.setdefault("funnel_rejections", [])
     pipeline.setdefault("persistence_failures", 0)
     funnel = _funnel(pipeline)
