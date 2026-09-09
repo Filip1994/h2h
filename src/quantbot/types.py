@@ -14,9 +14,9 @@ class Market(StrEnum):
     @property
     def display_name(self) -> str:
         return {
-            Market.OVER_25: "Ukupno Golova - Više 2.5",
-            Market.UNDER_25: "Ukupno Golova - Manje 2.5",
-            Market.BTTS_YES: "Oba Tima Daju Gol (GG)",
+            Market.OVER_25: "Over 2.5",
+            Market.UNDER_25: "Under 2.5",
+            Market.BTTS_YES: "BTTS — Yes",
         }[self]
 
     @classmethod
@@ -29,6 +29,12 @@ class Market(StrEnum):
             "Ukupno Golova - Manje 2.5": cls.UNDER_25,
             "Oba Tima Daju Gol (GG)": cls.BTTS_YES,
             "Više 2.5 Golova": cls.OVER_25,
+            "Više 2.5": cls.OVER_25,
+            "Manje 2.5": cls.UNDER_25,
+            "Less than 2.5": cls.UNDER_25,
+            "Under 2.5": cls.UNDER_25,
+            "Over 2.5": cls.OVER_25,
+            "GG": cls.BTTS_YES,
         }
         if value in aliases:
             return aliases[value]
@@ -114,6 +120,9 @@ class MarketCandidate:
         model_version: str,
         xi: float,
     ) -> dict[str, Any]:
+        captured_at = self.quote.captured_at.isoformat()
+        odd = round(self.quote.odd, 4)
+        opposite_odd = round(self.quote.opposite_odd, 4)
         return {
             "id": bet_id,
             "type": "DC_VALUE",
@@ -134,11 +143,14 @@ class MarketCandidate:
             "market": self.market.value,
             "market_display": self.market.display_name,
             "stake": round(stake, 2),
-            "odd": round(self.quote.odd, 4),
-            "opposite_odd": round(self.quote.opposite_odd, 4),
+            "odd": odd,
+            "opening_odd": odd,
+            "opposite_odd": opposite_odd,
+            "opening_opposite_odd": opposite_odd,
             "bookmaker_id": self.quote.bookmaker_id,
             "bookmaker": self.quote.bookmaker_name,
-            "odds_captured_at": self.quote.captured_at.isoformat(),
+            "odds_captured_at": captured_at,
+            "opening_odds_captured_at": captured_at,
             "implied_probability": round(self.quote.implied_probability, 6),
             "market_probability_devig": round(self.quote.devig_probability, 6),
             "market_overround": round(self.quote.overround, 6),

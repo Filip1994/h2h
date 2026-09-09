@@ -11,6 +11,13 @@ from urllib.parse import urlencode
 
 from .config import Settings
 from .engine import GenerationResult
+from .presentation import (
+    clv_label,
+    market_display,
+    odds_lifecycle,
+    skip_reason,
+    status_display,
+)
 
 
 def _esc(value: Any) -> str:
@@ -47,6 +54,18 @@ def _skip_url(repository: str, bet_id: str) -> str:
     return f"https://github.com/{repository}/issues/new?{query}"
 
 
+def _odds_lifecycle_html(bet: dict[str, Any]) -> str:
+    life = odds_lifecycle(bet)
+
+    def fmt(value: Any) -> str:
+        return f"{float(value):.2f}" if value is not None else "—"
+
+    return (
+        f"OPENING {fmt(life['opening'])} → PICK {fmt(life['pick'])} → "
+        f"CLOSING {fmt(life['closing'])}"
+    )
+
+
 def build_email(result: GenerationResult, settings: Settings, generated_at: datetime) -> tuple[str, str]:
     analytics = result.analytics
     mode = "PAPER" if settings.paper_mode else "LIVE"
@@ -55,7 +74,9 @@ def build_email(result: GenerationResult, settings: Settings, generated_at: date
         kickoff = datetime.fromisoformat(str(bet["kickoff"])).astimezone(settings.timezone)
         logo = _bookmaker_logo(str(bet.get("bookmaker") or ""))
         logo_html = f'<img src="{_esc(logo)}" width="24" height="24" alt="" style="vertical-align:middle;border-radius:5px;margin-right:7px;">' if logo else ""
-        cards.append(f'''<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#0d1a2b;border:1px solid #203b5c;border-radius:14px;margin:0 0 14px;overflow:hidden;"><tr><td style="padding:16px 18px 8px;"><div style="font-size:16px;font-weight:800;color:#eef7ff;">⚽ {_esc(bet["match"])}</div><div style="font-size:11px;color:#7f9ab8;margin-top:5px;">{_esc(bet["league"])} · KICKOFF {kickoff:%H:%M}</div></td></tr><tr><td style="padding:6px 18px 12px;"><span style="font-size:9px;letter-spacing:1px;color:#6f8eac;">SIGNAL</span><br><b style="font-size:15px;color:#fff;">{_esc(bet["market_display"])}</b> <span style="color:#45d9ff;font-weight:800;">@ {float(bet["odd"]):.2f}</span></td></tr><tr><td style="padding:0 18px 12px;color:#a9bfd5;font-size:12px;">MODEL <b style="color:#eef7ff;">{100 * float(bet["model_probability"]):.1f}%</b> · DECISION <b style="color:#eef7ff;">{100 * float(bet["decision_probability"]):.1f}%</b> · EV <b style="color:#45f0a5;">{100 * float(bet["expected_value"]):+.1f}%</b></td></tr><tr><td style="padding:10px 18px;background:#0a1524;border-top:1px solid #203b5c;">{logo_html}<b style="color:#eef7ff;">{_esc(bet.get("bookmaker") or "Bookmaker")}</b> <span style="color:#45f0a5;font-size:17px;font-weight:800;">{_money(float(bet["stake"]))} RSD</span> <span style="color:#718aa4;font-size:11px;">· {_esc(mode)}</span></td></tr><tr><td style="padding:10px 18px 14px;"><a href="{_esc(_skip_url(settings.github_repository, str(bet["id"]))) }" style="color:#ff8a9a;text-decoration:none;font-size:10px;font-weight:700;">↳ PRESKOČI TIP</a></td></tr></table>''')
+        skip = skip_reason(bet)
+        skip_html = f'<div style="font-size:10px;color:#ffd166;margin-top:7px;">SKIP REASON: {_esc(skip)}</div>' if skip else ""
+        cards.append(f'''<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#0d1a2b;border:1px solid #203b5c;border-radius:14px;margin:0 0 14px;overflow:hidden;"><tr><td style="padding:16px 18px 8px;"><div style="font-size:16px;font-weight:800;color:#eef7ff;">⚽ {_esc(bet["match"])}</div><div style="font-size:11px;color:#7f9ab8;margin-top:5px;">{_esc(bet["league"])} · KICKOFF {kickoff:%H:%M}</div></td></tr><tr><td style="padding:6px 18px 12px;"><span style="font-size:9px;letter-spacing:1px;color:#6f8eac;">MARKET</span><br><b style="font-size:15px;color:#fff;">{_esc(market_display(bet.get("market_display") or bet.get("market")))}</b></td></tr><tr><td style="padding:0 18px 8px;color:#a9bfd5;font-size:11px;">{_esc(_odds_lifecycle_html(bet))} · CLV {clv_label(bet.get("clv_odds_pct"))}</td></tr><tr><td style="padding:0 18px 12px;color:#a9bfd5;font-size:12px;">MODEL <b style="color:#eef7ff;">{100 * float(bet["model_probability"]):.1f}%</b> · DECISION <b style="color:#eef7ff;">{100 * float(bet["decision_probability"]):.1f}%</b> · EV <b style="color:#45f0a5;">{100 * float(bet["expected_value"]):+.1f}%</b></td></tr><tr><td style="padding:10px 18px;background:#0a1524;border-top:1px solid #203b5c;">{logo_html}<b style="color:#eef7ff;">{_esc(bet.get("bookmaker") or "Bookmaker")}</b> <span style="color:#45f0a5;font-size:17px;font-weight:800;">{_money(float(bet["stake"]))} RSD</span> <span style="color:#718aa4;font-size:11px;">· {_esc(mode)} · STATUS {status_display(bet.get("status"))}</span>{skip_html}</td></tr><tr><td style="padding:10px 18px 14px;"><a href="{_esc(_skip_url(settings.github_repository, str(bet["id"]))) }" style="color:#ff8a9a;text-decoration:none;font-size:10px;font-weight:700;">↳ PRESKOČI TIP</a></td></tr></table>''')
     picks_html = "".join(cards) or '<div style="background:#0d1a2b;border:1px solid #203b5c;border-radius:14px;padding:18px;color:#7f9ab8;">NO QUALIFIED PICKS · FILTERS HELD.</div>'
     roi_color = "#45f0a5" if analytics.roi >= 0 else "#ff5f6d"
     cutoff = generated_at.astimezone(UTC).isoformat()
