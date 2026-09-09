@@ -22,11 +22,9 @@ class StrongSignalPortfolio:
 
 def _terminal(row: dict[str, Any]) -> bool:
     """Only explicit virtual settlement can affect the virtual portfolio."""
-    return (
-        bool(row.get("virtual_settled"))
-        and str(row.get("status") or "").upper()
-        in {"WIN", "LOSS", "VOID", "REVIEW"}
-    )
+    return bool(row.get("virtual_settled")) and str(
+        row.get("status") or ""
+    ).upper() in {"WIN", "LOSS", "VOID", "REVIEW"}
 
 
 def _is_virtual(row: dict[str, Any]) -> bool:
@@ -52,7 +50,9 @@ def portfolio(rows: list[dict[str, Any]]) -> StrongSignalPortfolio:
     wins = sum(
         1 for row in completed if str(row.get("status") or "").upper() == "WIN"
     )
-    open_stake = sum(float(row.get("stake") or 0.0) for row in strong if not _terminal(row))
+    open_stake = sum(
+        float(row.get("stake") or 0.0) for row in strong if not _terminal(row)
+    )
     equity = STRONG_SIGNAL_INITIAL_BANK
     peak = equity
     for row in sorted(
