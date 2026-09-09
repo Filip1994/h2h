@@ -21,9 +21,7 @@ def load_json(path: Path) -> list[dict[str, Any]]:
 
 
 def key(row: dict[str, Any]) -> str:
-    return str(
-        row.get("id") or row.get("signal_id") or row.get("observation_id") or ""
-    )
+    return str(row.get("id") or row.get("signal_id") or row.get("observation_id") or "")
 
 
 def active(row: dict[str, Any]) -> bool:
