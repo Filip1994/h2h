@@ -15,7 +15,8 @@ const QB = (() => {
     if (v == null || v === '') return {value:'—',label:'Unavailable',cls:'neutral'};
     const n = Number(v) * 100;
     if (!Number.isFinite(n)) return {value:'—',label:'Unavailable',cls:'neutral'};
-    return {value:(n >= 0 ? '+' : '−') + Math.abs(n).toFixed(2) + '%',label:n >= 0 ? 'Beat Close' : 'Lost to Close',cls:n >= 0 ? 'positive' : 'negative'};
+    if (n === 0) return {value:'0.00%',label:'Even',cls:'neutral'};
+    return {value:(n > 0 ? '+' : '−') + Math.abs(n).toFixed(2) + '%',label:n > 0 ? 'Beat Close' : 'Lost to Close',cls:n > 0 ? 'positive' : 'negative'};
   };
   const outcome = x => {
     const s = String(x?.status || 'PENDING').toUpperCase();
@@ -113,8 +114,6 @@ const QB = (() => {
     const page = document.body.dataset.page || 'overview';
     const root = document.querySelector('#cards') || document.querySelector('#summary') || document.querySelector('#rows');
     try {
-      // Production is intentionally dependent only on canonical bets.json + ledger_meta.json.
-      // Optional telemetry files can never prevent the Production ledger from rendering.
       const bets = await load('bets.json');
       const meta = await load('ledger_meta.json');
       const capture = await optional('odds_collection_state.json');
