@@ -55,9 +55,7 @@ def test_reconciles_one_new_signal(tmp_path: Path, monkeypatch) -> None:
             "not_a_production_bet": True,
         },
     ]
-    (tmp_path / "strong_signals.json").write_text(
-        json.dumps(current), encoding="utf-8"
-    )
+    (tmp_path / "strong_signals.json").write_text(json.dumps(current), encoding="utf-8")
     _git_show(monkeypatch, tmp_path, json.dumps(existing))
 
     evidence = build_evidence(tmp_path)
@@ -67,9 +65,7 @@ def test_reconciles_one_new_signal(tmp_path: Path, monkeypatch) -> None:
     assert evidence["reconciliation"]["no_new_signal_id_missing_from_public"] is True
 
 
-def test_terminal_new_signal_is_history_not_active(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_terminal_new_signal_is_history_not_active(tmp_path: Path, monkeypatch) -> None:
     existing = []
     current = [
         {
@@ -80,9 +76,7 @@ def test_terminal_new_signal_is_history_not_active(
             "not_a_production_bet": True,
         },
     ]
-    (tmp_path / "strong_signals.json").write_text(
-        json.dumps(current), encoding="utf-8"
-    )
+    (tmp_path / "strong_signals.json").write_text(json.dumps(current), encoding="utf-8")
     _git_show(monkeypatch, tmp_path, json.dumps(existing))
 
     evidence = build_evidence(tmp_path)
@@ -110,9 +104,7 @@ def test_public_ids_must_be_unique(tmp_path: Path, monkeypatch) -> None:
             "not_a_production_bet": True,
         },
     ]
-    (tmp_path / "strong_signals.json").write_text(
-        json.dumps(current), encoding="utf-8"
-    )
+    (tmp_path / "strong_signals.json").write_text(json.dumps(current), encoding="utf-8")
     _git_show(monkeypatch, tmp_path, json.dumps(existing))
 
     evidence = build_evidence(tmp_path)
