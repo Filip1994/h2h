@@ -38,9 +38,7 @@ def main() -> int:
     parser.add_argument("--max-age-minutes", type=int, default=30)
     args = parser.parse_args()
     try:
-        report = check_settlement_health(
-            ROOT, datetime.now(UTC), args.max_age_minutes
-        )
+        report = check_settlement_health(ROOT, datetime.now(UTC), args.max_age_minutes)
     except RuntimeError as exc:
         report = {
             "checked_at": datetime.now(UTC).isoformat(),
