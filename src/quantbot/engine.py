@@ -176,10 +176,13 @@ class QuantEngine:
             "fixtures_eligible": 0,
             "fixtures_modelled": 0,
             "predictions_generated": 0,
+            "predictions_persisted": 0,
             "candidates_evaluated": 0,
             "candidates_qualified": 0,
             "candidates": 0,
             "selections_produced": 0,
+            "selected": 0,
+            "risk_selected": 0,
             "training_sample_insufficiency": 0,
             "fit_failures": 0,
             "fixtures_without_odds": 0,
@@ -191,6 +194,7 @@ class QuantEngine:
             "ev_pass": 0,
             "edge_pass": 0,
             "risk_rejections": 0,
+            "strength_rejections": 0,
             "duplicate_rejections": 0,
             "persistence_failures": 0,
         }
@@ -207,16 +211,37 @@ class QuantEngine:
             except (TypeError, ValueError) as exc:
                 telemetry["fixtures_parse_failures"] += 1
                 telemetry["fixture_failures"]["other"] += 1
+                telemetry["funnel_rejections"].append(
+                    {
+                        "stage": "discovered",
+                        "reason": "FIXTURE_PARSE_FAILURE",
+                        "detail": str(exc),
+                    }
+                )
                 diagnostics.append(f"fixture_parse: {exc}")
                 continue
             fixture_id = int(fields["fixture_id"])
             if fields["status"] not in {"NS", "TBD"}:
+                telemetry["funnel_rejections"].append(
+                    {
+                        "fixture_id": fixture_id,
+                        "stage": "discovered",
+                        "reason": "FIXTURE_STATUS_NOT_ACTIONABLE",
+                    }
+                )
                 continue
             if not (
                 decision_timestamp + timedelta(minutes=15)
                 < fields["kickoff"]
                 < decision_timestamp + timedelta(hours=upper_hours)
             ):
+                telemetry["funnel_rejections"].append(
+                    {
+                        "fixture_id": fixture_id,
+                        "stage": "discovered",
+                        "reason": "OUTSIDE_TIME_WINDOW",
+                    }
+                )
                 continue
             decision = eligibility_decision(
                 fields["country"],
@@ -320,7 +345,11 @@ class QuantEngine:
                 expected_value = None
                 probability_edge = None
                 if quote is None:
-                    reason = "REJECT_NO_ODDS"
+                    reason = (
+                        "REJECT_MARKET_UNAVAILABLE"
+                        if quotes
+                        else "REJECT_NO_ODDS"
+                    )
                 elif quote.odd < self.settings.min_odd:
                     reason = "REJECT_ODD"
                 elif not (0.0 <= quote.overround <= self.settings.max_market_overround):
@@ -412,6 +441,7 @@ class QuantEngine:
             candidates, existing_bets, now=now_local, settings=self.settings
         )
         telemetry["risk_checks"] = len(candidates)
+        telemetry["risk_selected"] = len(allocations)
         allocated_before_strength = {
             f"{candidate.fixture_id}_{candidate.market.value}_{MODEL_VERSION}"
             for candidate, _ in allocations
@@ -429,26 +459,51 @@ class QuantEngine:
                     }
                 )
         if self.settings.intraday_mode:
-            allocations = [
-                (candidate, stake)
-                for candidate, stake in allocations
-                if candidate.expected_value >= self.settings.strong_signal_min_ev
-                and candidate.probability_edge >= self.settings.strong_signal_min_edge
-                and stake >= self.settings.strong_signal_min_stake
-            ]
-        allocated_ids = {
+            filtered_allocations = []
+            for candidate, stake in allocations:
+                failures = []
+                if candidate.expected_value < self.settings.strong_signal_min_ev:
+                    failures.append("STRONG_MIN_EV")
+                if candidate.probability_edge < self.settings.strong_signal_min_edge:
+                    failures.append("STRONG_MIN_EDGE")
+                if stake < self.settings.strong_signal_min_stake:
+                    failures.append("STRONG_MIN_STAKE")
+                if failures:
+                    telemetry["strength_rejections"] += 1
+                    telemetry["funnel_rejections"].append(
+                        {
+                            "fixture_id": candidate.fixture_id,
+                            "market": candidate.market.value,
+                            "stage": "selected",
+                            "reason": "STRONG_SIGNAL_THRESHOLD",
+                            "failed_checks": failures,
+                        }
+                    )
+                    continue
+                filtered_allocations.append((candidate, stake))
+            allocations = filtered_allocations
+        selected_ids = {
             f"{candidate.fixture_id}_{candidate.market.value}_{MODEL_VERSION}"
             for candidate, _ in allocations
         }
-        if self.settings.intraday_mode:
-            # Intraday strength filtering is a signal-classification rule, not risk capacity.
-            pass
-        selected_ids = allocated_ids
+        telemetry["selected"] = len(selected_ids)
         for record in prediction_records:
             if record["id"] in selected_ids:
                 record["selected"] = True
                 record["rejection_reason"] = None
-        self.prediction_store.append_unique(prediction_records)
+        try:
+            persisted_predictions = self.prediction_store.append_unique(prediction_records)
+            telemetry["predictions_persisted"] = len(persisted_predictions)
+        except Exception as exc:
+            telemetry["persistence_failures"] += 1
+            telemetry["funnel_rejections"].append(
+                {
+                    "stage": "prediction_persisted",
+                    "reason": "PREDICTION_PERSISTENCE_FAILURE",
+                    "detail": str(exc),
+                }
+            )
+            raise
         mode = "PAPER" if self.settings.paper_mode else "LIVE"
         proposed_bets = [
             candidate.to_bet(
@@ -494,12 +549,24 @@ class QuantEngine:
                 bet["decision_packet"] = packet
                 bet["decision_packet_id"] = packet["packet_id"]
                 bet["decision_packet_integrity_hash"] = packet["integrity_hash"]
-        appended = self.bet_store.append_unique_fixtures(proposed_bets)
+        try:
+            appended = self.bet_store.append_unique_fixtures(proposed_bets)
+        except Exception as exc:
+            telemetry["persistence_failures"] += 1
+            telemetry["funnel_rejections"].append(
+                {
+                    "stage": "persisted_bet",
+                    "reason": "BET_PERSISTENCE_FAILURE",
+                    "detail": str(exc),
+                }
+            )
+            raise
         telemetry["selections_produced"] = len(appended)
         proposed_ids = {str(b.get("id")) for b in proposed_bets}
         appended_ids = {str(b.get("id")) for b in appended}
-        telemetry["duplicate_rejections"] += max(0, len(proposed_ids - appended_ids))
-        for bet_id in sorted(proposed_ids - appended_ids):
+        duplicate_ids = proposed_ids - appended_ids
+        telemetry["duplicate_rejections"] += len(duplicate_ids)
+        for bet_id in sorted(duplicate_ids):
             telemetry["funnel_rejections"].append(
                 {
                     "bet_id": bet_id,
@@ -512,8 +579,15 @@ class QuantEngine:
             "eligible": telemetry["fixtures_eligible"],
             "modelled": telemetry["fixtures_modelled"],
             "predictions": telemetry["predictions_generated"],
+            "odds_available": telemetry["odds_available"],
+            "valid_quotes": telemetry["valid_quotes"],
             "candidates": telemetry["candidates"],
-            "selections": telemetry["selections_produced"],
+            "ev_pass": telemetry["ev_pass"],
+            "edge_pass": telemetry["edge_pass"],
+            "risk_checks": telemetry["risk_checks"],
+            "selected": telemetry["selected"],
+            "persisted_bets": telemetry["selections_produced"],
+            "settled": telemetry.get("settled", 0),
         }
         final_bets = self.bet_store.load()
         analytics = portfolio_analytics(
