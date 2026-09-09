@@ -46,13 +46,7 @@ def _canonical_key(item: dict[str, Any]) -> str:
 
 
 def _as_virtual(item: dict[str, Any]) -> dict[str, Any]:
-    """Normalize a signal into the isolated virtual portfolio contract.
-
-    Historical rows may contain Production-derived status/profit fields from the
-    old implementation. Those fields are retained only as `production_*`
-    context when explicitly available; they can never settle the virtual
-    portfolio.
-    """
+    """Normalize a signal into the isolated virtual portfolio contract."""
     row = dict(item)
     row["virtual_portfolio"] = STRONG_SIGNAL_PORTFOLIO
     row["signal_class"] = "STRONG_SIGNAL"
@@ -106,8 +100,7 @@ def merge(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
             continue
         current = merged.setdefault(key, {})
         current.update(item)
-        current = _as_virtual(current)
-        merged[key] = current
+        merged[key] = _as_virtual(current)
     return sorted(
         merged.values(),
         key=lambda item: str(
@@ -147,7 +140,9 @@ def observation_public(row: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def build(root: Path = ROOT) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+def build(
+    root: Path = ROOT,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     ledger = load_or_migrate_ledger(root)
     alerts = load_json(root / "intraday_alerts.json")
     observations = load_jsonl(root / "data" / "market_timing_snapshots.jsonl")
@@ -155,7 +150,8 @@ def build(root: Path = ROOT) -> tuple[list[dict[str, Any]], list[dict[str, Any]]
     strong_updates = [
         x
         for x in alerts
-        if str(x.get("signal_class") or "").upper() in {"STRONG_SIGNAL", "STRONG"}
+        if str(x.get("signal_class") or "").upper()
+        in {"STRONG_SIGNAL", "STRONG"}
     ]
     strong = merge(ledger + strong_updates)
     (root / LEDGER_FILE).write_text(
