@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import json
+import os
 import re
 import unicodedata
 from dataclasses import dataclass
+from pathlib import Path
 
-from .league_registry import AFRICA_COUNTRIES, classification_for
+from .league_registry import AFRICA_COUNTRIES, classification_for_fixture
 
 _GENERAL_EXCLUDED_PATTERNS = tuple(
     re.compile(pattern, re.IGNORECASE)
@@ -54,6 +57,24 @@ def contains_excluded_keyword(*values: str | None) -> bool:
     return any(pattern.search(combined) for pattern in _GENERAL_EXCLUDED_PATTERNS)
 
 
+def _emit_eligibility_event(decision: EligibilityDecision) -> None:
+    path_value = os.getenv("QUANTBOT_ELIGIBILITY_LEDGER")
+    if not path_value:
+        return
+    path = Path(path_value)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "provider_league_id": decision.provider_league_id,
+        "country": decision.country,
+        "league": decision.league_name,
+        "tier": decision.tier,
+        "eligible": decision.eligible,
+        "reason": decision.reason,
+    }
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(payload, ensure_ascii=False, sort_keys=True) + "\n")
+
+
 def eligibility_decision(
     country: str | None,
     league_id: int | None,
@@ -65,56 +86,37 @@ def eligibility_decision(
     normalized_country = normalize_text(country)
     normalized_league = normalize_text(league_name)
 
-    if normalized_country in {
-        normalize_text(item) for item in excluded_countries
-    }:
-        return EligibilityDecision(
-            False,
-            "INELIGIBLE_COUNTRY",
-            league_id,
-            normalized_country,
-            normalized_league,
-            None,
+    if normalized_country in {normalize_text(item) for item in excluded_countries}:
+        decision = EligibilityDecision(
+            False, "INELIGIBLE_COUNTRY", league_id, normalized_country, normalized_league, None
         )
+        _emit_eligibility_event(decision)
+        return decision
 
     if contains_excluded_keyword(league_name, home_name, away_name):
-        return EligibilityDecision(
-            False,
-            "EXPLICIT_EXCLUSION",
-            league_id,
-            normalized_country,
-            normalized_league,
-            None,
+        decision = EligibilityDecision(
+            False, "EXPLICIT_EXCLUSION", league_id, normalized_country, normalized_league, None
         )
+        _emit_eligibility_event(decision)
+        return decision
 
-    # Africa is a country-level deny-by-default policy with exactly two
-    # exceptions. The registry below still controls their tier.
-    if normalized_country in AFRICA_COUNTRIES and normalized_country not in {
-        "egypt",
-        "morocco",
-    }:
-        return EligibilityDecision(
-            False,
-            "INELIGIBLE_COUNTRY",
-            league_id,
-            normalized_country,
-            normalized_league,
-            None,
+    if normalized_country in AFRICA_COUNTRIES and normalized_country not in {"egypt", "morocco"}:
+        decision = EligibilityDecision(
+            False, "INELIGIBLE_COUNTRY", league_id, normalized_country, normalized_league, None
         )
+        _emit_eligibility_event(decision)
+        return decision
 
-    classification = classification_for(league_id)
+    classification = classification_for_fixture(league_id, country, league_name)
     if classification is None:
-        return EligibilityDecision(
-            False,
-            "UNKNOWN_LEAGUE_TIER",
-            league_id,
-            normalized_country,
-            normalized_league,
-            None,
+        decision = EligibilityDecision(
+            False, "UNKNOWN_LEAGUE_TIER", league_id, normalized_country, normalized_league, None
         )
+        _emit_eligibility_event(decision)
+        return decision
 
     if normalize_text(classification.country) != normalized_country:
-        return EligibilityDecision(
+        decision = EligibilityDecision(
             False,
             "UNKNOWN_LEAGUE_TIER",
             league_id,
@@ -122,9 +124,11 @@ def eligibility_decision(
             normalized_league,
             classification.tier,
         )
+        _emit_eligibility_event(decision)
+        return decision
 
     if classification.tier not in (1, 2) or not classification.enabled:
-        return EligibilityDecision(
+        decision = EligibilityDecision(
             False,
             "INELIGIBLE_TIER",
             league_id,
@@ -132,11 +136,11 @@ def eligibility_decision(
             normalized_league,
             classification.tier,
         )
+        _emit_eligibility_event(decision)
+        return decision
 
-    # The provider ID is authoritative. League names are retained only for
-    # auditability and are never used to infer tier.
     if normalize_text(classification.league_name) != normalized_league:
-        return EligibilityDecision(
+        decision = EligibilityDecision(
             False,
             "UNKNOWN_LEAGUE_TIER",
             league_id,
@@ -144,6 +148,8 @@ def eligibility_decision(
             normalized_league,
             classification.tier,
         )
+        _emit_eligibility_event(decision)
+        return decision
 
     normalized_teams = (normalize_text(home_name), normalize_text(away_name))
     if any(
@@ -151,23 +157,17 @@ def eligibility_decision(
         for team in normalized_teams
         for pattern in _TEAM_SUFFIX_PATTERNS
     ):
-        return EligibilityDecision(
-            False,
-            "EXPLICIT_EXCLUSION",
-            league_id,
-            normalized_country,
-            normalized_league,
-            classification.tier,
+        decision = EligibilityDecision(
+            False, "EXPLICIT_EXCLUSION", league_id, normalized_country, normalized_league, classification.tier
         )
+        _emit_eligibility_event(decision)
+        return decision
 
-    return EligibilityDecision(
-        True,
-        "ELIGIBLE",
-        league_id,
-        normalized_country,
-        normalized_league,
-        classification.tier,
+    decision = EligibilityDecision(
+        True, "ELIGIBLE", league_id, normalized_country, normalized_league, classification.tier
     )
+    _emit_eligibility_event(decision)
+    return decision
 
 
 def is_allowed_match(
