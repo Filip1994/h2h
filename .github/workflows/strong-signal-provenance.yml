@@ -64,11 +64,68 @@ jobs:
       - name: Preserve generated evidence before switching to canonical main
         run: cp strong_signal_run_evidence.json /tmp/strong_signal_run_evidence.json
 
-      - name: Publish machine-readable evidence without stale overwrite
+      - name: Check canonical evidence ordering and idempotence
+        id: publish-check
         env:
           SOURCE_RUN_ID: ${{ github.event.workflow_run.id }}
         run: |
           set -euo pipefail
+          git fetch origin main
+          if ! git cat-file -e "origin/main:strong_signal_run_evidence.json" 2>/dev/null; then
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git show origin/main:strong_signal_run_evidence.json > /tmp/current-strong-signal-evidence.json
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          current_path = Path("/tmp/current-strong-signal-evidence.json")
+          current = json.loads(current_path.read_text(encoding="utf-8"))
+          source_run = int(os.environ["SOURCE_RUN_ID"])
+          current_source = current.get("source_run") or {}
+          try:
+              current_run = int(current_source["run_id"])
+          except (KeyError, TypeError, ValueError) as exc:
+              raise SystemExit("Canonical Strong Signal evidence has malformed source_run") from exc
+          if current_run > source_run:
+              raise SystemExit(
+                  f"Stale Strong Signal evidence: source run {source_run} < canonical run {current_run}"
+              )
+          if current_run == source_run:
+              print(f"Strong Signal evidence for source run {source_run} already published; idempotent no-op.")
+              Path("/tmp/publish-skip").write_text("true", encoding="utf-8")
+          PY
+          if [ -e /tmp/publish-skip ]; then echo "skip=true" >> "$GITHUB_OUTPUT"; else echo "skip=false" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Publish machine-readable evidence
+        if: steps.publish-check.outputs.skip != 'true'
+        env:
+          SOURCE_RUN_ID: ${{ github.event.workflow_run.id }}
+          PUBLICATION_RUN_ID: ${{ github.run_id }}
+          PUBLICATION_ATTEMPT: ${{ github.run_attempt }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import os
+          from datetime import UTC, datetime
+          from pathlib import Path
+
+          path = Path("/tmp/strong_signal_run_evidence.json")
+          evidence = json.loads(path.read_text(encoding="utf-8"))
+          evidence["publication"] = {
+              "workflow": "Strong Signal provenance audit",
+              "run_id": str(os.environ["PUBLICATION_RUN_ID"]),
+              "run_attempt": int(os.environ["PUBLICATION_ATTEMPT"]),
+              "published_at": datetime.now(UTC).isoformat(),
+          }
+          path.write_text(
+              json.dumps(evidence, ensure_ascii=False, indent=2) + "\n",
+              encoding="utf-8",
+          )
+          PY
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git fetch origin main
@@ -86,13 +143,16 @@ jobs:
           for attempt in 1 2 3; do
             if git push origin HEAD:main; then exit 0; fi
             git fetch origin main
-            python tools/provenance_publish_guard.py check \
-              --source-run "${SOURCE_RUN_ID}" \
-              --current-path <(git show origin/main:strong_signal_run_evidence.json) \
-              || {
-                echo "Stale Strong Signal provenance rejected after remote advanced." >&2
-                exit 1
-              }
+            if git cat-file -e "origin/main:strong_signal_run_evidence.json" 2>/dev/null; then
+              git show origin/main:strong_signal_run_evidence.json > /tmp/current-strong-signal-evidence.json
+              python tools/provenance_publish_guard.py check \
+                --source-run "${SOURCE_RUN_ID}" \
+                --current-path /tmp/current-strong-signal-evidence.json \
+                || {
+                  echo "Stale Strong Signal provenance rejected after remote advanced." >&2
+                  exit 1
+                }
+            fi
             git rebase origin/main
           done
           echo "Unable to publish Strong Signal evidence after retries" >&2
