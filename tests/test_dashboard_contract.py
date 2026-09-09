@@ -44,9 +44,7 @@ def test_dashboard_has_one_shared_design_system_and_all_primary_sectors():
         text = read(page)
         assert "./assets/qb-dashboard.css" in text
         if page == "strong-signals.html":
-            match = re.search(
-                r'\./assets/strong-signals\.js(?:\?[^"\']*)?', text
-            )
+            match = re.search(r'\./assets/strong-signals\.js(?:\?[^"\']*)?', text)
             assert match
             assert (ROOT / "assets" / "strong-signals.js").is_file()
         else:
