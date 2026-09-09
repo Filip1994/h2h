@@ -6,7 +6,6 @@ import os
 import tempfile
 import time
 import uuid
-from collections import Counter
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
