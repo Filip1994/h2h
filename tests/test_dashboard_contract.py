@@ -95,9 +95,22 @@ def test_history_preserves_accounting_buckets_and_does_not_invent_lifecycle():
     assert "signal_class:'PRODUCTION'" in js
     assert "signal_class:'STRONG_SIGNAL'" in js
     assert "signal_class:'NEAR_MISS'" in js
+    assert "x.opening_odd" in js
     assert "x.opening_captured_at" in js
+    assert "x.closing_odd" in js
     assert "x.closing_captured_at" in js
     assert "Unavailable" in js
+
+
+def test_signal_history_exposes_real_outcome_profit_and_counterfactual_semantics():
+    js = read("assets/qb-dashboard.js")
+    assert "const outcome = x" in js
+    assert "WIN" in js and "LOSS" in js and "PENDING" in js
+    assert "const resultBlock = x" in js
+    assert "OUTCOME" in js and "P/L" in js
+    assert "NOT A PRODUCTION BET" in js
+    assert "x.settled_at" in js
+    assert "x.result" in js
 
 
 def test_obsolete_competing_preview_is_removed():
