@@ -203,6 +203,9 @@ def merge(
 
 
 def observation_public(row: dict[str, Any]) -> dict[str, Any]:
+    home = row.get("home_name") or row.get("home_team") or row.get("home") or row.get("home_team_name")
+    away = row.get("away_name") or row.get("away_team") or row.get("away") or row.get("away_team_name")
+    match = row.get("match") or (f"{home} vs {away}" if home and away else None)
     return {
         "id": row.get("observation_id")
         or f"{row.get('prediction_id')}:{row.get('captured_at')}",
@@ -210,8 +213,10 @@ def observation_public(row: dict[str, Any]) -> dict[str, Any]:
         "event_id": row.get("fixture_id"),
         "market": row.get("market"),
         "market_display": row.get("market_display", row.get("market")),
-        "match": row.get("match"),
-        "league": row.get("league"),
+        "match": match,
+        "home_name": home,
+        "away_name": away,
+        "league": row.get("league") or row.get("league_name"),
         "kickoff": row.get("kickoff"),
         "odd": row.get("odd"),
         "opposite_odd": row.get("opposite_odd"),
