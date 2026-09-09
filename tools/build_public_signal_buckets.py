@@ -12,6 +12,7 @@ from quantbot.strong_signal_bankroll import STRONG_SIGNAL_PORTFOLIO, portfolio
 
 LEDGER_FILE = "strong_signal_ledger.json"
 LEGACY_SETTLEMENTS_FILE = "strong_signal_legacy_settlements.json"
+EVENT_FILE = "data/intraday_signal_events.jsonl"
 LEGACY_H2H_KEYS = {
     "h2h_enabled",
     "h2h_available",
@@ -287,11 +288,54 @@ def observation_public(
     }
 
 
+def signal_event_public(
+    row: dict[str, Any], source: dict[str, Any] | None = None
+) -> dict[str, Any]:
+    source = source or {}
+    return {
+        "id": row.get("event_id"),
+        "signal_id": row.get("event_id"),
+        "prediction_id": row.get("prediction_id"),
+        "event_id": row.get("fixture_id"),
+        "market": row.get("market"),
+        "market_display": row.get("market_display", row.get("market")),
+        "match": row.get("match") or source.get("match"),
+        "league": row.get("league") or source.get("league"),
+        "kickoff": row.get("kickoff") or source.get("kickoff"),
+        "odd": row.get("odd"),
+        "opposite_odd": row.get("opposite_odd"),
+        "bookmaker_id": row.get("bookmaker_id"),
+        "bookmaker": row.get("bookmaker"),
+        "odds_captured_at": row.get("captured_at"),
+        "model_probability": row.get("model_probability"),
+        "calibrated_probability": row.get("calibrated_probability"),
+        "decision_probability": row.get("decision_probability"),
+        "probability_edge": row.get("probability_edge"),
+        "expected_value": row.get("expected_value"),
+        "stake": row.get("stake", 0),
+        "signal_source": "INTRADAY_ALERT",
+        "signal_type": "CLASSIFICATION_TRANSITION",
+        "signal_class": "STRONG_SIGNAL",
+        "virtual_portfolio": STRONG_SIGNAL_PORTFOLIO,
+        "near_miss_reason": None,
+        "signal_sent_at": row.get("captured_at"),
+        "linked_bet_id": None,
+        "status": "PENDING",
+        "profit": 0.0,
+        "virtual_profit": 0.0,
+        "virtual_settled": False,
+        "source_transition": row.get("transition"),
+        "source_event_id": row.get("event_id"),
+    }
+
+
 def build(root: Path = ROOT) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     ledger = load_or_migrate_ledger(root)
     settlements = _legacy_settlement_map(root)
     alerts = load_json(root / "intraday_alerts.json")
     observations = load_jsonl(root / "data" / "market_timing_snapshots.jsonl")
+    signal_events = load_jsonl(root / EVENT_FILE)
+
     alert_lookup: dict[str, dict[str, Any]] = {}
     for alert in alerts:
         for key in (
@@ -301,15 +345,45 @@ def build(root: Path = ROOT) -> tuple[list[dict[str, Any]], list[dict[str, Any]]
         ):
             if key is not None and str(key):
                 alert_lookup[str(key)] = alert
+
+    observation_lookup: dict[str, dict[str, Any]] = {}
+    for observation in observations:
+        for key in (
+            observation.get("prediction_id"),
+            observation.get("fixture_id"),
+            observation.get("event_id"),
+        ):
+            if key is not None and str(key):
+                observation_lookup[str(key)] = observation
+
     strong_updates = [
         x
         for x in alerts
         if str(x.get("signal_class") or "").upper() in {"STRONG_SIGNAL", "STRONG"}
     ]
+
+    # A Strong Signal is an independent virtual observation.  It must not
+    # disappear merely because the same prediction is also linked to a
+    # Production bet.  watchlist.py records every classification transition
+    # durably in intraday_signal_events.jsonl; INITIAL/NEAR_MISS ->
+    # STRONG_SIGNAL transitions are therefore the authoritative fallback for
+    # persistence when no alert email/event was emitted.
+    for event in signal_events:
+        if str(event.get("signal_class") or "").upper() != "STRONG_SIGNAL":
+            continue
+        transition = str(event.get("transition") or "")
+        if not transition.endswith("->STRONG_SIGNAL"):
+            continue
+        source = observation_lookup.get(str(event.get("prediction_id") or "")) or alert_lookup.get(
+            str(event.get("prediction_id") or "")
+        )
+        strong_updates.append(signal_event_public(event, source))
+
     strong = merge(ledger + strong_updates, settlements)
     (root / LEDGER_FILE).write_text(
         json.dumps(strong, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
+
     near = []
     for observation in observations:
         if (
