@@ -17,9 +17,17 @@ def _git_show(monkeypatch, root: Path, payload: str) -> None:
 
 def test_reconciles_zero_new_signals(tmp_path: Path, monkeypatch) -> None:
     existing = [
-        {"id": "old", "signal_class": "STRONG_SIGNAL", "status": "WIN", "virtual_portfolio": "STRONG_SIGNALS_VIRTUAL", "not_a_production_bet": True},
+        {
+            "id": "old",
+            "signal_class": "STRONG_SIGNAL",
+            "status": "WIN",
+            "virtual_portfolio": "STRONG_SIGNALS_VIRTUAL",
+            "not_a_production_bet": True,
+        },
     ]
-    (tmp_path / "strong_signals.json").write_text(json.dumps(existing), encoding="utf-8")
+    (tmp_path / "strong_signals.json").write_text(
+        json.dumps(existing), encoding="utf-8"
+    )
     _git_show(monkeypatch, tmp_path, json.dumps(existing))
 
     evidence = build_evidence(tmp_path)
@@ -30,12 +38,26 @@ def test_reconciles_zero_new_signals(tmp_path: Path, monkeypatch) -> None:
 
 def test_reconciles_one_new_signal(tmp_path: Path, monkeypatch) -> None:
     existing = [
-        {"id": "old", "signal_class": "STRONG_SIGNAL", "status": "LOSS", "virtual_portfolio": "STRONG_SIGNALS_VIRTUAL", "not_a_production_bet": True},
+        {
+            "id": "old",
+            "signal_class": "STRONG_SIGNAL",
+            "status": "LOSS",
+            "virtual_portfolio": "STRONG_SIGNALS_VIRTUAL",
+            "not_a_production_bet": True,
+        },
     ]
     current = existing + [
-        {"id": "new-1", "signal_class": "STRONG_SIGNAL", "status": "PENDING", "virtual_portfolio": "STRONG_SIGNALS_VIRTUAL", "not_a_production_bet": True},
+        {
+            "id": "new-1",
+            "signal_class": "STRONG_SIGNAL",
+            "status": "PENDING",
+            "virtual_portfolio": "STRONG_SIGNALS_VIRTUAL",
+            "not_a_production_bet": True,
+        },
     ]
-    (tmp_path / "strong_signals.json").write_text(json.dumps(current), encoding="utf-8")
+    (tmp_path / "strong_signals.json").write_text(
+        json.dumps(current), encoding="utf-8"
+    )
     _git_show(monkeypatch, tmp_path, json.dumps(existing))
 
     evidence = build_evidence(tmp_path)
@@ -45,12 +67,22 @@ def test_reconciles_one_new_signal(tmp_path: Path, monkeypatch) -> None:
     assert evidence["reconciliation"]["no_new_signal_id_missing_from_public"] is True
 
 
-def test_terminal_new_signal_is_history_not_active(tmp_path: Path, monkeypatch) -> None:
+def test_terminal_new_signal_is_history_not_active(
+    tmp_path: Path, monkeypatch
+) -> None:
     existing = []
     current = [
-        {"id": "new-1", "signal_class": "STRONG_SIGNAL", "status": "SKIPPED", "virtual_portfolio": "STRONG_SIGNALS_VIRTUAL", "not_a_production_bet": True},
+        {
+            "id": "new-1",
+            "signal_class": "STRONG_SIGNAL",
+            "status": "SKIPPED",
+            "virtual_portfolio": "STRONG_SIGNALS_VIRTUAL",
+            "not_a_production_bet": True,
+        },
     ]
-    (tmp_path / "strong_signals.json").write_text(json.dumps(current), encoding="utf-8")
+    (tmp_path / "strong_signals.json").write_text(
+        json.dumps(current), encoding="utf-8"
+    )
     _git_show(monkeypatch, tmp_path, json.dumps(existing))
 
     evidence = build_evidence(tmp_path)
@@ -63,10 +95,24 @@ def test_terminal_new_signal_is_history_not_active(tmp_path: Path, monkeypatch) 
 def test_public_ids_must_be_unique(tmp_path: Path, monkeypatch) -> None:
     existing = []
     current = [
-        {"id": "duplicate", "signal_class": "STRONG_SIGNAL", "status": "PENDING", "virtual_portfolio": "STRONG_SIGNALS_VIRTUAL", "not_a_production_bet": True},
-        {"id": "duplicate", "signal_class": "STRONG_SIGNAL", "status": "PENDING", "virtual_portfolio": "STRONG_SIGNALS_VIRTUAL", "not_a_production_bet": True},
+        {
+            "id": "duplicate",
+            "signal_class": "STRONG_SIGNAL",
+            "status": "PENDING",
+            "virtual_portfolio": "STRONG_SIGNALS_VIRTUAL",
+            "not_a_production_bet": True,
+        },
+        {
+            "id": "duplicate",
+            "signal_class": "STRONG_SIGNAL",
+            "status": "PENDING",
+            "virtual_portfolio": "STRONG_SIGNALS_VIRTUAL",
+            "not_a_production_bet": True,
+        },
     ]
-    (tmp_path / "strong_signals.json").write_text(json.dumps(current), encoding="utf-8")
+    (tmp_path / "strong_signals.json").write_text(
+        json.dumps(current), encoding="utf-8"
+    )
     _git_show(monkeypatch, tmp_path, json.dumps(existing))
 
     evidence = build_evidence(tmp_path)
