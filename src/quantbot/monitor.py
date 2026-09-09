@@ -11,7 +11,7 @@ from .storage import BetStore, PredictionStore
 from .types import Market
 
 FINISHED_STATUSES = {"FT", "AET", "PEN"}
-VOID_STATUSES = {"CANC", "ABD"}
+VOID_STATUSES = {"CANC", "ABD", "PST"}
 REVIEW_STATUSES = {"AWD", "WO"}
 
 
@@ -120,7 +120,7 @@ class LedgerMonitor:
                 continue
             kickoff_raw = item.get("kickoff")
             if not kickoff_raw:
-                fixture_ids.add(fixture_id)  # Legacy ledger: API status decides.
+                fixture_ids.add(fixture_id)
                 continue
             try:
                 kickoff = parse_datetime(str(kickoff_raw))
