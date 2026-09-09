@@ -6,6 +6,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from .persistence import OddsSnapshotStore, source_request_hash
+
 SNAPSHOT_FILE = "data/market_timing_snapshots.jsonl"
 METRICS_FILE = "market_timing_metrics.json"
 SCHEMA_VERSION = 1
@@ -89,6 +91,7 @@ def append_snapshots(
         except OSError:
             existing_ids = set()
 
+    canonical_store = OddsSnapshotStore(root / "data" / "odds_snapshots.jsonl")
     appended = 0
     useful = 0
     with path.open("a", encoding="utf-8") as handle:
@@ -104,8 +107,40 @@ def append_snapshots(
             )
             existing_ids.add(observation_id)
             appended += 1
-            if snapshot.get("signal_state") in {"NEAR_MISS", "STRONG", "SIGNAL_UPDATE"}:
+            if snapshot.get("signal_state") in {
+                "NEAR_MISS",
+                "STRONG",
+                "SIGNAL_UPDATE",
+            }:
                 useful += 1
+
+            try:
+                seconds = float(snapshot.get("seconds_to_kickoff") or 0.0)
+                snapshot_type = "T5" if 120 <= seconds <= 480 else "INTERMEDIATE"
+                canonical_store.append(
+                    {
+                        "fixture_id": int(snapshot["fixture_id"]),
+                        "market": str(snapshot["market"]),
+                        "bookmaker_id": int(snapshot["bookmaker_id"]),
+                        "bookmaker": str(snapshot["bookmaker"]),
+                        "selection": str(snapshot["market"]),
+                        "odd": snapshot["odd"],
+                        "opposite_odd": snapshot["opposite_odd"],
+                        "devig_probability": snapshot["market_probability_devig"],
+                        "overround": snapshot["market_overround"],
+                        "odds_captured_at": snapshot["captured_at"],
+                        "snapshot_type": snapshot_type,
+                        "prediction_id": snapshot.get("prediction_id"),
+                        "signal_id": snapshot.get("prediction_id"),
+                        "source_endpoint": "odds",
+                        "source_request_hash": source_request_hash(
+                            "odds", {"fixture": int(snapshot["fixture_id"])}
+                        ),
+                        "captured_by": "watchlist",
+                    }
+                )
+            except (KeyError, TypeError, ValueError):
+                continue
         handle.flush()
 
     metrics_path = root / METRICS_FILE
