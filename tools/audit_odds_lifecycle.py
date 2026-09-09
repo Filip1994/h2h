@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import urllib.error
 import urllib.request
 from collections import Counter, defaultdict
 from datetime import UTC, datetime
@@ -27,7 +28,7 @@ def parse_dt(value: Any) -> datetime | None:
     if not value:
         return None
     try:
-        return datetime.fromisoformat(str(value).replace("Z", "+00:00")).astimezone(UTC)
+        return datetime.fromisoformat(str(value)).astimezone(UTC)
     except ValueError:
         return None
 
@@ -162,7 +163,7 @@ def audit_actions() -> dict[str, Any]:
     try:
         with urllib.request.urlopen(request, timeout=20) as response:
             runs = json.load(response).get("workflow_runs", [])
-    except Exception as exc:  # pragma: no cover
+    except (OSError, urllib.error.URLError, json.JSONDecodeError) as exc:
         return {"error": str(exc)}
     scheduled = [run for run in runs if run.get("event") == "schedule"]
     return {
