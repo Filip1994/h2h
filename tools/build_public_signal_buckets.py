@@ -138,14 +138,12 @@ def build(root: Path = ROOT) -> tuple[list[dict[str, Any]], list[dict[str, Any]]
     (root / LEDGER_FILE).write_text(
         json.dumps(strong, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
-    near = merge(
-        [
-            observation_public(x)
-            for x in observations
-            if str(x.get("signal_class") or x.get("signal_state") or "").upper()
-            == "NEAR_MISS"
-        ]
-    )
+    near = [
+        observation_public(x)
+        for x in observations
+        if str(x.get("signal_class") or x.get("signal_state") or "").upper()
+        == "NEAR_MISS"
+    ]
     (root / "strong_signals.json").write_text(
         json.dumps(strong, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
