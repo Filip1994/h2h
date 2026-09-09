@@ -52,7 +52,9 @@ def test_write_report_is_human_and_csv_friendly(tmp_path: Path) -> None:
     payload = json.loads(json_path.read_text(encoding="utf-8"))
     assert payload["catalogue"]["count"] == 2
     assert payload["catalogue"]["bookmakers"][0]["id"] == 8
-    assert payload["fixture_odds_observed"]["bookmakers"] == [{"id": 11, "name": "Beta"}]
+    assert payload["fixture_odds_observed"]["bookmakers"] == [
+        {"id": 11, "name": "Beta"}
+    ]
     csv_text = csv_path.read_text(encoding="utf-8")
     assert "id,name" in csv_text
     assert "8,Alpha" in csv_text
