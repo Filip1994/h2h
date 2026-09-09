@@ -14,6 +14,7 @@ from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
 from .config import Settings
+from .quota import GlobalQuotaExceeded, GlobalQuotaGovernor
 
 
 class APIError(RuntimeError):
@@ -43,6 +44,11 @@ class APIFootballClient:
         self.settings.cache_dir.mkdir(parents=True, exist_ok=True)
         self.settings.root.joinpath("data", "raw_api").mkdir(
             parents=True, exist_ok=True
+        )
+        self.quota = GlobalQuotaGovernor(
+            self.settings.root / "data" / "football_api_quota.json",
+            self.settings.api_request_budget,
+            self.settings.api_budget_reserve,
         )
 
     def _archive_path(self, captured_at: datetime) -> Path:
@@ -161,6 +167,12 @@ class APIFootballClient:
                     "Run je dostigao API radni budžet od "
                     f"{usable_budget} zahteva; rezerva={self.settings.api_budget_reserve}"
                 )
+            workflow = os.getenv("GITHUB_WORKFLOW") or os.getenv("GITHUB_JOB") or "local"
+            try:
+                reservation_id = self.quota.reserve(workflow, endpoint, "GET", protected=reserve_protected)
+            except GlobalQuotaExceeded as exc:
+                self.budget_exhaustion_events += 1
+                raise APIBudgetExceeded(str(exc)) from exc
             request = Request(
                 url,
                 headers={
@@ -174,8 +186,10 @@ class APIFootballClient:
             try:
                 with urlopen(request, timeout=20) as response:
                     raw = response.read().decode("utf-8")
+                self.quota.consume(reservation_id)
                 break
             except HTTPError as exc:
+                self.quota.consume(reservation_id)
                 self.http_errors[str(exc.code)] += 1
                 if exc.code == 429:
                     self.rate_limit_events += 1
@@ -188,6 +202,7 @@ class APIFootballClient:
                 detail = exc.read().decode("utf-8", errors="replace")[:500]
                 raise APIError(f"API HTTP {exc.code} za {endpoint}: {detail}") from exc
             except (URLError, TimeoutError) as exc:
+                self.quota.consume(reservation_id)
                 self.network_error_events += 1
                 if attempt + 1 < self.settings.api_max_attempts:
                     self.retry_events += 1
@@ -242,6 +257,7 @@ class APIFootballClient:
             "network_error_events": self.network_error_events,
             "endpoint_requests": dict(sorted(self.endpoint_requests.items())),
             "endpoint_cache_hits": dict(sorted(self.endpoint_cache_hits.items())),
+            "global_quota": self.quota.snapshot(),
         }
 
     def _retry_delay(self, attempt: int, retry_after: str | None = None) -> None:
