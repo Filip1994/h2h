@@ -1,7 +1,7 @@
 const QB = (() => {
   const MARKET = {OVER_2_5:'Over 2.5',UNDER_2_5:'Under 2.5',BTTS_YES:'BTTS — Yes',BTTS_NO:'BTTS — No',HOME_WIN:'Home Win',AWAY_WIN:'Away Win',DRAW:'Draw',GG:'BTTS — Yes',NG:'BTTS — No','Less than 2.5':'Under 2.5','Manje 2.5':'Under 2.5','Više 2.5':'Over 2.5'};
   const BOOK = {8:{name:'Bet365',logo:'https://commons.wikimedia.org/wiki/Special:Redirect/file/Bet_365_logo.png',verified:true},11:{name:'1xBet',logo:'https://commons.wikimedia.org/wiki/Special:Redirect/file/1xbetlogo.png',verified:true}};
-  const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const esc = v => String(v ?? '').replace(/[&<>\"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));
   const market = v => MARKET[v] || v || '—';
   const odd = v => v == null || v === '' ? '—' : Number(v).toFixed(2);
   const pct = v => Number.isFinite(Number(v)) ? (100 * Number(v)).toFixed(1) + '%' : '—';
@@ -17,13 +17,19 @@ const QB = (() => {
     if (!Number.isFinite(n)) return {value:'—',label:'Unavailable',cls:'neutral'};
     return {value:(n >= 0 ? '+' : '−') + Math.abs(n).toFixed(2) + '%',label:n >= 0 ? 'Beat Close' : 'Lost to Close',cls:n >= 0 ? 'positive' : 'negative'};
   };
+  const outcome = x => {
+    const s = String(x?.status || 'PENDING').toUpperCase();
+    if (s === 'WIN') return {label:'WIN',cls:'positive'};
+    if (s === 'LOSS') return {label:'LOSS',cls:'negative'};
+    return {label:s || 'PENDING',cls:'neutral'};
+  };
+  const lifecycle = x => `<div class="lifecycle">${stage('OPENING',x.opening_odd,x.opening_captured_at || x.opening_odds_captured_at)}${stage('PICK',x.odd,x.pick_captured_at || x.odds_captured_at || x.created_at)}${stage('CLOSING',x.closing_odd || x.closing_5m_odd,x.closing_captured_at || x.closing_odds_captured_at || x.closing_5m_odds_captured_at)}</div>`;
   const book = x => {
     const b = BOOK[Number(x.bookmaker_id)];
     const name = b?.name || x.bookmaker || 'Bookmaker';
     return b?.verified ? `<div class="book"><img class="book-logo" src="${b.logo}" alt="${esc(name)} verified logo"><span><b>${esc(name)}</b><small class="meta"> · verified</small></span></div>` : `<div class="book"><span class="book-fallback">${esc(name.slice(0,3).toUpperCase())}</span><span><b>${esc(name)}</b></span></div>`;
   };
   const stage = (label, value, time) => `<div class="stage"><label>${label}</label><b>${odd(value)}</b><small>${time ? when(time) : 'Unavailable'}</small></div>`;
-  const lifecycle = x => `<div class="lifecycle">${stage('OPENING',x.opening_odd,x.opening_captured_at)}${stage('PICK',x.odd,x.pick_captured_at || x.created_at)}${stage('CLOSING',x.closing_odd,x.closing_captured_at)}</div>`;
   const badge = (kind,text) => `<span class="badge ${kind}">${esc(text)}</span>`;
   const load = async name => {
     const r = await fetch('./' + name + '?v=' + Date.now(), {cache:'no-store'});
@@ -68,17 +74,32 @@ const QB = (() => {
     return [active ? 'RUNNING' : 'NO SIGNALS', active ? 'live' : 'neutral'];
   };
   const statusCard = (state,detail) => `<div class="notice status-card ${String(state).toLowerCase().replace(/ /g,'-')}"><b>SYSTEM / DATA STATUS · ${esc(state)}</b><div class="sub">${esc(detail)}</div></div>`;
+  const resultBlock = x => {
+    const o = outcome(x);
+    const profit = x.profit == null ? null : Number(x.profit);
+    const pcls = profit == null || !Number.isFinite(profit) ? 'neutral' : profit > 0 ? 'positive' : profit < 0 ? 'negative' : 'neutral';
+    const pl = profit == null || !Number.isFinite(profit) ? '—' : (profit >= 0 ? '+' : '') + profit.toFixed(2) + ' RSD';
+    const settlement = x.settled_at ? ` · Settled ${when(x.settled_at)}` : '';
+    const score = x.result ? ` · Result ${esc(x.result)}` : '';
+    return `<div class="metric-row"><span class="metric ${o.cls}">OUTCOME <b>${esc(o.label)}</b></span><span class="metric ${pcls}">P/L <b>${esc(pl)}</b></span>${score ? `<span class="metric">${score.slice(3)}</span>` : ''}</div><div class="meta" style="margin-top:8px">${esc(String(x.settlement_type || 'COUNTERFACTUAL'))} · NOT A PRODUCTION BET${esc(settlement)}</div>`;
+  };
   const productionCard = x => {
     const c = clv(x.clv_odds_pct);
-    return `<article class="card"><div class="match-head"><div><div class="teams">${esc(x.match || 'Meč')}</div><div class="league">${esc(x.league || '')} · ${esc(market(x.market_display || x.market))}</div></div>${badge('production','PRODUCTION · PAPER BET')}</div>${book(x)}${lifecycle(x)}<div class="clv ${c.cls}"><span class="meta">CLV · ${esc(c.label)}</span><br><strong>${esc(c.value)}</strong></div><div class="metric-row"><span class="metric">RESULT <b>${esc(String(x.status || 'PENDING').toUpperCase())}</b></span><span class="metric">P/L <b>${Number(x.profit || 0) >= 0 ? '+' : ''}${Number(x.profit || 0).toFixed(2)} RSD</b></span><span class="metric">KICKOFF <b>${when(x.kickoff || x.date)}</b></span></div></article>`;
+    const o = outcome(x);
+    const profit = Number(x.profit || 0);
+    const pcls = profit > 0 ? 'positive' : profit < 0 ? 'negative' : 'neutral';
+    return `<article class="card"><div class="match-head"><div><div class="teams">${esc(x.match || 'Meč')}</div><div class="league">${esc(x.league || '')} · ${esc(market(x.market_display || x.market))}</div></div>${badge('production','PRODUCTION · PAPER BET')}</div>${book(x)}${lifecycle(x)}<div class="clv ${c.cls}"><span class="meta">CLV · ${esc(c.label)}</span><br><strong>${esc(c.value)}</strong></div><div class="metric-row"><span class="metric ${o.cls}">RESULT <b>${esc(o.label)}</b></span><span class="metric ${pcls}">P/L <b>${profit >= 0 ? '+' : ''}${profit.toFixed(2)} RSD</b></span><span class="metric">KICKOFF <b>${when(x.kickoff || x.date)}</b></span></div></article>`;
   };
   const signalCard = (x,near) => {
     const c = clv(x.clv_odds_pct);
-    return `<article class="card"><div class="match-head"><div><div class="teams">${esc(x.match || 'Meč')}</div><div class="league">${esc(x.league || '')} · ${esc(market(x.market_display || x.market))}</div></div>${badge(near ? 'near' : 'strong',near ? 'NEAR MISS' : 'STRONG SIGNAL')}</div>${book(x)}${near ? '' : lifecycle(x)}<div class="metric-row"><span class="metric">EV <b>${pct(x.expected_value)}</b></span><span class="metric">EDGE <b>${pct(x.probability_edge)}</b></span>${near ? `<span class="metric">REASON <b>${esc(x.near_miss_reason || '—')}</b></span>` : ''}</div>${near ? '' : `<div class="clv ${c.cls}"><span class="meta">CLV · ${esc(c.label)}</span><br><strong>${esc(c.value)}</strong></div>`}<div class="meta" style="margin-top:12px">Kickoff · ${when(x.kickoff || x.created_at)}</div></article>`;
+    return `<article class="card"><div class="match-head"><div><div class="teams">${esc(x.match || 'Meč')}</div><div class="league">${esc(x.league || '')} · ${esc(market(x.market_display || x.market))}</div></div>${badge(near ? 'near' : 'strong',near ? 'NEAR MISS' : 'STRONG SIGNAL')}</div>${book(x)}${lifecycle(x)}<div class="metric-row"><span class="metric">EV <b>${pct(x.expected_value)}</b></span><span class="metric">EDGE <b>${pct(x.probability_edge)}</b></span>${near ? `<span class="metric">REASON <b>${esc(x.near_miss_reason || '—')}</b></span>` : ''}</div><div class="clv ${c.cls}"><span class="meta">CLV · ${esc(c.label)}</span><br><strong>${esc(c.value)}</strong></div>${resultBlock(x)}<div class="meta" style="margin-top:12px">Kickoff · ${when(x.kickoff || x.created_at)}</div></article>`;
   };
   const row = x => {
     const c = clv(x.clv_odds_pct);
-    return `<tr><td>${esc(when(x.kickoff || x.date || x.created_at))}</td><td><b>${esc(x.match || '—')}</b><br><span class="meta">${esc(x.league || '')}</span></td><td>${esc(market(x.market_display || x.market))}</td><td>${esc(BOOK[Number(x.bookmaker_id)]?.name || x.bookmaker || '—')}</td><td>${esc(odd(x.opening_odd))} → ${esc(odd(x.odd))} → ${esc(odd(x.closing_odd))}</td><td class="${c.cls}">${esc(c.value)}<br><span class="meta">${esc(c.label)}</span></td><td>${esc(String(x.status || x.signal_class || '—').toUpperCase())}</td><td>${x.profit == null ? '—' : Number(x.profit).toFixed(2)}</td></tr>`;
+    const o = outcome(x);
+    const profit = x.profit == null ? null : Number(x.profit);
+    const pcls = profit == null || !Number.isFinite(profit) ? 'neutral' : profit > 0 ? 'positive' : profit < 0 ? 'negative' : 'neutral';
+    return `<tr><td>${esc(when(x.kickoff || x.date || x.created_at))}</td><td><b>${esc(x.match || '—')}</b><br><span class="meta">${esc(x.league || '')}</span></td><td>${esc(market(x.market_display || x.market))}</td><td>${esc(BOOK[Number(x.bookmaker_id)]?.name || x.bookmaker || '—')}</td><td>${esc(odd(x.opening_odd))} → ${esc(odd(x.odd))} → ${esc(odd(x.closing_odd || x.closing_5m_odd))}</td><td class="${c.cls}">${esc(c.value)}<br><span class="meta">${esc(c.label)}</span></td><td class="${o.cls}">${esc(o.label)}</td><td class="${pcls}">${profit == null || !Number.isFinite(profit) ? '—' : (profit >= 0 ? '+' : '') + profit.toFixed(2)}</td></tr>`;
   };
   const renderBucket = (rows,activeId,historyId,near) => {
     const list = Array.isArray(rows) ? rows : [];
