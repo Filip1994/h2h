@@ -16,11 +16,16 @@ on:
     branches: [main]
     paths:
       - index.html
+      - production.html
       - strong-signals.html
+      - near-misses.html
+      - history.html
+      - assets/**
       - bets.json
       - ledger_meta.json
       - intraday_alerts.json
       - strong_signals.json
+      - near_misses.json
       - .github/workflows/pages.yml
   schedule:
     - cron: "17 * * * *"
@@ -48,18 +53,26 @@ jobs:
         run: |
           set -euo pipefail
           rm -rf _site
-          mkdir -p _site
-          cp index.html bets.json ledger_meta.json _site/
-          [ -f strong-signals.html ] && cp strong-signals.html _site/ || true
+          mkdir -p _site/assets
+          cp index.html production.html strong-signals.html near-misses.html history.html _site/
+          cp assets/qb-dashboard.css assets/qb-dashboard.js _site/assets/
+          cp bets.json ledger_meta.json _site/
           [ -f intraday_alerts.json ] && cp intraday_alerts.json _site/ || true
           [ -f strong_signals.json ] && cp strong_signals.json _site/ || true
+          [ -f near_misses.json ] && cp near_misses.json _site/ || true
           test -s _site/index.html
+          test -s _site/production.html
+          test -s _site/strong-signals.html
+          test -s _site/near-misses.html
+          test -s _site/history.html
+          test -s _site/assets/qb-dashboard.css
+          test -s _site/assets/qb-dashboard.js
           test -s _site/bets.json
           test -s _site/ledger_meta.json
           python - <<'PY'
           import json
           from pathlib import Path
-          for name in ('bets.json','ledger_meta.json','intraday_alerts.json','strong_signals.json'):
+          for name in ('bets.json','ledger_meta.json','intraday_alerts.json','strong_signals.json','near_misses.json'):
               p=Path('_site')/name
               if not p.exists():
                   print(name, 'not present yet')
