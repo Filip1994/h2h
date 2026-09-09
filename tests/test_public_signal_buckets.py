@@ -108,6 +108,45 @@ def test_public_buckets_restore_frozen_history_and_keep_strong_ledger_separate(
     assert [x["id"] for x in ledger] == ["strong-1", "strong-2"]
 
 
+def test_skipped_strong_signal_stays_historical_and_not_active(tmp_path) -> None:
+    (tmp_path / "strong_signal_ledger.json").write_text(
+        json.dumps(
+            [
+                {
+                    "id": "tz-skipped",
+                    "signal_class": "STRONG_SIGNAL",
+                    "status": "PENDING",
+                    "profit": 0.0,
+                    "virtual_settled": False,
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    (tmp_path / "strong_signals.json").write_text("[]", encoding="utf-8")
+    (tmp_path / "intraday_alerts.json").write_text(
+        json.dumps(
+            [
+                {
+                    "id": "tz-skipped",
+                    "signal_class": "STRONG_SIGNAL",
+                    "status": "SKIPPED",
+                    "profit": 0.0,
+                    "league": "Tanzania - Ligi kuu Bara",
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    (tmp_path / "bets.json").write_text("[]", encoding="utf-8")
+    strong, _ = build(tmp_path)
+    assert len(strong) == 1
+    assert strong[0]["status"] == "SKIPPED"
+    assert strong[0]["virtual_settled"] is False
+    assert strong[0]["virtual_profit"] == 0.0
+    assert strong[0]["league"] == "Tanzania - Ligi kuu Bara"
+
+
 def test_explicit_virtual_settlement_is_the_only_source_of_signal_profit() -> None:
     rows = [
         {
