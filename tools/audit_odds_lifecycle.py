@@ -57,6 +57,9 @@ def audit_raw() -> dict[str, Any]:
     odds_records = 0
     quote_rows = 0
     logo_rows = 0
+    provider_shape: dict[str, Any] = {}
+    timing = Counter()
+    lead_minutes: list[float] = []
 
     for path in sorted(RAW.glob("*.jsonl")):
         with path.open("r", encoding="utf-8", errors="replace") as handle:
@@ -79,6 +82,47 @@ def audit_raw() -> dict[str, Any]:
                 if captured is None or not isinstance(response, list):
                     continue
                 odds_records += 1
+                if not provider_shape and response:
+                    first = response[0]
+                    provider_shape = {
+                        "response_keys": sorted(first.keys()),
+                        "fixture_keys": sorted((first.get("fixture") or {}).keys()),
+                        "league_keys": sorted((first.get("league") or {}).keys()),
+                        "bookmaker_keys": sorted(
+                            (first.get("bookmakers") or [{}])[0].keys()
+                        ),
+                        "market_keys": sorted(
+                            (first.get("bookmakers") or [{}])[0]
+                            .get("bets", [{}])[0]
+                            .keys()
+                        ),
+                        "selection_keys": sorted(
+                            (first.get("bookmakers") or [{}])[0]
+                            .get("bets", [{}])[0]
+                            .get("values", [{}])[0]
+                            .keys()
+                        ),
+                    }
+                kickoff = None
+                if response:
+                    kickoff = parse_dt((response[0].get("fixture") or {}).get("date"))
+                if kickoff is not None:
+                    lead = (kickoff - captured).total_seconds() / 60
+                    lead_minutes.append(lead)
+                    if lead < 0:
+                        timing["POST_KICKOFF"] += 1
+                    elif lead <= 10:
+                        timing["T0_10M"] += 1
+                    elif lead <= 30:
+                        timing["T10_30M"] += 1
+                    elif lead <= 60:
+                        timing["T30_60M"] += 1
+                    elif lead <= 180:
+                        timing["T1_3H"] += 1
+                    elif lead <= 360:
+                        timing["T3_6H"] += 1
+                    else:
+                        timing["GT6H"] += 1
                 for container in response:
                     for bookmaker in container.get("bookmakers") or []:
                         bid = bookmaker.get("id")
@@ -110,6 +154,10 @@ def audit_raw() -> dict[str, Any]:
         "bookmakers": bookmakers.most_common(15),
         "markets": markets.most_common(15),
         "logo_rows": logo_rows,
+        "provider_shape": provider_shape,
+        "timing": dict(timing),
+        "lead_min": min(lead_minutes) if lead_minutes else None,
+        "lead_max": max(lead_minutes) if lead_minutes else None,
         "quotes": quotes,
     }
 
@@ -192,16 +240,19 @@ Generated: `{data["generated_at"]}`
 
 ## Conclusion
 
-The archive contains real API-Football odds responses, while the current persistence layer treats the pick quote as ENTRY. Opening therefore is not yet an independent lifecycle observation. Production closing/CLV and Strong Signals T-5 data are also persisted through different paths. The repair must unify lifecycle identity without changing model or decision mathematics.
+The current main branch has the raw provider archive, but the canonical odds ledger is not populated consistently. Real archived API-Football odds responses contain fixture, bookmaker, market, selection and odd fields; bookmaker logo metadata is absent in the audited archive. Opening must therefore be reconstructed only from our own repeated captures. The current lifecycle still treats the pick quote as ENTRY and splits Strong Signals T-5 from Production closing/CLV persistence.
 
 ## Evidence
 
 - Raw archive files: `{data["raw_files"]}`; bytes: `{data["raw_bytes"]:,}`.
 - Odds response records: `{raw["odds_records"]}`; extracted quote rows: `{raw["quote_rows"]}`.
 - Unique fixture/market/bookmaker keys: `{raw["unique_keys"]}`.
+- Odds snapshot ledger: `{data["snapshot_lines"]}` lines; `{data["snapshot_bytes"]:,}` bytes.
 - Production bets inspected: `{lifecycle["bets"]}`.
 - Lifecycle coverage: `{lifecycle["coverage"]}`.
-- Provider bookmaker logo metadata observed on `{raw["logo_rows"]}` quote containers.
+- Provider shape: `{json.dumps(raw["provider_shape"], ensure_ascii=False)}`.
+- Capture timing buckets: `{raw["timing"]}`; lead range minutes: `{raw["lead_min"]}`..`{raw["lead_max"]}`.
+- Provider bookmaker logo metadata observed on `{raw["logo_rows"]}` bookmaker records.
 
 ## Root causes
 
@@ -210,15 +261,16 @@ The archive contains real API-Football odds responses, while the current persist
 3. Legacy CLV can be present while lifecycle linkage is incomplete, so mathematical presence is not the same as audit completeness.
 4. Public rendering must consume one canonical lifecycle contract; backend market codes remain internal.
 5. Missing lifecycle stages must remain explicit and never be fabricated.
+6. The audited raw archive does not expose a bookmaker logo field in the provider bookmaker objects, so a deterministic verified registry is required if logos are to be displayed.
+
+## Concrete missing Production records
+
+`{json.dumps(lifecycle["missing"], ensure_ascii=False)}`
 
 ## Schedule evidence
 
 - Workflow schedules: `{json.dumps(data["schedules"], ensure_ascii=False)}`.
 - Recent Actions schedule evidence: `{json.dumps(data["actions"], ensure_ascii=False)}`.
-
-## Missing-record evidence
-
-`{json.dumps(lifecycle["missing"], ensure_ascii=False)}`
 
 ## Implementation guardrails
 
@@ -238,6 +290,12 @@ def main() -> int:
         "generated_at": datetime.now(UTC).isoformat(),
         "raw_files": len(list(RAW.glob("*.jsonl"))),
         "raw_bytes": sum(path.stat().st_size for path in RAW.glob("*.jsonl")),
+        "snapshot_lines": sum(
+            1 for _ in SNAP.open("r", encoding="utf-8", errors="replace")
+        )
+        if SNAP.exists()
+        else 0,
+        "snapshot_bytes": SNAP.stat().st_size if SNAP.exists() else 0,
         "raw": raw,
         "lifecycle": audit_lifecycle(raw),
         "actions": audit_actions(),
