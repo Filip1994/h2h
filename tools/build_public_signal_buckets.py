@@ -154,9 +154,7 @@ def load_or_migrate_ledger(root: Path) -> list[dict[str, Any]]:
     else:
         legacy = load_json(root / "strong_signals.json")
         rows = [_as_virtual(x) for x in legacy]
-    recovered = [
-        _restore_legacy_virtual_settlement(row, settlements) for row in rows
-    ]
+    recovered = [_restore_legacy_virtual_settlement(row, settlements) for row in rows]
     if not ledger_path.exists():
         ledger_path.write_text(
             json.dumps(recovered, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
