@@ -20,7 +20,9 @@ def _load(path: Path) -> list[dict[str, Any]]:
         payload = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, TypeError, ValueError, json.JSONDecodeError) as exc:
         raise RuntimeError(f"INVALID_CANONICAL_DATA:{path.name}") from exc
-    if not isinstance(payload, list) or any(not isinstance(item, dict) for item in payload):
+    if not isinstance(payload, list) or any(
+        not isinstance(item, dict) for item in payload
+    ):
         raise RuntimeError(f"INVALID_CANONICAL_DATA:{path.name}")
     return payload
 
@@ -37,7 +39,12 @@ def _parse(value: object) -> datetime | None:
     return parsed.astimezone(UTC)
 
 
-def inspect_source(source: str, rows: list[dict[str, Any]], now: datetime, stale_minutes: int) -> dict[str, Any]:
+def inspect_source(
+    source: str,
+    rows: list[dict[str, Any]],
+    now: datetime,
+    stale_minutes: int,
+) -> dict[str, Any]:
     errors: list[dict[str, Any]] = []
     active: list[dict[str, Any]] = []
     seen_ids: set[str] = set()
@@ -48,38 +55,75 @@ def inspect_source(source: str, rows: list[dict[str, Any]], now: datetime, stale
         status = str(row.get("status") or "").upper()
         event_id = row.get("event_id")
         if not row_id:
-            errors.append({"source": source, "error": "MISSING_ID", "event_id": event_id})
+            errors.append(
+                {"source": source, "error": "MISSING_ID", "event_id": event_id}
+            )
         elif row_id in seen_ids:
-            errors.append({"source": source, "error": "DUPLICATE_ID", "id": row_id})
+            errors.append(
+                {"source": source, "error": "DUPLICATE_ID", "id": row_id}
+            )
         seen_ids.add(row_id)
+
         if status not in KNOWN_STATUSES:
-            errors.append({"source": source, "error": "UNKNOWN_STATUS", "id": row_id, "status": status})
+            errors.append(
+                {
+                    "source": source,
+                    "error": "UNKNOWN_STATUS",
+                    "id": row_id,
+                    "status": status,
+                }
+            )
             continue
+
         if event_id is None:
-            errors.append({"source": source, "error": "MISSING_EVENT_ID", "id": row_id})
+            errors.append(
+                {"source": source, "error": "MISSING_EVENT_ID", "id": row_id}
+            )
+
         kickoff = _parse(row.get("kickoff"))
         if status == ACTIVE_STATUS:
-            active.append({
-                "source": source,
-                "id": row_id,
-                "event_id": event_id,
-                "match": row.get("match"),
-                "kickoff": row.get("kickoff"),
-            })
-            if kickoff is None:
-                errors.append({"source": source, "error": "ACTIVE_MISSING_VALID_KICKOFF", "id": row_id})
-            elif kickoff + timedelta(minutes=90) <= cutoff:
-                errors.append({
+            active.append(
+                {
                     "source": source,
-                    "error": "STALE_ACTIVE",
                     "id": row_id,
                     "event_id": event_id,
                     "match": row.get("match"),
                     "kickoff": row.get("kickoff"),
-                    "eligible_at": (kickoff + timedelta(minutes=90)).isoformat(),
-                })
-        elif status in TERMINAL_STATUSES and not row.get("settled_at") and status not in {"SKIPPED"}:
-            errors.append({"source": source, "error": "TERMINAL_MISSING_SETTLED_AT", "id": row_id, "status": status})
+                }
+            )
+            if kickoff is None:
+                errors.append(
+                    {
+                        "source": source,
+                        "error": "ACTIVE_MISSING_VALID_KICKOFF",
+                        "id": row_id,
+                    }
+                )
+            elif kickoff + timedelta(minutes=90) <= cutoff:
+                errors.append(
+                    {
+                        "source": source,
+                        "error": "STALE_ACTIVE",
+                        "id": row_id,
+                        "event_id": event_id,
+                        "match": row.get("match"),
+                        "kickoff": row.get("kickoff"),
+                        "eligible_at": (kickoff + timedelta(minutes=90)).isoformat(),
+                    }
+                )
+        elif (
+            status in TERMINAL_STATUSES
+            and not row.get("settled_at")
+            and status != "SKIPPED"
+        ):
+            errors.append(
+                {
+                    "source": source,
+                    "error": "TERMINAL_MISSING_SETTLED_AT",
+                    "id": row_id,
+                    "status": status,
+                }
+            )
 
     return {
         "records": len(rows),
@@ -89,7 +133,11 @@ def inspect_source(source: str, rows: list[dict[str, Any]], now: datetime, stale
     }
 
 
-def check_system_health(root: Path = ROOT, now: datetime | None = None, stale_minutes: int = 30) -> dict[str, Any]:
+def check_system_health(
+    root: Path = ROOT,
+    now: datetime | None = None,
+    stale_minutes: int = 30,
+) -> dict[str, Any]:
     now = (now or datetime.now(UTC)).astimezone(UTC)
     sources = {
         "bets.json": _load(root / "bets.json"),
@@ -99,7 +147,11 @@ def check_system_health(root: Path = ROOT, now: datetime | None = None, stale_mi
         name: inspect_source(name, rows, now, stale_minutes)
         for name, rows in sources.items()
     }
-    errors = [error for report in inspections.values() for error in report["errors"]]
+    errors = [
+        error
+        for report in inspections.values()
+        for error in report["errors"]
+    ]
     active_count = sum(report["active_count"] for report in inspections.values())
     return {
         "schema_version": 1,
@@ -115,7 +167,9 @@ def check_system_health(root: Path = ROOT, now: datetime | None = None, stale_mi
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Canonical QuantBet production system health gate")
+    parser = argparse.ArgumentParser(
+        description="Canonical QuantBet production system health gate"
+    )
     parser.add_argument("--stale-minutes", type=int, default=30)
     args = parser.parse_args()
     try:
@@ -131,7 +185,10 @@ def main() -> int:
             "errors": [{"error": str(exc)}],
             "sources": {},
         }
-    (ROOT / "system_health.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    (ROOT / "system_health.json").write_text(
+        json.dumps(report, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
     if report["status"] == "FAIL":
         print(json.dumps(report, ensure_ascii=False, indent=2))
         return 1
