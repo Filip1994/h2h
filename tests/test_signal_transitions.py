@@ -7,11 +7,18 @@ from quantbot.watchlist import _append_transition_event
 
 
 def prediction() -> dict[str, object]:
-    return {"id": "p1", "event_id": 42, "market": "UNDER_2_5", "kickoff": "2026-09-09T12:00:00+00:00"}
+    return {
+        "id": "p1",
+        "event_id": 42,
+        "market": "UNDER_2_5",
+        "kickoff": "2026-09-09T12:00:00+00:00",
+    }
 
 
 def quote() -> SimpleNamespace:
-    return SimpleNamespace(bookmaker_id=8, bookmaker_name="Bet365", odd=1.9, opposite_odd=1.9)
+    return SimpleNamespace(
+        bookmaker_id=8, bookmaker_name="Bet365", odd=1.9, opposite_odd=1.9
+    )
 
 
 def test_transition_history_is_only_written_on_class_change(tmp_path) -> None:
@@ -31,8 +38,15 @@ def test_transition_history_is_only_written_on_class_change(tmp_path) -> None:
     )
     _append_transition_event(**args, previous_class=None)
     _append_transition_event(**args, previous_class="NEAR_MISS")
-    _append_transition_event(**{**args, "signal_class": "STRONG_SIGNAL", "near_miss_reason": None}, previous_class="NEAR_MISS")
-    lines = (tmp_path / "data" / "intraday_signal_events.jsonl").read_text(encoding="utf-8").splitlines()
+    _append_transition_event(
+        **{**args, "signal_class": "STRONG_SIGNAL", "near_miss_reason": None},
+        previous_class="NEAR_MISS",
+    )
+    lines = (
+        (tmp_path / "data" / "intraday_signal_events.jsonl")
+        .read_text(encoding="utf-8")
+        .splitlines()
+    )
     assert len(lines) == 2
     assert '"transition":"INITIAL->NEAR_MISS"' in lines[0]
     assert '"transition":"NEAR_MISS->STRONG_SIGNAL"' in lines[1]
