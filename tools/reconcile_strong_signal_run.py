@@ -22,7 +22,9 @@ def load_json(path: Path) -> list[dict[str, Any]]:
 
 
 def key(row: dict[str, Any]) -> str:
-    return str(row.get("id") or row.get("signal_id") or row.get("observation_id") or "")
+    return str(
+        row.get("id") or row.get("signal_id") or row.get("observation_id") or ""
+    )
 
 
 def active(row: dict[str, Any]) -> bool:
@@ -97,7 +99,9 @@ def build_evidence(root: Path) -> dict[str, Any]:
     return {
         "schema_version": 2,
         "source_run": {
-            "workflow": os.environ.get("GITHUB_WORKFLOW", "QuantBet adaptive watchlist monitor"),
+            "workflow": os.environ.get(
+                "GITHUB_WORKFLOW", "QuantBet adaptive watchlist monitor"
+            ),
             "run_id": os.environ.get("SOURCE_RUN_ID") or None,
             "run_started_at": os.environ.get("SOURCE_RUN_STARTED_AT") or None,
             "data_commit": subprocess.check_output(
