@@ -1,3 +1,4 @@
+# fmt: off
 from __future__ import annotations
 
 import json
@@ -289,9 +290,6 @@ def run_watchlist(settings: Settings, now: datetime | None = None) -> dict[str, 
             ev = decision * quote.odd - 1.0
             edge = decision - quote.devig_probability
             linked_bet = linked.get((fixture_id, market.value))
-
-            # Keep the existing Production stake semantics only as the classification
-            # reference. The Strong Signal's actual virtual allocation is independent.
             classification_stake = (
                 float(linked_bet.get("stake"))
                 if linked_bet
@@ -438,3 +436,4 @@ def run_watchlist(settings: Settings, now: datetime | None = None) -> dict[str, 
         "useful_observations": timing_stats["useful_observations"],
         "api_requests": api.request_count,
     }
+# fmt: on
