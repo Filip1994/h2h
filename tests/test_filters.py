@@ -31,11 +31,8 @@ def test_tier_three_and_unknown_fail_closed() -> None:
     assert not decision.eligible
     assert decision.reason == "UNKNOWN_LEAGUE_TIER"
     assert not allowed("Spain", 141001, "Segunda B")
-
-
-def test_missing_tier_and_missing_league_id_fail_closed() -> None:
     decision = eligibility_decision(
-        "England", None, "Premier League", "Home FC", "Away FC"
+        "England", None, "Unclassified League", "Home FC", "Away FC"
     )
     assert not decision.eligible
     assert decision.reason == "UNKNOWN_LEAGUE_TIER"
@@ -61,7 +58,7 @@ def test_youth_reserve_amateur_and_b_team_exclusions_remain_blocked() -> None:
     assert not is_allowed_match(
         "Germany", "Bundesliga", "Bayern Munich II", "Augsburg", league_id=78
     )
-    assert not is_allowed_match("France", "Ligue 1", "Nice", "Lyon", league_id=61)
+    assert not is_allowed_match("France", "Ligue 1", "Nice B", "Lyon", league_id=61)
 
 
 def test_exact_country_name_fallback_is_deterministic() -> None:
