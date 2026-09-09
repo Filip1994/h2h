@@ -129,7 +129,10 @@ def enrich(root: Path = ROOT) -> dict[str, int]:
     grouped: dict[tuple[int, str, int], list[dict[str, Any]]] = defaultdict(list)
     for item in observations:
         identity = key(item)
-        if identity is not None and parse_capture(item.get("odds_captured_at")) is not None:
+        if (
+            identity is not None
+            and parse_capture(item.get("odds_captured_at")) is not None
+        ):
             grouped[identity].append(item)
 
     for rows in grouped.values():

@@ -138,7 +138,9 @@ def main() -> int:
             f"{name}: missing active navigation"
         )
         assert "./assets/qb-dashboard.css" in text
-        assert 'meta name="viewport" content="width=device-width,initial-scale=1"' in text
+        assert (
+            'meta name="viewport" content="width=device-width,initial-scale=1"' in text
+        )
 
     js = (ROOT / "assets" / "qb-dashboard.js").read_text(encoding="utf-8")
     strong_js = (ROOT / "assets" / "strong-signals.js").read_text(encoding="utf-8")
