@@ -109,6 +109,11 @@ class MarketCandidate:
     expected_value: float
     probability_edge: float
     calibration_status: str
+    model_version: str = "dc-value-v2.1.0"
+    model_fitted_matches: int = 0
+    model_team_count: int = 0
+    model_training_cutoff: str = ""
+    model_training_identity: str = ""
 
     def to_bet(
         self,
@@ -131,7 +136,7 @@ class MarketCandidate:
             "prediction_id": f"{self.fixture_id}_{self.market.value}_{model_version}",
             "created_at": created_at.isoformat(),
             "decision_timestamp": created_at.isoformat(),
-            "data_cutoff": created_at.isoformat(),
+            "data_cutoff": self.model_training_cutoff or created_at.isoformat(),
             "date": created_at.date().isoformat(),
             "kickoff": self.kickoff.isoformat(),
             "sport": "Football",
@@ -144,13 +149,13 @@ class MarketCandidate:
             "market_display": self.market.display_name,
             "stake": round(stake, 2),
             "odd": odd,
-            "opening_odd": odd,
+            "opening_odd": None,
             "opposite_odd": opposite_odd,
-            "opening_opposite_odd": opposite_odd,
+            "opening_opposite_odd": None,
             "bookmaker_id": self.quote.bookmaker_id,
             "bookmaker": self.quote.bookmaker_name,
             "odds_captured_at": captured_at,
-            "opening_odds_captured_at": captured_at,
+            "opening_odds_captured_at": None,
             "implied_probability": round(self.quote.implied_probability, 6),
             "market_probability_devig": round(self.quote.devig_probability, 6),
             "market_overround": round(self.quote.overround, 6),
@@ -164,6 +169,10 @@ class MarketCandidate:
             "rho": round(self.rho, 6),
             "xi": xi,
             "model_version": model_version,
+            "model_fitted_matches": self.model_fitted_matches,
+            "model_team_count": self.model_team_count,
+            "model_training_cutoff": self.model_training_cutoff,
+            "model_training_identity": self.model_training_identity,
             "calibration_status": self.calibration_status,
             "status": "PENDING",
             "profit": 0.0,
