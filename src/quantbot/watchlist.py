@@ -17,9 +17,8 @@ from .markets import extract_best_quotes
 from .risk import kelly_stake, portfolio_analytics
 from .signal_classification import classification_fields, classify_signal
 from .storage import BetStore, atomic_write_json
+from .strong_signal_bankroll import portfolio as strong_signal_portfolio
 from .types import Market
-
-# fmt: off
 
 STATE_FILE = "intraday_watchlist_state.json"
 ALERT_FILE = "intraday_alerts.json"
@@ -104,7 +103,7 @@ def _event_from_prediction(
         "decision_probability": round(decision_probability, 6),
         "probability_edge": round(probability_edge, 6),
         "expected_value": round(expected_value, 6),
-        "stake": round(float(linked_bet.get("stake") if linked_bet else stake), 2),
+        "stake": round(float(stake), 2),
         "signal_source": "INTRADAY_ALERT",
         "signal_type": signal_type,
         "signal_class": signal_class,
@@ -113,6 +112,7 @@ def _event_from_prediction(
         "linked_bet_id": linked_bet.get("id") if linked_bet else None,
         "status": "PENDING",
         "profit": 0.0,
+        "virtual_profit": 0.0,
         "closing_5m_odd": None,
         "closing_5m_opposite_odd": None,
         "closing_5m_market_probability_devig": None,
@@ -180,6 +180,8 @@ def _apply_linked_result(event: dict[str, Any], bet: dict[str, Any] | None) -> N
     ):
         if bet.get(key) is not None:
             event[key] = bet[key]
+    if event.get("status") in {"WIN", "LOSS"}:
+        event["virtual_profit"] = float(event.get("profit") or 0.0)
 
 
 def _material_improvement(
@@ -204,9 +206,10 @@ def run_watchlist(settings: Settings, now: datetime | None = None) -> dict[str, 
     bets = BetStore(settings.bets_file).load()
     alerts = _load_list(alerts_path)
     state = _load_state(state_path)
-    analytics = portfolio_analytics(
+    production_analytics = portfolio_analytics(
         bets, settings.initial_bank, today=now_local.date().isoformat()
     )
+    strong_portfolio = strong_signal_portfolio(alerts)
     linked = {
         (int(b.get("event_id")), str(b.get("market"))): b
         for b in bets
@@ -286,15 +289,23 @@ def run_watchlist(settings: Settings, now: datetime | None = None) -> dict[str, 
             ev = decision * quote.odd - 1.0
             edge = decision - quote.devig_probability
             linked_bet = linked.get((fixture_id, market.value))
-            suggested_stake = (
+
+            # Keep the existing Production stake semantics only as the classification
+            # reference. The Strong Signal's actual virtual allocation is independent.
+            classification_stake = (
                 float(linked_bet.get("stake"))
                 if linked_bet
-                else kelly_stake(analytics.current_bank, decision, quote.odd, settings)
+                else kelly_stake(
+                    production_analytics.current_bank, decision, quote.odd, settings
+                )
+            )
+            virtual_stake = kelly_stake(
+                strong_portfolio.current_bank, decision, quote.odd, settings
             )
             classification = classify_signal(
                 expected_value=ev,
                 probability_edge=edge,
-                stake=suggested_stake,
+                stake=classification_stake,
                 settings=settings,
             )
             fields = classification_fields(classification)
@@ -312,7 +323,7 @@ def run_watchlist(settings: Settings, now: datetime | None = None) -> dict[str, 
                 expected_value=ev,
                 probability_edge=edge,
                 decision_probability=decision,
-                stake=suggested_stake,
+                stake=virtual_stake,
                 seconds_to_kickoff=seconds,
             )
             was_strong = previous_class == "STRONG_SIGNAL"
@@ -331,6 +342,7 @@ def run_watchlist(settings: Settings, now: datetime | None = None) -> dict[str, 
                         captured_at=now_utc,
                     ),
                     **fields,
+                    "virtual_stake": round(virtual_stake, 2),
                 }
             )
             previous.update(fields)
@@ -354,7 +366,7 @@ def run_watchlist(settings: Settings, now: datetime | None = None) -> dict[str, 
                         decision_probability=decision,
                         expected_value=ev,
                         probability_edge=edge,
-                        stake=suggested_stake,
+                        stake=virtual_stake,
                         now=now_local,
                         linked_bet=linked_bet,
                         signal_type="SIGNAL_UPDATE",
@@ -373,7 +385,7 @@ def run_watchlist(settings: Settings, now: datetime | None = None) -> dict[str, 
                     decision_probability=decision,
                     expected_value=ev,
                     probability_edge=edge,
-                    stake=suggested_stake,
+                    stake=virtual_stake,
                     now=now_local,
                     linked_bet=None,
                     signal_type="NEW_OPPORTUNITY",
@@ -426,5 +438,3 @@ def run_watchlist(settings: Settings, now: datetime | None = None) -> dict[str, 
         "useful_observations": timing_stats["useful_observations"],
         "api_requests": api.request_count,
     }
-
-# fmt: on
