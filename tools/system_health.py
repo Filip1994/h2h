@@ -59,9 +59,7 @@ def inspect_source(
                 {"source": source, "error": "MISSING_ID", "event_id": event_id}
             )
         elif row_id in seen_ids:
-            errors.append(
-                {"source": source, "error": "DUPLICATE_ID", "id": row_id}
-            )
+            errors.append({"source": source, "error": "DUPLICATE_ID", "id": row_id})
         seen_ids.add(row_id)
 
         if status not in KNOWN_STATUSES:
@@ -76,9 +74,7 @@ def inspect_source(
             continue
 
         if event_id is None:
-            errors.append(
-                {"source": source, "error": "MISSING_EVENT_ID", "id": row_id}
-            )
+            errors.append({"source": source, "error": "MISSING_EVENT_ID", "id": row_id})
 
         kickoff = _parse(row.get("kickoff"))
         if status == ACTIVE_STATUS:
