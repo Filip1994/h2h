@@ -109,7 +109,7 @@ def test_collector_creates_real_opening_then_intermediate(monkeypatch, settings)
     snapshots = (settings.root / "data" / "odds_snapshots.jsonl").read_text()
     assert '"snapshot_type":"OPENING"' in snapshots
 
-    second = collect(settings, now + timedelta(hours=3))
+    second = collect(settings, now + timedelta(hours=9))
     assert second["queried_fixtures"] == 1
     snapshots = (settings.root / "data" / "odds_snapshots.jsonl").read_text()
     assert '"snapshot_type":"INTERMEDIATE"' in snapshots
