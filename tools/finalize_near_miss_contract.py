@@ -1,3 +1,4 @@
+# fmt: off
 from __future__ import annotations
 
 import json
@@ -30,16 +31,11 @@ def main() -> int:
                 pass
         if row.get("clv_odds_pct") is None:
             row["clv_status"] = "NOT_COMPUTABLE"
-    (ROOT / "near_misses.json").write_text(
-        json.dumps(rows, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-    )
-    print(
-        json.dumps(
-            {"near_misses": len(rows), "checked_at": datetime.now(UTC).isoformat()}
-        )
-    )
+    (ROOT / "near_misses.json").write_text(json.dumps(rows, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(json.dumps({"near_misses": len(rows), "checked_at": datetime.now(UTC).isoformat()}))
     return 0
 
 
 if __name__ == "__main__":
     raise SystemExit(main())
+# fmt: on
