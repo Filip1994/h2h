@@ -50,7 +50,9 @@ def main() -> int:
         "near_miss_count": len(near),
         "intraday_alert_count": len(alerts),
     }
-    OUTPUT.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    OUTPUT.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
     print(f"Intraday health: {status}")
     return 0
 
