@@ -1,15 +1,5 @@
 (() => {
-  const MARKET = {
-    OVER_2_5: 'Over 2.5',
-    UNDER_2_5: 'Under 2.5',
-    BTTS_YES: 'BTTS — Yes',
-    BTTS_NO: 'BTTS — No',
-    HOME_WIN: 'Home Win',
-    AWAY_WIN: 'Away Win',
-    DRAW: 'Draw',
-    GG: 'BTTS — Yes',
-    NG: 'BTTS — No',
-  };
+  const MARKET = { OVER_2_5: 'Over 2.5', UNDER_2_5: 'Under 2.5', BTTS_YES: 'BTTS — Yes', BTTS_NO: 'BTTS — No', HOME_WIN: 'Home Win', AWAY_WIN: 'Away Win', DRAW: 'Draw', GG: 'BTTS — Yes', NG: 'BTTS — No' };
   const esc = (value) => String(value ?? '').replace(/[&<>\\\"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;', "'": '&#39;' }[char]));
   const market = (value) => MARKET[value] || value || '—';
   const odd = (value) => value == null || value === '' ? '—' : Number(value).toFixed(2);
