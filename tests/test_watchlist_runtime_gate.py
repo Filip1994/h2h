@@ -1,4 +1,4 @@
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime, timedelta  # noqa: I001
 
 from tools.watchlist_runtime_gate import evaluate
 
