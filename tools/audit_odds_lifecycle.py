@@ -76,11 +76,21 @@ def raw_odds_records() -> tuple[
                 for container in response:
                     for bookmaker in container.get("bookmakers") or []:
                         bookmaker_counts[
-                            str(bookmaker.get("id") or bookmaker.get("name") or "unknown")
+                            str(
+                                bookmaker.get("id")
+                                or bookmaker.get("name")
+                                or "unknown"
+                            )
                         ] += 1
-                        for market in bookmaker.get("bets") or []:
+                        for market in (
+                            bookmaker.get("bets") or bookmaker.get("markets") or []
+                        ):
                             market_counts[
-                                str(market.get("id") or market.get("name") or "unknown")
+                                str(
+                                    market.get("id")
+                                    or market.get("name")
+                                    or "unknown"
+                                )
                             ] += 1
     return records, endpoint_counts, bookmaker_counts, market_counts
 
@@ -151,15 +161,16 @@ def audit() -> dict[str, Any]:
     for record in records:
         quotes.extend(quote_rows(record))
 
-    by_key: dict[tuple[int, str, int], list[dict[str, Any]]] = defaultdict(list)
+    quotes_by_key: dict[tuple[int, str, int], list[dict[str, Any]]] = defaultdict(list)
     for quote in quotes:
-        key = (
-            quote["fixture_id"],
-            normalize_market(quote["market"]),
-            int(quote["bookmaker_id"] or 0),
-        )
-        by_key[key].append(quote)
-    for values in by_key.values():
+        quotes_by_key[
+            (
+                quote["fixture_id"],
+                normalize_market(quote["market"]),
+                int(quote["bookmaker_id"] or 0),
+            )
+        ].append(quote)
+    for values in quotes_by_key.values():
         values.sort(key=lambda item: item["captured_at"])
 
     coverage: Counter[str] = Counter()
@@ -169,14 +180,14 @@ def audit() -> dict[str, Any]:
         if key is None:
             continue
         pick_at = parse_dt(bet.get("odds_captured_at") or bet.get("created_at"))
-        values = by_key.get(key, [])
+        values = quotes_by_key.get(key, [])
         pre_pick = [
             quote for quote in values if pick_at is None or quote["captured_at"] <= pick_at
         ]
         opening = bool(pre_pick)
-        closing = bool(
+        closing = (
             bet.get("closing_odd") is not None
-            and parse_dt(bet.get("closing_odds_captured_at"))
+            and parse_dt(bet.get("closing_odds_captured_at")) is not None
         )
         if opening and closing:
             coverage["FULLY_AUDITABLE"] += 1
@@ -193,13 +204,32 @@ def audit() -> dict[str, Any]:
             )
 
     public_codes = []
-    for path in (ROOT / "index.html", ROOT / "strong-signals.html"):
-        text = path.read_text(encoding="utf-8", errors="replace")
-        if re.search(r"\b(?:UNDER_2_5|OVER_2_5|BTTS_YES|BTTS_NO)\b", text):
-            public_codes.append(str(path.relative_to(ROOT)))
+    for path in (
+        ROOT / "index.html",
+        ROOT / "strong-signals.html",
+        ROOT / "main.py",
+        ROOT / "src",
+    ):
+        if path.is_file():
+            text = path.read_text(encoding="utf-8", errors="replace")
+            if re.search(
+                r"\b(?:UNDER_2_5|OVER_2_5|BTTS_YES|BTTS_NO)\b", text
+            ):
+                public_codes.append(str(path.relative_to(ROOT)))
+        elif path.is_dir():
+            for child in path.rglob("*.py"):
+                text = child.read_text(encoding="utf-8", errors="replace")
+                if (
+                    "UNDER_2_5" in text
+                    or "OVER_2_5" in text
+                    or "BTTS_YES" in text
+                    or "BTTS_NO" in text
+                ):
+                    continue
 
+    workflow_paths = sorted((ROOT / ".github" / "workflows").glob("*.yml"))
     schedules = {}
-    for path in sorted((ROOT / ".github" / "workflows").glob("*.yml")):
+    for path in workflow_paths:
         text = path.read_text(encoding="utf-8", errors="replace")
         schedules[path.name] = re.findall(r'cron:\s*"([^"]+)"', text)
 
@@ -218,7 +248,7 @@ def audit() -> dict[str, Any]:
             "endpoint_counts": dict(endpoint_counts),
             "odds_response_records": len(records),
             "odds_quote_rows": len(quotes),
-            "unique_fixture_bookmaker_market": len(by_key),
+            "unique_fixture_bookmaker_market": len(quotes_by_key),
             "bookmakers": bookmaker_counts.most_common(15),
             "markets": market_counts.most_common(15),
             "provider_logo_present_rows": sum(
@@ -315,7 +345,9 @@ def markdown(data: dict[str, Any]) -> str:
         "## E. Cadence",
     ]
     for workflow, crons in data["workflow_schedules"].items():
-        lines.append(f"- `{workflow}`: `{', '.join(crons) if crons else 'no schedule'}`")
+        lines.append(
+            f"- `{workflow}`: `{', '.join(crons) if crons else 'no schedule'}`"
+        )
     if "actions" in data and "error" not in data["actions"]:
         actions = data["actions"]
         lines += [
@@ -326,7 +358,9 @@ def markdown(data: dict[str, Any]) -> str:
             f"- Scheduled runs by workflow: `{actions['scheduled_by_workflow']}`.",
         ]
     elif "actions" in data:
-        lines.append(f"- Actions API audit unavailable: `{data['actions'].get('error')}`")
+        lines.append(
+            f"- Actions API audit unavailable: `{data['actions'].get('error')}`"
+        )
     lines += [
         "",
         "## F. Missing records",
