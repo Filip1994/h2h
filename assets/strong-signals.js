@@ -59,7 +59,7 @@
   const historyRow = (row) => {
     const close = clv(row.clv_odds_pct);
     const profit = Number(row.virtual_profit || 0);
-    return `<tr><td>${esc(when(row.kickoff || row.signal_sent_at || row.created_at))}</td><td><b>${esc(fixture(row))}</b><br><span class="meta">${esc(row.league || row.league_name || '')}</span></td><td>${esc(market(row.market_display || row.market))}</td><td>${esc(row.bookmaker || '—')}</td><td>${esc(odd(row.opening_odd))} → ${esc(odd(row.odd))} → ${esc(odd(row.closing_odd || row.closing_5m_odd))}</td><td class="${close.cls}">${esc(close.value)}</td><td>${esc(effectiveStatus(row))}</td><td class="${profit >= 0 ? 'positive' : 'negative'}">${profit >= 0 ? '+' : ''}${profit.toFixed(2)}</td></tr>`;
+    return `<tr><td>${esc(when(row.kickoff || row.signal_sent_at || row.created_at))}</td><td><b>${esc(fixture(row))}</b><br><span class="meta">${esc(row.league || row.league_name || '')}</span></td><td>${esc(market(row.market_display || row.market))}</td><td>${esc(row.bookmaker || '—')}</td><td>${esc(odd(row.opening_odd))} → ${esc(odd(row.odd))} → ${esc(row.closing_odd || row.closing_5m_odd)}</td><td class="${close.cls}">${esc(close.value)}</td><td>${esc(effectiveStatus(row))}</td><td class="${profit >= 0 ? 'positive' : 'negative'}">${profit >= 0 ? '+' : ''}${profit.toFixed(2)}</td></tr>`;
   };
   const render = async () => {
     setStatus('LOADING');
