@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 import sys
 from collections import defaultdict
-from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -13,7 +12,7 @@ sys.path.insert(0, str(ROOT / "src"))
 from quantbot.odds_lifecycle import lifecycle_contract, parse_capture
 
 
-SNAPSHOTS = ROOT / "data" / "market_timing_snapshots.jsonl"
+SNAPSHOTS = ROOT / "data" / "odds_snapshots.jsonl"
 PUBLIC_FILES = (ROOT / "strong_signals.json", ROOT / "strong_signal_ledger.json")
 
 
@@ -52,7 +51,10 @@ def key(row: dict[str, Any]) -> tuple[int, str, int] | None:
         return None
 
 
-def enrich_row(row: dict[str, Any], grouped: dict[tuple[int, str, int], list[dict[str, Any]]]) -> str:
+def enrich_row(
+    row: dict[str, Any],
+    grouped: dict[tuple[int, str, int], list[dict[str, Any]]],
+) -> str:
     identity = key(row)
     if identity is None:
         row["lifecycle_coverage"] = "UNRECOVERABLE"
@@ -83,7 +85,7 @@ def enrich_row(row: dict[str, Any], grouped: dict[tuple[int, str, int], list[dic
         row["opening_odd"] = opening.get("odd")
         row["opening_opposite_odd"] = opening.get("opposite_odd")
         row["opening_odds_captured_at"] = opening.get("odds_captured_at")
-        row["opening_snapshot_id"] = opening.get("observation_id")
+        row["opening_snapshot_id"] = opening.get("snapshot_id")
     else:
         row["opening_odd"] = None
         row["opening_opposite_odd"] = None
@@ -91,7 +93,7 @@ def enrich_row(row: dict[str, Any], grouped: dict[tuple[int, str, int], list[dic
         row["opening_snapshot_id"] = None
 
     if pick:
-        row["pick_snapshot_id"] = pick.get("observation_id")
+        row["pick_snapshot_id"] = pick.get("snapshot_id")
         row["pick_odds_captured_at"] = pick.get("odds_captured_at")
     else:
         row["pick_snapshot_id"] = None
@@ -101,7 +103,7 @@ def enrich_row(row: dict[str, Any], grouped: dict[tuple[int, str, int], list[dic
         row["closing_odd"] = closing.get("odd")
         row["closing_opposite_odd"] = closing.get("opposite_odd")
         row["closing_odds_captured_at"] = closing.get("odds_captured_at")
-        row["closing_snapshot_id"] = closing.get("observation_id")
+        row["closing_snapshot_id"] = closing.get("snapshot_id")
     else:
         row["closing_odd"] = None
         row["closing_opposite_odd"] = None
@@ -123,7 +125,7 @@ def enrich_row(row: dict[str, Any], grouped: dict[tuple[int, str, int], list[dic
 
 
 def enrich(root: Path = ROOT) -> dict[str, int]:
-    observations = load_jsonl(root / "data" / "market_timing_snapshots.jsonl")
+    observations = load_jsonl(root / "data" / "odds_snapshots.jsonl")
     grouped: dict[tuple[int, str, int], list[dict[str, Any]]] = defaultdict(list)
     for item in observations:
         identity = key(item)
@@ -139,7 +141,9 @@ def enrich(root: Path = ROOT) -> dict[str, int]:
         for row in rows:
             coverage = enrich_row(row, grouped)
             stats[f"{path.name}:{coverage}"] += 1
-        path.write_text(json.dumps(rows, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        path.write_text(
+            json.dumps(rows, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        )
 
     return dict(stats)
 
