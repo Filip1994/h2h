@@ -93,11 +93,15 @@ def append_snapshots(
     useful = 0
     with path.open("a", encoding="utf-8") as handle:
         for snapshot in snapshots:
-            observation_id = str(snapshot.get("observation_id") or _observation_id(snapshot))
+            observation_id = str(
+                snapshot.get("observation_id") or _observation_id(snapshot)
+            )
             if observation_id in existing_ids:
                 continue
             snapshot["observation_id"] = observation_id
-            handle.write(json.dumps(snapshot, ensure_ascii=False, separators=(",", ":")) + "\n")
+            handle.write(
+                json.dumps(snapshot, ensure_ascii=False, separators=(",", ":")) + "\n"
+            )
             existing_ids.add(observation_id)
             appended += 1
             if snapshot.get("signal_state") in {"NEAR_MISS", "STRONG", "SIGNAL_UPDATE"}:
@@ -121,11 +125,15 @@ def append_snapshots(
             "last_run_snapshots": appended,
             "last_run_useful_observations": useful,
             "total_snapshots": int(metrics.get("total_snapshots", 0)) + appended,
-            "total_useful_observations": int(metrics.get("total_useful_observations", 0)) + useful,
+            "total_useful_observations": (
+                int(metrics.get("total_useful_observations", 0)) + useful
+            ),
         }
     )
     metrics["api_requests_per_useful_observation"] = round(
         api_requests / max(1, useful), 4
     )
-    metrics_path.write_text(json.dumps(metrics, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    metrics_path.write_text(
+        json.dumps(metrics, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
     return {"snapshots_appended": appended, "useful_observations": useful}
