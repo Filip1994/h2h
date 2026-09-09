@@ -107,8 +107,15 @@
     "settled_at": "2026-09-05T18:26:45.595027+00:00",
     "clv_odds_pct": 0.020833,
     "clv_probability_pp": 0.010471,
-    "clv_status": "NOT_COMPUTABLE",
-    "closing_snapshot_id": "63303e3653abcd306f6dedc0505b1ade748378c20c337abfca8d182aa3ba862e"
+    "clv_status": "COMPUTABLE",
+    "closing_snapshot_id": "63303e3653abcd306f6dedc0505b1ade748378c20c337abfca8d182aa3ba862e",
+    "opening_odd": null,
+    "opening_odds_captured_at": null,
+    "opening_snapshot_id": null,
+    "opening_coverage": "UNAVAILABLE",
+    "pick_coverage": "UNAVAILABLE",
+    "closing_coverage": "PROVEN",
+    "lifecycle_coverage": "PARTIAL"
   },
   {
     "id": "1552467_UNDER_2_5",
@@ -166,8 +173,15 @@
     "settled_at": "2026-09-05T20:32:00.428958+00:00",
     "clv_odds_pct": -0.0181,
     "clv_probability_pp": -0.008922,
-    "clv_status": "NOT_COMPUTABLE",
-    "closing_snapshot_id": "a28471028c12f56e22bb84b4f7c5bd28add2cc8e48faf7bcf4f037e6b0adad96"
+    "clv_status": "COMPUTABLE",
+    "closing_snapshot_id": "a28471028c12f56e22bb84b4f7c5bd28add2cc8e48faf7bcf4f037e6b0adad96",
+    "opening_odd": null,
+    "opening_odds_captured_at": null,
+    "opening_snapshot_id": null,
+    "opening_coverage": "UNAVAILABLE",
+    "pick_coverage": "UNAVAILABLE",
+    "closing_coverage": "PROVEN",
+    "lifecycle_coverage": "PARTIAL"
   },
   {
     "id": "1548523_UNDER_2_5",
@@ -225,8 +239,15 @@
     "settled_at": "2026-09-05T22:25:35.434888+00:00",
     "clv_odds_pct": 0.072917,
     "clv_probability_pp": 0.034336,
-    "clv_status": "NOT_COMPUTABLE",
-    "closing_snapshot_id": "a00f3ef9a820bc2a3fb9fb237286bebc18bad7f23950471055c54d075dd744de"
+    "clv_status": "COMPUTABLE",
+    "closing_snapshot_id": "a00f3ef9a820bc2a3fb9fb237286bebc18bad7f23950471055c54d075dd744de",
+    "opening_odd": null,
+    "opening_odds_captured_at": null,
+    "opening_snapshot_id": null,
+    "opening_coverage": "UNAVAILABLE",
+    "pick_coverage": "UNAVAILABLE",
+    "closing_coverage": "PROVEN",
+    "lifecycle_coverage": "PARTIAL"
   },
   {
     "id": "1629829_UNDER_2_5",
@@ -285,7 +306,15 @@
     "signal_id": "1629829_UNDER_2_5_dc-value-v2.1.0",
     "entry_snapshot_id": "4864863d40d1a1cce4ca13bdfa8257de8451034bd25db95bfabe543b6a5570f6",
     "clv_status": "COMPUTABLE",
-    "closing_snapshot_id": "17dc870780bb59be7571964a63ec757566f2a582823c2d4bbe3141da1286a3f5"
+    "closing_snapshot_id": "17dc870780bb59be7571964a63ec757566f2a582823c2d4bbe3141da1286a3f5",
+    "opening_odd": null,
+    "opening_odds_captured_at": null,
+    "opening_snapshot_id": null,
+    "opening_coverage": "UNAVAILABLE",
+    "pick_snapshot_id": "4864863d40d1a1cce4ca13bdfa8257de8451034bd25db95bfabe543b6a5570f6",
+    "pick_coverage": "PROVEN",
+    "closing_coverage": "PROVEN",
+    "lifecycle_coverage": "PARTIAL"
   },
   {
     "id": "1490444_UNDER_2_5",
@@ -344,7 +373,15 @@
     "signal_id": "1490444_UNDER_2_5_dc-value-v2.1.0",
     "entry_snapshot_id": "ad0fb03e44c422fe9d7d1402279690b0eaac0b67c0a6eca79bf54fadd131fb83",
     "clv_status": "COMPUTABLE",
-    "closing_snapshot_id": "de99cdf3f33dcb6499993222d913e6b9209b7d9c2805e24a30d69232c22c9b4b"
+    "closing_snapshot_id": "de99cdf3f33dcb6499993222d913e6b9209b7d9c2805e24a30d69232c22c9b4b",
+    "opening_odd": null,
+    "opening_odds_captured_at": null,
+    "opening_snapshot_id": null,
+    "opening_coverage": "UNAVAILABLE",
+    "pick_snapshot_id": "ad0fb03e44c422fe9d7d1402279690b0eaac0b67c0a6eca79bf54fadd131fb83",
+    "pick_coverage": "PROVEN",
+    "closing_coverage": "PROVEN",
+    "lifecycle_coverage": "PARTIAL"
   },
   {
     "id": "1601522_OVER_2_5",
@@ -396,7 +433,15 @@
     "prediction_id": "1601522_OVER_2_5_dc-value-v2.1.0",
     "signal_id": "1601522_OVER_2_5_dc-value-v2.1.0",
     "entry_snapshot_id": "7154b53c0ffea999d893f12c2df7a8765a3e4cc431048a79d740763c7083a927",
-    "clv_status": "NOT_COMPUTABLE"
+    "clv_status": "NOT_COMPUTABLE",
+    "opening_odd": null,
+    "opening_odds_captured_at": null,
+    "opening_snapshot_id": null,
+    "opening_coverage": "UNAVAILABLE",
+    "pick_snapshot_id": "7154b53c0ffea999d893f12c2df7a8765a3e4cc431048a79d740763c7083a927",
+    "pick_coverage": "PROVEN",
+    "closing_coverage": "UNAVAILABLE",
+    "lifecycle_coverage": "PARTIAL"
   },
   {
     "id": "1601424_UNDER_2_5",
@@ -455,7 +500,15 @@
     "signal_id": "1601424_UNDER_2_5_dc-value-v2.1.0",
     "entry_snapshot_id": "eb467de9a644407de608fc76e0523545ae318e1ffc1cf2eab58610eeac95d8c4",
     "clv_status": "COMPUTABLE",
-    "closing_snapshot_id": "2fca46e8d75d5bfe37b7c359071f879e6fd97afcf428102282f135c02cece820"
+    "closing_snapshot_id": "2fca46e8d75d5bfe37b7c359071f879e6fd97afcf428102282f135c02cece820",
+    "opening_odd": null,
+    "opening_odds_captured_at": null,
+    "opening_snapshot_id": null,
+    "opening_coverage": "UNAVAILABLE",
+    "pick_snapshot_id": "eb467de9a644407de608fc76e0523545ae318e1ffc1cf2eab58610eeac95d8c4",
+    "pick_coverage": "PROVEN",
+    "closing_coverage": "PROVEN",
+    "lifecycle_coverage": "PARTIAL"
   },
   {
     "id": "1636736_OVER_2_5",
@@ -514,7 +567,15 @@
     "signal_id": "1636736_OVER_2_5_dc-value-v2.1.0",
     "entry_snapshot_id": "52943a101b018c0e6e4e788f5cb2b5777fcfbff22f4e31d025ee89ce78f74263",
     "clv_status": "COMPUTABLE",
-    "closing_snapshot_id": "5b7b19ce745ef473b69c98998702cc16107b186b4eba0255313ada6699947af9"
+    "closing_snapshot_id": "5b7b19ce745ef473b69c98998702cc16107b186b4eba0255313ada6699947af9",
+    "opening_odd": null,
+    "opening_odds_captured_at": null,
+    "opening_snapshot_id": null,
+    "opening_coverage": "UNAVAILABLE",
+    "pick_snapshot_id": "52943a101b018c0e6e4e788f5cb2b5777fcfbff22f4e31d025ee89ce78f74263",
+    "pick_coverage": "PROVEN",
+    "closing_coverage": "PROVEN",
+    "lifecycle_coverage": "PARTIAL"
   },
   {
     "id": "1585746_UNDER_2_5",
@@ -566,7 +627,15 @@
     "prediction_id": "1585746_UNDER_2_5_dc-value-v2.1.0",
     "signal_id": "1585746_UNDER_2_5_dc-value-v2.1.0",
     "entry_snapshot_id": "29dab24a11f6bc7db7a41a32df06b6ed1b993513a144505d841ea5d89be34fe9",
-    "clv_status": "NOT_COMPUTABLE"
+    "clv_status": "NOT_COMPUTABLE",
+    "opening_odd": null,
+    "opening_odds_captured_at": null,
+    "opening_snapshot_id": null,
+    "opening_coverage": "UNAVAILABLE",
+    "pick_snapshot_id": "29dab24a11f6bc7db7a41a32df06b6ed1b993513a144505d841ea5d89be34fe9",
+    "pick_coverage": "PROVEN",
+    "closing_coverage": "UNAVAILABLE",
+    "lifecycle_coverage": "PARTIAL"
   },
   {
     "id": "1576480_OVER_2_5",
@@ -618,7 +687,15 @@
     "prediction_id": "1576480_OVER_2_5_dc-value-v2.1.0",
     "signal_id": "1576480_OVER_2_5_dc-value-v2.1.0",
     "entry_snapshot_id": "e756179de0d241437442608162bb8459b84132dd69261d84dfd28bf9251d80f1",
-    "clv_status": "NOT_COMPUTABLE"
+    "clv_status": "NOT_COMPUTABLE",
+    "opening_odd": null,
+    "opening_odds_captured_at": null,
+    "opening_snapshot_id": null,
+    "opening_coverage": "UNAVAILABLE",
+    "pick_snapshot_id": "e756179de0d241437442608162bb8459b84132dd69261d84dfd28bf9251d80f1",
+    "pick_coverage": "PROVEN",
+    "closing_coverage": "UNAVAILABLE",
+    "lifecycle_coverage": "PARTIAL"
   },
   {
     "id": "1587799_UNDER_2_5",
@@ -679,7 +756,15 @@
     "clv_odds_pct": 0.0,
     "clv_probability_pp": 0.0,
     "closing_snapshot_id": "f3d59c91148046e4632a8f813398d43b97641e1e677eb841b6e7f321c61612e4",
-    "clv_status": "COMPUTABLE"
+    "clv_status": "COMPUTABLE",
+    "opening_odd": null,
+    "opening_odds_captured_at": null,
+    "opening_snapshot_id": null,
+    "opening_coverage": "UNAVAILABLE",
+    "pick_snapshot_id": "19633ce775e9bf877d095d231429660e3114ef5e039b614e1e67600c9d8176bc",
+    "pick_coverage": "PROVEN",
+    "closing_coverage": "PROVEN",
+    "lifecycle_coverage": "PARTIAL"
   },
   {
     "id": "1588347_UNDER_2_5",
@@ -740,7 +825,15 @@
     "clv_odds_pct": 0.097561,
     "clv_probability_pp": 0.041921,
     "closing_snapshot_id": "2a3493cac12defe0a240139fd9b830c53b679063217ad100609b28668f468668",
-    "clv_status": "COMPUTABLE"
+    "clv_status": "COMPUTABLE",
+    "opening_odd": null,
+    "opening_odds_captured_at": null,
+    "opening_snapshot_id": null,
+    "opening_coverage": "UNAVAILABLE",
+    "pick_snapshot_id": "461679defb484cad505508265dc2e204f4335994341871585f098e673625a1c7",
+    "pick_coverage": "PROVEN",
+    "closing_coverage": "PROVEN",
+    "lifecycle_coverage": "PARTIAL"
   },
   {
     "id": "1603995_UNDER_2_5",
@@ -801,7 +894,15 @@
     "clv_odds_pct": 0.088235,
     "clv_probability_pp": 0.039474,
     "closing_snapshot_id": "c85afeb26894505071f901a739989c4bf0115ffeb64c9004d487a542b622854b",
-    "clv_status": "COMPUTABLE"
+    "clv_status": "COMPUTABLE",
+    "opening_odd": null,
+    "opening_odds_captured_at": null,
+    "opening_snapshot_id": null,
+    "opening_coverage": "UNAVAILABLE",
+    "pick_snapshot_id": "e47ea93fe48b3f4cf99cd8d11ae86669b2f49708d22ad30afff89d9077359508",
+    "pick_coverage": "PROVEN",
+    "closing_coverage": "PROVEN",
+    "lifecycle_coverage": "PARTIAL"
   },
   {
     "id": "1603024_UNDER_2_5",
@@ -824,13 +925,13 @@
     "market_display": "Under 2.5",
     "stake": 500.0,
     "odd": 2.16,
-    "opening_odd": 2.16,
+    "opening_odd": null,
     "opposite_odd": 1.65,
     "opening_opposite_odd": 1.65,
     "bookmaker_id": 11,
     "bookmaker": "1xBet",
     "odds_captured_at": "2026-09-09T05:08:08.421056+00:00",
-    "opening_odds_captured_at": "2026-09-09T05:08:08.421056+00:00",
+    "opening_odds_captured_at": null,
     "implied_probability": 0.462963,
     "market_probability_devig": 0.433071,
     "market_overround": 0.069024,
@@ -856,7 +957,17 @@
     "result": "1:2",
     "settled_at": "2026-09-09T20:19:09.803045+00:00",
     "clv_odds_pct": -0.052632,
-    "clv_probability_pp": -0.022218
+    "clv_probability_pp": -0.022218,
+    "signal_id": "1603024_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "d1a752f7ebde1bca617d12c925ebd95506578a17d56c55f7c037ac554bfdb0ca",
+    "opening_snapshot_id": null,
+    "opening_coverage": "UNAVAILABLE",
+    "pick_snapshot_id": "d1a752f7ebde1bca617d12c925ebd95506578a17d56c55f7c037ac554bfdb0ca",
+    "pick_coverage": "PROVEN",
+    "closing_coverage": "PROVEN",
+    "lifecycle_coverage": "PARTIAL",
+    "clv_status": "COMPUTABLE",
+    "closing_snapshot_id": "d4eecc773026f8d70bc5ef0fc67e4eefcf47f7ee69d400ec4b345472bb60b5e8"
   },
   {
     "id": "1552142_UNDER_2_5",
@@ -879,13 +990,13 @@
     "market_display": "Under 2.5",
     "stake": 500.0,
     "odd": 3.5,
-    "opening_odd": 3.5,
+    "opening_odd": null,
     "opposite_odd": 1.3,
     "opening_opposite_odd": 1.3,
     "bookmaker_id": 8,
     "bookmaker": "Bet365",
     "odds_captured_at": "2026-09-09T05:08:08.421056+00:00",
-    "opening_odds_captured_at": "2026-09-09T05:08:08.421056+00:00",
+    "opening_odds_captured_at": null,
     "implied_probability": 0.285714,
     "market_probability_devig": 0.270833,
     "market_overround": 0.054945,
@@ -911,7 +1022,17 @@
     "result": "1:0",
     "settled_at": "2026-09-09T20:19:09.803045+00:00",
     "clv_odds_pct": -0.027778,
-    "clv_probability_pp": -0.008538
+    "clv_probability_pp": -0.008538,
+    "signal_id": "1552142_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "fc00379de2c4f3063185c0d5b1dc3ea9eaf570b4215186914814e2a0f151bc19",
+    "opening_snapshot_id": null,
+    "opening_coverage": "UNAVAILABLE",
+    "pick_snapshot_id": "fc00379de2c4f3063185c0d5b1dc3ea9eaf570b4215186914814e2a0f151bc19",
+    "pick_coverage": "PROVEN",
+    "closing_coverage": "PROVEN",
+    "lifecycle_coverage": "PARTIAL",
+    "clv_status": "COMPUTABLE",
+    "closing_snapshot_id": "609180b4dd933b9753a7563200193f24ddaa579b5b47275f75a3050826879591"
   },
   {
     "id": "1497691_UNDER_2_5",
@@ -934,13 +1055,13 @@
     "market_display": "Under 2.5",
     "stake": 500.0,
     "odd": 2.25,
-    "opening_odd": 2.25,
+    "opening_odd": null,
     "opposite_odd": 1.62,
     "opening_opposite_odd": 1.62,
     "bookmaker_id": 8,
     "bookmaker": "Bet365",
     "odds_captured_at": "2026-09-09T05:08:08.421056+00:00",
-    "opening_odds_captured_at": "2026-09-09T05:08:08.421056+00:00",
+    "opening_odds_captured_at": null,
     "implied_probability": 0.444444,
     "market_probability_devig": 0.418605,
     "market_overround": 0.061728,
@@ -966,7 +1087,17 @@
     "result": "2:1",
     "settled_at": "2026-09-09T20:19:09.803045+00:00",
     "clv_odds_pct": -0.042553,
-    "clv_probability_pp": -0.018095
+    "clv_probability_pp": -0.018095,
+    "signal_id": "1497691_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "f530ac771e0ad1fa7ad5714b1e915bd6806997910e9fede86894806c03623de1",
+    "opening_snapshot_id": null,
+    "opening_coverage": "UNAVAILABLE",
+    "pick_snapshot_id": "f530ac771e0ad1fa7ad5714b1e915bd6806997910e9fede86894806c03623de1",
+    "pick_coverage": "PROVEN",
+    "closing_coverage": "PROVEN",
+    "lifecycle_coverage": "PARTIAL",
+    "clv_status": "COMPUTABLE",
+    "closing_snapshot_id": "095911b36406d46ac1e77038679e5c339b652f99ac2e4931c79cf92c0a25fcb2"
   },
   {
     "id": "1490461_UNDER_2_5",
@@ -1111,7 +1242,16 @@
       "integrity_hash": "cc1cf80589b53fca8c5519421153cb02e4634dbd0b643a2bbd78a512fd194ed9"
     },
     "decision_packet_id": "2cc18a69ae1202eb38e7457e9ca104608171767679ac2d5a66bae6b8ee004cb9",
-    "decision_packet_integrity_hash": "cc1cf80589b53fca8c5519421153cb02e4634dbd0b643a2bbd78a512fd194ed9"
+    "decision_packet_integrity_hash": "cc1cf80589b53fca8c5519421153cb02e4634dbd0b643a2bbd78a512fd194ed9",
+    "signal_id": "1490461_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "89f1d2f00f91438e9d283378c2ab90cd40e6a4bbbef452aa43cf485f84f0c566",
+    "opening_snapshot_id": null,
+    "opening_coverage": "UNAVAILABLE",
+    "pick_snapshot_id": "89f1d2f00f91438e9d283378c2ab90cd40e6a4bbbef452aa43cf485f84f0c566",
+    "pick_coverage": "PROVEN",
+    "closing_coverage": "UNAVAILABLE",
+    "lifecycle_coverage": "PARTIAL",
+    "clv_status": "NOT_COMPUTABLE"
   },
   {
     "id": "1634287_BTTS_YES",
@@ -1256,7 +1396,16 @@
       "integrity_hash": "01b7483cc26dc2e03d30ba432b2ad40fd021af29c802e34c8bad67c47e8def51"
     },
     "decision_packet_id": "e0f393aab3c3ebca4c0ab3ba77f8cf824b57dc2af390b7150fc14386b67f1502",
-    "decision_packet_integrity_hash": "01b7483cc26dc2e03d30ba432b2ad40fd021af29c802e34c8bad67c47e8def51"
+    "decision_packet_integrity_hash": "01b7483cc26dc2e03d30ba432b2ad40fd021af29c802e34c8bad67c47e8def51",
+    "signal_id": "1634287_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "33fb930c1333233a611c12bde38bc2f19c65ff2f3d35157729e0ad203c215ced",
+    "opening_snapshot_id": null,
+    "opening_coverage": "UNAVAILABLE",
+    "pick_snapshot_id": "33fb930c1333233a611c12bde38bc2f19c65ff2f3d35157729e0ad203c215ced",
+    "pick_coverage": "PROVEN",
+    "closing_coverage": "UNAVAILABLE",
+    "lifecycle_coverage": "PARTIAL",
+    "clv_status": "NOT_COMPUTABLE"
   },
   {
     "id": "1594824_OVER_2_5",
@@ -1394,6 +1543,15 @@
       "integrity_hash": "288836d9709f66ef73dd4769a7cc09a053a43268c7517831d0e68f260ab26fdc"
     },
     "decision_packet_id": "30f9592e2e53ce659287a79cb7cd5a6dba6be0b2abe26e39c7bff1e347a05257",
-    "decision_packet_integrity_hash": "288836d9709f66ef73dd4769a7cc09a053a43268c7517831d0e68f260ab26fdc"
+    "decision_packet_integrity_hash": "288836d9709f66ef73dd4769a7cc09a053a43268c7517831d0e68f260ab26fdc",
+    "signal_id": "1594824_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "009ab53f67f1a9710d9475a80846abb03b905c8339487b6deddfc3222c0b5cf9",
+    "opening_snapshot_id": null,
+    "opening_coverage": "UNAVAILABLE",
+    "pick_snapshot_id": "009ab53f67f1a9710d9475a80846abb03b905c8339487b6deddfc3222c0b5cf9",
+    "pick_coverage": "PROVEN",
+    "closing_coverage": "UNAVAILABLE",
+    "lifecycle_coverage": "PARTIAL",
+    "clv_status": "NOT_COMPUTABLE"
   }
 ]

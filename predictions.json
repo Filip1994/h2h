@@ -13498,7 +13498,16 @@
     "result": "0:0",
     "settled_at": "2026-09-06T04:51:54.244981+00:00",
     "signal_id": "1490444_UNDER_2_5_dc-value-v2.1.0",
-    "entry_snapshot_id": "ad0fb03e44c422fe9d7d1402279690b0eaac0b67c0a6eca79bf54fadd131fb83"
+    "entry_snapshot_id": "ad0fb03e44c422fe9d7d1402279690b0eaac0b67c0a6eca79bf54fadd131fb83",
+    "opening_odd": null,
+    "opening_odds_captured_at": null,
+    "opening_snapshot_id": null,
+    "pick_snapshot_id": "ad0fb03e44c422fe9d7d1402279690b0eaac0b67c0a6eca79bf54fadd131fb83",
+    "closing_odd": 3.4,
+    "closing_odds_captured_at": "2026-09-06T00:13:50.150351+00:00",
+    "closing_snapshot_id": "de99cdf3f33dcb6499993222d913e6b9209b7d9c2805e24a30d69232c22c9b4b",
+    "clv_odds_pct": 0.0,
+    "clv_status": "COMPUTABLE"
   },
   {
     "id": "1490444_BTTS_YES_dc-value-v2.1.0",
@@ -58940,7 +58949,16 @@
     "result": "5:0",
     "settled_at": "2026-09-06T17:50:30.013104+00:00",
     "signal_id": "1601522_OVER_2_5_dc-value-v2.1.0",
-    "entry_snapshot_id": "7154b53c0ffea999d893f12c2df7a8765a3e4cc431048a79d740763c7083a927"
+    "entry_snapshot_id": "7154b53c0ffea999d893f12c2df7a8765a3e4cc431048a79d740763c7083a927",
+    "opening_odd": null,
+    "opening_odds_captured_at": null,
+    "opening_snapshot_id": null,
+    "pick_snapshot_id": "7154b53c0ffea999d893f12c2df7a8765a3e4cc431048a79d740763c7083a927",
+    "closing_odd": null,
+    "closing_odds_captured_at": null,
+    "closing_snapshot_id": null,
+    "clv_odds_pct": null,
+    "clv_status": "NOT_COMPUTABLE"
   },
   {
     "id": "1601522_UNDER_2_5_dc-value-v2.1.0",
@@ -71581,7 +71599,16 @@
     "result": "2:1",
     "settled_at": "2026-09-06T19:41:18.277545+00:00",
     "signal_id": "1601424_UNDER_2_5_dc-value-v2.1.0",
-    "entry_snapshot_id": "eb467de9a644407de608fc76e0523545ae318e1ffc1cf2eab58610eeac95d8c4"
+    "entry_snapshot_id": "eb467de9a644407de608fc76e0523545ae318e1ffc1cf2eab58610eeac95d8c4",
+    "opening_odd": null,
+    "opening_odds_captured_at": null,
+    "opening_snapshot_id": null,
+    "pick_snapshot_id": "eb467de9a644407de608fc76e0523545ae318e1ffc1cf2eab58610eeac95d8c4",
+    "closing_odd": 2.62,
+    "closing_odds_captured_at": "2026-09-06T15:52:54.263127+00:00",
+    "closing_snapshot_id": "2fca46e8d75d5bfe37b7c359071f879e6fd97afcf428102282f135c02cece820",
+    "clv_odds_pct": 0.080153,
+    "clv_status": "COMPUTABLE"
   },
   {
     "id": "1601424_BTTS_YES_dc-value-v2.1.0",
@@ -85021,7 +85048,16 @@
     "result": "2:0",
     "settled_at": "2026-09-07T01:08:36.004117+00:00",
     "signal_id": "1629829_UNDER_2_5_dc-value-v2.1.0",
-    "entry_snapshot_id": "4864863d40d1a1cce4ca13bdfa8257de8451034bd25db95bfabe543b6a5570f6"
+    "entry_snapshot_id": "4864863d40d1a1cce4ca13bdfa8257de8451034bd25db95bfabe543b6a5570f6",
+    "opening_odd": null,
+    "opening_odds_captured_at": null,
+    "opening_snapshot_id": null,
+    "pick_snapshot_id": "4864863d40d1a1cce4ca13bdfa8257de8451034bd25db95bfabe543b6a5570f6",
+    "closing_odd": 2.62,
+    "closing_odds_captured_at": "2026-09-06T19:41:18.277545+00:00",
+    "closing_snapshot_id": "17dc870780bb59be7571964a63ec757566f2a582823c2d4bbe3141da1286a3f5",
+    "clv_odds_pct": 0.0,
+    "clv_status": "COMPUTABLE"
   },
   {
     "id": "1629829_BTTS_YES_dc-value-v2.1.0",
@@ -90701,7 +90737,16 @@
     "result": "2:2",
     "settled_at": "2026-09-07T17:58:47.277589+00:00",
     "signal_id": "1636736_OVER_2_5_dc-value-v2.1.0",
-    "entry_snapshot_id": "52943a101b018c0e6e4e788f5cb2b5777fcfbff22f4e31d025ee89ce78f74263"
+    "entry_snapshot_id": "52943a101b018c0e6e4e788f5cb2b5777fcfbff22f4e31d025ee89ce78f74263",
+    "opening_odd": null,
+    "opening_odds_captured_at": null,
+    "opening_snapshot_id": null,
+    "pick_snapshot_id": "52943a101b018c0e6e4e788f5cb2b5777fcfbff22f4e31d025ee89ce78f74263",
+    "closing_odd": 2.2,
+    "closing_odds_captured_at": "2026-09-07T12:49:09.237612+00:00",
+    "closing_snapshot_id": "5b7b19ce745ef473b69c98998702cc16107b186b4eba0255313ada6699947af9",
+    "clv_odds_pct": 0.0,
+    "clv_status": "COMPUTABLE"
   },
   {
     "id": "1636736_UNDER_2_5_dc-value-v2.1.0",
@@ -94211,7 +94256,16 @@
     "result": "2:1",
     "settled_at": "2026-09-07T22:32:50.674837+00:00",
     "signal_id": "1576480_OVER_2_5_dc-value-v2.1.0",
-    "entry_snapshot_id": "e756179de0d241437442608162bb8459b84132dd69261d84dfd28bf9251d80f1"
+    "entry_snapshot_id": "e756179de0d241437442608162bb8459b84132dd69261d84dfd28bf9251d80f1",
+    "opening_odd": null,
+    "opening_odds_captured_at": null,
+    "opening_snapshot_id": null,
+    "pick_snapshot_id": "e756179de0d241437442608162bb8459b84132dd69261d84dfd28bf9251d80f1",
+    "closing_odd": null,
+    "closing_odds_captured_at": null,
+    "closing_snapshot_id": null,
+    "clv_odds_pct": null,
+    "clv_status": "NOT_COMPUTABLE"
   },
   {
     "id": "1576480_UNDER_2_5_dc-value-v2.1.0",
@@ -94705,7 +94759,16 @@
     "result": "1:0",
     "settled_at": "2026-09-07T22:32:50.674837+00:00",
     "signal_id": "1585746_UNDER_2_5_dc-value-v2.1.0",
-    "entry_snapshot_id": "29dab24a11f6bc7db7a41a32df06b6ed1b993513a144505d841ea5d89be34fe9"
+    "entry_snapshot_id": "29dab24a11f6bc7db7a41a32df06b6ed1b993513a144505d841ea5d89be34fe9",
+    "opening_odd": null,
+    "opening_odds_captured_at": null,
+    "opening_snapshot_id": null,
+    "pick_snapshot_id": "29dab24a11f6bc7db7a41a32df06b6ed1b993513a144505d841ea5d89be34fe9",
+    "closing_odd": null,
+    "closing_odds_captured_at": null,
+    "closing_snapshot_id": null,
+    "clv_odds_pct": null,
+    "clv_status": "NOT_COMPUTABLE"
   },
   {
     "id": "1585746_BTTS_YES_dc-value-v2.1.0",
@@ -101813,7 +101876,16 @@
     "signal_id": "1603995_UNDER_2_5_dc-value-v2.1.0",
     "entry_snapshot_id": "e47ea93fe48b3f4cf99cd8d11ae86669b2f49708d22ad30afff89d9077359508",
     "result": "0:1",
-    "settled_at": "2026-09-08T17:48:54.766414+00:00"
+    "settled_at": "2026-09-08T17:48:54.766414+00:00",
+    "opening_odd": null,
+    "opening_odds_captured_at": null,
+    "opening_snapshot_id": null,
+    "pick_snapshot_id": "e47ea93fe48b3f4cf99cd8d11ae86669b2f49708d22ad30afff89d9077359508",
+    "closing_odd": 1.7,
+    "closing_odds_captured_at": "2026-09-08T13:56:01.318803+00:00",
+    "closing_snapshot_id": "c85afeb26894505071f901a739989c4bf0115ffeb64c9004d487a542b622854b",
+    "clv_odds_pct": 0.088235,
+    "clv_status": "COMPUTABLE"
   },
   {
     "id": "1603995_BTTS_YES_dc-value-v2.1.0",
@@ -106076,7 +106148,16 @@
     "signal_id": "1587799_UNDER_2_5_dc-value-v2.1.0",
     "entry_snapshot_id": "19633ce775e9bf877d095d231429660e3114ef5e039b614e1e67600c9d8176bc",
     "result": "1:3",
-    "settled_at": "2026-09-08T22:45:35.347651+00:00"
+    "settled_at": "2026-09-08T22:45:35.347651+00:00",
+    "opening_odd": null,
+    "opening_odds_captured_at": null,
+    "opening_snapshot_id": null,
+    "pick_snapshot_id": "19633ce775e9bf877d095d231429660e3114ef5e039b614e1e67600c9d8176bc",
+    "closing_odd": 2.0,
+    "closing_odds_captured_at": "2026-09-08T17:48:54.766414+00:00",
+    "closing_snapshot_id": "f3d59c91148046e4632a8f813398d43b97641e1e677eb841b6e7f321c61612e4",
+    "clv_odds_pct": 0.0,
+    "clv_status": "COMPUTABLE"
   },
   {
     "id": "1587799_BTTS_YES_dc-value-v2.1.0",
@@ -106988,7 +107069,16 @@
     "signal_id": "1588347_UNDER_2_5_dc-value-v2.1.0",
     "entry_snapshot_id": "461679defb484cad505508265dc2e204f4335994341871585f098e673625a1c7",
     "result": "0:4",
-    "settled_at": "2026-09-08T22:45:35.347651+00:00"
+    "settled_at": "2026-09-08T22:45:35.347651+00:00",
+    "opening_odd": null,
+    "opening_odds_captured_at": null,
+    "opening_snapshot_id": null,
+    "pick_snapshot_id": "461679defb484cad505508265dc2e204f4335994341871585f098e673625a1c7",
+    "closing_odd": 2.05,
+    "closing_odds_captured_at": "2026-09-08T17:48:54.766414+00:00",
+    "closing_snapshot_id": "2a3493cac12defe0a240139fd9b830c53b679063217ad100609b28668f468668",
+    "clv_odds_pct": 0.097561,
+    "clv_status": "COMPUTABLE"
   },
   {
     "id": "1588347_BTTS_YES_dc-value-v2.1.0",
@@ -108561,7 +108651,9 @@
     "outcome": 1,
     "model_version": "dc-value-v2.1.0",
     "result": "3:2",
-    "settled_at": "2026-09-09T13:31:22.775520+00:00"
+    "settled_at": "2026-09-09T13:31:22.775520+00:00",
+    "signal_id": "1507060_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "add90304606c72783b27dd9358e68eac0c9a119ad71da293cbf39b310f7a2081"
   },
   {
     "id": "1507060_UNDER_2_5_dc-value-v2.1.0",
@@ -108592,7 +108684,9 @@
     "outcome": 0,
     "model_version": "dc-value-v2.1.0",
     "result": "3:2",
-    "settled_at": "2026-09-09T13:31:22.775520+00:00"
+    "settled_at": "2026-09-09T13:31:22.775520+00:00",
+    "signal_id": "1507060_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "2336cd050deadf01a13a9b68b01fb49b41a05c1c950545f767a28af7a596b519"
   },
   {
     "id": "1507060_BTTS_YES_dc-value-v2.1.0",
@@ -108623,7 +108717,9 @@
     "outcome": 1,
     "model_version": "dc-value-v2.1.0",
     "result": "3:2",
-    "settled_at": "2026-09-09T13:31:22.775520+00:00"
+    "settled_at": "2026-09-09T13:31:22.775520+00:00",
+    "signal_id": "1507060_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "ae0a70e053a4dfeded2b3ddbdd91b210e7679f954bb5cfb61843885ed64d833e"
   },
   {
     "id": "1507061_OVER_2_5_dc-value-v2.1.0",
@@ -108654,7 +108750,9 @@
     "outcome": 0,
     "model_version": "dc-value-v2.1.0",
     "result": "1:1",
-    "settled_at": "2026-09-09T13:31:22.775520+00:00"
+    "settled_at": "2026-09-09T13:31:22.775520+00:00",
+    "signal_id": "1507061_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "b05fa40b7ce3bda0b87a674567500f77814c6820661ad118aef86880d23b803c"
   },
   {
     "id": "1507061_UNDER_2_5_dc-value-v2.1.0",
@@ -108685,7 +108783,9 @@
     "outcome": 1,
     "model_version": "dc-value-v2.1.0",
     "result": "1:1",
-    "settled_at": "2026-09-09T13:31:22.775520+00:00"
+    "settled_at": "2026-09-09T13:31:22.775520+00:00",
+    "signal_id": "1507061_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "a9c3a459937c293b6a3ba0052f8b7b7c9854815c1565a64c29af0d2656fd73cd"
   },
   {
     "id": "1507061_BTTS_YES_dc-value-v2.1.0",
@@ -108716,7 +108816,9 @@
     "outcome": 1,
     "model_version": "dc-value-v2.1.0",
     "result": "1:1",
-    "settled_at": "2026-09-09T13:31:22.775520+00:00"
+    "settled_at": "2026-09-09T13:31:22.775520+00:00",
+    "signal_id": "1507061_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "80cfee6fa65bec7143db60d05430f0df9ededcee7132c2bc3ed3465e2ff07e0d"
   },
   {
     "id": "1507062_OVER_2_5_dc-value-v2.1.0",
@@ -108747,7 +108849,9 @@
     "outcome": 0,
     "model_version": "dc-value-v2.1.0",
     "result": "0:1",
-    "settled_at": "2026-09-09T13:31:22.775520+00:00"
+    "settled_at": "2026-09-09T13:31:22.775520+00:00",
+    "signal_id": "1507062_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "d4f934ad18d242593e623abd95783ea9ce223235c3555f959347bdda5bac7765"
   },
   {
     "id": "1507062_UNDER_2_5_dc-value-v2.1.0",
@@ -108778,7 +108882,9 @@
     "outcome": 1,
     "model_version": "dc-value-v2.1.0",
     "result": "0:1",
-    "settled_at": "2026-09-09T13:31:22.775520+00:00"
+    "settled_at": "2026-09-09T13:31:22.775520+00:00",
+    "signal_id": "1507062_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "cb0008d76222dab33c3c4bd80bca4e5870b2b3e6d91e88e7a704138017740662"
   },
   {
     "id": "1507062_BTTS_YES_dc-value-v2.1.0",
@@ -108809,7 +108915,9 @@
     "outcome": 0,
     "model_version": "dc-value-v2.1.0",
     "result": "0:1",
-    "settled_at": "2026-09-09T13:31:22.775520+00:00"
+    "settled_at": "2026-09-09T13:31:22.775520+00:00",
+    "signal_id": "1507062_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "e9f1857dcd2bba95632fb5baf29655810681c892e3d798ba7240b43d5493f71c"
   },
   {
     "id": "1507063_OVER_2_5_dc-value-v2.1.0",
@@ -108840,7 +108948,9 @@
     "outcome": 0,
     "model_version": "dc-value-v2.1.0",
     "result": "0:0",
-    "settled_at": "2026-09-09T13:31:22.775520+00:00"
+    "settled_at": "2026-09-09T13:31:22.775520+00:00",
+    "signal_id": "1507063_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "52a27c8a7eb59673e2466f363ca238d6c8432b5dd49aa78762a1d7f5937cf3d5"
   },
   {
     "id": "1507063_UNDER_2_5_dc-value-v2.1.0",
@@ -108871,7 +108981,9 @@
     "outcome": 1,
     "model_version": "dc-value-v2.1.0",
     "result": "0:0",
-    "settled_at": "2026-09-09T13:31:22.775520+00:00"
+    "settled_at": "2026-09-09T13:31:22.775520+00:00",
+    "signal_id": "1507063_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "003ba9a6a3c2dab763a14474e2ea2e824a637abce255a77dae7d009ec796c84b"
   },
   {
     "id": "1507063_BTTS_YES_dc-value-v2.1.0",
@@ -108902,7 +109014,9 @@
     "outcome": 0,
     "model_version": "dc-value-v2.1.0",
     "result": "0:0",
-    "settled_at": "2026-09-09T13:31:22.775520+00:00"
+    "settled_at": "2026-09-09T13:31:22.775520+00:00",
+    "signal_id": "1507063_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "15007c7c6998de54674d637349c01f7d120e8736a00238968eb3ff2cad65ab48"
   },
   {
     "id": "1612233_OVER_2_5_dc-value-v2.1.0",
@@ -108933,7 +109047,9 @@
     "outcome": 0,
     "model_version": "dc-value-v2.1.0",
     "result": "1:0",
-    "settled_at": "2026-09-09T16:17:31.850421+00:00"
+    "settled_at": "2026-09-09T16:17:31.850421+00:00",
+    "signal_id": "1612233_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "10d362e9737ded76191e4a95255c48c01f038eeda7bd0d8dbd97395e6dadfeb7"
   },
   {
     "id": "1612233_UNDER_2_5_dc-value-v2.1.0",
@@ -108964,7 +109080,9 @@
     "outcome": 1,
     "model_version": "dc-value-v2.1.0",
     "result": "1:0",
-    "settled_at": "2026-09-09T16:17:31.850421+00:00"
+    "settled_at": "2026-09-09T16:17:31.850421+00:00",
+    "signal_id": "1612233_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "fe0a49ed5c52b6c2c6ac545412239df23b780c210d7dd8948a67b4d01410368d"
   },
   {
     "id": "1612233_BTTS_YES_dc-value-v2.1.0",
@@ -108995,7 +109113,9 @@
     "outcome": 0,
     "model_version": "dc-value-v2.1.0",
     "result": "1:0",
-    "settled_at": "2026-09-09T16:17:31.850421+00:00"
+    "settled_at": "2026-09-09T16:17:31.850421+00:00",
+    "signal_id": "1612233_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "d40e1bdff217d1ef5f0fe0f917d56cf1cd781d878a30b2588f0c65cb88cf8ad1"
   },
   {
     "id": "1612236_OVER_2_5_dc-value-v2.1.0",
@@ -109026,7 +109146,9 @@
     "outcome": 1,
     "model_version": "dc-value-v2.1.0",
     "result": "2:1",
-    "settled_at": "2026-09-09T16:17:31.850421+00:00"
+    "settled_at": "2026-09-09T16:17:31.850421+00:00",
+    "signal_id": "1612236_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "dea7d32e5a9ee1e6036b0bf8be7bc81e62b1d13098ead42604eb89da3aa17ce6"
   },
   {
     "id": "1612236_UNDER_2_5_dc-value-v2.1.0",
@@ -109057,7 +109179,9 @@
     "outcome": 0,
     "model_version": "dc-value-v2.1.0",
     "result": "2:1",
-    "settled_at": "2026-09-09T16:17:31.850421+00:00"
+    "settled_at": "2026-09-09T16:17:31.850421+00:00",
+    "signal_id": "1612236_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "d53520d4010bc944a5a0b234585133cbbb05cd94035234b406e13a6897603cbc"
   },
   {
     "id": "1612236_BTTS_YES_dc-value-v2.1.0",
@@ -109088,7 +109212,9 @@
     "outcome": 1,
     "model_version": "dc-value-v2.1.0",
     "result": "2:1",
-    "settled_at": "2026-09-09T16:17:31.850421+00:00"
+    "settled_at": "2026-09-09T16:17:31.850421+00:00",
+    "signal_id": "1612236_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "d91d393f91ac1fc649de326c040989ccb8a36b15f5d01f73605fd40d4a02381e"
   },
   {
     "id": "1559994_OVER_2_5_dc-value-v2.1.0",
@@ -109119,7 +109245,9 @@
     "outcome": 1,
     "model_version": "dc-value-v2.1.0",
     "result": "3:0",
-    "settled_at": "2026-09-09T18:33:46.258716+00:00"
+    "settled_at": "2026-09-09T18:33:46.258716+00:00",
+    "signal_id": "1559994_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "f42f456533885be95e8b7587f583b039e9719cef2999eb834f536a7b0e44f04c"
   },
   {
     "id": "1559994_UNDER_2_5_dc-value-v2.1.0",
@@ -109150,7 +109278,9 @@
     "outcome": 0,
     "model_version": "dc-value-v2.1.0",
     "result": "3:0",
-    "settled_at": "2026-09-09T18:33:46.258716+00:00"
+    "settled_at": "2026-09-09T18:33:46.258716+00:00",
+    "signal_id": "1559994_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "de1ac0df257b9b2ff4fb22029f4582350f431313b4426ed06bf3a259b88b8219"
   },
   {
     "id": "1559994_BTTS_YES_dc-value-v2.1.0",
@@ -109181,7 +109311,9 @@
     "outcome": 0,
     "model_version": "dc-value-v2.1.0",
     "result": "3:0",
-    "settled_at": "2026-09-09T18:33:46.258716+00:00"
+    "settled_at": "2026-09-09T18:33:46.258716+00:00",
+    "signal_id": "1559994_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "f2aa1dab666692cba3f2f6dd5c80c6b66cbbfd3590b7296421baf3663736127b"
   },
   {
     "id": "1603023_OVER_2_5_dc-value-v2.1.0",
@@ -109212,7 +109344,9 @@
     "outcome": 1,
     "model_version": "dc-value-v2.1.0",
     "result": "2:1",
-    "settled_at": "2026-09-09T18:33:46.258716+00:00"
+    "settled_at": "2026-09-09T18:33:46.258716+00:00",
+    "signal_id": "1603023_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "794c9e446cf7d9a749fba83586091dea13aaa45baa8beb8f1f0268f7e7f925e0"
   },
   {
     "id": "1603023_UNDER_2_5_dc-value-v2.1.0",
@@ -109243,7 +109377,9 @@
     "outcome": 0,
     "model_version": "dc-value-v2.1.0",
     "result": "2:1",
-    "settled_at": "2026-09-09T18:33:46.258716+00:00"
+    "settled_at": "2026-09-09T18:33:46.258716+00:00",
+    "signal_id": "1603023_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "770d7cbf9b6f415974d8645d7c0505c5c03d729ffb8621947997245f4b796e5c"
   },
   {
     "id": "1603023_BTTS_YES_dc-value-v2.1.0",
@@ -109274,7 +109410,9 @@
     "outcome": 1,
     "model_version": "dc-value-v2.1.0",
     "result": "2:1",
-    "settled_at": "2026-09-09T18:33:46.258716+00:00"
+    "settled_at": "2026-09-09T18:33:46.258716+00:00",
+    "signal_id": "1603023_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "1c9186fe1944e4c53ba22b476993e56e4e947c7463b685b829a688e465e006de"
   },
   {
     "id": "1582774_OVER_2_5_dc-value-v2.1.0",
@@ -109305,7 +109443,9 @@
     "outcome": 0,
     "model_version": "dc-value-v2.1.0",
     "result": "2:0",
-    "settled_at": "2026-09-09T18:33:46.258716+00:00"
+    "settled_at": "2026-09-09T18:33:46.258716+00:00",
+    "signal_id": "1582774_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "97341877044e9010169f53f96d0efa7f7f441c67d3b5eacba8c8ab8c72ef8c81"
   },
   {
     "id": "1582774_UNDER_2_5_dc-value-v2.1.0",
@@ -109336,7 +109476,9 @@
     "outcome": 1,
     "model_version": "dc-value-v2.1.0",
     "result": "2:0",
-    "settled_at": "2026-09-09T18:33:46.258716+00:00"
+    "settled_at": "2026-09-09T18:33:46.258716+00:00",
+    "signal_id": "1582774_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "b111b0e7faf465a9c633f3f60e2c456120fa7d10d2b434f6fa65764edf75175d"
   },
   {
     "id": "1582774_BTTS_YES_dc-value-v2.1.0",
@@ -109367,7 +109509,9 @@
     "outcome": 0,
     "model_version": "dc-value-v2.1.0",
     "result": "2:0",
-    "settled_at": "2026-09-09T18:33:46.258716+00:00"
+    "settled_at": "2026-09-09T18:33:46.258716+00:00",
+    "signal_id": "1582774_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "45b790ce1530abff14c4c402d7755373a889bf210db93daf20411081d75acc99"
   },
   {
     "id": "1603998_OVER_2_5_dc-value-v2.1.0",
@@ -109398,7 +109542,9 @@
     "outcome": 1,
     "model_version": "dc-value-v2.1.0",
     "result": "4:1",
-    "settled_at": "2026-09-09T18:33:46.258716+00:00"
+    "settled_at": "2026-09-09T18:33:46.258716+00:00",
+    "signal_id": "1603998_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "2f4555c78f95da1be35cee24db9bbbcb6b6ca9e75cce435eccba01850fca495d"
   },
   {
     "id": "1603998_UNDER_2_5_dc-value-v2.1.0",
@@ -109429,7 +109575,9 @@
     "outcome": 0,
     "model_version": "dc-value-v2.1.0",
     "result": "4:1",
-    "settled_at": "2026-09-09T18:33:46.258716+00:00"
+    "settled_at": "2026-09-09T18:33:46.258716+00:00",
+    "signal_id": "1603998_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "4fd9f2cc6de7f802f72eb3b39b6cb2c04c76c2e8018cd631d53e99e40b08c061"
   },
   {
     "id": "1603998_BTTS_YES_dc-value-v2.1.0",
@@ -109460,7 +109608,9 @@
     "outcome": 1,
     "model_version": "dc-value-v2.1.0",
     "result": "4:1",
-    "settled_at": "2026-09-09T18:33:46.258716+00:00"
+    "settled_at": "2026-09-09T18:33:46.258716+00:00",
+    "signal_id": "1603998_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "cecc6611b4bb4b181aa7e8129eac57d84432c19ab7d3be3fef873e7f8edf84a5"
   },
   {
     "id": "1552142_OVER_2_5_dc-value-v2.1.0",
@@ -109491,7 +109641,9 @@
     "outcome": 0,
     "model_version": "dc-value-v2.1.0",
     "result": "1:0",
-    "settled_at": "2026-09-09T20:19:09.803045+00:00"
+    "settled_at": "2026-09-09T20:19:09.803045+00:00",
+    "signal_id": "1552142_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "5222adc5da020996b598dcc15014623832030de037cb9c22cb998a014c820704"
   },
   {
     "id": "1552142_UNDER_2_5_dc-value-v2.1.0",
@@ -109522,7 +109674,18 @@
     "outcome": 1,
     "model_version": "dc-value-v2.1.0",
     "result": "1:0",
-    "settled_at": "2026-09-09T20:19:09.803045+00:00"
+    "settled_at": "2026-09-09T20:19:09.803045+00:00",
+    "signal_id": "1552142_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "fc00379de2c4f3063185c0d5b1dc3ea9eaf570b4215186914814e2a0f151bc19",
+    "opening_odd": null,
+    "opening_odds_captured_at": null,
+    "opening_snapshot_id": null,
+    "pick_snapshot_id": "fc00379de2c4f3063185c0d5b1dc3ea9eaf570b4215186914814e2a0f151bc19",
+    "closing_odd": 3.6,
+    "closing_odds_captured_at": "2026-09-09T16:17:31.850421+00:00",
+    "closing_snapshot_id": null,
+    "clv_odds_pct": -0.027778,
+    "clv_status": "COMPUTABLE"
   },
   {
     "id": "1552142_BTTS_YES_dc-value-v2.1.0",
@@ -109553,7 +109716,9 @@
     "outcome": 0,
     "model_version": "dc-value-v2.1.0",
     "result": "1:0",
-    "settled_at": "2026-09-09T20:19:09.803045+00:00"
+    "settled_at": "2026-09-09T20:19:09.803045+00:00",
+    "signal_id": "1552142_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "9f1acc45d723066826cc68f7620c552312b785fbfcb0503965a9e743ceebd888"
   },
   {
     "id": "1497690_OVER_2_5_dc-value-v2.1.0",
@@ -109584,7 +109749,9 @@
     "outcome": 1,
     "model_version": "dc-value-v2.1.0",
     "result": "1:2",
-    "settled_at": "2026-09-09T20:19:09.803045+00:00"
+    "settled_at": "2026-09-09T20:19:09.803045+00:00",
+    "signal_id": "1497690_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "0f38d80985590430a1b6d5b50a38dac23f09aa2b12a93f0625cdc6ed3a9d37a2"
   },
   {
     "id": "1497690_UNDER_2_5_dc-value-v2.1.0",
@@ -109615,7 +109782,9 @@
     "outcome": 0,
     "model_version": "dc-value-v2.1.0",
     "result": "1:2",
-    "settled_at": "2026-09-09T20:19:09.803045+00:00"
+    "settled_at": "2026-09-09T20:19:09.803045+00:00",
+    "signal_id": "1497690_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "98c066ed714e9480d050b75cf51f999e12e5ea13ce68ac74d3774af1e4f83191"
   },
   {
     "id": "1497690_BTTS_YES_dc-value-v2.1.0",
@@ -109646,7 +109815,9 @@
     "outcome": 1,
     "model_version": "dc-value-v2.1.0",
     "result": "1:2",
-    "settled_at": "2026-09-09T20:19:09.803045+00:00"
+    "settled_at": "2026-09-09T20:19:09.803045+00:00",
+    "signal_id": "1497690_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "09c4b2c601717c8141ac40ec31491b8965c15ed291dcba499945c27d2e660969"
   },
   {
     "id": "1497691_OVER_2_5_dc-value-v2.1.0",
@@ -109677,7 +109848,9 @@
     "outcome": 1,
     "model_version": "dc-value-v2.1.0",
     "result": "2:1",
-    "settled_at": "2026-09-09T20:19:09.803045+00:00"
+    "settled_at": "2026-09-09T20:19:09.803045+00:00",
+    "signal_id": "1497691_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "9d5c7974fd032f056c39ee8701f77653488037edeacb7df6354d185df6d74e2a"
   },
   {
     "id": "1497691_UNDER_2_5_dc-value-v2.1.0",
@@ -109708,7 +109881,18 @@
     "outcome": 0,
     "model_version": "dc-value-v2.1.0",
     "result": "2:1",
-    "settled_at": "2026-09-09T20:19:09.803045+00:00"
+    "settled_at": "2026-09-09T20:19:09.803045+00:00",
+    "signal_id": "1497691_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "f530ac771e0ad1fa7ad5714b1e915bd6806997910e9fede86894806c03623de1",
+    "opening_odd": null,
+    "opening_odds_captured_at": null,
+    "opening_snapshot_id": null,
+    "pick_snapshot_id": "f530ac771e0ad1fa7ad5714b1e915bd6806997910e9fede86894806c03623de1",
+    "closing_odd": 2.35,
+    "closing_odds_captured_at": "2026-09-09T16:17:31.850421+00:00",
+    "closing_snapshot_id": null,
+    "clv_odds_pct": -0.042553,
+    "clv_status": "COMPUTABLE"
   },
   {
     "id": "1497691_BTTS_YES_dc-value-v2.1.0",
@@ -109739,7 +109923,9 @@
     "outcome": 1,
     "model_version": "dc-value-v2.1.0",
     "result": "2:1",
-    "settled_at": "2026-09-09T20:19:09.803045+00:00"
+    "settled_at": "2026-09-09T20:19:09.803045+00:00",
+    "signal_id": "1497691_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "63a804bf6bee5c33ec507ce8e5764e9dd9d55c8f581cedffcc51e2f04a9ab9bf"
   },
   {
     "id": "1497692_OVER_2_5_dc-value-v2.1.0",
@@ -109770,7 +109956,9 @@
     "outcome": 1,
     "model_version": "dc-value-v2.1.0",
     "result": "2:4",
-    "settled_at": "2026-09-09T20:19:09.803045+00:00"
+    "settled_at": "2026-09-09T20:19:09.803045+00:00",
+    "signal_id": "1497692_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "1a7f05045176611e61933c039eff4e4e381dcecf9a67789557c85a1714e1102d"
   },
   {
     "id": "1497692_UNDER_2_5_dc-value-v2.1.0",
@@ -109801,7 +109989,9 @@
     "outcome": 0,
     "model_version": "dc-value-v2.1.0",
     "result": "2:4",
-    "settled_at": "2026-09-09T20:19:09.803045+00:00"
+    "settled_at": "2026-09-09T20:19:09.803045+00:00",
+    "signal_id": "1497692_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "f16f3c19bf0ae7fcaa0d51411a145a00f7612788ed6af1d789cf54f34666bcfd"
   },
   {
     "id": "1497692_BTTS_YES_dc-value-v2.1.0",
@@ -109832,7 +110022,9 @@
     "outcome": 1,
     "model_version": "dc-value-v2.1.0",
     "result": "2:4",
-    "settled_at": "2026-09-09T20:19:09.803045+00:00"
+    "settled_at": "2026-09-09T20:19:09.803045+00:00",
+    "signal_id": "1497692_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "27419b9a4a4d448eebba6cc9ea7d60636ccf5ec2dc6bcf5feb83b5e373040364"
   },
   {
     "id": "1497694_OVER_2_5_dc-value-v2.1.0",
@@ -109863,7 +110055,9 @@
     "outcome": 0,
     "model_version": "dc-value-v2.1.0",
     "result": "0:1",
-    "settled_at": "2026-09-09T20:19:09.803045+00:00"
+    "settled_at": "2026-09-09T20:19:09.803045+00:00",
+    "signal_id": "1497694_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "5d2e875ae11b144377a9e88849d5b64ea6f5881846e9e25d3ba451e850fcf851"
   },
   {
     "id": "1497694_UNDER_2_5_dc-value-v2.1.0",
@@ -109894,7 +110088,9 @@
     "outcome": 1,
     "model_version": "dc-value-v2.1.0",
     "result": "0:1",
-    "settled_at": "2026-09-09T20:19:09.803045+00:00"
+    "settled_at": "2026-09-09T20:19:09.803045+00:00",
+    "signal_id": "1497694_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "461dceca602802fa423afeee920beb8ac7e84b075438f5d6da990dd426f7c746"
   },
   {
     "id": "1497694_BTTS_YES_dc-value-v2.1.0",
@@ -109925,7 +110121,9 @@
     "outcome": 0,
     "model_version": "dc-value-v2.1.0",
     "result": "0:1",
-    "settled_at": "2026-09-09T20:19:09.803045+00:00"
+    "settled_at": "2026-09-09T20:19:09.803045+00:00",
+    "signal_id": "1497694_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "06c456c65f00a600c874e913a8a81e5fdbbfa7abc11ee7f2ac700b9eaf56c8ae"
   },
   {
     "id": "1559993_OVER_2_5_dc-value-v2.1.0",
@@ -109956,7 +110154,9 @@
     "outcome": 0,
     "model_version": "dc-value-v2.1.0",
     "result": "0:0",
-    "settled_at": "2026-09-09T20:19:09.803045+00:00"
+    "settled_at": "2026-09-09T20:19:09.803045+00:00",
+    "signal_id": "1559993_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "74531ce1bc0ac6d42877736a3dc825916363ade244eda086f2bdd6c37703b1bf"
   },
   {
     "id": "1559993_UNDER_2_5_dc-value-v2.1.0",
@@ -109987,7 +110187,9 @@
     "outcome": 1,
     "model_version": "dc-value-v2.1.0",
     "result": "0:0",
-    "settled_at": "2026-09-09T20:19:09.803045+00:00"
+    "settled_at": "2026-09-09T20:19:09.803045+00:00",
+    "signal_id": "1559993_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "895cb98184c03ba920891910cc9cb6240f2763c5784076dcfdf0bb96447c47a9"
   },
   {
     "id": "1559993_BTTS_YES_dc-value-v2.1.0",
@@ -110018,7 +110220,9 @@
     "outcome": 0,
     "model_version": "dc-value-v2.1.0",
     "result": "0:0",
-    "settled_at": "2026-09-09T20:19:09.803045+00:00"
+    "settled_at": "2026-09-09T20:19:09.803045+00:00",
+    "signal_id": "1559993_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "bb2e5e939b2d94905b2c1c57b3af3ca87611ed206aa79997eac4d3d39c4c3fac"
   },
   {
     "id": "1612237_OVER_2_5_dc-value-v2.1.0",
@@ -110049,7 +110253,9 @@
     "outcome": 0,
     "model_version": "dc-value-v2.1.0",
     "result": "1:1",
-    "settled_at": "2026-09-09T20:19:09.803045+00:00"
+    "settled_at": "2026-09-09T20:19:09.803045+00:00",
+    "signal_id": "1612237_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "21651d81efed39925328c578c7fe11c06c776a23a3bfbe0db8ad0fc5c634e73c"
   },
   {
     "id": "1612237_UNDER_2_5_dc-value-v2.1.0",
@@ -110080,7 +110286,9 @@
     "outcome": 1,
     "model_version": "dc-value-v2.1.0",
     "result": "1:1",
-    "settled_at": "2026-09-09T20:19:09.803045+00:00"
+    "settled_at": "2026-09-09T20:19:09.803045+00:00",
+    "signal_id": "1612237_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "9c59950c2979cbfde22e7c62f39046f4f59044f39755d0030aef038e32d0794a"
   },
   {
     "id": "1612237_BTTS_YES_dc-value-v2.1.0",
@@ -110111,7 +110319,9 @@
     "outcome": 1,
     "model_version": "dc-value-v2.1.0",
     "result": "1:1",
-    "settled_at": "2026-09-09T20:19:09.803045+00:00"
+    "settled_at": "2026-09-09T20:19:09.803045+00:00",
+    "signal_id": "1612237_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "fb5b3991febc8252e9c9c8efb723ac5738a04f5e24fcb489c38df4c703cda53e"
   },
   {
     "id": "1612238_OVER_2_5_dc-value-v2.1.0",
@@ -110142,7 +110352,9 @@
     "outcome": 1,
     "model_version": "dc-value-v2.1.0",
     "result": "2:1",
-    "settled_at": "2026-09-09T20:19:09.803045+00:00"
+    "settled_at": "2026-09-09T20:19:09.803045+00:00",
+    "signal_id": "1612238_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "8370b5830a542e745bb06676709ad859e33fd3a36b33aa354b7791bf296c3125"
   },
   {
     "id": "1612238_UNDER_2_5_dc-value-v2.1.0",
@@ -110173,7 +110385,9 @@
     "outcome": 0,
     "model_version": "dc-value-v2.1.0",
     "result": "2:1",
-    "settled_at": "2026-09-09T20:19:09.803045+00:00"
+    "settled_at": "2026-09-09T20:19:09.803045+00:00",
+    "signal_id": "1612238_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "8c91975bbc5df086656bdfb5786a1f756fcad6ded6cca82c81c2fd92369fa699"
   },
   {
     "id": "1612238_BTTS_YES_dc-value-v2.1.0",
@@ -110204,7 +110418,9 @@
     "outcome": 1,
     "model_version": "dc-value-v2.1.0",
     "result": "2:1",
-    "settled_at": "2026-09-09T20:19:09.803045+00:00"
+    "settled_at": "2026-09-09T20:19:09.803045+00:00",
+    "signal_id": "1612238_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "add4b47c75414567f2ae57cbd9ac73b44c17304a1b80a96251456a9bdb99ba90"
   },
   {
     "id": "1603999_OVER_2_5_dc-value-v2.1.0",
@@ -110235,7 +110451,9 @@
     "outcome": 1,
     "model_version": "dc-value-v2.1.0",
     "result": "2:2",
-    "settled_at": "2026-09-09T20:19:09.803045+00:00"
+    "settled_at": "2026-09-09T20:19:09.803045+00:00",
+    "signal_id": "1603999_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "f12c44dbdc01aee3d69b94004fa222aa1248098239e370a9c049f43369ebc1a5"
   },
   {
     "id": "1603999_UNDER_2_5_dc-value-v2.1.0",
@@ -110266,7 +110484,9 @@
     "outcome": 0,
     "model_version": "dc-value-v2.1.0",
     "result": "2:2",
-    "settled_at": "2026-09-09T20:19:09.803045+00:00"
+    "settled_at": "2026-09-09T20:19:09.803045+00:00",
+    "signal_id": "1603999_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "f5192490605736a3a282564281b1460fd2dae78f350a6b4681c9c3da8a429652"
   },
   {
     "id": "1603999_BTTS_YES_dc-value-v2.1.0",
@@ -110297,7 +110517,9 @@
     "outcome": 1,
     "model_version": "dc-value-v2.1.0",
     "result": "2:2",
-    "settled_at": "2026-09-09T20:19:09.803045+00:00"
+    "settled_at": "2026-09-09T20:19:09.803045+00:00",
+    "signal_id": "1603999_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "416c2ea688126a35d2bf5f0b42d880f749ef81e47fb8c9ea84fcf8f490af3063"
   },
   {
     "id": "1603024_OVER_2_5_dc-value-v2.1.0",
@@ -110328,7 +110550,9 @@
     "outcome": 1,
     "model_version": "dc-value-v2.1.0",
     "result": "1:2",
-    "settled_at": "2026-09-09T20:19:09.803045+00:00"
+    "settled_at": "2026-09-09T20:19:09.803045+00:00",
+    "signal_id": "1603024_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "4b3e3921721cb3a9782db59d8a0fc0f13bcb05d803390fee7e9d887403a7ed9d"
   },
   {
     "id": "1603024_UNDER_2_5_dc-value-v2.1.0",
@@ -110359,7 +110583,18 @@
     "outcome": 0,
     "model_version": "dc-value-v2.1.0",
     "result": "1:2",
-    "settled_at": "2026-09-09T20:19:09.803045+00:00"
+    "settled_at": "2026-09-09T20:19:09.803045+00:00",
+    "signal_id": "1603024_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "d1a752f7ebde1bca617d12c925ebd95506578a17d56c55f7c037ac554bfdb0ca",
+    "opening_odd": null,
+    "opening_odds_captured_at": null,
+    "opening_snapshot_id": null,
+    "pick_snapshot_id": "d1a752f7ebde1bca617d12c925ebd95506578a17d56c55f7c037ac554bfdb0ca",
+    "closing_odd": 2.28,
+    "closing_odds_captured_at": "2026-09-09T16:17:31.850421+00:00",
+    "closing_snapshot_id": null,
+    "clv_odds_pct": -0.052632,
+    "clv_status": "COMPUTABLE"
   },
   {
     "id": "1603024_BTTS_YES_dc-value-v2.1.0",
@@ -110390,7 +110625,9 @@
     "outcome": 1,
     "model_version": "dc-value-v2.1.0",
     "result": "1:2",
-    "settled_at": "2026-09-09T20:19:09.803045+00:00"
+    "settled_at": "2026-09-09T20:19:09.803045+00:00",
+    "signal_id": "1603024_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "d040b7a85243b8c63940ce03250ee4d07f99cc00fc64c0db2566910be4b45adf"
   },
   {
     "id": "1603025_OVER_2_5_dc-value-v2.1.0",
@@ -110421,7 +110658,9 @@
     "outcome": 1,
     "model_version": "dc-value-v2.1.0",
     "result": "2:1",
-    "settled_at": "2026-09-09T20:19:09.803045+00:00"
+    "settled_at": "2026-09-09T20:19:09.803045+00:00",
+    "signal_id": "1603025_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "aa6f582830fa566ef7c802cb57d4e1d7cb7b4bc99af43ee859fe8176d8d3d57e"
   },
   {
     "id": "1603025_UNDER_2_5_dc-value-v2.1.0",
@@ -110452,7 +110691,9 @@
     "outcome": 0,
     "model_version": "dc-value-v2.1.0",
     "result": "2:1",
-    "settled_at": "2026-09-09T20:19:09.803045+00:00"
+    "settled_at": "2026-09-09T20:19:09.803045+00:00",
+    "signal_id": "1603025_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "d5a0e446052af9ba5385c4a82c6044c6ed584e2dca45a39514010743a362c071"
   },
   {
     "id": "1603025_BTTS_YES_dc-value-v2.1.0",
@@ -110483,7 +110724,9 @@
     "outcome": 1,
     "model_version": "dc-value-v2.1.0",
     "result": "2:1",
-    "settled_at": "2026-09-09T20:19:09.803045+00:00"
+    "settled_at": "2026-09-09T20:19:09.803045+00:00",
+    "signal_id": "1603025_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "26612dca6f708cc889bb951be1c50509876f938f34bce40b04775c10f8382d88"
   },
   {
     "id": "1498658_OVER_2_5_dc-value-v2.1.0",
@@ -110514,7 +110757,9 @@
     "outcome": 0,
     "model_version": "dc-value-v2.1.0",
     "result": "1:1",
-    "settled_at": "2026-09-09T20:25:54.712177+00:00"
+    "settled_at": "2026-09-09T20:25:54.712177+00:00",
+    "signal_id": "1498658_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "95f3e50f98687d0c401448bb37a957ec77624f52967c4e420fc91d4cf2293f7e"
   },
   {
     "id": "1498658_UNDER_2_5_dc-value-v2.1.0",
@@ -110545,7 +110790,9 @@
     "outcome": 1,
     "model_version": "dc-value-v2.1.0",
     "result": "1:1",
-    "settled_at": "2026-09-09T20:25:54.712177+00:00"
+    "settled_at": "2026-09-09T20:25:54.712177+00:00",
+    "signal_id": "1498658_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "f557e8020d11f5fdafb199fe28d49cc8b7974af84d77eeba2a82c40cfaa775b9"
   },
   {
     "id": "1498658_BTTS_YES_dc-value-v2.1.0",
@@ -110576,7 +110823,9 @@
     "outcome": 1,
     "model_version": "dc-value-v2.1.0",
     "result": "1:1",
-    "settled_at": "2026-09-09T20:25:54.712177+00:00"
+    "settled_at": "2026-09-09T20:25:54.712177+00:00",
+    "signal_id": "1498658_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "59171aa61e3599a21f6bd09ae12e02bdcba5b3e91d0905e098683ddd9eb00cdc"
   },
   {
     "id": "1556644_OVER_2_5_dc-value-v2.1.0",
@@ -110607,7 +110856,9 @@
     "outcome": 0,
     "model_version": "dc-value-v2.1.0",
     "result": "1:0",
-    "settled_at": "2026-09-09T21:09:23.382144+00:00"
+    "settled_at": "2026-09-09T21:09:23.382144+00:00",
+    "signal_id": "1556644_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "b0b01841c17c4cde3fcf65f5b7ea9ce0451e4fb8d8edb8be07c0efe5a956c870"
   },
   {
     "id": "1556644_UNDER_2_5_dc-value-v2.1.0",
@@ -110638,7 +110889,9 @@
     "outcome": 1,
     "model_version": "dc-value-v2.1.0",
     "result": "1:0",
-    "settled_at": "2026-09-09T21:09:23.382144+00:00"
+    "settled_at": "2026-09-09T21:09:23.382144+00:00",
+    "signal_id": "1556644_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "a7dffee6a8502a8ed61b43d76754ea17839685c92505f880d16b87983f269232"
   },
   {
     "id": "1556644_BTTS_YES_dc-value-v2.1.0",
@@ -110669,7 +110922,9 @@
     "outcome": 0,
     "model_version": "dc-value-v2.1.0",
     "result": "1:0",
-    "settled_at": "2026-09-09T21:09:23.382144+00:00"
+    "settled_at": "2026-09-09T21:09:23.382144+00:00",
+    "signal_id": "1556644_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "86acb70619ba4ac2f525c4e8ec4dbb4824cdc6b213fc50f4c7298355b5e909e0"
   },
   {
     "id": "1563152_OVER_2_5_dc-value-v2.1.0",
@@ -110700,7 +110955,9 @@
     "outcome": 0,
     "model_version": "dc-value-v2.1.0",
     "result": "0:1",
-    "settled_at": "2026-09-09T21:09:23.382144+00:00"
+    "settled_at": "2026-09-09T21:09:23.382144+00:00",
+    "signal_id": "1563152_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "8933121f634b7e52e65f72263b7ef7e7584daae4cc77fd931fe15710727bce43"
   },
   {
     "id": "1563152_UNDER_2_5_dc-value-v2.1.0",
@@ -110731,7 +110988,9 @@
     "outcome": 1,
     "model_version": "dc-value-v2.1.0",
     "result": "0:1",
-    "settled_at": "2026-09-09T21:09:23.382144+00:00"
+    "settled_at": "2026-09-09T21:09:23.382144+00:00",
+    "signal_id": "1563152_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "9a4612885b059c922a985291a1cbcabd44c0cc03bdbeb62ecc6822f0ff20b5ca"
   },
   {
     "id": "1563152_BTTS_YES_dc-value-v2.1.0",
@@ -110762,7 +111021,9 @@
     "outcome": 0,
     "model_version": "dc-value-v2.1.0",
     "result": "0:1",
-    "settled_at": "2026-09-09T21:09:23.382144+00:00"
+    "settled_at": "2026-09-09T21:09:23.382144+00:00",
+    "signal_id": "1563152_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "81ed2442bfd1171155596a0d9fc2c3576cf74a49c74da0e10a0f60b984da3975"
   },
   {
     "id": "1563153_OVER_2_5_dc-value-v2.1.0",
@@ -110793,7 +111054,9 @@
     "outcome": 1,
     "model_version": "dc-value-v2.1.0",
     "result": "2:1",
-    "settled_at": "2026-09-09T21:09:23.382144+00:00"
+    "settled_at": "2026-09-09T21:09:23.382144+00:00",
+    "signal_id": "1563153_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "e987d4f220262c20403b904b0388175e3c986cb83821d3b44507046ec51db62f"
   },
   {
     "id": "1563153_UNDER_2_5_dc-value-v2.1.0",
@@ -110824,7 +111087,9 @@
     "outcome": 0,
     "model_version": "dc-value-v2.1.0",
     "result": "2:1",
-    "settled_at": "2026-09-09T21:09:23.382144+00:00"
+    "settled_at": "2026-09-09T21:09:23.382144+00:00",
+    "signal_id": "1563153_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "5f6b69d9f9e29432ed799e590d263ef927e388cccb716cc6d7d0fd07e026f9d4"
   },
   {
     "id": "1563153_BTTS_YES_dc-value-v2.1.0",
@@ -110855,7 +111120,9 @@
     "outcome": 1,
     "model_version": "dc-value-v2.1.0",
     "result": "2:1",
-    "settled_at": "2026-09-09T21:09:23.382144+00:00"
+    "settled_at": "2026-09-09T21:09:23.382144+00:00",
+    "signal_id": "1563153_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "76e5665217abe7a1144d750eec8c8568aa4fb5b70dd91d29851afef4ad3b1c63"
   },
   {
     "id": "1556645_OVER_2_5_dc-value-v2.1.0",
@@ -110886,7 +111153,9 @@
     "outcome": 0,
     "model_version": "dc-value-v2.1.0",
     "result": "0:1",
-    "settled_at": "2026-09-09T21:09:23.382144+00:00"
+    "settled_at": "2026-09-09T21:09:23.382144+00:00",
+    "signal_id": "1556645_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "1b34057937784217b2332195f39964f16b38b82e4d19885b7af1a9d740e04171"
   },
   {
     "id": "1556645_UNDER_2_5_dc-value-v2.1.0",
@@ -110917,7 +111186,9 @@
     "outcome": 1,
     "model_version": "dc-value-v2.1.0",
     "result": "0:1",
-    "settled_at": "2026-09-09T21:09:23.382144+00:00"
+    "settled_at": "2026-09-09T21:09:23.382144+00:00",
+    "signal_id": "1556645_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "b20e746e06636e698cb7b28c79eb1c1c39f539431b3a00d5e7dce431e1830552"
   },
   {
     "id": "1556645_BTTS_YES_dc-value-v2.1.0",
@@ -110948,7 +111219,9 @@
     "outcome": 0,
     "model_version": "dc-value-v2.1.0",
     "result": "0:1",
-    "settled_at": "2026-09-09T21:09:23.382144+00:00"
+    "settled_at": "2026-09-09T21:09:23.382144+00:00",
+    "signal_id": "1556645_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "fc80d01b508b5858a91fd58aea291d214ff304de1d20aa4e48ddcbcc3d74a877"
   },
   {
     "id": "1563151_OVER_2_5_dc-value-v2.1.0",
@@ -110979,7 +111252,9 @@
     "outcome": 0,
     "model_version": "dc-value-v2.1.0",
     "result": "0:0",
-    "settled_at": "2026-09-09T21:09:23.382144+00:00"
+    "settled_at": "2026-09-09T21:09:23.382144+00:00",
+    "signal_id": "1563151_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "26bd722699cd266d16a650cfd331db6f384ce1f8050bfaf6b1709594113ee7c7"
   },
   {
     "id": "1563151_UNDER_2_5_dc-value-v2.1.0",
@@ -111010,7 +111285,9 @@
     "outcome": 1,
     "model_version": "dc-value-v2.1.0",
     "result": "0:0",
-    "settled_at": "2026-09-09T21:09:23.382144+00:00"
+    "settled_at": "2026-09-09T21:09:23.382144+00:00",
+    "signal_id": "1563151_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "c0473dd5d7ab40f2654e9a06fdabba95dabd9dce3dc517fbc35ae735fa31653b"
   },
   {
     "id": "1563151_BTTS_YES_dc-value-v2.1.0",
@@ -111041,7 +111318,9 @@
     "outcome": 0,
     "model_version": "dc-value-v2.1.0",
     "result": "0:0",
-    "settled_at": "2026-09-09T21:09:23.382144+00:00"
+    "settled_at": "2026-09-09T21:09:23.382144+00:00",
+    "signal_id": "1563151_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "0e3cfbdc1d331ab1c03d4f983ebc7c73742b8ce4dac47ff2df46fce820b098ba"
   },
   {
     "id": "1575469_OVER_2_5_dc-value-v2.1.0",
@@ -111072,7 +111351,9 @@
     "outcome": 1,
     "model_version": "dc-value-v2.1.0",
     "result": "0:4",
-    "settled_at": "2026-09-09T22:38:05.754325+00:00"
+    "settled_at": "2026-09-09T22:38:05.754325+00:00",
+    "signal_id": "1575469_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "81add06fb86d4990c2a6d26594c199eaa01690718dc27277b2158eb70e856184"
   },
   {
     "id": "1575469_UNDER_2_5_dc-value-v2.1.0",
@@ -111103,7 +111384,9 @@
     "outcome": 0,
     "model_version": "dc-value-v2.1.0",
     "result": "0:4",
-    "settled_at": "2026-09-09T22:38:05.754325+00:00"
+    "settled_at": "2026-09-09T22:38:05.754325+00:00",
+    "signal_id": "1575469_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "967121da062b9ed793d201cc1a48bcc7bd4c78ce25fbb144221e242d478895c1"
   },
   {
     "id": "1575469_BTTS_YES_dc-value-v2.1.0",
@@ -111134,7 +111417,9 @@
     "outcome": 0,
     "model_version": "dc-value-v2.1.0",
     "result": "0:4",
-    "settled_at": "2026-09-09T22:38:05.754325+00:00"
+    "settled_at": "2026-09-09T22:38:05.754325+00:00",
+    "signal_id": "1575469_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "fe082745666e0e897422742b941485a8d286f349b8adf517ef553eea1a5c660c"
   },
   {
     "id": "1549589_OVER_2_5_dc-value-v2.1.0",
@@ -111258,7 +111543,9 @@
     "outcome": 1,
     "model_version": "dc-value-v2.1.0",
     "result": "2:1",
-    "settled_at": "2026-09-09T23:15:36.143061+00:00"
+    "settled_at": "2026-09-09T23:15:36.143061+00:00",
+    "signal_id": "1511687_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "031bcd6353974ea9522e45d05b21e69d5451e35e438180bcebc24a1630526bcb"
   },
   {
     "id": "1511687_UNDER_2_5_dc-value-v2.1.0",
@@ -111289,7 +111576,9 @@
     "outcome": 0,
     "model_version": "dc-value-v2.1.0",
     "result": "2:1",
-    "settled_at": "2026-09-09T23:15:36.143061+00:00"
+    "settled_at": "2026-09-09T23:15:36.143061+00:00",
+    "signal_id": "1511687_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "7f0cea1fa939fcb38d41b8a5b84dda571ecc9313948f624a988fdd3c51fb9aab"
   },
   {
     "id": "1511687_BTTS_YES_dc-value-v2.1.0",
@@ -111320,7 +111609,9 @@
     "outcome": 1,
     "model_version": "dc-value-v2.1.0",
     "result": "2:1",
-    "settled_at": "2026-09-09T23:15:36.143061+00:00"
+    "settled_at": "2026-09-09T23:15:36.143061+00:00",
+    "signal_id": "1511687_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "2f4a01c05d59a71758c185f47207960bd31ae68944fa2f43c4ccb2d2c72659c9"
   },
   {
     "id": "1490452_OVER_2_5_dc-value-v2.1.0",
@@ -111349,7 +111640,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1490452_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "841d5a7fefdb8e2ccb9dfd78f2a5f0911fdb5fac5b0551126f17005eaa106aeb"
   },
   {
     "id": "1490452_UNDER_2_5_dc-value-v2.1.0",
@@ -111378,7 +111671,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1490452_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "e9422acb6a47fedc9a41d2c9d9645fc60a95fc4f8b27f3a27c0083c7d6e80ce1"
   },
   {
     "id": "1490452_BTTS_YES_dc-value-v2.1.0",
@@ -111407,7 +111702,9 @@
     "rejection_reason": "REJECT_ODD",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1490452_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "6c7d48f74d20bec631015be25758f6450f5324681ce1aee961f40623b7f6d928"
   },
   {
     "id": "1490453_OVER_2_5_dc-value-v2.1.0",
@@ -111436,7 +111733,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1490453_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "7af0d432740c11850a4511e019cd8adaa87d78d12059f94e82edac6f6e8eb3c0"
   },
   {
     "id": "1490453_UNDER_2_5_dc-value-v2.1.0",
@@ -111465,7 +111764,9 @@
     "rejection_reason": null,
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1490453_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "15b1e3393cbc9c1d68d316f79b7a03c520f4551361dd3fcebdc866133ab42d56"
   },
   {
     "id": "1490453_BTTS_YES_dc-value-v2.1.0",
@@ -111494,7 +111795,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1490453_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "0665130a0672c4e8b3ef161facf3ddf11faf13848c34fe185fce21ceef74bf89"
   },
   {
     "id": "1490454_OVER_2_5_dc-value-v2.1.0",
@@ -111523,7 +111826,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1490454_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "8fb75a22e008fd24e41cea8759104d51aef3558ff2959981ee24fe5dbb1b6455"
   },
   {
     "id": "1490454_UNDER_2_5_dc-value-v2.1.0",
@@ -111552,7 +111857,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1490454_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "0c5cc85b0b2700ee6c2d051e93215c6634509b8ed4206dc33c6490bf31eccb44"
   },
   {
     "id": "1490454_BTTS_YES_dc-value-v2.1.0",
@@ -111581,7 +111888,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1490454_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "93dccb28aa19eedc82b85fd8d62d98585974bb9ce21463da6dede505a8d3d5be"
   },
   {
     "id": "1490456_OVER_2_5_dc-value-v2.1.0",
@@ -111610,7 +111919,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1490456_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "5525bfa01bee6dda5a76e19acfe29a0081447fd8af550cc6dc8fa448370556dc"
   },
   {
     "id": "1490456_UNDER_2_5_dc-value-v2.1.0",
@@ -111639,7 +111950,9 @@
     "rejection_reason": null,
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1490456_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "2158aea35deddd5066cf8234113d282f70d111697280546e6adda5aa9292628b"
   },
   {
     "id": "1490456_BTTS_YES_dc-value-v2.1.0",
@@ -111668,7 +111981,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1490456_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "d91f5494efb535e02fc29247f1be6879eb4a21ad4fd2ad50202e7525d5c1fa33"
   },
   {
     "id": "1511682_OVER_2_5_dc-value-v2.1.0",
@@ -111697,7 +112012,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1511682_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "015999ae4b0cf009ac149f32c34611b061750574168b6437cc0d87ad2d1246cf"
   },
   {
     "id": "1511682_UNDER_2_5_dc-value-v2.1.0",
@@ -111726,7 +112043,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1511682_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "71a92bc092c29a4e09c09bab55aec69dca020a5226179c541c1926250dbccddb"
   },
   {
     "id": "1511682_BTTS_YES_dc-value-v2.1.0",
@@ -111755,7 +112074,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1511682_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "f0362eb04a7f26d24b4746ea9c2c99667503a55b7706e10d45c438de0056c8ad"
   },
   {
     "id": "1511684_OVER_2_5_dc-value-v2.1.0",
@@ -111784,7 +112105,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1511684_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "dbe5005085c62003a3ec0d01bbc1528d7afd8f43fea628bb3254956033fc15c6"
   },
   {
     "id": "1511684_UNDER_2_5_dc-value-v2.1.0",
@@ -111813,7 +112136,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1511684_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "3a38c883caa40bd8050282fc80e3bf1d1511ea96f91f4cbf63b5b9ad8b3c2366"
   },
   {
     "id": "1511684_BTTS_YES_dc-value-v2.1.0",
@@ -111842,7 +112167,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1511684_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "db127fe2ebbb75227b9dfc2a8a9019dacdccee6d8462ac13e0431f078d2ac959"
   },
   {
     "id": "1520860_OVER_2_5_dc-value-v2.1.0",
@@ -111871,7 +112198,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1520860_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "c75dd219dc7fad16fc1b782b43086aad862e387596fe9797f6dfe21a701bd266"
   },
   {
     "id": "1520860_UNDER_2_5_dc-value-v2.1.0",
@@ -111900,7 +112229,9 @@
     "rejection_reason": null,
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1520860_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "c901fb8ef29b835a85d5775b556f0fedf7f128b5c08fdc0e6b2b480509fad787"
   },
   {
     "id": "1520860_BTTS_YES_dc-value-v2.1.0",
@@ -111929,7 +112260,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1520860_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "c9f128c57e7da1ba408aea08f79047fc906baa723fd23a7fce06b28c874ef6f9"
   },
   {
     "id": "1520866_OVER_2_5_dc-value-v2.1.0",
@@ -111958,7 +112291,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1520866_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "1e37fb7c3e2baff3abdccfa383882451c05edf166e638e7518db1023d114b991"
   },
   {
     "id": "1520866_UNDER_2_5_dc-value-v2.1.0",
@@ -111987,7 +112322,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1520866_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "da7331b8ca5efaa0865aecb216921de21622dc983f9a83969cab77f3f62dd801"
   },
   {
     "id": "1520866_BTTS_YES_dc-value-v2.1.0",
@@ -112016,7 +112353,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1520866_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "45f790ea330a194678f6e14120f522affab2fdd96cff016e948a835dbe90444c"
   },
   {
     "id": "1490451_OVER_2_5_dc-value-v2.1.0",
@@ -112045,7 +112384,9 @@
     "rejection_reason": "REJECT_ODD",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1490451_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "055fd121ffe08f0388fbad7cbc9b69451ef748f0b0a4c0addbe93f1e08ef56c9"
   },
   {
     "id": "1490451_UNDER_2_5_dc-value-v2.1.0",
@@ -112074,7 +112415,9 @@
     "rejection_reason": null,
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1490451_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "12442bf05253e0457cb0422bc455b06726f477dbaa536f0996acd5a95418f6e8"
   },
   {
     "id": "1490451_BTTS_YES_dc-value-v2.1.0",
@@ -112103,7 +112446,9 @@
     "rejection_reason": "REJECT_ODD",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1490451_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "f98f8c91b1c0792dc90836b7812f5f91af4bc47ad9721cf43a060dccea4b66db"
   },
   {
     "id": "1490455_OVER_2_5_dc-value-v2.1.0",
@@ -112132,7 +112477,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1490455_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "d35f42106719b609a0c47f9b7352574ed696b8cf3c6abebf7bd41ad155ec4d4f"
   },
   {
     "id": "1490455_UNDER_2_5_dc-value-v2.1.0",
@@ -112161,7 +112508,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1490455_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "6d52dbed0dee2c847d928b18050f95a54e59f1abc70b20399353a86dd733da24"
   },
   {
     "id": "1490455_BTTS_YES_dc-value-v2.1.0",
@@ -112190,7 +112539,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1490455_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "142a02e75316bbee20b7c7f73c71df828eda663000bceef7d12cc771c9368c84"
   },
   {
     "id": "1490457_OVER_2_5_dc-value-v2.1.0",
@@ -112219,7 +112570,9 @@
     "rejection_reason": "REJECT_ODD",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1490457_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "48e9be1aa1b51d45e74968a12bc9ce5bef19b4a6f1b6e8e4f973cb9483feaaea"
   },
   {
     "id": "1490457_UNDER_2_5_dc-value-v2.1.0",
@@ -112248,7 +112601,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1490457_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "d364c105fc9a1e3d5d4e8b0ce8f1e6876f5ed67f9b1cebb98c0bf8ff4f27c08e"
   },
   {
     "id": "1490457_BTTS_YES_dc-value-v2.1.0",
@@ -112277,7 +112632,9 @@
     "rejection_reason": "REJECT_ODD",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1490457_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "0523a14f8e5f7728597e4cc2f048fbe49d9ff16197d0bd67118557746b8fd231"
   },
   {
     "id": "1490458_OVER_2_5_dc-value-v2.1.0",
@@ -112306,7 +112663,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1490458_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "53f06db3e1e507c31403440e3cbe29f3576cbf3cc11d6f89a8ef0f90f40a04ed"
   },
   {
     "id": "1490458_UNDER_2_5_dc-value-v2.1.0",
@@ -112335,7 +112694,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1490458_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "f1800c3a89d17147b532e9ef2159585ed6db1b99a755ad0f8b1de72496eae6ce"
   },
   {
     "id": "1490458_BTTS_YES_dc-value-v2.1.0",
@@ -112364,7 +112725,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1490458_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "03744d122192590cc41c5f3493f3c0da90c0e8b5759b9ac04b097e01cee2d8a5"
   },
   {
     "id": "1490459_OVER_2_5_dc-value-v2.1.0",
@@ -112393,7 +112756,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1490459_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "c2432d616fb8ff9cbbe5ff20a9b28cca61220fcad0deda05343a34eb9ad49b35"
   },
   {
     "id": "1490459_UNDER_2_5_dc-value-v2.1.0",
@@ -112422,7 +112787,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1490459_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "9b43fd2297d608965f4b236b243ae5c8b570d96b7e8e2aab1a6974023522ae2a"
   },
   {
     "id": "1490459_BTTS_YES_dc-value-v2.1.0",
@@ -112451,7 +112818,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1490459_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "cec0fea26bf921dbdb21365f553ba9d77fef159d19303c181ba3323383f1b419"
   },
   {
     "id": "1490460_OVER_2_5_dc-value-v2.1.0",
@@ -112480,7 +112849,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1490460_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "e3bccd64b6984be302b17c33330ec07206b59656369b69cfb2984005fb09ad64"
   },
   {
     "id": "1490460_UNDER_2_5_dc-value-v2.1.0",
@@ -112509,7 +112880,9 @@
     "rejection_reason": null,
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1490460_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "a051cd4b16d8944b2618f6aba33f758517ba5c173152c480e0738179da92cdd1"
   },
   {
     "id": "1490460_BTTS_YES_dc-value-v2.1.0",
@@ -112538,7 +112911,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1490460_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "5144c49d71eefbf859d14a637fce30aacbcc341121c235c3395e585d104d2b79"
   },
   {
     "id": "1520861_OVER_2_5_dc-value-v2.1.0",
@@ -112567,7 +112942,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1520861_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "05326ce2051b6e9e0a8d6c09f27fd98783acbae6bca6b70202eb376a2c277cfc"
   },
   {
     "id": "1520861_UNDER_2_5_dc-value-v2.1.0",
@@ -112596,7 +112973,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1520861_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "7f91820ab813653c5ad1ba0d85837fdaa3d0a51a700dd4e1b86f9039de62fffc"
   },
   {
     "id": "1520861_BTTS_YES_dc-value-v2.1.0",
@@ -112625,7 +113004,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1520861_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "23e0afc9689ce6fc3c4c28aafa1d56de3a899dcc88771309da9f26cad652e329"
   },
   {
     "id": "1490461_OVER_2_5_dc-value-v2.1.0",
@@ -112654,7 +113035,9 @@
     "rejection_reason": "REJECT_ODD",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1490461_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "a108916b8ab7fa0e390493f66aa9e417958eefb521d973c088f70cfc6846bb80"
   },
   {
     "id": "1490461_UNDER_2_5_dc-value-v2.1.0",
@@ -112683,7 +113066,18 @@
     "rejection_reason": null,
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1490461_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "89f1d2f00f91438e9d283378c2ab90cd40e6a4bbbef452aa43cf485f84f0c566",
+    "opening_odd": null,
+    "opening_odds_captured_at": null,
+    "opening_snapshot_id": null,
+    "pick_snapshot_id": "89f1d2f00f91438e9d283378c2ab90cd40e6a4bbbef452aa43cf485f84f0c566",
+    "closing_odd": null,
+    "closing_odds_captured_at": null,
+    "closing_snapshot_id": null,
+    "clv_odds_pct": null,
+    "clv_status": "NOT_COMPUTABLE"
   },
   {
     "id": "1490461_BTTS_YES_dc-value-v2.1.0",
@@ -112712,7 +113106,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1490461_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "ef97c5cb97c89331fae36663bbd033b7c0d0430b58fa8e0a8412bca0d2394215"
   },
   {
     "id": "1490462_OVER_2_5_dc-value-v2.1.0",
@@ -112741,7 +113137,9 @@
     "rejection_reason": "REJECT_ODD",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1490462_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "199abf8757d5b00f13c2c45273882526936217ef13e226d2356b7ca541fa46f5"
   },
   {
     "id": "1490462_UNDER_2_5_dc-value-v2.1.0",
@@ -112770,7 +113168,9 @@
     "rejection_reason": null,
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1490462_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "21348e3174a2e5515b3c13fb191bfe849f0c989101afc4a53dfa3546bba37ef4"
   },
   {
     "id": "1490462_BTTS_YES_dc-value-v2.1.0",
@@ -112799,7 +113199,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1490462_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "10ff8b22332ba80dfbb07b74287bf3b57c82ecaf685d55dbdc2a0861b789b9b6"
   },
   {
     "id": "1490464_OVER_2_5_dc-value-v2.1.0",
@@ -112828,7 +113230,9 @@
     "rejection_reason": "REJECT_ODD",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1490464_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "aa6911350ecdfbb936b06dd504b055b17ca2ac31436ba8699f88db3044a98c85"
   },
   {
     "id": "1490464_UNDER_2_5_dc-value-v2.1.0",
@@ -112857,7 +113261,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1490464_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "b77e0ed7cfd143a04bddce2fc095f95e19ddea2caa94b4a95b684048fca02794"
   },
   {
     "id": "1490464_BTTS_YES_dc-value-v2.1.0",
@@ -112886,7 +113292,9 @@
     "rejection_reason": "REJECT_ODD",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1490464_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "bdd859e6b1030780a75ab36c02ef80150ca4b89e4737f971cb23f6ed5b2ee48b"
   },
   {
     "id": "1490465_OVER_2_5_dc-value-v2.1.0",
@@ -112915,7 +113323,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1490465_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "974bdf2f8dc547f45ae4816a91e02e810ba5408279cf66c56aaa75a05dc1a75e"
   },
   {
     "id": "1490465_UNDER_2_5_dc-value-v2.1.0",
@@ -112944,7 +113354,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1490465_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "6b3a9d34d6c67e42dbe95c593c0e2404080b757b82bc6a8c30294034693685c8"
   },
   {
     "id": "1490465_BTTS_YES_dc-value-v2.1.0",
@@ -112973,7 +113385,9 @@
     "rejection_reason": "REJECT_ODD",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1490465_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "569fab5b6ca3654f7248ba8ed6cb07b0fcae1031662fdfe003a48b1d2ed95611"
   },
   {
     "id": "1594824_OVER_2_5_dc-value-v2.1.0",
@@ -113002,7 +113416,18 @@
     "rejection_reason": null,
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1594824_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "009ab53f67f1a9710d9475a80846abb03b905c8339487b6deddfc3222c0b5cf9",
+    "opening_odd": null,
+    "opening_odds_captured_at": null,
+    "opening_snapshot_id": null,
+    "pick_snapshot_id": "009ab53f67f1a9710d9475a80846abb03b905c8339487b6deddfc3222c0b5cf9",
+    "closing_odd": null,
+    "closing_odds_captured_at": null,
+    "closing_snapshot_id": null,
+    "clv_odds_pct": null,
+    "clv_status": "NOT_COMPUTABLE"
   },
   {
     "id": "1594824_UNDER_2_5_dc-value-v2.1.0",
@@ -113031,7 +113456,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1594824_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "cb572cf4a50fc44879d4a9b37356619f523f2efbeef7ee3c4604a78938af7e72"
   },
   {
     "id": "1594824_BTTS_YES_dc-value-v2.1.0",
@@ -113060,7 +113487,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1594824_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "945c3f3b15237847b7b926c6460f4d179410fa9ed4d97caa735efba18fa228b3"
   },
   {
     "id": "1594825_OVER_2_5_dc-value-v2.1.0",
@@ -113089,7 +113518,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1594825_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "54c898da15ed3eb7a14850d1ed2ad222b28a870ded527360285c1410d02f3ad2"
   },
   {
     "id": "1594825_UNDER_2_5_dc-value-v2.1.0",
@@ -113118,7 +113549,9 @@
     "rejection_reason": "REJECT_ODD",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1594825_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "0792d0866bc3c0d3fbe15fcc42188c2b61bf073b10147ccf0b1aa54385445e96"
   },
   {
     "id": "1594825_BTTS_YES_dc-value-v2.1.0",
@@ -113176,7 +113609,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1594826_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "ef66af1035380b94b939d1c9aec13d53c15a9a473bc91019afa342eaa2da451c"
   },
   {
     "id": "1594826_UNDER_2_5_dc-value-v2.1.0",
@@ -113205,7 +113640,9 @@
     "rejection_reason": "REJECT_ODD",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1594826_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "bd7e5d0717f9ea682dc8b010d14ee8736cefae4ca8a3608b89de1451274ebffe"
   },
   {
     "id": "1594826_BTTS_YES_dc-value-v2.1.0",
@@ -113234,7 +113671,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1594826_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "8652c5edfc50ecac6417576797751759e864369f1e8dd48767a519c9dce2f1a4"
   },
   {
     "id": "1595141_OVER_2_5_dc-value-v2.1.0",
@@ -113350,7 +113789,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1634286_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "8da5779d88094f20797845ff4f375befb9ea49ad3100f6d695fe00cd3e0df373"
   },
   {
     "id": "1634286_UNDER_2_5_dc-value-v2.1.0",
@@ -113379,7 +113820,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1634286_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "fd23aaab408a3070f18fe2f76f26264d1d0b87b073e29e4ed34f66d06a70b46b"
   },
   {
     "id": "1634286_BTTS_YES_dc-value-v2.1.0",
@@ -113408,7 +113851,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1634286_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "ad3d3a50ad8356ae5236dd2e91c3332f4fb10d1a39fd5d37dbc3e178127c9ba8"
   },
   {
     "id": "1634287_OVER_2_5_dc-value-v2.1.0",
@@ -113437,7 +113882,9 @@
     "rejection_reason": "REJECT_ODD",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1634287_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "612e99217df8b32e117c6f72d3cec7979ea09dc1904564d9fba18912e8a92368"
   },
   {
     "id": "1634287_UNDER_2_5_dc-value-v2.1.0",
@@ -113466,7 +113913,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1634287_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "634266a65e0da39384de3d30ec453d9c479bf951977446b2f96f2677fb82958e"
   },
   {
     "id": "1634287_BTTS_YES_dc-value-v2.1.0",
@@ -113495,7 +113944,18 @@
     "rejection_reason": null,
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1634287_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "33fb930c1333233a611c12bde38bc2f19c65ff2f3d35157729e0ad203c215ced",
+    "opening_odd": null,
+    "opening_odds_captured_at": null,
+    "opening_snapshot_id": null,
+    "pick_snapshot_id": "33fb930c1333233a611c12bde38bc2f19c65ff2f3d35157729e0ad203c215ced",
+    "closing_odd": null,
+    "closing_odds_captured_at": null,
+    "closing_snapshot_id": null,
+    "clv_odds_pct": null,
+    "clv_status": "NOT_COMPUTABLE"
   },
   {
     "id": "1597931_OVER_2_5_dc-value-v2.1.0",
@@ -113524,7 +113984,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1597931_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "3ee5011af7d3665d683ffb634c1f02c72f5960d2d25e9d7d97f7b93d3bd98756"
   },
   {
     "id": "1597931_UNDER_2_5_dc-value-v2.1.0",
@@ -113553,7 +114015,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1597931_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "80db0607864efeaf4faf8049006524d6ffdce57923abe36da7b9a0e21f94c6ce"
   },
   {
     "id": "1597931_BTTS_YES_dc-value-v2.1.0",
@@ -113582,7 +114046,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1597931_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "e0ee0486650618fb26145d199bf2c20344f7fdc948e1cf2456e30fe23b1cafdc"
   },
   {
     "id": "1554152_OVER_2_5_dc-value-v2.1.0",
@@ -113611,7 +114077,9 @@
     "rejection_reason": null,
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1554152_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "91fc1b88fc3c2e51af2710f64959db4a261868de38e5670f25c0d8c7ec3adcdb"
   },
   {
     "id": "1554152_UNDER_2_5_dc-value-v2.1.0",
@@ -113640,7 +114108,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1554152_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "8e6a954c58a49b16b819ef722ae9db90ac67426777a0738f5a3f298d4a8e50f5"
   },
   {
     "id": "1554152_BTTS_YES_dc-value-v2.1.0",
@@ -113669,7 +114139,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1554152_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "80c61ae87caa555a22cf0b06354a7c072a1c3a8466afb601805ea74d92acf2ec"
   },
   {
     "id": "1555142_OVER_2_5_dc-value-v2.1.0",
@@ -113698,7 +114170,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1555142_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "0c55dc42ee605a28a9bf0eb04cd6860e1decf641472bccc4318d7abd21f7087a"
   },
   {
     "id": "1555142_UNDER_2_5_dc-value-v2.1.0",
@@ -113727,7 +114201,9 @@
     "rejection_reason": null,
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1555142_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "eaef7396ab6e2acbdec3ec200b9f18ca98af63ba58829d3322a8483830f5df95"
   },
   {
     "id": "1555142_BTTS_YES_dc-value-v2.1.0",
@@ -113785,7 +114261,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1555143_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "e76e2b34d7a6bd976b45e12133b02b3774076a502c3484f0962343e49396b915"
   },
   {
     "id": "1555143_UNDER_2_5_dc-value-v2.1.0",
@@ -113814,7 +114292,9 @@
     "rejection_reason": null,
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1555143_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "ceee8cfca88ad4c585fe7a0a9f992df4cac8efcd763802e4b66baead0f5e2d52"
   },
   {
     "id": "1555143_BTTS_YES_dc-value-v2.1.0",
@@ -113872,7 +114352,9 @@
     "rejection_reason": null,
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1555144_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "cb20bbea03dd20357b46a5d7c0cd50b795f14bba7caf23065e09f8e8f1ec07d3"
   },
   {
     "id": "1555144_UNDER_2_5_dc-value-v2.1.0",
@@ -113901,7 +114383,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1555144_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "07a49dfe825a06d0b0e853e13a793f5b18819e5cc0bf36b0bca52997c1b7b502"
   },
   {
     "id": "1555144_BTTS_YES_dc-value-v2.1.0",
@@ -113959,7 +114443,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1555145_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "cc5266e0d290a083bf66bb1450a2c96f03baf8737f9089ed4a519dd6ec5c9d22"
   },
   {
     "id": "1555145_UNDER_2_5_dc-value-v2.1.0",
@@ -113988,7 +114474,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1555145_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "9307f8a98c61fdd922861d35527dbd096406044c6557c62b72344cd372c8ea7c"
   },
   {
     "id": "1555145_BTTS_YES_dc-value-v2.1.0",
@@ -114046,7 +114534,9 @@
     "rejection_reason": "REJECT_ODD",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1597930_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "88ec2baa9fef2a56c6f0c0c06de8a8f999f57188d18feebf325a6c55da044146"
   },
   {
     "id": "1597930_UNDER_2_5_dc-value-v2.1.0",
@@ -114075,7 +114565,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1597930_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "2c3dc24489840f42b0acaeca5e97e710d2caa475fb6f06c04b8d30702ef8e9b1"
   },
   {
     "id": "1597930_BTTS_YES_dc-value-v2.1.0",
@@ -114104,7 +114596,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1597930_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "b8f353546f641bba12d4f242ce263b28fa25b938696d64a41ccb4114c135d034"
   },
   {
     "id": "1634288_OVER_2_5_dc-value-v2.1.0",
@@ -114133,7 +114627,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1634288_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "5b690cc73ac5c25913abff68570adf72bf6a2671c5a74ba3965a0753faf14f51"
   },
   {
     "id": "1634288_UNDER_2_5_dc-value-v2.1.0",
@@ -114162,7 +114658,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1634288_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "a9d6ee0cbcce7dedc6a0b513b74e45ae86bdbc2fc9aa5a6a205856974ea5b40f"
   },
   {
     "id": "1634288_BTTS_YES_dc-value-v2.1.0",
@@ -114191,7 +114689,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1634288_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "5c4a98ab5739e2d9045352d568f3276cf60a12bc7a97dc36f9d1231cb8e5dda8"
   },
   {
     "id": "1497689_OVER_2_5_dc-value-v2.1.0",
@@ -114220,7 +114720,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1497689_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "dbff2b4e9dfb523b598e6e675944ead8fdbe62efe1e79b8b2e57594f264ed44c"
   },
   {
     "id": "1497689_UNDER_2_5_dc-value-v2.1.0",
@@ -114249,7 +114751,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1497689_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "c3b1aa7aaf9ebc36b4c778118c4062d5e9c5e3f012e4c911743eb53f870e40ab"
   },
   {
     "id": "1497689_BTTS_YES_dc-value-v2.1.0",
@@ -114278,7 +114782,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1497689_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "b9854fd060425f11714a84da5157d670728bfe73496be429487a23bf91afbbb9"
   },
   {
     "id": "1497693_OVER_2_5_dc-value-v2.1.0",
@@ -114307,7 +114813,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1497693_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "021082d835684902a2bd963fda377e1797d464674822b3770bc4736a32957c3d"
   },
   {
     "id": "1497693_UNDER_2_5_dc-value-v2.1.0",
@@ -114336,7 +114844,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1497693_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "430a9d569ca5c35fcf5d8493cc641d1e55e27f9f735e5b3079faae6125694dfa"
   },
   {
     "id": "1497693_BTTS_YES_dc-value-v2.1.0",
@@ -114365,7 +114875,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1497693_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "7da98ad3c7cf9b9a34fb049f9c875754a5f01bbfe40a7f5a4105278baa632a2a"
   },
   {
     "id": "1497695_OVER_2_5_dc-value-v2.1.0",
@@ -114394,7 +114906,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1497695_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "dc32ab4520b51293080eb75c9d08db377f619ad9a6fc937fe15eee3a1e1e236d"
   },
   {
     "id": "1497695_UNDER_2_5_dc-value-v2.1.0",
@@ -114423,7 +114937,9 @@
     "rejection_reason": null,
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1497695_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "695f40a1c03a8fa5025385c27c8c5fdb68d0c6fda6cb35b9d3cdf63e7a3db8e5"
   },
   {
     "id": "1497695_BTTS_YES_dc-value-v2.1.0",
@@ -114452,7 +114968,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1497695_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "a4af9d9d578d86c52e814c2f5fa4fc1ec903d7361d918af9d62646696b50fde0"
   },
   {
     "id": "1497696_OVER_2_5_dc-value-v2.1.0",
@@ -114481,7 +114999,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1497696_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "e427f3b854768319615fda9548eb484b469603945b1849b1e1103ea1ce6027bf"
   },
   {
     "id": "1497696_UNDER_2_5_dc-value-v2.1.0",
@@ -114510,7 +115030,9 @@
     "rejection_reason": null,
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1497696_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "35e69ed48676ba53103b0fcc4ada809e8707233cff377e02f7fde8ca5de2e9e5"
   },
   {
     "id": "1497696_BTTS_YES_dc-value-v2.1.0",
@@ -114539,7 +115061,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1497696_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "5a64214eb8bd675c08dccea1d93daf51dc0c180278c0d2f73792adc144fd052b"
   },
   {
     "id": "1553825_OVER_2_5_dc-value-v2.1.0",
@@ -114568,7 +115092,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1553825_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "af919ab7e4a47e30abbe9a008f86c8f16cf8e8c2b59f049be392f27b631e1195"
   },
   {
     "id": "1553825_UNDER_2_5_dc-value-v2.1.0",
@@ -114597,7 +115123,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1553825_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "541bfc3980f3ec0e210ded7184c209f357b6eb03c8d98bc774d7fc75a843ac78"
   },
   {
     "id": "1553825_BTTS_YES_dc-value-v2.1.0",
@@ -114626,7 +115154,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1553825_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "b2a8de7abe077e2676aa58f93c3df86a157b2b3bc529a915701835907cc78050"
   },
   {
     "id": "1593293_OVER_2_5_dc-value-v2.1.0",
@@ -114655,7 +115185,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1593293_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "251392272f7052bca404d2ec7e5d0ff2ca8dec9f53722aafc9a434843d34b1d9"
   },
   {
     "id": "1593293_UNDER_2_5_dc-value-v2.1.0",
@@ -114684,7 +115216,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1593293_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "c788dfe5cffceedae082168ee1578d344bf8eae69371bb2979c9847dabaf0a00"
   },
   {
     "id": "1593293_BTTS_YES_dc-value-v2.1.0",
@@ -114713,7 +115247,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1593293_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "cc665daf43a50d2440d3e7a77fd2ae809b4113f78cfb43c35420c3a978f48863"
   },
   {
     "id": "1575465_OVER_2_5_dc-value-v2.1.0",
@@ -114742,7 +115278,9 @@
     "rejection_reason": null,
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1575465_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "98da2618dd7ddb7a8ed3c786aa7cf5a17b30a1a44360262784925f2f2bc0bd85"
   },
   {
     "id": "1575465_UNDER_2_5_dc-value-v2.1.0",
@@ -114771,7 +115309,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1575465_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "1913049f274bd8c0ca3e04475c061e13a09bdb97ea2f002a8b4ac0c395474358"
   },
   {
     "id": "1575465_BTTS_YES_dc-value-v2.1.0",
@@ -114800,7 +115340,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1575465_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "865366da8ff0f2fd4857a3e6159b7a4ecb7f91eb9d5abd3ad5319e938a36816e"
   },
   {
     "id": "1632428_OVER_2_5_dc-value-v2.1.0",
@@ -114916,7 +115458,9 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1636692_OVER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "d346c3fb43b0576494068a1824b1a01a6d42d1ff780181b18dce3c64b8e2e6e7"
   },
   {
     "id": "1636692_UNDER_2_5_dc-value-v2.1.0",
@@ -114945,7 +115489,9 @@
     "rejection_reason": "REJECT_ODD",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1636692_UNDER_2_5_dc-value-v2.1.0",
+    "entry_snapshot_id": "516eb4f350ec4abeff2acbb183229545c9b9f6f8f473278e7d823a2951cb01fe"
   },
   {
     "id": "1636692_BTTS_YES_dc-value-v2.1.0",
@@ -114974,6 +115520,8 @@
     "rejection_reason": "REJECT_LOW_EV",
     "status": "PENDING",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "signal_id": "1636692_BTTS_YES_dc-value-v2.1.0",
+    "entry_snapshot_id": "80d756ff54a8ea0f53e52f8bef306c415787596dc34125c2c69aaad3d5afab9c"
   }
 ]
