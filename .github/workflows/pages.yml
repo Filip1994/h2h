@@ -8,6 +8,7 @@ on:
       - QuantBet adaptive watchlist monitor
       - Monitor odds and settle ledgers
       - QuantBet T-5 closing odds capture
+      - QuantBet CLV persistence
       - Daily QuantBet bulletin
       - QuantBet closing-day bulletin
       - Skip pending bet
@@ -26,6 +27,12 @@ on:
       - intraday_alerts.json
       - strong_signals.json
       - near_misses.json
+      - bulletin_health.json
+      - odds_collection_state.json
+      - generation_health.json
+      - generation_health_history.json
+      - intraday_health.json
+      - deployment_meta.json
       - .github/workflows/pages.yml
   schedule:
     - cron: "17 * * * *"
@@ -38,7 +45,11 @@ concurrency:
   cancel-in-progress: true
 jobs:
   deploy:
-    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    # A completed producer can be successful, failed, cancelled or skipped. The
+    # deployment must still publish the latest canonical main state so that a
+    # failed/skipped producer cannot itself leave an older Pages artifact live.
+    # Truth about data freshness is carried by the published health metadata.
+    if: ${{ always() }}
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -50,6 +61,11 @@ jobs:
           fetch-depth: 1
       - uses: actions/configure-pages@v5
       - name: Build static artifact
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          WORKFLOW_RUN_NAME: ${{ github.event.workflow_run.name || '' }}
+          WORKFLOW_RUN_ID: ${{ github.event.workflow_run.id || '' }}
+          WORKFLOW_RUN_CONCLUSION: ${{ github.event.workflow_run.conclusion || '' }}
         run: |
           set -euo pipefail
           rm -rf _site
@@ -57,9 +73,9 @@ jobs:
           cp index.html production.html strong-signals.html near-misses.html history.html _site/
           cp assets/qb-dashboard.css assets/qb-dashboard.js _site/assets/
           cp bets.json ledger_meta.json _site/
-          [ -f intraday_alerts.json ] && cp intraday_alerts.json _site/ || true
-          [ -f strong_signals.json ] && cp strong_signals.json _site/ || true
-          [ -f near_misses.json ] && cp near_misses.json _site/ || true
+          for file in intraday_alerts.json strong_signals.json near_misses.json bulletin_health.json odds_collection_state.json generation_health.json generation_health_history.json intraday_health.json; do
+            [ -f "$file" ] && cp "$file" _site/ || true
+          done
           test -s _site/index.html
           test -s _site/production.html
           test -s _site/strong-signals.html
@@ -70,16 +86,44 @@ jobs:
           test -s _site/bets.json
           test -s _site/ledger_meta.json
           python - <<'PY'
+          import hashlib
           import json
+          import os
+          import subprocess
+          from datetime import datetime, timezone
           from pathlib import Path
-          for name in ('bets.json','ledger_meta.json','intraday_alerts.json','strong_signals.json','near_misses.json'):
-              p=Path('_site')/name
-              if not p.exists():
-                  print(name, 'not present yet')
+
+          site = Path('_site')
+          files = {}
+          for name in ('bets.json', 'ledger_meta.json', 'bulletin_health.json', 'odds_collection_state.json', 'generation_health.json', 'intraday_health.json'):
+              path = site / name
+              if path.exists():
+                  raw = path.read_bytes()
+                  files[name] = {
+                      'sha256': hashlib.sha256(raw).hexdigest(),
+                      'bytes': len(raw),
+                  }
+          deployment = {
+              'schema_version': 1,
+              'built_at': datetime.now(timezone.utc).isoformat(),
+              'source_sha': subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip(),
+              'event_name': os.environ.get('EVENT_NAME', ''),
+              'upstream_workflow_run': {
+                  'name': os.environ.get('WORKFLOW_RUN_NAME', ''),
+                  'id': os.environ.get('WORKFLOW_RUN_ID', ''),
+                  'conclusion': os.environ.get('WORKFLOW_RUN_CONCLUSION', ''),
+              },
+              'files': files,
+          }
+          (site / 'deployment_meta.json').write_text(json.dumps(deployment, indent=2) + '\n', encoding='utf-8')
+          print(json.dumps(deployment, indent=2))
+          for name in ('bets.json', 'ledger_meta.json', 'bulletin_health.json', 'odds_collection_state.json', 'generation_health.json', 'intraday_health.json'):
+              path = site / name
+              if not path.exists():
+                  print(name, 'not present')
                   continue
-              data=json.loads(p.read_text(encoding='utf-8'))
-              print(name, 'records=', len(data) if isinstance(data,list) else 'object')
-          PY
+              data = json.loads(path.read_text(encoding='utf-8'))
+              print(name, 'records=', len(data) if isinstance(data, list) else 'object')
       - uses: actions/upload-pages-artifact@v4
         with:
           path: _site
