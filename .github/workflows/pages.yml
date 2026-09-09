@@ -61,6 +61,31 @@ jobs:
           fetch-depth: 1
       - name: Build isolated public signal datasets
         run: python tools/build_public_signal_buckets.py
+      - name: Validate isolated Strong Signal publication contract
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          signals = json.loads(Path('strong_signals.json').read_text(encoding='utf-8'))
+          ledger = json.loads(Path('strong_signal_ledger.json').read_text(encoding='utf-8'))
+          portfolio = json.loads(Path('strong_signals_portfolio.json').read_text(encoding='utf-8'))
+
+          assert isinstance(signals, list) and len(signals) == len(ledger), (
+              'Strong Signal public dataset and ledger diverged'
+          )
+          assert all(x.get('virtual_portfolio') == 'STRONG_SIGNALS_VIRTUAL' for x in signals)
+          assert all(x.get('not_a_production_bet') is True for x in signals)
+          assert all(x.get('virtual_settled') is False for x in signals)
+          assert all(float(x.get('virtual_profit') or 0.0) == 0.0 for x in signals)
+          assert portfolio['production'] is False
+          assert portfolio['initial_bank'] == 10000.0
+          assert portfolio['current_bank'] == 10000.0
+          assert portfolio['total_profit'] == 0.0
+          assert portfolio['completed_count'] == 0
+          print('strong_signals records=', len(signals))
+          print('strong_signal portfolio=', json.dumps(portfolio, sort_keys=True))
+          PY
       - uses: actions/configure-pages@v5
       - name: Build static artifact
         env:
