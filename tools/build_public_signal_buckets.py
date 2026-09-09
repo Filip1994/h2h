@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from quantbot.strong_signal_bankroll import STRONG_SIGNAL_PORTFOLIO, portfolio
+from src.quantbot.strong_signal_bankroll import STRONG_SIGNAL_PORTFOLIO, portfolio
 
 ROOT = Path(__file__).resolve().parents[1]
 LEDGER_FILE = "strong_signal_ledger.json"
