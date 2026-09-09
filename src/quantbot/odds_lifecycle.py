@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 from datetime import UTC, datetime
 from pathlib import Path
@@ -130,6 +131,11 @@ def lifecycle_contract(
     opening = select_opening(observations, pick_at)
     pick = select_pick(observations, pick_at)
     closing = select_closing(observations, kickoff) if kickoff else None
+    opening_reason = None if opening else "NO_EARLIER_OBSERVATION"
+    pick_reason = None if pick else "NO_EXACT_ENTRY_OBSERVATION"
+    closing_reason = None if closing else (
+        "NO_VALID_PRE_KICKOFF_CLOSE" if kickoff else "KICKOFF_UNAVAILABLE"
+    )
     return {
         "schema_version": LIFECYCLE_SCHEMA_VERSION,
         "opening": opening,
@@ -138,6 +144,12 @@ def lifecycle_contract(
         "opening_available": opening is not None,
         "pick_available": pick is not None,
         "closing_available": closing is not None,
+        "opening_observation_id": opening.get("observation_id") if opening else None,
+        "pick_observation_id": pick.get("observation_id") if pick else None,
+        "closing_observation_id": closing.get("observation_id") if closing else None,
+        "opening_unavailable_reason": opening_reason,
+        "pick_unavailable_reason": pick_reason,
+        "closing_unavailable_reason": closing_reason,
         "coverage": (
             "FULLY_AUDITABLE"
             if opening and pick and closing
@@ -173,8 +185,22 @@ def canonical_observation(
 ) -> dict[str, Any]:
     if snapshot_type not in CANONICAL_SNAPSHOT_TYPES:
         raise ValueError(f"Unsupported canonical snapshot type: {snapshot_type}")
+    captured_iso = captured_at.astimezone(UTC).isoformat()
+    identity = "|".join(
+        (
+            str(int(fixture_id)),
+            str(market),
+            str(int(bookmaker_id)),
+            captured_iso,
+            f"{float(odd):.4f}",
+            f"{float(opposite_odd):.4f}",
+            snapshot_type,
+        )
+    )
+    observation_id = hashlib.sha256(identity.encode("utf-8")).hexdigest()
     return {
         "schema_version": LIFECYCLE_SCHEMA_VERSION,
+        "observation_id": observation_id,
         "fixture_id": int(fixture_id),
         "market": str(market),
         "bookmaker_id": int(bookmaker_id),
@@ -182,7 +208,7 @@ def canonical_observation(
         "selection": str(market),
         "odd": round(float(odd), 4),
         "opposite_odd": round(float(opposite_odd), 4),
-        "odds_captured_at": captured_at.astimezone(UTC).isoformat(),
+        "odds_captured_at": captured_iso,
         "snapshot_type": snapshot_type,
         "prediction_id": prediction_id,
         "signal_id": signal_id,
