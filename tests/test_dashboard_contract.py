@@ -15,6 +15,13 @@ NAV_PAGES = [
     "./near-misses.html",
     "./history.html",
 ]
+PAGE_KEYS = {
+    "index.html": "overview",
+    "production.html": "production",
+    "strong-signals.html": "strong",
+    "near-misses.html": "near",
+    "history.html": "history",
+}
 
 
 def read(name: str) -> str:
@@ -79,6 +86,26 @@ def test_dashboard_zero_pick_contract_and_truthful_state_labels():
     ):
         assert state in js
     assert "const status =" in js
+
+
+def test_dashboard_pages_have_explicit_sector_identity_and_active_navigation():
+    for page, key in PAGE_KEYS.items():
+        text = read(page)
+        assert f'<body data-page="{key}">' in text
+        assert f'class="active" aria-current="page" data-page="{key}"' in text
+
+    strong = read("strong-signals.html")
+    assert "STRONG SIGNALS · ISOLATED SECTOR" in strong
+    assert "VIRTUAL / COUNTERFACTUAL · 10,000 RSD BASE" in strong
+    assert "sector-frame" in strong
+
+
+def test_strong_page_cannot_fall_through_to_production_overview_accounting():
+    strong = read("strong-signals.html")
+    assert '<body data-page="strong">' in strong
+    assert "const INITIAL_BANK = 10000" in strong
+    assert "virtualProfit" in strong
+    assert "strong_signals_portfolio.json" in strong
 
 
 def test_strong_and_near_pages_have_active_and_history_contract():
