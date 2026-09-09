@@ -36,17 +36,18 @@ jobs:
       - run: pip install -r requirements.txt
       - run: python main.py capture-closing
       - run: python tools/capture_alert_closing.py
-      - name: Build public strong-signal dataset
-        run: python tools/build_public_strong_signals.py
-      - name: Commit T-5 snapshots, strong signals and raw API archive
+      - name: Build isolated public Strong Signal dataset
+        run: python tools/build_public_signal_buckets.py
+      - name: Commit T-5 snapshots, isolated Strong Signals and raw API archive
         run: |
           set -euo pipefail
-          if git diff --quiet -- bets.json intraday_alerts.json strong_signals.json && test -z "$(git status --porcelain -- data/raw_api)"; then
+          files=(bets.json intraday_alerts.json strong_signal_ledger.json strong_signals.json strong_signals_portfolio.json near_misses.json)
+          if git diff --quiet -- "${files[@]}" && test -z "$(git status --porcelain -- data/raw_api)"; then
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add bets.json intraday_alerts.json strong_signals.json data/raw_api
+          git add "${files[@]}" data/raw_api
           git commit -m "Capture QuantBet T-5 closing odds and API archive"
           for attempt in 1 2 3; do
             if git push; then exit 0; fi
