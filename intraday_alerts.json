@@ -243,7 +243,7 @@
     "signal_type": "NEW_OPPORTUNITY",
     "signal_sent_at": "2026-09-08T15:12:18.782287+02:00",
     "linked_bet_id": null,
-    "status": "PENDING",
+    "status": "SKIPPED",
     "profit": 0.0,
     "closing_5m_odd": null,
     "closing_5m_opposite_odd": null,
