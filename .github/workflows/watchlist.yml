@@ -40,7 +40,7 @@ jobs:
         with:
           path: .cache/api
           key: api-cache-${{ runner.os }}-${{ github.run_id }}
-          restore-keys: odds-capture-api-${{ runner.os }}-
+          restore-keys: api-cache-${{ runner.os }}-
       - run: pip install -r requirements.txt
       - run: python main.py watchlist
       - name: Build public Strong and Near Miss datasets
