@@ -133,8 +133,10 @@ def lifecycle_contract(
     closing = select_closing(observations, kickoff) if kickoff else None
     opening_reason = None if opening else "NO_EARLIER_OBSERVATION"
     pick_reason = None if pick else "NO_EXACT_ENTRY_OBSERVATION"
-    closing_reason = None if closing else (
-        "NO_VALID_PRE_KICKOFF_CLOSE" if kickoff else "KICKOFF_UNAVAILABLE"
+    closing_reason = (
+        None
+        if closing
+        else ("NO_VALID_PRE_KICKOFF_CLOSE" if kickoff else "KICKOFF_UNAVAILABLE")
     )
     return {
         "schema_version": LIFECYCLE_SCHEMA_VERSION,
