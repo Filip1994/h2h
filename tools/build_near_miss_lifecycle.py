@@ -1,3 +1,4 @@
+# fmt: off
 from __future__ import annotations
 
 import json
@@ -102,7 +103,12 @@ def _settlement_from_prediction(prediction: dict[str, Any]) -> tuple[str | None,
         return status, result, settled_at, True
     if status == "SETTLED" and prediction.get("outcome") is not None:
         result = result or str(prediction.get("outcome"))
-        return ("WIN" if bool(prediction.get("outcome")) else "LOSS"), result, settled_at, True
+        return (
+            ("WIN" if bool(prediction.get("outcome")) else "LOSS"),
+            result,
+            settled_at,
+            True,
+        )
     return None, result, settled_at, False
 
 
@@ -126,8 +132,10 @@ def build(root: Path = ROOT, now: datetime | None = None) -> list[dict[str, Any]
     existing = existing if isinstance(existing, list) else []
 
     candidates = [
-        row for row in observations
-        if str(row.get("signal_class") or row.get("signal_state") or "").upper() == "NEAR_MISS"
+        row
+        for row in observations
+        if str(row.get("signal_class") or row.get("signal_state") or "").upper()
+        == "NEAR_MISS"
     ]
     candidates.extend(row for row in existing if isinstance(row, dict))
     groups: dict[tuple[str, str, str, str, str], list[dict[str, Any]]] = {}
@@ -150,7 +158,8 @@ def build(root: Path = ROOT, now: datetime | None = None) -> list[dict[str, Any]
         near_at = _capture_time(latest)
 
         exact_alerts = [
-            row for row in alerts
+            row
+            for row in alerts
             if isinstance(row, dict)
             and str(row.get("signal_class") or "").upper() == "STRONG_SIGNAL"
             and exact_identity(
@@ -163,7 +172,8 @@ def build(root: Path = ROOT, now: datetime | None = None) -> list[dict[str, Any]
             )
         ]
         exact_bets = [
-            row for row in bets
+            row
+            for row in bets
             if isinstance(row, dict)
             and exact_identity(
                 row,
@@ -175,14 +185,16 @@ def build(root: Path = ROOT, now: datetime | None = None) -> list[dict[str, Any]
             )
         ]
         promotions = exact_alerts or [
-            row for row in exact_bets
+            row
+            for row in exact_bets
             if str(row.get("signal_source") or "").upper() == "INTRADAY_ALERT"
         ]
         pick = min(promotions, key=_event_sort_key) if promotions else None
         pick_at = _capture_time(pick or {})
 
         same_canonical = [
-            row for row in canonical
+            row
+            for row in canonical
             if exact_identity(
                 row,
                 prediction_id=prediction_id,
@@ -195,17 +207,23 @@ def build(root: Path = ROOT, now: datetime | None = None) -> list[dict[str, Any]
             and kickoff
             and _capture_time(row) < kickoff
         ]
-        pre_pick = [row for row in same_canonical if pick_at is None or _capture_time(row) < pick_at]
+        pre_pick = [
+            row
+            for row in same_canonical
+            if pick_at is None or _capture_time(row) < pick_at
+        ]
         opening_pool = pre_pick or same_canonical
         opening = min(opening_pool, key=_event_sort_key) if opening_pool else None
         t5 = [
-            row for row in same_canonical
+            row
+            for row in same_canonical
             if str(row.get("snapshot_type") or "").upper() == "T5"
         ]
         closing = max(t5, key=_event_sort_key) if t5 else None
 
         exact_transitions = [
-            row for row in transitions
+            row
+            for row in transitions
             if isinstance(row, dict)
             and exact_identity(
                 row,
@@ -359,7 +377,10 @@ if __name__ == "__main__":
         json.dumps(
             {
                 "near_misses": len(rows),
-                "active": sum(row["status"] in {"PENDING", "PROMOTED", "SETTLEMENT_PENDING"} for row in rows),
+                "active": sum(
+                    row["status"] in {"PENDING", "PROMOTED", "SETTLEMENT_PENDING"}
+                    for row in rows
+                ),
                 "expired": sum(row["status"] == "EXPIRED" for row in rows),
                 "promoted": sum(row["status"] == "PROMOTED" for row in rows),
                 "settled": sum(row["virtual_settled"] for row in rows),
