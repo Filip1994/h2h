@@ -82,10 +82,8 @@ def _classification_reasons(
         reasons.append("NETWORK_ERROR")
     if usage.get("budget_exhaustion_events", 0):
         reasons.append("API_BUDGET_EXHAUSTED")
-    if telemetry.get("global_quota", {}).get("quota_pressure_state") not in (
-        None,
-        "HEALTHY",
-    ):
+    global_quota = usage.get("global_quota") or {}
+    if global_quota.get("quota_pressure_state") not in (None, "HEALTHY"):
         reasons.append("GLOBAL_QUOTA_PRESSURE")
     fixture_failures = telemetry.get("fixture_failures", {})
     if fixture_failures.get("api", 0):
