@@ -6,9 +6,11 @@ import sys
 from datetime import UTC, datetime
 from pathlib import Path
 
-from tools.system_health import check_system_health
-
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from tools.system_health import check_system_health
 
 
 def check_settlement_health(
