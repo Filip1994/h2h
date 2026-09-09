@@ -1,12 +1,12 @@
 {
-  "request_count": 95,
+  "request_count": 28,
   "request_budget": 7500,
   "working_budget": 7000,
   "reserve": 500,
-  "remaining_working": 6905,
-  "cache_hits": 0,
-  "cache_misses": 95,
-  "cache_hit_rate": 0.0,
+  "remaining_working": 6972,
+  "cache_hits": 4,
+  "cache_misses": 28,
+  "cache_hit_rate": 0.125,
   "rate_limit_events": 0,
   "retry_events": 0,
   "budget_exhaustion_events": 0,
@@ -14,29 +14,29 @@
   "api_error_events": 0,
   "network_error_events": 0,
   "endpoint_requests": {
-    "fixtures": 53,
-    "odds": 42
+    "fixtures": 9,
+    "odds": 19
   },
-  "endpoint_cache_hits": {},
+  "endpoint_cache_hits": {
+    "fixtures": 4
+  },
   "global_quota": {
     "date": "2026-09-09",
     "daily_capacity": 7500,
     "safety_reserve": 500,
-    "consumed": 142,
+    "consumed": 75,
     "reserved": 0,
-    "remaining_unallocated": 7358,
+    "remaining_unallocated": 7425,
     "consumed_by_workflow": {
-      "Daily QuantBet bulletin": 95,
-      "QuantBet intraday strong-signal scanner": 47
+      "QuantBet intraday strong-signal scanner": 75
     },
     "reserved_by_workflow": {
-      "Daily QuantBet bulletin": 0,
       "QuantBet intraday strong-signal scanner": 0
     },
     "quota_pressure_state": "HEALTHY",
-    "request_count": 142
+    "request_count": 75
   },
-  "timestamp": "2026-09-09T22:23:24.071011+00:00",
+  "timestamp": "2026-09-09T22:28:55.506191+00:00",
   "date": "2026-09-10",
-  "new_bets": 3
+  "new_bets": 0
 }

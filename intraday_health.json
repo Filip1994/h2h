@@ -1,10 +1,10 @@
 {
   "status": "RUNNING",
-  "last_run_at": "2026-09-09T19:58:11.981078+00:00",
+  "last_run_at": "2026-09-09T22:29:11.174100+00:00",
   "workflow": "intraday.yml",
-  "workflow_run_id": "34398172265",
+  "workflow_run_id": "34412285260",
   "workflow_run_attempt": "1",
-  "workflow_sha": "986c9684d39aed1674f734f7d0d69bd6ba75fcb0",
+  "workflow_sha": "2e4d87f7f9eb732eb7b07fbc13dd360925dc453c",
   "timezone": "Europe/Belgrade",
   "strong_signal_count": 17,
   "near_miss_count": 98,

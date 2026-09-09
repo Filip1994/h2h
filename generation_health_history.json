@@ -4968,5 +4968,1053 @@
     "diagnostic_count": 4,
     "observation_only": true,
     "threshold_action": "NO_AUTOMATIC_BLOCKING"
+  },
+  {
+    "schema_version": 4,
+    "timestamp": "2026-09-09T22:28:55.506191+00:00",
+    "status": "HEALTHY",
+    "classification_reasons": [],
+    "pipeline": {
+      "fixtures_discovered": 190,
+      "fixtures_parse_failures": 0,
+      "fixtures_eligible": 19,
+      "fixtures_modelled": 19,
+      "predictions_generated": 57,
+      "candidates_evaluated": 57,
+      "candidates_qualified": 7,
+      "candidates": 7,
+      "selections_produced": 0,
+      "training_sample_insufficiency": 0,
+      "fit_failures": 0,
+      "fixtures_without_odds": 0,
+      "fixture_failures": {
+        "api": 0,
+        "dixon_coles": 0,
+        "other": 0
+      },
+      "eligibility_rejections": {
+        "UNKNOWN_LEAGUE_TIER": 17,
+        "EXPLICIT_EXCLUSION": 6
+      },
+      "funnel_rejections": [
+        {
+          "fixture_id": 1635839,
+          "stage": "eligible",
+          "reason": "UNKNOWN_LEAGUE_TIER"
+        },
+        {
+          "fixture_id": 1549114,
+          "stage": "eligible",
+          "reason": "UNKNOWN_LEAGUE_TIER"
+        },
+        {
+          "fixture_id": 1607638,
+          "stage": "eligible",
+          "reason": "UNKNOWN_LEAGUE_TIER"
+        },
+        {
+          "fixture_id": 1607643,
+          "stage": "eligible",
+          "reason": "UNKNOWN_LEAGUE_TIER"
+        },
+        {
+          "fixture_id": 1610969,
+          "stage": "eligible",
+          "reason": "EXPLICIT_EXCLUSION"
+        },
+        {
+          "fixture_id": 1632412,
+          "stage": "eligible",
+          "reason": "UNKNOWN_LEAGUE_TIER"
+        },
+        {
+          "fixture_id": 1637526,
+          "stage": "eligible",
+          "reason": "EXPLICIT_EXCLUSION"
+        },
+        {
+          "fixture_id": 1637543,
+          "stage": "eligible",
+          "reason": "EXPLICIT_EXCLUSION"
+        },
+        {
+          "fixture_id": 1637553,
+          "stage": "eligible",
+          "reason": "EXPLICIT_EXCLUSION"
+        },
+        {
+          "fixture_id": 1638211,
+          "stage": "eligible",
+          "reason": "UNKNOWN_LEAGUE_TIER"
+        },
+        {
+          "fixture_id": 1490452,
+          "market": "OVER_2_5",
+          "stage": "strategy",
+          "reason": "REJECT_LOW_EV"
+        },
+        {
+          "fixture_id": 1490452,
+          "market": "UNDER_2_5",
+          "stage": "strategy",
+          "reason": "REJECT_LOW_EV"
+        },
+        {
+          "fixture_id": 1490452,
+          "market": "BTTS_YES",
+          "stage": "strategy",
+          "reason": "REJECT_ODD"
+        },
+        {
+          "fixture_id": 1490453,
+          "market": "OVER_2_5",
+          "stage": "strategy",
+          "reason": "REJECT_LOW_EV"
+        },
+        {
+          "fixture_id": 1490453,
+          "market": "BTTS_YES",
+          "stage": "strategy",
+          "reason": "REJECT_LOW_EV"
+        },
+        {
+          "fixture_id": 1490454,
+          "market": "OVER_2_5",
+          "stage": "strategy",
+          "reason": "REJECT_LOW_EV"
+        },
+        {
+          "fixture_id": 1490454,
+          "market": "UNDER_2_5",
+          "stage": "strategy",
+          "reason": "REJECT_LOW_EV"
+        },
+        {
+          "fixture_id": 1490454,
+          "market": "BTTS_YES",
+          "stage": "strategy",
+          "reason": "REJECT_LOW_EV"
+        },
+        {
+          "fixture_id": 1490456,
+          "market": "OVER_2_5",
+          "stage": "strategy",
+          "reason": "REJECT_LOW_EV"
+        },
+        {
+          "fixture_id": 1490456,
+          "market": "BTTS_YES",
+          "stage": "strategy",
+          "reason": "REJECT_LOW_EV"
+        },
+        {
+          "fixture_id": 1511682,
+          "market": "OVER_2_5",
+          "stage": "strategy",
+          "reason": "REJECT_LOW_EV"
+        },
+        {
+          "fixture_id": 1511682,
+          "market": "UNDER_2_5",
+          "stage": "strategy",
+          "reason": "REJECT_LOW_EV"
+        },
+        {
+          "fixture_id": 1511682,
+          "market": "BTTS_YES",
+          "stage": "strategy",
+          "reason": "REJECT_LOW_EV"
+        },
+        {
+          "fixture_id": 1511684,
+          "market": "OVER_2_5",
+          "stage": "strategy",
+          "reason": "REJECT_LOW_EV"
+        },
+        {
+          "fixture_id": 1511684,
+          "market": "UNDER_2_5",
+          "stage": "strategy",
+          "reason": "REJECT_LOW_EV"
+        },
+        {
+          "fixture_id": 1511684,
+          "market": "BTTS_YES",
+          "stage": "strategy",
+          "reason": "REJECT_LOW_EV"
+        },
+        {
+          "fixture_id": 1517343,
+          "stage": "eligible",
+          "reason": "UNKNOWN_LEAGUE_TIER"
+        },
+        {
+          "fixture_id": 1520860,
+          "market": "OVER_2_5",
+          "stage": "strategy",
+          "reason": "REJECT_LOW_EV"
+        },
+        {
+          "fixture_id": 1520860,
+          "market": "BTTS_YES",
+          "stage": "strategy",
+          "reason": "REJECT_LOW_EV"
+        },
+        {
+          "fixture_id": 1520866,
+          "market": "OVER_2_5",
+          "stage": "strategy",
+          "reason": "REJECT_LOW_EV"
+        },
+        {
+          "fixture_id": 1520866,
+          "market": "UNDER_2_5",
+          "stage": "strategy",
+          "reason": "REJECT_LOW_EV"
+        },
+        {
+          "fixture_id": 1520866,
+          "market": "BTTS_YES",
+          "stage": "strategy",
+          "reason": "REJECT_LOW_EV"
+        },
+        {
+          "fixture_id": 1490451,
+          "market": "OVER_2_5",
+          "stage": "strategy",
+          "reason": "REJECT_ODD"
+        },
+        {
+          "fixture_id": 1490451,
+          "market": "BTTS_YES",
+          "stage": "strategy",
+          "reason": "REJECT_ODD"
+        },
+        {
+          "fixture_id": 1490455,
+          "market": "OVER_2_5",
+          "stage": "strategy",
+          "reason": "REJECT_LOW_EV"
+        },
+        {
+          "fixture_id": 1490455,
+          "market": "UNDER_2_5",
+          "stage": "strategy",
+          "reason": "REJECT_LOW_EV"
+        },
+        {
+          "fixture_id": 1490455,
+          "market": "BTTS_YES",
+          "stage": "strategy",
+          "reason": "REJECT_LOW_EV"
+        },
+        {
+          "fixture_id": 1513346,
+          "stage": "eligible",
+          "reason": "EXPLICIT_EXCLUSION"
+        },
+        {
+          "fixture_id": 1559632,
+          "stage": "eligible",
+          "reason": "UNKNOWN_LEAGUE_TIER"
+        },
+        {
+          "fixture_id": 1611288,
+          "stage": "eligible",
+          "reason": "UNKNOWN_LEAGUE_TIER"
+        },
+        {
+          "fixture_id": 1490457,
+          "market": "OVER_2_5",
+          "stage": "strategy",
+          "reason": "REJECT_ODD"
+        },
+        {
+          "fixture_id": 1490457,
+          "market": "UNDER_2_5",
+          "stage": "strategy",
+          "reason": "REJECT_LOW_EV"
+        },
+        {
+          "fixture_id": 1490457,
+          "market": "BTTS_YES",
+          "stage": "strategy",
+          "reason": "REJECT_ODD"
+        },
+        {
+          "fixture_id": 1490458,
+          "market": "OVER_2_5",
+          "stage": "strategy",
+          "reason": "REJECT_LOW_EV"
+        },
+        {
+          "fixture_id": 1490458,
+          "market": "UNDER_2_5",
+          "stage": "strategy",
+          "reason": "REJECT_LOW_EV"
+        },
+        {
+          "fixture_id": 1490458,
+          "market": "BTTS_YES",
+          "stage": "strategy",
+          "reason": "REJECT_LOW_EV"
+        },
+        {
+          "fixture_id": 1490459,
+          "market": "OVER_2_5",
+          "stage": "strategy",
+          "reason": "REJECT_LOW_EV"
+        },
+        {
+          "fixture_id": 1490459,
+          "market": "UNDER_2_5",
+          "stage": "strategy",
+          "reason": "REJECT_LOW_EV"
+        },
+        {
+          "fixture_id": 1490459,
+          "market": "BTTS_YES",
+          "stage": "strategy",
+          "reason": "REJECT_LOW_EV"
+        },
+        {
+          "fixture_id": 1490460,
+          "market": "OVER_2_5",
+          "stage": "strategy",
+          "reason": "REJECT_LOW_EV"
+        },
+        {
+          "fixture_id": 1490460,
+          "market": "BTTS_YES",
+          "stage": "strategy",
+          "reason": "REJECT_LOW_EV"
+        },
+        {
+          "fixture_id": 1520861,
+          "market": "OVER_2_5",
+          "stage": "strategy",
+          "reason": "REJECT_LOW_EV"
+        },
+        {
+          "fixture_id": 1520861,
+          "market": "UNDER_2_5",
+          "stage": "strategy",
+          "reason": "REJECT_LOW_EV"
+        },
+        {
+          "fixture_id": 1520861,
+          "market": "BTTS_YES",
+          "stage": "strategy",
+          "reason": "REJECT_LOW_EV"
+        },
+        {
+          "fixture_id": 1619673,
+          "stage": "eligible",
+          "reason": "UNKNOWN_LEAGUE_TIER"
+        },
+        {
+          "fixture_id": 1631506,
+          "stage": "eligible",
+          "reason": "UNKNOWN_LEAGUE_TIER"
+        },
+        {
+          "fixture_id": 1513347,
+          "stage": "eligible",
+          "reason": "EXPLICIT_EXCLUSION"
+        },
+        {
+          "fixture_id": 1600590,
+          "stage": "eligible",
+          "reason": "UNKNOWN_LEAGUE_TIER"
+        },
+        {
+          "fixture_id": 1600591,
+          "stage": "eligible",
+          "reason": "UNKNOWN_LEAGUE_TIER"
+        },
+        {
+          "fixture_id": 1636684,
+          "stage": "eligible",
+          "reason": "UNKNOWN_LEAGUE_TIER"
+        },
+        {
+          "fixture_id": 1635082,
+          "stage": "eligible",
+          "reason": "UNKNOWN_LEAGUE_TIER"
+        },
+        {
+          "fixture_id": 1559635,
+          "stage": "eligible",
+          "reason": "UNKNOWN_LEAGUE_TIER"
+        },
+        {
+          "fixture_id": 1490461,
+          "market": "OVER_2_5",
+          "stage": "strategy",
+          "reason": "REJECT_ODD"
+        },
+        {
+          "fixture_id": 1490461,
+          "market": "BTTS_YES",
+          "stage": "strategy",
+          "reason": "REJECT_LOW_EV"
+        },
+        {
+          "fixture_id": 1490462,
+          "market": "OVER_2_5",
+          "stage": "strategy",
+          "reason": "REJECT_ODD"
+        },
+        {
+          "fixture_id": 1490462,
+          "market": "BTTS_YES",
+          "stage": "strategy",
+          "reason": "REJECT_LOW_EV"
+        },
+        {
+          "fixture_id": 1490464,
+          "market": "OVER_2_5",
+          "stage": "strategy",
+          "reason": "REJECT_ODD"
+        },
+        {
+          "fixture_id": 1490464,
+          "market": "UNDER_2_5",
+          "stage": "strategy",
+          "reason": "REJECT_LOW_EV"
+        },
+        {
+          "fixture_id": 1490464,
+          "market": "BTTS_YES",
+          "stage": "strategy",
+          "reason": "REJECT_ODD"
+        },
+        {
+          "fixture_id": 1490465,
+          "market": "OVER_2_5",
+          "stage": "strategy",
+          "reason": "REJECT_LOW_EV"
+        },
+        {
+          "fixture_id": 1490465,
+          "market": "UNDER_2_5",
+          "stage": "strategy",
+          "reason": "REJECT_LOW_EV"
+        },
+        {
+          "fixture_id": 1490465,
+          "market": "BTTS_YES",
+          "stage": "strategy",
+          "reason": "REJECT_ODD"
+        },
+        {
+          "fixture_id": 1636685,
+          "stage": "eligible",
+          "reason": "UNKNOWN_LEAGUE_TIER"
+        },
+        {
+          "fixture_id": 1490453,
+          "market": "UNDER_2_5",
+          "stage": "risk_staking",
+          "reason": "RISK_OR_CAPACITY"
+        },
+        {
+          "fixture_id": 1490456,
+          "market": "UNDER_2_5",
+          "stage": "risk_staking",
+          "reason": "RISK_OR_CAPACITY"
+        },
+        {
+          "fixture_id": 1520860,
+          "market": "UNDER_2_5",
+          "stage": "risk_staking",
+          "reason": "RISK_OR_CAPACITY"
+        },
+        {
+          "fixture_id": 1490451,
+          "market": "UNDER_2_5",
+          "stage": "risk_staking",
+          "reason": "RISK_OR_CAPACITY"
+        },
+        {
+          "fixture_id": 1490460,
+          "market": "UNDER_2_5",
+          "stage": "risk_staking",
+          "reason": "RISK_OR_CAPACITY"
+        },
+        {
+          "fixture_id": 1490461,
+          "market": "UNDER_2_5",
+          "stage": "risk_staking",
+          "reason": "RISK_OR_CAPACITY"
+        },
+        {
+          "fixture_id": 1490462,
+          "market": "UNDER_2_5",
+          "stage": "risk_staking",
+          "reason": "RISK_OR_CAPACITY"
+        }
+      ],
+      "odds_available": 19,
+      "valid_quotes": 57,
+      "ev_pass": 7,
+      "edge_pass": 7,
+      "risk_rejections": 7,
+      "duplicate_rejections": 0,
+      "persistence_failures": 0,
+      "risk_checks": 7,
+      "funnel": {
+        "discovered": 190,
+        "eligible": 19,
+        "modelled": 19,
+        "predictions": 57,
+        "odds_available": 0,
+        "valid_quotes": 0,
+        "candidates": 7,
+        "ev_pass": 0,
+        "edge_pass": 0,
+        "risk_checks": 0,
+        "selected": 0,
+        "persisted_bets": 0,
+        "settled": 0
+      }
+    },
+    "funnel": {
+      "discovered": 190,
+      "eligible": 19,
+      "modelled": 19,
+      "predictions": 57,
+      "odds_available": 0,
+      "valid_quotes": 0,
+      "candidates": 7,
+      "ev_pass": 0,
+      "edge_pass": 0,
+      "risk_checks": 0,
+      "selected": 0,
+      "persisted_bets": 0,
+      "settled": 0
+    },
+    "funnel_semantics": {
+      "discovered": "Raw fixtures returned by the fixture discovery call for the run.",
+      "eligible": "Discovered fixtures that pass status, time-window and league eligibility checks.",
+      "modelled": "Eligible fixtures for which the model successfully produced probabilities and expected goals.",
+      "predictions": "Market-level prediction records produced from successfully modelled fixtures.",
+      "odds_available": "Modelled fixtures for which the provider returned at least one valid market quote.",
+      "valid_quotes": "Market-level quotes accepted by the quote normalizer and available for strategy evaluation.",
+      "candidates": "Market-level candidates that pass all existing odds/EV/edge gates.",
+      "ev_pass": "Market-level evaluations that pass the configured EV threshold.",
+      "edge_pass": "Market-level candidates that pass the configured probability-edge threshold.",
+      "risk_checks": "Candidates presented to the existing staking/risk allocator.",
+      "selected": "Candidates selected by the existing allocator before persistence.",
+      "persisted_bets": "Production bets successfully appended by the idempotent BetStore.",
+      "settled": "Production bets that subsequently reach a terminal settlement state."
+    },
+    "funnel_rejections": [
+      {
+        "fixture_id": 1635839,
+        "stage": "eligible",
+        "reason": "UNKNOWN_LEAGUE_TIER"
+      },
+      {
+        "fixture_id": 1549114,
+        "stage": "eligible",
+        "reason": "UNKNOWN_LEAGUE_TIER"
+      },
+      {
+        "fixture_id": 1607638,
+        "stage": "eligible",
+        "reason": "UNKNOWN_LEAGUE_TIER"
+      },
+      {
+        "fixture_id": 1607643,
+        "stage": "eligible",
+        "reason": "UNKNOWN_LEAGUE_TIER"
+      },
+      {
+        "fixture_id": 1610969,
+        "stage": "eligible",
+        "reason": "EXPLICIT_EXCLUSION"
+      },
+      {
+        "fixture_id": 1632412,
+        "stage": "eligible",
+        "reason": "UNKNOWN_LEAGUE_TIER"
+      },
+      {
+        "fixture_id": 1637526,
+        "stage": "eligible",
+        "reason": "EXPLICIT_EXCLUSION"
+      },
+      {
+        "fixture_id": 1637543,
+        "stage": "eligible",
+        "reason": "EXPLICIT_EXCLUSION"
+      },
+      {
+        "fixture_id": 1637553,
+        "stage": "eligible",
+        "reason": "EXPLICIT_EXCLUSION"
+      },
+      {
+        "fixture_id": 1638211,
+        "stage": "eligible",
+        "reason": "UNKNOWN_LEAGUE_TIER"
+      },
+      {
+        "fixture_id": 1490452,
+        "market": "OVER_2_5",
+        "stage": "strategy",
+        "reason": "REJECT_LOW_EV"
+      },
+      {
+        "fixture_id": 1490452,
+        "market": "UNDER_2_5",
+        "stage": "strategy",
+        "reason": "REJECT_LOW_EV"
+      },
+      {
+        "fixture_id": 1490452,
+        "market": "BTTS_YES",
+        "stage": "strategy",
+        "reason": "REJECT_ODD"
+      },
+      {
+        "fixture_id": 1490453,
+        "market": "OVER_2_5",
+        "stage": "strategy",
+        "reason": "REJECT_LOW_EV"
+      },
+      {
+        "fixture_id": 1490453,
+        "market": "BTTS_YES",
+        "stage": "strategy",
+        "reason": "REJECT_LOW_EV"
+      },
+      {
+        "fixture_id": 1490454,
+        "market": "OVER_2_5",
+        "stage": "strategy",
+        "reason": "REJECT_LOW_EV"
+      },
+      {
+        "fixture_id": 1490454,
+        "market": "UNDER_2_5",
+        "stage": "strategy",
+        "reason": "REJECT_LOW_EV"
+      },
+      {
+        "fixture_id": 1490454,
+        "market": "BTTS_YES",
+        "stage": "strategy",
+        "reason": "REJECT_LOW_EV"
+      },
+      {
+        "fixture_id": 1490456,
+        "market": "OVER_2_5",
+        "stage": "strategy",
+        "reason": "REJECT_LOW_EV"
+      },
+      {
+        "fixture_id": 1490456,
+        "market": "BTTS_YES",
+        "stage": "strategy",
+        "reason": "REJECT_LOW_EV"
+      },
+      {
+        "fixture_id": 1511682,
+        "market": "OVER_2_5",
+        "stage": "strategy",
+        "reason": "REJECT_LOW_EV"
+      },
+      {
+        "fixture_id": 1511682,
+        "market": "UNDER_2_5",
+        "stage": "strategy",
+        "reason": "REJECT_LOW_EV"
+      },
+      {
+        "fixture_id": 1511682,
+        "market": "BTTS_YES",
+        "stage": "strategy",
+        "reason": "REJECT_LOW_EV"
+      },
+      {
+        "fixture_id": 1511684,
+        "market": "OVER_2_5",
+        "stage": "strategy",
+        "reason": "REJECT_LOW_EV"
+      },
+      {
+        "fixture_id": 1511684,
+        "market": "UNDER_2_5",
+        "stage": "strategy",
+        "reason": "REJECT_LOW_EV"
+      },
+      {
+        "fixture_id": 1511684,
+        "market": "BTTS_YES",
+        "stage": "strategy",
+        "reason": "REJECT_LOW_EV"
+      },
+      {
+        "fixture_id": 1517343,
+        "stage": "eligible",
+        "reason": "UNKNOWN_LEAGUE_TIER"
+      },
+      {
+        "fixture_id": 1520860,
+        "market": "OVER_2_5",
+        "stage": "strategy",
+        "reason": "REJECT_LOW_EV"
+      },
+      {
+        "fixture_id": 1520860,
+        "market": "BTTS_YES",
+        "stage": "strategy",
+        "reason": "REJECT_LOW_EV"
+      },
+      {
+        "fixture_id": 1520866,
+        "market": "OVER_2_5",
+        "stage": "strategy",
+        "reason": "REJECT_LOW_EV"
+      },
+      {
+        "fixture_id": 1520866,
+        "market": "UNDER_2_5",
+        "stage": "strategy",
+        "reason": "REJECT_LOW_EV"
+      },
+      {
+        "fixture_id": 1520866,
+        "market": "BTTS_YES",
+        "stage": "strategy",
+        "reason": "REJECT_LOW_EV"
+      },
+      {
+        "fixture_id": 1490451,
+        "market": "OVER_2_5",
+        "stage": "strategy",
+        "reason": "REJECT_ODD"
+      },
+      {
+        "fixture_id": 1490451,
+        "market": "BTTS_YES",
+        "stage": "strategy",
+        "reason": "REJECT_ODD"
+      },
+      {
+        "fixture_id": 1490455,
+        "market": "OVER_2_5",
+        "stage": "strategy",
+        "reason": "REJECT_LOW_EV"
+      },
+      {
+        "fixture_id": 1490455,
+        "market": "UNDER_2_5",
+        "stage": "strategy",
+        "reason": "REJECT_LOW_EV"
+      },
+      {
+        "fixture_id": 1490455,
+        "market": "BTTS_YES",
+        "stage": "strategy",
+        "reason": "REJECT_LOW_EV"
+      },
+      {
+        "fixture_id": 1513346,
+        "stage": "eligible",
+        "reason": "EXPLICIT_EXCLUSION"
+      },
+      {
+        "fixture_id": 1559632,
+        "stage": "eligible",
+        "reason": "UNKNOWN_LEAGUE_TIER"
+      },
+      {
+        "fixture_id": 1611288,
+        "stage": "eligible",
+        "reason": "UNKNOWN_LEAGUE_TIER"
+      },
+      {
+        "fixture_id": 1490457,
+        "market": "OVER_2_5",
+        "stage": "strategy",
+        "reason": "REJECT_ODD"
+      },
+      {
+        "fixture_id": 1490457,
+        "market": "UNDER_2_5",
+        "stage": "strategy",
+        "reason": "REJECT_LOW_EV"
+      },
+      {
+        "fixture_id": 1490457,
+        "market": "BTTS_YES",
+        "stage": "strategy",
+        "reason": "REJECT_ODD"
+      },
+      {
+        "fixture_id": 1490458,
+        "market": "OVER_2_5",
+        "stage": "strategy",
+        "reason": "REJECT_LOW_EV"
+      },
+      {
+        "fixture_id": 1490458,
+        "market": "UNDER_2_5",
+        "stage": "strategy",
+        "reason": "REJECT_LOW_EV"
+      },
+      {
+        "fixture_id": 1490458,
+        "market": "BTTS_YES",
+        "stage": "strategy",
+        "reason": "REJECT_LOW_EV"
+      },
+      {
+        "fixture_id": 1490459,
+        "market": "OVER_2_5",
+        "stage": "strategy",
+        "reason": "REJECT_LOW_EV"
+      },
+      {
+        "fixture_id": 1490459,
+        "market": "UNDER_2_5",
+        "stage": "strategy",
+        "reason": "REJECT_LOW_EV"
+      },
+      {
+        "fixture_id": 1490459,
+        "market": "BTTS_YES",
+        "stage": "strategy",
+        "reason": "REJECT_LOW_EV"
+      },
+      {
+        "fixture_id": 1490460,
+        "market": "OVER_2_5",
+        "stage": "strategy",
+        "reason": "REJECT_LOW_EV"
+      },
+      {
+        "fixture_id": 1490460,
+        "market": "BTTS_YES",
+        "stage": "strategy",
+        "reason": "REJECT_LOW_EV"
+      },
+      {
+        "fixture_id": 1520861,
+        "market": "OVER_2_5",
+        "stage": "strategy",
+        "reason": "REJECT_LOW_EV"
+      },
+      {
+        "fixture_id": 1520861,
+        "market": "UNDER_2_5",
+        "stage": "strategy",
+        "reason": "REJECT_LOW_EV"
+      },
+      {
+        "fixture_id": 1520861,
+        "market": "BTTS_YES",
+        "stage": "strategy",
+        "reason": "REJECT_LOW_EV"
+      },
+      {
+        "fixture_id": 1619673,
+        "stage": "eligible",
+        "reason": "UNKNOWN_LEAGUE_TIER"
+      },
+      {
+        "fixture_id": 1631506,
+        "stage": "eligible",
+        "reason": "UNKNOWN_LEAGUE_TIER"
+      },
+      {
+        "fixture_id": 1513347,
+        "stage": "eligible",
+        "reason": "EXPLICIT_EXCLUSION"
+      },
+      {
+        "fixture_id": 1600590,
+        "stage": "eligible",
+        "reason": "UNKNOWN_LEAGUE_TIER"
+      },
+      {
+        "fixture_id": 1600591,
+        "stage": "eligible",
+        "reason": "UNKNOWN_LEAGUE_TIER"
+      },
+      {
+        "fixture_id": 1636684,
+        "stage": "eligible",
+        "reason": "UNKNOWN_LEAGUE_TIER"
+      },
+      {
+        "fixture_id": 1635082,
+        "stage": "eligible",
+        "reason": "UNKNOWN_LEAGUE_TIER"
+      },
+      {
+        "fixture_id": 1559635,
+        "stage": "eligible",
+        "reason": "UNKNOWN_LEAGUE_TIER"
+      },
+      {
+        "fixture_id": 1490461,
+        "market": "OVER_2_5",
+        "stage": "strategy",
+        "reason": "REJECT_ODD"
+      },
+      {
+        "fixture_id": 1490461,
+        "market": "BTTS_YES",
+        "stage": "strategy",
+        "reason": "REJECT_LOW_EV"
+      },
+      {
+        "fixture_id": 1490462,
+        "market": "OVER_2_5",
+        "stage": "strategy",
+        "reason": "REJECT_ODD"
+      },
+      {
+        "fixture_id": 1490462,
+        "market": "BTTS_YES",
+        "stage": "strategy",
+        "reason": "REJECT_LOW_EV"
+      },
+      {
+        "fixture_id": 1490464,
+        "market": "OVER_2_5",
+        "stage": "strategy",
+        "reason": "REJECT_ODD"
+      },
+      {
+        "fixture_id": 1490464,
+        "market": "UNDER_2_5",
+        "stage": "strategy",
+        "reason": "REJECT_LOW_EV"
+      },
+      {
+        "fixture_id": 1490464,
+        "market": "BTTS_YES",
+        "stage": "strategy",
+        "reason": "REJECT_ODD"
+      },
+      {
+        "fixture_id": 1490465,
+        "market": "OVER_2_5",
+        "stage": "strategy",
+        "reason": "REJECT_LOW_EV"
+      },
+      {
+        "fixture_id": 1490465,
+        "market": "UNDER_2_5",
+        "stage": "strategy",
+        "reason": "REJECT_LOW_EV"
+      },
+      {
+        "fixture_id": 1490465,
+        "market": "BTTS_YES",
+        "stage": "strategy",
+        "reason": "REJECT_ODD"
+      },
+      {
+        "fixture_id": 1636685,
+        "stage": "eligible",
+        "reason": "UNKNOWN_LEAGUE_TIER"
+      },
+      {
+        "fixture_id": 1490453,
+        "market": "UNDER_2_5",
+        "stage": "risk_staking",
+        "reason": "RISK_OR_CAPACITY"
+      },
+      {
+        "fixture_id": 1490456,
+        "market": "UNDER_2_5",
+        "stage": "risk_staking",
+        "reason": "RISK_OR_CAPACITY"
+      },
+      {
+        "fixture_id": 1520860,
+        "market": "UNDER_2_5",
+        "stage": "risk_staking",
+        "reason": "RISK_OR_CAPACITY"
+      },
+      {
+        "fixture_id": 1490451,
+        "market": "UNDER_2_5",
+        "stage": "risk_staking",
+        "reason": "RISK_OR_CAPACITY"
+      },
+      {
+        "fixture_id": 1490460,
+        "market": "UNDER_2_5",
+        "stage": "risk_staking",
+        "reason": "RISK_OR_CAPACITY"
+      },
+      {
+        "fixture_id": 1490461,
+        "market": "UNDER_2_5",
+        "stage": "risk_staking",
+        "reason": "RISK_OR_CAPACITY"
+      },
+      {
+        "fixture_id": 1490462,
+        "market": "UNDER_2_5",
+        "stage": "risk_staking",
+        "reason": "RISK_OR_CAPACITY"
+      }
+    ],
+    "fixture_failures": {
+      "api": 0,
+      "dixon_coles": 0,
+      "other": 0
+    },
+    "api": {
+      "request_count": 28,
+      "request_budget": 7500,
+      "working_budget": 7000,
+      "reserve": 500,
+      "remaining_working": 6972,
+      "cache_hits": 4,
+      "cache_misses": 28,
+      "cache_hit_rate": 0.125,
+      "rate_limit_events": 0,
+      "retry_events": 0,
+      "budget_exhaustion_events": 0,
+      "http_errors": {},
+      "api_error_events": 0,
+      "network_error_events": 0,
+      "endpoint_requests": {
+        "fixtures": 9,
+        "odds": 19
+      },
+      "endpoint_cache_hits": {
+        "fixtures": 4
+      },
+      "global_quota": {
+        "date": "2026-09-09",
+        "daily_capacity": 7500,
+        "safety_reserve": 500,
+        "consumed": 75,
+        "reserved": 0,
+        "remaining_unallocated": 7425,
+        "consumed_by_workflow": {
+          "QuantBet intraday strong-signal scanner": 75
+        },
+        "reserved_by_workflow": {
+          "QuantBet intraday strong-signal scanner": 0
+        },
+        "quota_pressure_state": "HEALTHY",
+        "request_count": 75
+      }
+    },
+    "new_bets": 0,
+    "diagnostic_count": 1,
+    "observation_only": true,
+    "threshold_action": "NO_AUTOMATIC_BLOCKING"
   }
 ]
