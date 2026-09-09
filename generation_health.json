@@ -1,50 +1,47 @@
 {
   "schema_version": 3,
-  "timestamp": "2026-09-09T05:08:08.421056+00:00",
-  "status": "DEGRADED",
-  "classification_reasons": [
-    "DIXON_COLES_FIXTURE_FAILURE",
-    "TRAINING_SAMPLE_INSUFFICIENT"
-  ],
+  "timestamp": "2026-09-09T08:20:18.484733+00:00",
+  "status": "HEALTHY",
+  "classification_reasons": [],
   "pipeline": {
-    "fixtures_discovered": 304,
+    "fixtures_discovered": 303,
     "fixtures_parse_failures": 0,
-    "fixtures_eligible": 31,
-    "fixtures_modelled": 30,
-    "predictions_generated": 90,
-    "candidates_evaluated": 90,
-    "candidates_qualified": 8,
-    "candidates": 8,
-    "selections_produced": 3,
-    "training_sample_insufficiency": 1,
+    "fixtures_eligible": 6,
+    "fixtures_modelled": 6,
+    "predictions_generated": 18,
+    "candidates_evaluated": 18,
+    "candidates_qualified": 1,
+    "candidates": 1,
+    "selections_produced": 0,
+    "training_sample_insufficiency": 0,
     "fit_failures": 0,
-    "fixtures_without_odds": 1,
+    "fixtures_without_odds": 0,
     "fixture_failures": {
       "api": 0,
-      "dixon_coles": 1,
+      "dixon_coles": 0,
       "other": 0
     },
     "eligibility_rejections": {
-      "EXPLICIT_EXCLUSION": 82,
-      "UNKNOWN_LEAGUE_TIER": 164,
-      "INELIGIBLE_COUNTRY": 7
+      "EXPLICIT_EXCLUSION": 18,
+      "UNKNOWN_LEAGUE_TIER": 48,
+      "INELIGIBLE_COUNTRY": 6
     },
     "funnel": {
-      "discovered": 304,
-      "eligible": 31,
-      "modelled": 30,
-      "predictions": 90,
-      "candidates": 8,
-      "selections": 3
+      "discovered": 303,
+      "eligible": 6,
+      "modelled": 6,
+      "predictions": 18,
+      "candidates": 1,
+      "selections": 0
     }
   },
   "funnel": {
-    "discovered": 304,
-    "eligible": 31,
-    "modelled": 30,
-    "predictions": 90,
-    "candidates": 8,
-    "selections": 3
+    "discovered": 303,
+    "eligible": 6,
+    "modelled": 6,
+    "predictions": 18,
+    "candidates": 1,
+    "selections": 0
   },
   "funnel_semantics": {
     "discovered": "Raw fixtures returned by the fixture discovery call for the run.",
@@ -56,18 +53,18 @@
   },
   "fixture_failures": {
     "api": 0,
-    "dixon_coles": 1,
+    "dixon_coles": 0,
     "other": 0
   },
   "api": {
-    "request_count": 87,
+    "request_count": 7,
     "request_budget": 7500,
     "working_budget": 7000,
     "reserve": 500,
-    "remaining_working": 6913,
-    "cache_hits": 0,
-    "cache_misses": 87,
-    "cache_hit_rate": 0.0,
+    "remaining_working": 6993,
+    "cache_hits": 8,
+    "cache_misses": 7,
+    "cache_hit_rate": 0.533333,
     "rate_limit_events": 0,
     "retry_events": 0,
     "budget_exhaustion_events": 0,
@@ -75,13 +72,15 @@
     "api_error_events": 0,
     "network_error_events": 0,
     "endpoint_requests": {
-      "fixtures": 57,
-      "odds": 30
+      "fixtures": 1,
+      "odds": 6
     },
-    "endpoint_cache_hits": {}
+    "endpoint_cache_hits": {
+      "fixtures": 8
+    }
   },
-  "new_bets": 3,
-  "diagnostic_count": 2,
+  "new_bets": 0,
+  "diagnostic_count": 1,
   "observation_only": true,
   "threshold_action": "NO_AUTOMATIC_BLOCKING"
 }
