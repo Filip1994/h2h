@@ -12,6 +12,9 @@ concurrency:
   group: quantbet-football-api-global
   cancel-in-progress: false
 
+env:
+  SIGNAL_WRITER_META: watchlist_run_meta.json
+
 jobs:
   watchlist:
     runs-on: ubuntu-latest
@@ -67,10 +70,37 @@ jobs:
           assert len(strong_public) <= len(ledger_rows)
           print(f"Strong publication contract OK: ledger={len(ledger_rows)} public_strong={len(strong_public)}")
           PY
-      - name: Commit watchlist, signal history, quota and bounded API archive
+      - name: Create canonical writer provenance marker
+        env:
+          RUN_ID: ${{ github.run_id }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
+          WORKFLOW: ${{ github.workflow }}
+          SOURCE_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
-          files=(intraday_watchlist_state.json intraday_alerts.json strong_signal_ledger.json strong_signals.json strong_signals_portfolio.json near_misses.json market_timing_metrics.json data/football_api_quota.json)
+          python tools/signal_writer_guard.py write \
+            --path "${SIGNAL_WRITER_META}.pending" \
+            --run-id "${RUN_ID}" \
+            --run-attempt "${RUN_ATTEMPT}" \
+            --workflow "${WORKFLOW}" \
+            --sha "${SOURCE_SHA}"
+      - name: Reject stale writer before publication
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          if git cat-file -e "origin/main:${SIGNAL_WRITER_META}" 2>/dev/null; then
+            git show "origin/main:${SIGNAL_WRITER_META}" > /tmp/current-watchlist-run-meta.json
+          else
+            : > /tmp/current-watchlist-run-meta.json
+          fi
+          python tools/signal_writer_guard.py check \
+            --path "${SIGNAL_WRITER_META}.pending" \
+            --current-path /tmp/current-watchlist-run-meta.json
+          mv "${SIGNAL_WRITER_META}.pending" "${SIGNAL_WRITER_META}"
+      - name: Commit watchlist, signal history, provenance, quota and bounded API archive
+        run: |
+          set -euo pipefail
+          files=(intraday_watchlist_state.json intraday_alerts.json strong_signal_ledger.json strong_signals.json strong_signals_portfolio.json near_misses.json market_timing_metrics.json data/football_api_quota.json "${SIGNAL_WRITER_META}")
           changed=0
           for file in "${files[@]}"; do
             if [ -e "$file" ] && ! git diff --quiet -- "$file"; then changed=1; fi
@@ -87,6 +117,15 @@ jobs:
           for attempt in 1 2 3; do
             if git push; then exit 0; fi
             git fetch origin main
+            if git cat-file -e "origin/main:${SIGNAL_WRITER_META}" 2>/dev/null; then
+              git show "origin/main:${SIGNAL_WRITER_META}" > /tmp/current-watchlist-run-meta.json
+              if ! python tools/signal_writer_guard.py check \
+                --path "${SIGNAL_WRITER_META}" \
+                --current-path /tmp/current-watchlist-run-meta.json; then
+                echo "Stale watchlist writer rejected after remote advanced." >&2
+                exit 1
+              fi
+            fi
             if ! git rebase origin/main; then
               git rebase --abort || true
               echo "Signal ledger reconciliation conflict; watchlist update failed." >&2
