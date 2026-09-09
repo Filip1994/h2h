@@ -72,9 +72,7 @@ def audit(root: Path = ROOT) -> dict[str, Any]:
             ),
             "markets_evaluated": len(rows),
             "valid_odds_observations": len(rows),
-            "strong_signals": classes.get(
-                "STRONG_SIGNAL", classes.get("STRONG", 0)
-            ),
+            "strong_signals": classes.get("STRONG_SIGNAL", classes.get("STRONG", 0)),
             "near_misses": classes.get("NEAR_MISS", 0),
             "observed_only": classes.get("OBSERVED", 0),
             "alerts": sum(
