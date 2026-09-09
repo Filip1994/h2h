@@ -32,7 +32,11 @@ def test_dashboard_has_one_shared_design_system_and_all_primary_sectors():
     css = read("assets/qb-dashboard.css")
     js = read("assets/qb-dashboard.js")
     assert ".shell" in css and ".lifecycle" in css and ".clv" in css
-    assert "const productionCard" in js and "const signalCard" in js and "const lifecycle" in js
+    assert (
+        "const productionCard" in js
+        and "const signalCard" in js
+        and "const lifecycle" in js
+    )
     for page in PAGES:
         text = read(page)
         assert "./assets/qb-dashboard.css" in text
@@ -72,7 +76,14 @@ def test_dashboard_zero_pick_contract_and_truthful_state_labels():
         assert 'id="roi"' in text
         assert "data-generation" in text
         assert "data-capture" in text
-    for state in ("RUNNING", "NO SIGNALS", "NO ELIGIBLE FIXTURES", "STALE", "NO DATA", "ERROR"):
+    for state in (
+        "RUNNING",
+        "NO SIGNALS",
+        "NO ELIGIBLE FIXTURES",
+        "STALE",
+        "NO DATA",
+        "ERROR",
+    ):
         assert state in js
     assert "const status =" in js
 

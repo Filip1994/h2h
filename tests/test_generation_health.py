@@ -16,7 +16,9 @@ def _result(*diagnostics: str, telemetry=None, **usage):
 
 
 def test_429_is_classified_as_degraded_without_blocking() -> None:
-    result = _result(rate_limit_events=1, retry_events=1, api_error_events=0, network_error_events=0)
+    result = _result(
+        rate_limit_events=1, retry_events=1, api_error_events=0, network_error_events=0
+    )
     health = build_success_health(datetime.now(UTC), result)
     assert health["status"] == "DEGRADED"
     assert "API_RATE_LIMIT" in health["classification_reasons"]
@@ -80,7 +82,9 @@ def test_clean_generation_is_healthy_with_full_pipeline_funnel() -> None:
         "persisted_bets": 1,
         "settled": 0,
     }
-    assert health["funnel_semantics"]["candidates"].startswith("Market-level candidates")
+    assert health["funnel_semantics"]["candidates"].startswith(
+        "Market-level candidates"
+    )
     assert health["pipeline"]["selections_produced"] == 1
 
 
