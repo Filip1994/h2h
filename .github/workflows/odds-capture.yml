@@ -3,14 +3,14 @@ name: QuantBet exhaustive odds capture
 on:
   workflow_dispatch:
   schedule:
-    - cron: "*/5 * * * *"
+    - cron: "2-57/5 * * * *"
       timezone: "Europe/Belgrade"
 
 permissions:
   contents: write
 
 concurrency:
-  group: quantbet-ledger
+  group: quantbet-odds-capture
   cancel-in-progress: false
 
 jobs:
