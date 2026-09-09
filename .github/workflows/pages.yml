@@ -111,7 +111,8 @@ jobs:
           mkdir -p _site/assets
           cp index.html production.html strong-signals.html near-misses.html history.html _site/
           cp assets/qb-dashboard.css assets/qb-dashboard.js assets/strong-signals.js _site/assets/
-          cp bets.json ledger_meta.json system_health.json _site/
+          cp bets.json ledger_meta.json _site/
+          cp system_health.json _site/
           for file in intraday_alerts.json strong_signal_ledger.json strong_signals.json strong_signals_portfolio.json near_misses.json bulletin_health.json odds_collection_state.json generation_health.json generation_health_history.json intraday_health.json; do
             [ -f "$file" ] && cp "$file" _site/ || true
           done
