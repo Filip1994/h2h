@@ -168,7 +168,9 @@ def entries(settings: Settings) -> int:
             )
             prediction["entry_snapshot_id"] = snapshot
             changed += 1
-            snapshots.append(next(row for row in store.load() if row.get("snapshot_id") == snapshot))
+            snapshots.append(
+                next(row for row in store.load() if row.get("snapshot_id") == snapshot)
+            )
 
     pred_map = {key(p): p for p in predictions if key(p)}
     for bet in bets:
