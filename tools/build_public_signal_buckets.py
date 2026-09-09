@@ -39,12 +39,7 @@ def load_jsonl(path: Path) -> list[dict[str, Any]]:
 def merge(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
     merged: dict[str, dict[str, Any]] = {}
     for item in items:
-        key = str(
-            item.get("id")
-            or item.get("signal_id")
-            or item.get("observation_id")
-            or ""
-        )
+        key = str(item.get("id") or item.get("signal_id") or item.get("observation_id") or "")
         if not key:
             continue
         merged.setdefault(key, {}).update(item)
@@ -100,8 +95,7 @@ def build(root: Path = ROOT) -> tuple[list[dict[str, Any]], list[dict[str, Any]]
     strong_candidates = [
         x
         for x in old_strong + alerts + bets
-        if str(x.get("signal_class") or "").upper()
-        in {"STRONG_SIGNAL", "STRONG"}
+        if str(x.get("signal_class") or "").upper() in {"STRONG_SIGNAL", "STRONG"}
         or ("signal_class" not in x and x in old_strong)
     ]
     strong = merge(strong_candidates)
