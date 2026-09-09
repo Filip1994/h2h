@@ -5,6 +5,12 @@ from typing import Any
 
 from .types import Market, OddsQuote
 
+# Production bookmaker scope: only Serbian-available operators selected for the
+# paper-trading system. This is intentionally a code-level hard whitelist so
+# Production, Strong Signals, and Near Misses cannot silently drift to another
+# provider. API odds are still fetched once per fixture and filtered locally.
+ALLOWED_BOOKMAKER_IDS: frozenset[int] = frozenset({8, 11, 34})
+
 
 def _as_float(value: Any) -> float | None:
     try:
@@ -38,7 +44,9 @@ def _bookmakers(raw_odds: list[dict[str, Any]]) -> list[dict[str, Any]]:
     bookmakers: list[dict[str, Any]] = []
     for payload in raw_odds:
         bookmakers.extend(
-            item for item in (payload.get("bookmakers") or []) if isinstance(item, dict)
+            item
+            for item in (payload.get("bookmakers") or [])
+            if isinstance(item, dict) and _bookmaker_id(item) in ALLOWED_BOOKMAKER_IDS
         )
     return bookmakers
 
@@ -47,7 +55,7 @@ def _quotes_for_bookmaker(
     bookmaker: dict[str, Any], captured_at: datetime
 ) -> list[OddsQuote]:
     bookmaker_id = _bookmaker_id(bookmaker)
-    if bookmaker_id is None:
+    if bookmaker_id is None or bookmaker_id not in ALLOWED_BOOKMAKER_IDS:
         return []
     bookmaker_name = str(bookmaker.get("name") or f"Bookmaker {bookmaker_id}")
     values = _bookmaker_values(bookmaker)
@@ -78,7 +86,7 @@ def _quotes_for_bookmaker(
 def extract_all_valid_quotes(
     raw_odds: list[dict[str, Any]], *, captured_at: datetime
 ) -> list[OddsQuote]:
-    """Extract every valid supported market quote from every provider bookmaker."""
+    """Extract every valid supported quote from the hard-whitelisted bookmakers."""
     quotes: list[OddsQuote] = []
     seen: set[tuple[int, Market, float, float]] = set()
     for bookmaker in _bookmakers(raw_odds):
@@ -99,12 +107,13 @@ def extract_best_quotes(
     captured_at: datetime,
     only_bookmaker_id: int | None = None,
 ) -> dict[Market, OddsQuote]:
-    """Select the best valid quote across every provider bookmaker before Pick.
+    """Select the best quote from the Serbian hard whitelist.
 
-    ``bookmaker_priority`` is retained for backwards-compatible configuration and
-    display ordering, but it is never a coverage or selection filter. Once a Pick
-    exists, callers can pass ``only_bookmaker_id`` to lock lifecycle reads to the
-    exact Pick bookmaker.
+    ``bookmaker_priority`` and ``allow_any_bookmaker`` remain accepted for
+    backwards-compatible configuration, but neither can expand bookmaker scope.
+    Before Pick, the best valid quote is selected only among IDs 8, 11, and 34.
+    Once a Pick exists, ``only_bookmaker_id`` locks reads to the exact Pick
+    bookmaker and therefore cannot substitute another provider.
     """
     bookmakers = _bookmakers(raw_odds)
 
