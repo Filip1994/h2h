@@ -1,17 +1,39 @@
 {
   "schema_version": 1,
-  "checked_at": "2026-09-09T21:09:25.592814+00:00",
+  "checked_at": "2026-09-09T22:38:07.442216+00:00",
   "stale_minutes": 30,
   "status": "OK",
-  "production_active_count": 0,
+  "production_active_count": 3,
   "intraday_active_count": 0,
-  "active_count": 0,
+  "active_count": 3,
   "errors": [],
   "sources": {
     "bets.json": {
-      "records": 17,
-      "active_count": 0,
-      "active": [],
+      "records": 20,
+      "active_count": 3,
+      "active": [
+        {
+          "source": "bets.json",
+          "id": "1490461_UNDER_2_5",
+          "event_id": 1490461,
+          "match": "Los Angeles FC vs New York Red Bulls",
+          "kickoff": "2026-09-10T02:30:00+00:00"
+        },
+        {
+          "source": "bets.json",
+          "id": "1634287_BTTS_YES",
+          "event_id": 1634287,
+          "match": "Dubai United vs Shabab Al Ahli Dubai",
+          "kickoff": "2026-09-10T13:40:00+00:00"
+        },
+        {
+          "source": "bets.json",
+          "id": "1594824_OVER_2_5",
+          "event_id": 1594824,
+          "match": "Kahraba Ismailia vs El Dakhleya",
+          "kickoff": "2026-09-10T13:30:00+00:00"
+        }
+      ],
       "errors": []
     },
     "intraday_alerts.json": {
