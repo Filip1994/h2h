@@ -86,3 +86,11 @@ def test_scheduled_path_does_not_depend_on_manual_dispatch() -> None:
     assert schedule < text.index("jobs:")
     assert dispatch < schedule
     assert "Force a new bulletin" in text
+
+
+def test_scheduled_intraday_completion_also_hands_off_to_daily_bulletin() -> None:
+    text = _workflow()
+    assert "workflow_run:" in text
+    assert "QuantBet intraday strong-signal scanner" in text
+    assert "types: [completed]" in text
+    assert "every completed 24/7 intraday scan" in text
