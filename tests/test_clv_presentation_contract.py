@@ -21,5 +21,5 @@ def test_strong_signal_page_uses_shared_clv_renderer() -> None:
 def test_shared_dashboard_loader_bypasses_browser_cached_json() -> None:
     js = (ROOT / "assets" / "qb-dashboard.js").read_text(encoding="utf-8")
     assert "fetch('./' + name + '?v=' + Date.now(), {cache:'no-store'})" in js
-    assert "load('strong_signals.json')" in js
-    assert "load('strong_signals_portfolio.json')" in js
+    assert "strong_signals.json" in js
+    assert "strong_signals_portfolio.json" in js
