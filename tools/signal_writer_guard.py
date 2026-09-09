@@ -69,7 +69,9 @@ def assert_not_stale(candidate_path: Path, current_path: Path) -> None:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Guard canonical Strong/Near watchlist writes")
+    parser = argparse.ArgumentParser(
+        description="Guard canonical Strong/Near watchlist writes"
+    )
     parser.add_argument("command", choices=("write", "check"))
     parser.add_argument("--path", default=DEFAULT_META)
     parser.add_argument("--current-path", default=DEFAULT_META)
