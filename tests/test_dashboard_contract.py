@@ -146,5 +146,25 @@ def test_signal_history_exposes_real_outcome_profit_and_counterfactual_semantics
     assert "x.result" in js
 
 
+def test_overview_snapshot_excludes_stale_production_matches():
+    overview = read("index.html")
+    assert 'id="current-summary"' in overview
+    assert 'id="summary"' not in overview
+    assert "status || '').toUpperCase() === 'PENDING'" in overview
+    assert "liveWindow = 4 * 60 * 60 * 1000" in overview
+    assert "Nema aktivnih ili predstojećih Production odluka." in overview
+
+
+def test_high_volume_observational_buckets_use_compact_list_layout():
+    css = read("assets/qb-dashboard.css")
+    near = read("near-misses.html")
+    strong = read("strong-signals.html")
+    assert 'class="cards signal-list"' in near
+    assert ".signal-list{display:flex;flex-direction:column" in css
+    assert ".overview-snapshot{display:flex;flex-direction:column" in css
+    assert "history-table thead{display:none}" in strong
+    assert "history-table tbody{display:flex;flex-direction:column;gap:8px}" in strong
+
+
 def test_obsolete_competing_preview_is_removed():
     assert not (ROOT / "dashboard_preview.html").exists()
