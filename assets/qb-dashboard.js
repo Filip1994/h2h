@@ -1,29 +1,164 @@
-const QB={MARKET:{OVER_2_5:'Over 2.5',UNDER_2_5:'Under 2.5',BTTS_YES:'BTTS — Yes',BTTS_NO:'BTTS — No',HOME_WIN:'Home Win',AWAY_WIN:'Away Win',DRAW:'Draw',GG:'BTTS — Yes',NG:'BTTS — No','Less than 2.5':'Under 2.5','Manje 2.5':'Under 2.5','Više 2.5':'Over 2.5'},BOOK:{8:{name:'Bet365',logo:'https://commons.wikimedia.org/wiki/Special:Redirect/file/Bet_365_logo.png',verified:true},11:{name:'1xBet',logo:'https://commons.wikimedia.org/wiki/Special:Redirect/file/1xbetlogo.png',verified:true}}};
-QB.esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-QB.market=v=>QB.MARKET[v]||v||'—'; QB.odd=v=>v==null||v===''?'—':Number(v).toFixed(2); QB.pct=v=>Number.isFinite(Number(v))?(100*Number(v)).toFixed(1)+'%':'—';
-QB.when=v=>{if(!v)return'—';const d=new Date(v);return Number.isNaN(d.getTime())?QB.esc(v):new Intl.DateTimeFormat('sr-RS',{timeZone:'Europe/Belgrade',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}).format(d).replace(',',' ·')};
-QB.clv=v=>{if(v==null||v==='')return{value:'—',label:'Unavailable',cls:'neutral'};const n=Number(v)*100;if(!Number.isFinite(n))return{value:'—',label:'Unavailable',cls:'neutral'};return{value:(n>=0?'+':'−')+Math.abs(n).toFixed(2)+'%',label:n>=0?'Beat Close':'Lost to Close',cls:n>=0?'positive':'negative'}};
-QB.book=x=>{const b=QB.BOOK[Number(x.bookmaker_id)],name=b?.name||x.bookmaker||'Bookmaker';return b?.verified?`<div class="book"><img class="book-logo" src="${b.logo}" alt="${QB.esc(name)} verified logo"><span><b>${QB.esc(name)}</b><small class="meta"> · verified</small></span></div>`:`<div class="book"><span class="book-fallback">${QB.esc(name.slice(0,3).toUpperCase())}</span><span><b>${QB.esc(name)}</b></span></div>`};
-QB.stage=(label,odd,time)=>`<div class="stage"><label>${label}</label><b>${QB.odd(odd)}</b><small>${time?QB.when(time):'Unavailable'}</small></div>`;
-QB.lifecycle=x=>`<div class="lifecycle">${QB.stage('OPENING',x.opening_odd,x.opening_captured_at)}${QB.stage('PICK',x.odd,x.pick_captured_at||x.created_at)}${QB.stage('CLOSING',x.closing_odd,x.closing_captured_at)}</div>`;
-QB.badge=(kind,text)=>`<span class="badge ${kind}">${QB.esc(text)}</span>`;
-QB.load=async name=>{const r=await fetch('./'+name+'?v='+Date.now(),{cache:'no-store'});if(!r.ok)throw Error(name+' HTTP '+r.status);return r.json()};
-QB.optional=async name=>{try{return await QB.load(name)}catch{return null}};
-QB.fresh=ts=>{if(!ts)return['NO DATA','neutral'];const a=(Date.now()-new Date(ts).getTime())/60000;return a<10?['FRESH','live']:a<30?['AGING','stale']:['STALE','stale']};
-QB.findLatest=(...lists)=>lists.flat().flatMap(x=>[x.updated_at,x.created_at,x.signal_sent_at,x.settled_at,x.odds_captured_at,x.date]).filter(Boolean).map(x=>new Date(x)).filter(d=>!Number.isNaN(d.getTime())).sort((a,b)=>b-a)[0]?.toISOString()||null;
-QB.captureTs=state=>state?.updated_at||state?.last_run_at||state?.last_capture_at||null;
-QB.generationTs=meta=>meta?.updated_at||meta?.decision_timestamp||null;
-QB.status=(meta,bets,strong,near,capture)=>{const generation=QB.generationTs(meta),cap=QB.captureTs(capture);if(!generation&&!cap)return['NO DATA','neutral'];if(!cap)return['NOT RUN','neutral'];const eligible=Number(capture?.eligible_fixture_count??capture?.eligible_fixtures);if(Number.isFinite(eligible)&&eligible===0)return['NO ELIGIBLE FIXTURES','neutral'];const latest=QB.findLatest(bets,strong,near,[meta]);if(!latest)return['NO SIGNALS','neutral'];const age=(Date.now()-new Date(latest).getTime())/60000;if(age>180)return['STALE','stale'];const active=[...bets,...strong,...near].some(x=>String(x.status||'PENDING').toUpperCase()==='PENDING');return[active?'RUNNING':'NO SIGNALS',active?'live':'neutral']};
-QB.statusCard=(state,detail)=>`<div class="notice status-card ${state.toLowerCase().replaceAll(' ','-')}"><b>SYSTEM / DATA STATUS · ${QB.esc(state)}</b><div class="sub">${QB.esc(detail)}</div></div>`;
-QB.productionCard=x=>{const c=QB.clv(x.clv_odds_pct);return `<article class="card"><div class="match-head"><div><div class="teams">${QB.esc(x.match||'Meč')}</div><div class="league">${QB.esc(x.league||'')} · ${QB.esc(QB.market(x.market_display||x.market))}</div></div>${QB.badge('production','PRODUCTION · PAPER BET')}</div>${QB.book(x)}${QB.lifecycle(x)}<div class="clv ${c.cls}"><span class="meta">CLV · ${QB.esc(c.label)}</span><br><strong>${QB.esc(c.value)}</strong></div><div class="metric-row"><span class="metric">RESULT <b>${QB.esc(String(x.status||'PENDING').toUpperCase())}</b></span><span class="metric">P/L <b>${Number(x.profit||0)>=0?'+':''}${Number(x.profit||0).toFixed(2)} RSD</b></span><span class="metric">KICKOFF <b>${QB.when(x.kickoff||x.date)}</b></span></div></article>`};
-QB.signalCard=(x,near=false)=>{const c=QB.clv(x.clv_odds_pct);return `<article class="card"><div class="match-head"><div><div class="teams">${QB.esc(x.match||'Meč')}</div><div class="league">${QB.esc(x.league||'')} · ${QB.esc(QB.market(x.market_display||x.market))}</div></div>${QB.badge(near?'near':'strong',near?'NEAR MISS':'STRONG SIGNAL')}</div>${QB.book(x)}${near?'':QB.lifecycle(x)}<div class="metric-row"><span class="metric">EV <b>${QB.pct(x.expected_value)}</b></span><span class="metric">EDGE <b>${QB.pct(x.probability_edge)}</b></span>${near?`<span class="metric">REASON <b>${QB.esc(x.near_miss_reason||'—')}</b></span>`:''}</div>${near?'':`<div class="clv ${c.cls}"><span class="meta">CLV · ${QB.esc(c.label)}</span><br><strong>${QB.esc(c.value)}</strong></div>`}<div class="meta" style="margin-top:12px">Kickoff · ${QB.when(x.kickoff||x.created_at)}</div></article>`};
-QB.row=x=>{const c=QB.clv(x.clv_odds_pct);return `<tr><td>${QB.esc(QB.when(x.kickoff||x.date||x.created_at))}</td><td><b>${QB.esc(x.match||'—')}</b><br><span class="meta">${QB.esc(x.league||'')}</span></td><td>${QB.esc(QB.market(x.market_display||x.market))}</td><td>${QB.esc(QB.BOOK[Number(x.bookmaker_id)]?.name||x.bookmaker||'—')}</td><td>${QB.esc(QB.odd(x.opening_odd))} → ${QB.esc(QB.odd(x.odd))} → ${QB.esc(QB.odd(x.closing_odd))}</td><td class="${c.cls}">${QB.esc(c.value)}<br><span class="meta">${QB.esc(c.label)}</span></td><td>${QB.esc(String(x.status||x.signal_class||'—').toUpperCase())}</td><td>${x.profit==null?'—':Number(x.profit).toFixed(2)}</td></tr>`};
-function renderBucket(rows,activeId,historyId,near=false){const list=Array.isArray(rows)?rows:[],active=list.filter(x=>String(x.status||'PENDING').toUpperCase()==='PENDING'),history=list.filter(x=>String(x.status||'PENDING').toUpperCase()!=='PENDING');document.querySelector('#'+activeId).innerHTML=active.slice(0,30).map(x=>QB.signalCard(x,near)).join('')||'<div class="card empty">Nema aktivnih opservacija.</div>';document.querySelector('#'+historyId).innerHTML=history.slice().reverse().slice(0,200).map(x=>QB.signalCard(x,near)).join('')||'<div class="card empty">Nema istorijskih opservacija.</div>';}
-async function render(){const page=document.body.dataset.page;try{const bets=await QB.load('bets.json'),meta=await QB.load('ledger_meta.json'),capture=await QB.optional('odds_collection_state.json');const strong=await QB.optional('strong_signals.json')||[],near=await QB.optional('near_misses.json')||[];const prod=Array.isArray(bets)?bets.filter(x=>String(x.signal_source||'DAILY_BULLETIN')!=='INTRADAY_ALERT'):[];const settled=prod.filter(x=>['WIN','LOSS','SKIPPED','VOID','REVIEW'].includes(String(x.status||'').toUpperCase()));const done=prod.filter(x=>['WIN','LOSS'].includes(String(x.status||'').toUpperCase()));const profit=done.reduce((s,x)=>s+Number(x.profit||0),0),stake=done.reduce((s,x)=>s+Number(x.stake||0),0),wins=done.filter(x=>String(x.status).toUpperCase()==='WIN').length;const gen=QB.generationTs(meta),cap=QB.captureTs(capture),latest=QB.findLatest(prod,strong,near,[meta]),[fresh,cls]=QB.fresh(latest),[state,stateCls]=QB.status(meta,prod,strong,near,capture);document.querySelectorAll('[data-fresh]').forEach(e=>{e.textContent=fresh;e.classList.add(cls)});document.querySelectorAll('[data-status]').forEach(e=>{e.textContent=state;e.classList.add(stateCls)});document.querySelectorAll('[data-updated]').forEach(e=>e.textContent=QB.when(latest));document.querySelectorAll('[data-generation]').forEach(e=>e.textContent=QB.when(gen));document.querySelectorAll('[data-capture]').forEach(e=>e.textContent=QB.when(cap));
-if(page==='overview'){document.querySelector('#bank').textContent=(Number(meta.initial_bank||0)+profit).toFixed(0)+' RSD';document.querySelector('#pnl').textContent=(profit>=0?'+':'')+profit.toFixed(2)+' RSD';document.querySelector('#roi').textContent=(stake?100*profit/stake:0).toFixed(2)+'%';document.querySelector('#win').textContent=(done.length?100*wins/done.length:0).toFixed(1)+'%';document.querySelector('#count').textContent=done.length;document.querySelector('#paper').textContent=meta.paper_mode===false?'LIVE':'PAPER';document.querySelector('#summary').innerHTML=prod.length?prod.slice().reverse().slice(0,4).map(QB.productionCard).join(''):QB.statusCard(state,state==='NO DATA'?'Canonical dashboard data nije dostupna.':state==='STALE'?'Canonical podaci nisu skoro osveženi.':state==='NO SIGNALS'?'Scanner je radio; nema qualifying Production signala.':state==='NOT RUN'?'Signal/odds capture još nije izvršen.':state==='NO ELIGIBLE FIXTURES'?'Collector je radio, ali nema eligible Football fixture-a.':'Sistem trenutno obrađuje dostupne podatke.');}
-if(page==='production'){document.querySelector('#count').textContent=done.length;document.querySelector('#bank').textContent=(Number(meta.initial_bank||0)+profit).toFixed(0)+' RSD';document.querySelector('#pnl').textContent=(profit>=0?'+':'')+profit.toFixed(2)+' RSD';document.querySelector('#roi').textContent=(stake?100*profit/stake:0).toFixed(2)+'%';document.querySelector('#cards').innerHTML=prod.filter(x=>['PENDING','SKIPPED'].includes(String(x.status||'').toUpperCase())).slice(0,30).map(QB.productionCard).join('')||QB.statusCard(state,state==='NO SIGNALS'?'Nema aktivnih Production odluka.':'Nema aktivnih Production odluka u trenutno dostupnom ledgeru.');document.querySelector('#rows').innerHTML=settled.slice().reverse().slice(0,200).map(QB.row).join('')||'<tr><td colspan="8" class="empty">Nema Production history zapisa.</td></tr>';}
-if(page==='strong'){document.querySelector('#count').textContent=strong.length;renderBucket(strong,'active-cards','history-cards');}
-if(page==='near'){document.querySelector('#count').textContent=near.length;renderBucket(near,'active-cards','history-cards',true);}
-if(page==='history'){const all=[...prod.map(x=>({...x,signal_class:'PRODUCTION'})),...strong.map(x=>({...x,signal_class:'STRONG_SIGNAL'})),...near.map(x=>({...x,signal_class:'NEAR_MISS'}))];window.QB_HISTORY=all;window.QB_RENDER_HISTORY=()=>{const q=(document.querySelector('#q').value||'').toLowerCase(),cl=document.querySelector('#class').value,st=document.querySelector('#status').value;const f=all.filter(x=>(!q||JSON.stringify(x).toLowerCase().includes(q))&&(!cl||String(x.signal_class).toUpperCase()===cl)&&(!st||String(x.status||'').toUpperCase()===st));document.querySelector('#rows').innerHTML=f.slice().reverse().slice(0,500).map(QB.row).join('')||'<tr><td colspan="8" class="empty">Nema rezultata za izabrane filtere.</td></tr>';document.querySelector('#count').textContent=f.length};document.querySelectorAll('#q,#class,#status').forEach(e=>e.addEventListener('input',window.QB_RENDER_HISTORY));QB_RENDER_HISTORY()}}
-catch(e){document.querySelectorAll('[data-fresh]').forEach(x=>{x.textContent='ERROR';x.classList.add('error')});document.querySelectorAll('[data-status]').forEach(x=>{x.textContent='ERROR';x.classList.add('error')});const target=document.querySelector('#cards,#summary,#rows');if(target)target.innerHTML=`<div class="card empty">Podaci trenutno nisu dostupni. ${QB.esc(e.message)}</div>`}}
-}render();setInterval(render,60000);
+const QB = (() => {
+  const MARKET = {OVER_2_5:'Over 2.5',UNDER_2_5:'Under 2.5',BTTS_YES:'BTTS — Yes',BTTS_NO:'BTTS — No',HOME_WIN:'Home Win',AWAY_WIN:'Away Win',DRAW:'Draw',GG:'BTTS — Yes',NG:'BTTS — No','Less than 2.5':'Under 2.5','Manje 2.5':'Under 2.5','Više 2.5':'Over 2.5'};
+  const BOOK = {8:{name:'Bet365',logo:'https://commons.wikimedia.org/wiki/Special:Redirect/file/Bet_365_logo.png',verified:true},11:{name:'1xBet',logo:'https://commons.wikimedia.org/wiki/Special:Redirect/file/1xbetlogo.png',verified:true}};
+  const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const market = v => MARKET[v] || v || '—';
+  const odd = v => v == null || v === '' ? '—' : Number(v).toFixed(2);
+  const pct = v => Number.isFinite(Number(v)) ? (100 * Number(v)).toFixed(1) + '%' : '—';
+  const when = v => {
+    if (!v) return '—';
+    const d = new Date(v);
+    if (Number.isNaN(d.getTime())) return esc(v);
+    return new Intl.DateTimeFormat('sr-RS',{timeZone:'Europe/Belgrade',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}).format(d).replace(',',' ·');
+  };
+  const clv = v => {
+    if (v == null || v === '') return {value:'—',label:'Unavailable',cls:'neutral'};
+    const n = Number(v) * 100;
+    if (!Number.isFinite(n)) return {value:'—',label:'Unavailable',cls:'neutral'};
+    return {value:(n >= 0 ? '+' : '−') + Math.abs(n).toFixed(2) + '%',label:n >= 0 ? 'Beat Close' : 'Lost to Close',cls:n >= 0 ? 'positive' : 'negative'};
+  };
+  const book = x => {
+    const b = BOOK[Number(x.bookmaker_id)];
+    const name = b?.name || x.bookmaker || 'Bookmaker';
+    return b?.verified ? `<div class="book"><img class="book-logo" src="${b.logo}" alt="${esc(name)} verified logo"><span><b>${esc(name)}</b><small class="meta"> · verified</small></span></div>` : `<div class="book"><span class="book-fallback">${esc(name.slice(0,3).toUpperCase())}</span><span><b>${esc(name)}</b></span></div>`;
+  };
+  const stage = (label, value, time) => `<div class="stage"><label>${label}</label><b>${odd(value)}</b><small>${time ? when(time) : 'Unavailable'}</small></div>`;
+  const lifecycle = x => `<div class="lifecycle">${stage('OPENING',x.opening_odd,x.opening_captured_at)}${stage('PICK',x.odd,x.pick_captured_at || x.created_at)}${stage('CLOSING',x.closing_odd,x.closing_captured_at)}</div>`;
+  const badge = (kind,text) => `<span class="badge ${kind}">${esc(text)}</span>`;
+  const load = async name => {
+    const r = await fetch('./' + name + '?v=' + Date.now(), {cache:'no-store'});
+    if (!r.ok) throw new Error(name + ' HTTP ' + r.status);
+    return r.json();
+  };
+  const optional = async name => { try { return await load(name); } catch (_) { return null; } };
+  const findLatest = (...lists) => {
+    const values = [];
+    lists.forEach(list => {
+      if (!Array.isArray(list)) return;
+      list.forEach(x => {
+        if (!x || typeof x !== 'object') return;
+        ['updated_at','created_at','signal_sent_at','settled_at','odds_captured_at','decision_timestamp','date'].forEach(k => { if (x[k]) values.push(x[k]); });
+      });
+    });
+    const dates = values.map(x => new Date(x)).filter(d => !Number.isNaN(d.getTime()));
+    dates.sort((a,b) => b-a);
+    return dates.length ? dates[0].toISOString() : null;
+  };
+  const captureTs = state => state && (state.updated_at || state.last_run_at || state.last_capture_at) || null;
+  const generationTs = meta => meta && (meta.updated_at || meta.decision_timestamp) || null;
+  const fresh = ts => {
+    if (!ts) return ['NO DATA','neutral'];
+    const age = (Date.now() - new Date(ts).getTime()) / 60000;
+    return age < 10 ? ['FRESH','live'] : age < 30 ? ['AGING','stale'] : ['STALE','stale'];
+  };
+  const production = bets => Array.isArray(bets) ? bets.filter(x => String(x.signal_source || 'DAILY_BULLETIN') !== 'INTRADAY_ALERT') : [];
+  const status = (meta,bets,strong,near,capture) => {
+    const generation = generationTs(meta);
+    const cap = captureTs(capture);
+    if (!generation && !cap) return ['NO DATA','neutral'];
+    if (!cap) return ['NOT RUN','neutral'];
+    const eligible = Number(capture?.eligible_fixture_count ?? capture?.eligible_fixtures);
+    if (Number.isFinite(eligible) && eligible === 0) return ['NO ELIGIBLE FIXTURES','neutral'];
+    const latest = findLatest(bets,strong,near,meta ? [meta] : []);
+    if (!latest) return ['NO SIGNALS','neutral'];
+    const age = (Date.now() - new Date(latest).getTime()) / 60000;
+    if (age > 180) return ['STALE','stale'];
+    const all = [].concat(bets || [], strong || [], near || []);
+    const active = all.some(x => String(x.status || 'PENDING').toUpperCase() === 'PENDING');
+    return [active ? 'RUNNING' : 'NO SIGNALS', active ? 'live' : 'neutral'];
+  };
+  const statusCard = (state,detail) => `<div class="notice status-card ${String(state).toLowerCase().replace(/ /g,'-')}"><b>SYSTEM / DATA STATUS · ${esc(state)}</b><div class="sub">${esc(detail)}</div></div>`;
+  const productionCard = x => {
+    const c = clv(x.clv_odds_pct);
+    return `<article class="card"><div class="match-head"><div><div class="teams">${esc(x.match || 'Meč')}</div><div class="league">${esc(x.league || '')} · ${esc(market(x.market_display || x.market))}</div></div>${badge('production','PRODUCTION · PAPER BET')}</div>${book(x)}${lifecycle(x)}<div class="clv ${c.cls}"><span class="meta">CLV · ${esc(c.label)}</span><br><strong>${esc(c.value)}</strong></div><div class="metric-row"><span class="metric">RESULT <b>${esc(String(x.status || 'PENDING').toUpperCase())}</b></span><span class="metric">P/L <b>${Number(x.profit || 0) >= 0 ? '+' : ''}${Number(x.profit || 0).toFixed(2)} RSD</b></span><span class="metric">KICKOFF <b>${when(x.kickoff || x.date)}</b></span></div></article>`;
+  };
+  const signalCard = (x,near) => {
+    const c = clv(x.clv_odds_pct);
+    return `<article class="card"><div class="match-head"><div><div class="teams">${esc(x.match || 'Meč')}</div><div class="league">${esc(x.league || '')} · ${esc(market(x.market_display || x.market))}</div></div>${badge(near ? 'near' : 'strong',near ? 'NEAR MISS' : 'STRONG SIGNAL')}</div>${book(x)}${near ? '' : lifecycle(x)}<div class="metric-row"><span class="metric">EV <b>${pct(x.expected_value)}</b></span><span class="metric">EDGE <b>${pct(x.probability_edge)}</b></span>${near ? `<span class="metric">REASON <b>${esc(x.near_miss_reason || '—')}</b></span>` : ''}</div>${near ? '' : `<div class="clv ${c.cls}"><span class="meta">CLV · ${esc(c.label)}</span><br><strong>${esc(c.value)}</strong></div>`}<div class="meta" style="margin-top:12px">Kickoff · ${when(x.kickoff || x.created_at)}</div></article>`;
+  };
+  const row = x => {
+    const c = clv(x.clv_odds_pct);
+    return `<tr><td>${esc(when(x.kickoff || x.date || x.created_at))}</td><td><b>${esc(x.match || '—')}</b><br><span class="meta">${esc(x.league || '')}</span></td><td>${esc(market(x.market_display || x.market))}</td><td>${esc(BOOK[Number(x.bookmaker_id)]?.name || x.bookmaker || '—')}</td><td>${esc(odd(x.opening_odd))} → ${esc(odd(x.odd))} → ${esc(odd(x.closing_odd))}</td><td class="${c.cls}">${esc(c.value)}<br><span class="meta">${esc(c.label)}</span></td><td>${esc(String(x.status || x.signal_class || '—').toUpperCase())}</td><td>${x.profit == null ? '—' : Number(x.profit).toFixed(2)}</td></tr>`;
+  };
+  const renderBucket = (rows,activeId,historyId,near) => {
+    const list = Array.isArray(rows) ? rows : [];
+    const active = list.filter(x => String(x.status || 'PENDING').toUpperCase() === 'PENDING');
+    const history = list.filter(x => String(x.status || 'PENDING').toUpperCase() !== 'PENDING');
+    const a = document.getElementById(activeId), h = document.getElementById(historyId);
+    if (a) a.innerHTML = active.slice(0,30).map(x => signalCard(x,near)).join('') || '<div class="card empty">Nema aktivnih opservacija.</div>';
+    if (h) h.innerHTML = history.slice().reverse().slice(0,200).map(x => signalCard(x,near)).join('') || '<div class="card empty">Nema istorijskih opservacija.</div>';
+  };
+  async function render() {
+    const page = document.body.dataset.page || 'overview';
+    const root = document.querySelector('#cards') || document.querySelector('#summary') || document.querySelector('#rows');
+    try {
+      // Production is intentionally dependent only on canonical bets.json + ledger_meta.json.
+      // Optional telemetry files can never prevent the Production ledger from rendering.
+      const bets = await load('bets.json');
+      const meta = await load('ledger_meta.json');
+      const capture = await optional('odds_collection_state.json');
+      const strong = (await optional('strong_signals.json')) || [];
+      const near = (await optional('near_misses.json')) || [];
+      const prod = production(bets);
+      const settled = prod.filter(x => ['WIN','LOSS','SKIPPED','VOID','REVIEW'].includes(String(x.status || '').toUpperCase()));
+      const done = prod.filter(x => ['WIN','LOSS'].includes(String(x.status || '').toUpperCase()));
+      const profit = done.reduce((s,x) => s + Number(x.profit || 0), 0);
+      const stake = done.reduce((s,x) => s + Number(x.stake || 0), 0);
+      const wins = done.filter(x => String(x.status || '').toUpperCase() === 'WIN').length;
+      const gen = generationTs(meta), cap = captureTs(capture), latest = findLatest(prod,strong,near,meta ? [meta] : []);
+      const fr = fresh(latest), st = status(meta,prod,strong,near,capture);
+      document.querySelectorAll('[data-fresh]').forEach(e => { e.textContent = fr[0]; e.classList.add(fr[1]); });
+      document.querySelectorAll('[data-status]').forEach(e => { e.textContent = st[0]; e.classList.add(st[1]); });
+      document.querySelectorAll('[data-updated]').forEach(e => e.textContent = when(latest));
+      document.querySelectorAll('[data-generation]').forEach(e => e.textContent = when(gen));
+      document.querySelectorAll('[data-capture]').forEach(e => e.textContent = when(cap));
+      if (page === 'overview') {
+        const bank = document.querySelector('#bank'), pnl = document.querySelector('#pnl'), roi = document.querySelector('#roi'), win = document.querySelector('#win'), count = document.querySelector('#count'), paper = document.querySelector('#paper'), summary = document.querySelector('#summary');
+        if (bank) bank.textContent = (Number(meta.initial_bank || 0) + profit).toFixed(0) + ' RSD';
+        if (pnl) pnl.textContent = (profit >= 0 ? '+' : '') + profit.toFixed(2) + ' RSD';
+        if (roi) roi.textContent = (stake ? 100 * profit / stake : 0).toFixed(2) + '%';
+        if (win) win.textContent = (done.length ? 100 * wins / done.length : 0).toFixed(1) + '%';
+        if (count) count.textContent = done.length;
+        if (paper) paper.textContent = meta.paper_mode === false ? 'LIVE' : 'PAPER';
+        if (summary) summary.innerHTML = prod.length ? prod.slice().reverse().slice(0,4).map(productionCard).join('') : statusCard(st[0], st[0] === 'NO SIGNALS' ? 'Scanner je radio; nema qualifying Production signala.' : 'Canonical dashboard data nije dostupna.');
+      }
+      if (page === 'production') {
+        const count = document.querySelector('#count'), bank = document.querySelector('#bank'), pnl = document.querySelector('#pnl'), roi = document.querySelector('#roi'), cards = document.querySelector('#cards'), rows = document.querySelector('#rows');
+        if (count) count.textContent = done.length;
+        if (bank) bank.textContent = (Number(meta.initial_bank || 0) + profit).toFixed(0) + ' RSD';
+        if (pnl) pnl.textContent = (profit >= 0 ? '+' : '') + profit.toFixed(2) + ' RSD';
+        if (roi) roi.textContent = (stake ? 100 * profit / stake : 0).toFixed(2) + '%';
+        if (cards) cards.innerHTML = prod.filter(x => ['PENDING','SKIPPED'].includes(String(x.status || '').toUpperCase())).slice(0,30).map(productionCard).join('') || statusCard(st[0], 'Nema aktivnih Production odluka u trenutno dostupnom ledgeru.');
+        if (rows) rows.innerHTML = settled.slice().reverse().slice(0,200).map(row).join('') || '<tr><td colspan="8" class="empty">Nema Production history zapisa.</td></tr>';
+      }
+      if (page === 'strong') {
+        const count = document.querySelector('#count'); if (count) count.textContent = strong.length;
+        renderBucket(strong,'active-cards','history-cards',false);
+      }
+      if (page === 'near') {
+        const count = document.querySelector('#count'); if (count) count.textContent = near.length;
+        renderBucket(near,'active-cards','history-cards',true);
+      }
+      if (page === 'history') {
+        const all = prod.map(x => ({...x,signal_class:'PRODUCTION'})).concat(strong.map(x => ({...x,signal_class:'STRONG_SIGNAL'})),near.map(x => ({...x,signal_class:'NEAR_MISS'})));
+        const renderHistory = () => {
+          const q = (document.querySelector('#q')?.value || '').toLowerCase(), cls = document.querySelector('#class')?.value || '', statusValue = document.querySelector('#status')?.value || '';
+          const filtered = all.filter(x => (!q || JSON.stringify(x).toLowerCase().includes(q)) && (!cls || String(x.signal_class).toUpperCase() === cls) && (!statusValue || String(x.status || '').toUpperCase() === statusValue));
+          const rows = document.querySelector('#rows'); if (rows) rows.innerHTML = filtered.slice().reverse().slice(0,500).map(row).join('') || '<tr><td colspan="8" class="empty">Nema rezultata za izabrane filtere.</td></tr>';
+          const count = document.querySelector('#count'); if (count) count.textContent = filtered.length;
+        };
+        window.QB_RENDER_HISTORY = renderHistory;
+        document.querySelectorAll('#q,#class,#status').forEach(e => { e.addEventListener('input',renderHistory); e.addEventListener('change',renderHistory); });
+        renderHistory();
+      }
+    } catch (e) {
+      console.error('QuantBet dashboard render error', e);
+      document.querySelectorAll('[data-fresh]').forEach(x => { x.textContent = 'ERROR'; x.classList.add('error'); });
+      document.querySelectorAll('[data-status]').forEach(x => { x.textContent = 'ERROR'; x.classList.add('error'); });
+      if (root) root.innerHTML = `<div class="card empty">Podaci trenutno nisu dostupni. ${esc(e.message)}</div>`;
+    }
+  }
+  return {render};
+})();
+QB.render();
+setInterval(QB.render,60000);
