@@ -6,6 +6,7 @@ on:
     branches: [main]
     paths:
       - ".github/workflows/monitor.yml"
+      - "tools/system_health.py"
   schedule:
     - cron: "2/5 * * * *"
 
@@ -38,10 +39,13 @@ jobs:
       - run: pip install -r requirements.txt
       - run: python main.py monitor
       - run: python tools/settle_alerts.py
-      - name: Check settlement health
+      - name: Check canonical system and settlement health
         id: settlement-health
         continue-on-error: true
-        run: python tools/settlement_health.py --max-age-minutes 30
+        run: |
+          set -euo pipefail
+          python tools/system_health.py --stale-minutes 30
+          python tools/settlement_health.py --max-age-minutes 30
       - name: Build isolated public Strong Signal dataset
         run: python tools/build_public_signal_buckets.py
       - name: Resolve Strong Signal Opening-Pick-Closing lifecycle
@@ -50,21 +54,26 @@ jobs:
         if: always()
         run: |
           set -euo pipefail
-          files=(bets.json predictions.json intraday_alerts.json strong_signal_ledger.json strong_signals.json strong_signals_portfolio.json near_misses.json settlement_health.json)
+          files=(bets.json predictions.json intraday_alerts.json strong_signal_ledger.json strong_signals.json strong_signals_portfolio.json near_misses.json settlement_health.json system_health.json)
           if git diff --quiet -- "${files[@]}" && test -z "$(git status --porcelain -- data/raw_api)"; then
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add "${files[@]}" data/raw_api
-          git commit -m "Settle QuantBet ledger and archive API data"
+          git commit -m "Settle QuantBet ledger and publish canonical health"
           for attempt in 1 2 3; do
             if git push; then exit 0; fi
             git fetch origin main
-            git rebase origin/main || { git rebase --abort; sleep 2; }
+            if git rebase origin/main; then
+              continue
+            fi
+            git rebase --abort || true
+            echo "Ledger reconciliation conflict; settlement update failed." >&2
+            exit 1
           done
           echo "Unable to push after retries" >&2
           exit 1
-      - name: Fail when settlement is stale
+      - name: Fail when canonical settlement health is unsafe
         if: steps.settlement-health.outcome == 'failure'
         run: exit 1

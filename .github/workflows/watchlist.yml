@@ -8,16 +8,13 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: quantbet-football-api-global
+  cancel-in-progress: false
+
 jobs:
   watchlist:
     runs-on: ubuntu-latest
-    concurrency:
-      # Every scheduled scan must be allowed to finish and publish its state.
-      # The quota governor is the provider-budget authority; this group only
-      # serializes watchlist publication. Cancelling a 5-minute scan can leave
-      # the canonical state frozen for hours when the runner/API path is slow.
-      group: quantbet-watchlist
-      cancel-in-progress: false
     env:
       API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
       GMAIL_USER: ${{ secrets.GMAIL_USER }}
