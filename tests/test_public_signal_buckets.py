@@ -6,7 +6,7 @@ from src.quantbot.strong_signal_bankroll import portfolio
 from tools.build_public_signal_buckets import build
 
 
-def test_public_buckets_migrate_history_and_keep_strong_ledger_separate(
+def test_public_buckets_restore_frozen_history_and_keep_strong_ledger_separate(
     tmp_path,
 ) -> None:
     (tmp_path / "strong_signals.json").write_text(
@@ -15,8 +15,28 @@ def test_public_buckets_migrate_history_and_keep_strong_ledger_separate(
                 {
                     "id": "strong-1",
                     "signal_class": "STRONG_SIGNAL",
+                    "status": "PENDING",
+                    "profit": 0.0,
+                },
+                {
+                    "id": "strong-2",
+                    "signal_class": "STRONG_SIGNAL",
+                    "status": "PENDING",
+                    "profit": 0.0,
+                },
+            ]
+        ),
+        encoding="utf-8",
+    )
+    (tmp_path / "strong_signal_legacy_settlements.json").write_text(
+        json.dumps(
+            [
+                {
+                    "id": "strong-1",
                     "status": "WIN",
                     "profit": 240.0,
+                    "result": "1:0",
+                    "settled_at": "2026-09-09T10:00:00+00:00",
                 }
             ]
         ),
@@ -71,13 +91,17 @@ def test_public_buckets_migrate_history_and_keep_strong_ledger_separate(
     assert all("profit" in x for x in near)
     assert all(float(x["profit"]) == 0.0 for x in near)
     assert not any(x["id"] == "production-only" for x in strong)
-    assert all(x["status"] == "PENDING" for x in strong)
-    assert all(float(x["virtual_profit"]) == 0.0 for x in strong)
+    assert strong[0]["status"] == "WIN"
+    assert strong[0]["virtual_settled"] is True
+    assert strong[0]["virtual_profit"] == 240.0
+    assert strong[1]["status"] == "PENDING"
+    assert strong[1]["virtual_settled"] is False
+    assert strong[1]["virtual_profit"] == 0.0
     metrics = portfolio(strong)
     assert metrics.initial_bank == 10_000.0
-    assert metrics.current_bank == 10_000.0
-    assert metrics.total_profit == 0.0
-    assert metrics.completed_count == 0
+    assert metrics.current_bank == 10_240.0
+    assert metrics.total_profit == 240.0
+    assert metrics.completed_count == 1
     ledger = json.loads(
         (tmp_path / "strong_signal_ledger.json").read_text(encoding="utf-8")
     )
