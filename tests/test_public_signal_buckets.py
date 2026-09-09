@@ -5,7 +5,9 @@ import json
 from tools.build_public_signal_buckets import build
 
 
-def test_public_buckets_migrate_history_and_keep_strong_ledger_separate(tmp_path) -> None:
+def test_public_buckets_migrate_history_and_keep_strong_ledger_separate(
+    tmp_path,
+) -> None:
     (tmp_path / "strong_signals.json").write_text(
         json.dumps(
             [
@@ -69,7 +71,9 @@ def test_public_buckets_migrate_history_and_keep_strong_ledger_separate(tmp_path
     assert all("profit" in x for x in near)
     assert all(float(x["profit"]) == 0.0 for x in near)
     assert not any(x["id"] == "production-only" for x in strong)
-    ledger = json.loads((tmp_path / "strong_signal_ledger.json").read_text(encoding="utf-8"))
+    ledger = json.loads(
+        (tmp_path / "strong_signal_ledger.json").read_text(encoding="utf-8")
+    )
     assert [x["id"] for x in ledger] == ["strong-1", "strong-2"]
 
 
