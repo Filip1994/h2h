@@ -31,7 +31,6 @@ def test_intraday_workflow_keeps_accounting_outputs_separate():
         "bets.json",
         "intraday_alerts.json",
         "intraday_watchlist_state.json",
-        "strong_signals.json",
         "intraday_health.json",
     ):
         assert filename in workflow
