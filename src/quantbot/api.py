@@ -289,7 +289,9 @@ class APIFootballClient:
         self, league_id: int, season: int
     ) -> list[dict[str, Any]]:
         return self.get(
-            "fixtures", {"league": league_id, "season": season, "status": "FT"}, ttl_seconds=21_600
+            "fixtures",
+            {"league": league_id, "season": season, "status": "FT"},
+            ttl_seconds=21_600,
         )
 
     def odds(self, fixture_id: int) -> list[dict[str, Any]]:
