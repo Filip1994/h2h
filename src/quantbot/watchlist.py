@@ -115,6 +115,7 @@ def _event_from_prediction(
         "status": "PENDING",
         "profit": 0.0,
         "virtual_profit": 0.0,
+        "virtual_settled": False,
         "closing_5m_odd": None,
         "closing_5m_opposite_odd": None,
         "closing_5m_market_probability_devig": None,
@@ -169,8 +170,15 @@ def _append_transition_event(
 
 
 def _apply_linked_result(event: dict[str, Any], bet: dict[str, Any] | None) -> None:
+    """Reference Production outcome without importing it into Strong Signals.
+
+    Strong Signals are observations with their own virtual portfolio. A linked
+    Production bet is useful context, but Production status/P&L/settlement must
+    never become the virtual signal's status/P&L/settlement.
+    """
     if not bet:
         return
+    event["linked_bet_id"] = bet.get("id")
     for key in (
         "status",
         "profit",
@@ -179,11 +187,15 @@ def _apply_linked_result(event: dict[str, Any], bet: dict[str, Any] | None) -> N
         "closing_5m_opposite_odd",
         "closing_5m_market_probability_devig",
         "closing_5m_odds_captured_at",
+        "settled_at",
+        "settlement_type",
     ):
         if bet.get(key) is not None:
-            event[key] = bet[key]
-    if event.get("status") in {"WIN", "LOSS"}:
-        event["virtual_profit"] = float(event.get("profit") or 0.0)
+            event[f"production_{key}"] = bet[key]
+    event["status"] = "PENDING"
+    event["profit"] = 0.0
+    event["virtual_profit"] = 0.0
+    event["virtual_settled"] = False
 
 
 def _material_improvement(
@@ -291,16 +303,10 @@ def run_watchlist(settings: Settings, now: datetime | None = None) -> dict[str, 
             ev = decision * quote.odd - 1.0
             edge = decision - quote.devig_probability
             linked_bet = linked.get((fixture_id, market.value))
-            classification_stake = (
-                float(linked_bet.get("stake"))
-                if linked_bet
-                else kelly_stake(
-                    production_analytics.current_bank, decision, quote.odd, settings
-                )
-            )
             virtual_stake = kelly_stake(
                 strong_portfolio.current_bank, decision, quote.odd, settings
             )
+            classification_stake = virtual_stake
             classification = classify_signal(
                 expected_value=ev,
                 probability_edge=edge,
