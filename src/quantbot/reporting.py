@@ -11,7 +11,13 @@ from urllib.parse import urlencode
 
 from .config import Settings
 from .engine import GenerationResult
-from .presentation import clv_label, market_display, odds_lifecycle, skip_reason, status_display
+from .presentation import (  # noqa: I001
+    clv_label,
+    market_display,
+    odds_lifecycle,
+    skip_reason,
+    status_display,
+)
 
 
 def _esc(value: Any) -> str:
@@ -50,8 +56,10 @@ def _skip_url(repository: str, bet_id: str) -> str:
 
 def _odds_lifecycle_html(bet: dict[str, Any]) -> str:
     life = odds_lifecycle(bet)
+
     def fmt(value: Any) -> str:
         return f"{float(value):.2f}" if value is not None else "—"
+
     return (
         f"OPENING {fmt(life['opening'])} → PICK {fmt(life['pick'])} → "
         f"CLOSING {fmt(life['closing'])}"
