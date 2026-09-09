@@ -1,5 +1,5 @@
-from datetime import UTC, datetime, timedelta
 import json
+from datetime import UTC, datetime, timedelta
 
 from quantbot.odds_lifecycle import (
     canonical_observation,
