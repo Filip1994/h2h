@@ -9,6 +9,7 @@ from .api import APIBudgetExceeded, APIError, APIFootballClient
 from .calibration import ProbabilityCalibrator
 from .config import Settings
 from .dixon_coles import DixonColesFitError, DixonColesModel
+from .decision_packet import build_packet
 from .filters import eligibility_decision
 from .markets import extract_best_quotes
 from .parsing import current_fixture_fields, match_record_from_api
@@ -371,9 +372,40 @@ class QuantEngine:
         signal_source = (
             "INTRADAY_ALERT" if self.settings.intraday_mode else "DAILY_BULLETIN"
         )
+        candidate_by_id = {
+            f"{candidate.fixture_id}_{candidate.market.value}_{MODEL_VERSION}": (candidate, stake)
+            for candidate, stake in allocations
+        }
+        calibration_hash = None
+        try:
+            import hashlib
+            calibration_hash = hashlib.sha256(self.settings.calibration_file.read_bytes()).hexdigest()
+        except OSError:
+            calibration_hash = None
         for bet in proposed_bets:
             bet["signal_source"] = signal_source
             bet["signal_sent_at"] = now_local.isoformat()
+            packet_key = str(bet.get("prediction_id") or "")
+            if packet_key in candidate_by_id:
+                candidate, stake = candidate_by_id[packet_key]
+                bet["decision_packet"] = build_packet(
+                    candidate,
+                    stake,
+                    settings=self.settings,
+                    model=self._model_for_fixture(
+                        {
+                            "league_id": candidate.league_id,
+                            "season": int(str(candidate.kickoff.year)),
+                            "home_id": candidate.home_id,
+                            "away_id": candidate.away_id,
+                        },
+                        data_cutoff=decision_timestamp,
+                    ),
+                    decision_timestamp=decision_timestamp,
+                    calibration_hash=calibration_hash,
+                )
+                bet["decision_packet_id"] = bet["decision_packet"]["packet_id"]
+                bet["decision_packet_integrity_hash"] = bet["decision_packet"]["integrity_hash"]
         appended = self.bet_store.append_unique_fixtures(proposed_bets)
         telemetry["selections_produced"] = len(appended)
         telemetry["funnel"] = {
