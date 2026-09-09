@@ -44,9 +44,7 @@ def test_malformed_active_record_cannot_hide_from_health(tmp_path):
     report = check_system_health(tmp_path, now=now)
 
     assert report["status"] == "FAIL"
-    assert any(
-        e["error"] == "ACTIVE_MISSING_VALID_KICKOFF" for e in report["errors"]
-    )
+    assert any(e["error"] == "ACTIVE_MISSING_VALID_KICKOFF" for e in report["errors"])
 
 
 def test_terminal_without_settlement_timestamp_is_failure(tmp_path):
@@ -57,9 +55,7 @@ def test_terminal_without_settlement_timestamp_is_failure(tmp_path):
     report = check_system_health(tmp_path, now=now)
 
     assert report["status"] == "FAIL"
-    assert any(
-        e["error"] == "TERMINAL_MISSING_SETTLED_AT" for e in report["errors"]
-    )
+    assert any(e["error"] == "TERMINAL_MISSING_SETTLED_AT" for e in report["errors"])
 
 
 def test_healthy_active_record_is_not_false_positive(tmp_path):
