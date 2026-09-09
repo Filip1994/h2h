@@ -53,10 +53,34 @@ def _refresh_opening_fields(bet: dict[str, Any], store_path: Any) -> None:
         bet["opening_snapshot_id"] = opening.get("snapshot_id")
         bet["opening_coverage"] = "PROVEN"
     else:
-        bet["opening_odd"] = None
-        bet["opening_odds_captured_at"] = None
-        bet["opening_snapshot_id"] = None
+        bet.setdefault("opening_odd", None)
+        bet.setdefault("opening_odds_captured_at", None)
+        bet.setdefault("opening_snapshot_id", None)
         bet["opening_coverage"] = "UNAVAILABLE"
+    if bet.get("closing_odd") is not None or contract["closing"]:
+        bet["closing_coverage"] = "PROVEN"
+    else:
+        bet["closing_coverage"] = "UNAVAILABLE"
+    bet["pick_coverage"] = "PROVEN" if bet.get("entry_snapshot_id") else "UNAVAILABLE"
+    bet["lifecycle_coverage"] = (
+        "FULLY_AUDITABLE"
+        if bet.get("opening_odd") is not None
+        and bet.get("entry_snapshot_id")
+        and bet.get("closing_odd") is not None
+        else "PARTIAL"
+        if bet.get("opening_odd") is not None
+        or bet.get("entry_snapshot_id")
+        or bet.get("closing_odd") is not None
+        else "UNRECOVERABLE"
+    )
+    if bet.get("odd") is not None and bet.get("closing_odd") is not None:
+        pick = float(bet["odd"])
+        close = float(bet["closing_odd"])
+        if pick > 1 and close > 1:
+            bet["clv_odds_pct"] = round((pick / close) - 1.0, 6)
+            bet["clv_status"] = "COMPUTABLE"
+    else:
+        bet["clv_status"] = "NOT_COMPUTABLE"
 
 
 def capture_five_minute_closing_quotes(
@@ -66,7 +90,8 @@ def capture_five_minute_closing_quotes(
     now_utc = (now or datetime.now(UTC)).astimezone(UTC)
     store = BetStore(settings.bets_file)
     bets = store.load()
-    snapshot_store = OddsSnapshotStore(settings.root / "data" / "odds_snapshots.jsonl")
+    root = getattr(settings, "root", settings.bets_file.parent)
+    snapshot_store = OddsSnapshotStore(root / "data" / "odds_snapshots.jsonl")
     changed = False
     captured = 0
 
@@ -82,17 +107,14 @@ def capture_five_minute_closing_quotes(
             market = Market.parse(str(bet["market"]))
         except (KeyError, TypeError, ValueError):
             continue
-
         seconds_to_kickoff = (kickoff - now_utc).total_seconds()
         if not 120.0 <= seconds_to_kickoff <= 480.0:
             continue
-
         try:
             raw = APIFootballClient(settings).odds(fixture_id)
         except APIError as exc:
             print(f"⚠️ T-5 closing odds {bet.get('id')}: {exc}")
             continue
-
         quotes = extract_best_quotes(
             raw,
             bookmaker_priority=(bookmaker_id,),
@@ -103,7 +125,6 @@ def capture_five_minute_closing_quotes(
         quote = quotes.get(market)
         if quote is None or not 0.0 <= quote.overround <= settings.max_market_overround:
             continue
-
         snapshot_id = snapshot_store.append_quote(
             quote,
             fixture_id=fixture_id,
@@ -124,7 +145,7 @@ def capture_five_minute_closing_quotes(
         bet["closing_snapshot_id"] = snapshot_id
         changed = True
         captured += 1
-        _refresh_opening_fields(bet, settings.root / "data" / "odds_snapshots.jsonl")
+        _refresh_opening_fields(bet, root / "data" / "odds_snapshots.jsonl")
 
     if changed:
         store.save(bets)
