@@ -3,7 +3,7 @@ name: QuantBet intraday strong-signal scanner
 on:
   workflow_dispatch:
   schedule:
-    - cron: "*/30 6-23 * * *"
+    - cron: "*/30 * * * *"
       timezone: "Europe/Belgrade"
 
 permissions:
@@ -44,11 +44,18 @@ jobs:
           key: api-cache-${{ runner.os }}-${{ github.run_id }}
           restore-keys: api-cache-${{ runner.os }}-
       - run: pip install -r requirements.txt
-      - run: python main.py generate
+      - name: Generate intraday signals
+        id: scan
+        continue-on-error: true
+        run: python main.py generate
+      - name: Persist intraday generation health
+        if: always()
+        run: python tools/intraday_health.py --run-status "${{ steps.scan.outcome }}"
       - name: Commit intraday ledger, signals, health and safe raw API archives
+        if: always()
         run: |
           set -euo pipefail
-          files=(bets.json predictions.json ledger_meta.json api_usage.json api_usage_history.json generation_health.json generation_health_history.json intraday_alerts.json intraday_watchlist_state.json)
+          files=(bets.json predictions.json ledger_meta.json api_usage.json api_usage_history.json generation_health.json generation_health_history.json intraday_alerts.json intraday_watchlist_state.json intraday_health.json)
           changed=0
           for file in "${files[@]}"; do
             if [ -e "$file" ] && ! git diff --quiet -- "$file"; then changed=1; fi
@@ -81,3 +88,6 @@ jobs:
           done
           echo "Unable to push intraday update after 3 attempts" >&2
           exit 1
+      - name: Fail when signal generation fails
+        if: steps.scan.outcome == 'failure'
+        run: exit 1
