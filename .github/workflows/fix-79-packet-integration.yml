@@ -1,0 +1,42 @@
+name: Fix decision packet integration
+on:
+  push:
+    branches: [fix/79-immutable-decision-packets-v2]
+
+jobs:
+  patch:
+    if: github.actor == 'Filip1994'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fix packet model linkage
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('src/quantbot/decision_packet.py')
+          s = p.read_text()
+          s = s.replace('def build_packet(candidate: Any, stake: float, *, settings: Any, model: Any, decision_timestamp: datetime, calibration_hash: str | None = None) -> dict[str, Any]:', 'def build_packet(candidate: Any, stake: float, *, settings: Any, model: Any | None, decision_timestamp: datetime, calibration_hash: str | None = None) -> dict[str, Any]:')
+          s = s.replace('int(getattr(model, "fitted_matches", 0))', 'int(getattr(model, "fitted_matches", 0)) if model is not None else 0')
+          s = s.replace('len(getattr(model, "team_ids", ()) or ())', 'len(getattr(model, "team_ids", ()) or ()) if model is not None else 0')
+          s = s.replace('list(getattr(model, "team_ids", ()) or ())', 'list(getattr(model, "team_ids", ()) or ()) if model is not None else []')
+          p.write_text(s)
+
+          p = Path('src/quantbot/engine.py')
+          s = p.read_text()
+          if 'model_by_fixture: dict[int, DixonColesModel]' not in s:
+              s = s.replace('        self._training_cache: dict[tuple[int, int, str], list[MatchRecord]] = {}\n', '        self._training_cache: dict[tuple[int, int, str], list[MatchRecord]] = {}\n', 1)
+              s = s.replace('        prediction_records: list[dict[str, Any]] = []\n', '        prediction_records: list[dict[str, Any]] = []\n        model_by_fixture: dict[int, DixonColesModel] = {}\n', 1)
+          s = s.replace('                telemetry["fixtures_modelled"] += 1\n                quotes = extract_best_quotes(', '                telemetry["fixtures_modelled"] += 1\n                model_by_fixture[fixture_id] = model\n                quotes = extract_best_quotes(', 1)
+          bad = '''                    model=self._model_for_fixture(\n                        {\n                            "league_id": candidate.league_id,\n                            "season": int(str(candidate.kickoff.year)),\n                            "home_id": candidate.home_id,\n                            "away_id": candidate.away_id,\n                        },\n                        data_cutoff=decision_timestamp,\n                    ),'''
+          if bad in s:
+              s = s.replace(bad, '                    model=model_by_fixture.get(candidate.fixture_id),', 1)
+          p.write_text(s)
+          PY
+          rm -f .github/workflows/fix-79-packet-integration.yml .github/workflows/apply-79-packet.yml
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add src/quantbot/decision_packet.py src/quantbot/engine.py .github/workflows/fix-79-packet-integration.yml .github/workflows/apply-79-packet.yml
+          git commit -m 'fix: link decision packets to in-run model metadata'
+          git push
