@@ -1,0 +1,26 @@
+name: Format issue 80 patch
+
+on:
+  push:
+    branches: [fix/80-lifecycle-provenance]
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - run: pip install ruff
+      - run: ruff format src/quantbot/odds_lifecycle.py tests/test_lifecycle_provenance.py
+      - run: rm .github/workflows/format-issue-80.yml
+      - run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/quantbot/odds_lifecycle.py tests/test_lifecycle_provenance.py .github/workflows/format-issue-80.yml
+          git diff --cached --quiet && exit 0
+          git commit -m 'Format lifecycle provenance patch'
+          git push
