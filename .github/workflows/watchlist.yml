@@ -4,6 +4,7 @@ on:
   workflow_dispatch:
   schedule:
     - cron: "*/5 * * * *"
+      timezone: "Europe/Belgrade"
 
 permissions:
   contents: write
@@ -45,7 +46,14 @@ jobs:
           key: api-cache-${{ runner.os }}-${{ github.run_id }}
           restore-keys: api-cache-${{ runner.os }}-
       - run: pip install -r requirements.txt
-      - run: python main.py watchlist
+      - name: Run canonical Strong/Near scanner
+        id: watchlist-run
+        shell: bash
+        run: |
+          set -o pipefail
+          python main.py watchlist | tee watchlist_run_output.json
+      - name: Gate scanner fixture discovery and API activity
+        run: python tools/watchlist_runtime_gate.py --run-output watchlist_run_output.json
       - name: Build public Strong and Near Miss datasets
         run: python tools/build_public_signal_buckets.py
       - name: Validate Strong Signal publication contract
@@ -97,10 +105,10 @@ jobs:
             --path "${SIGNAL_WRITER_META}.pending" \
             --current-path /tmp/current-watchlist-run-meta.json
           mv "${SIGNAL_WRITER_META}.pending" "${SIGNAL_WRITER_META}"
-      - name: Commit watchlist, signal history, provenance, quota and bounded API archive
+      - name: Commit watchlist, runtime health, signal history, provenance, quota and bounded API archive
         run: |
           set -euo pipefail
-          files=(intraday_watchlist_state.json intraday_alerts.json strong_signal_ledger.json strong_signals.json strong_signals_portfolio.json near_misses.json market_timing_metrics.json data/football_api_quota.json "${SIGNAL_WRITER_META}")
+          files=(watchlist_run_output.json watchlist_runtime_health.json intraday_watchlist_state.json intraday_alerts.json strong_signal_ledger.json strong_signals.json strong_signals_portfolio.json near_misses.json market_timing_metrics.json data/football_api_quota.json "${SIGNAL_WRITER_META}")
           changed=0
           for file in "${files[@]}"; do
             if [ -e "$file" ] && ! git diff --quiet -- "$file"; then changed=1; fi
