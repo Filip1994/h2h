@@ -147,11 +147,7 @@ def check_system_health(
         name: inspect_source(name, rows, now, stale_minutes)
         for name, rows in sources.items()
     }
-    errors = [
-        error
-        for report in inspections.values()
-        for error in report["errors"]
-    ]
+    errors = [error for report in inspections.values() for error in report["errors"]]
     active_count = sum(report["active_count"] for report in inspections.values())
     return {
         "schema_version": 1,
