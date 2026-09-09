@@ -25,6 +25,7 @@
     if (status === 'PENDING' && kickoffDate(row)?.getTime() <= Date.now()) return 'SKIPPED';
     return status;
   };
+  const result = (row) => row.result || row.virtual_result || row.production_result || '—';
   const load = async (name) => {
     const response = await fetch(`./${name}?v=${Date.now()}`, { cache: 'no-store' });
     if (!response.ok) throw new Error(`${name} HTTP ${response.status}`);
@@ -59,7 +60,8 @@
   const historyRow = (row) => {
     const close = clv(row.clv_odds_pct);
     const profit = Number(row.virtual_profit || 0);
-    return `<tr><td>${esc(when(row.kickoff || row.signal_sent_at || row.created_at))}</td><td><b>${esc(fixture(row))}</b><br><span class="meta">${esc(row.league || row.league_name || '')}</span></td><td>${esc(market(row.market_display || row.market))}</td><td>${esc(row.bookmaker || '—')}</td><td>${esc(odd(row.opening_odd))} → ${esc(odd(row.odd))} → ${esc(odd(row.closing_odd || row.closing_5m_odd))}</td><td class="${close.cls}">${esc(close.value)}</td><td>${esc(effectiveStatus(row))}</td><td class="${profit >= 0 ? 'positive' : 'negative'}">${profit >= 0 ? '+' : ''}${profit.toFixed(2)}</td></tr>`;
+    const status = effectiveStatus(row);
+    return `<tr><td>${esc(when(row.kickoff || row.signal_sent_at || row.created_at))}</td><td><b>${esc(fixture(row))}</b><br><span class="meta">${esc(row.league || row.league_name || '')}</span></td><td>${esc(market(row.market_display || row.market))}</td><td>${esc(row.bookmaker || '—')}</td><td>${esc(odd(row.opening_odd))} → ${esc(odd(row.odd))} → ${esc(row.closing_odd || row.closing_5m_odd) ? odd(row.closing_odd || row.closing_5m_odd) : '—'}</td><td>${esc(result(row))}</td><td class="${close.cls}">${esc(close.value)}</td><td>${esc(status)}</td><td class="${profit >= 0 ? 'positive' : 'negative'}">${profit >= 0 ? '+' : ''}${profit.toFixed(2)}</td></tr>`;
   };
   const render = async () => {
     setStatus('LOADING');
@@ -71,7 +73,7 @@
       const activeElement = document.getElementById('active-cards');
       const historyElement = document.getElementById('history-cards');
       if (activeElement) activeElement.innerHTML = active.slice().reverse().slice(0, 30).map(card).join('') || '<div class="card empty">Nema aktivnih Strong Signal opservacija.</div>';
-      if (historyElement) historyElement.innerHTML = history.slice().reverse().slice(0, 200).map(historyRow).join('') || '<tr><td colspan="8" class="empty">Nema istorijskih Strong Signal zapisa.</td></tr>';
+      if (historyElement) historyElement.innerHTML = history.slice().reverse().slice(0, 200).map(historyRow).join('') || '<tr><td colspan="9" class="empty">Nema istorijskih Strong Signal zapisa.</td></tr>';
       document.getElementById('bank').textContent = `${Number(portfolio.current_bank ?? 10000).toFixed(0)} RSD`;
       document.getElementById('pnl').textContent = `${Number(portfolio.total_profit || 0) >= 0 ? '+' : ''}${Number(portfolio.total_profit || 0).toFixed(2)} RSD`;
       document.getElementById('roi').textContent = `${(Number(portfolio.roi || 0) * 100).toFixed(2)}%`;
