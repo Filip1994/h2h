@@ -146,16 +146,20 @@ jobs:
 
           signals = json.loads(Path('strong_signals.json').read_text(encoding='utf-8'))
           portfolio = json.loads(Path('strong_signals_portfolio.json').read_text(encoding='utf-8'))
+          terminal = {'WIN', 'LOSS', 'VOID', 'REVIEW'}
+          completed = [x for x in signals if x.get('virtual_settled') is True and str(x.get('status') or '').upper() in terminal]
+          expected_profit = sum(float(x.get('virtual_profit') or 0.0) for x in completed)
           assert all(x.get('virtual_portfolio') == 'STRONG_SIGNALS_VIRTUAL' for x in signals)
           assert all(x.get('not_a_production_bet') is True for x in signals)
-          assert all(x.get('virtual_settled') is False for x in signals)
-          assert all(float(x.get('virtual_profit') or 0.0) == 0.0 for x in signals)
+          assert all((x.get('virtual_settled') is True) == (str(x.get('status') or '').upper() in terminal) for x in signals)
+          assert all(float(x.get('virtual_profit') or 0.0) == (float(x.get('profit') or 0.0) if x.get('virtual_settled') is True else 0.0) for x in signals)
           assert portfolio['production'] is False
           assert portfolio['initial_bank'] == 10000.0
-          assert portfolio['current_bank'] == 10000.0
-          assert portfolio['total_profit'] == 0.0
-          assert portfolio['completed_count'] == 0
+          assert portfolio['current_bank'] == 10000.0 + expected_profit
+          assert portfolio['total_profit'] == expected_profit
+          assert portfolio['completed_count'] == len(completed)
           print('scheduled Strong Signal records=', len(signals))
+          print('scheduled Strong Signal completed=', len(completed))
           print('scheduled Strong Signal portfolio=', json.dumps(portfolio, sort_keys=True))
           PY
       - name: Commit scheduled Strong Signal lifecycle evidence
