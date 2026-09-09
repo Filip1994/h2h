@@ -31,36 +31,49 @@ def bookmaker(
     }
 
 
-def test_extracts_best_quote_from_every_bookmaker() -> None:
+def test_extracts_best_quote_only_from_serbian_whitelist() -> None:
     raw = [
         {
             "bookmakers": [
                 bookmaker(8, 1.85, 2.00, 1.75, 2.10),
                 bookmaker(11, 1.90, 1.95, 1.70, 2.20),
+                bookmaker(34, 2.00, 1.80, 1.80, 2.30),
                 bookmaker(99, 2.10, 1.75, 1.65, 2.40),
             ]
         }
     ]
     quotes = extract_best_quotes(
         raw,
-        bookmaker_priority=(8, 11),
-        allow_any_bookmaker=False,
+        bookmaker_priority=(8, 11, 34),
+        allow_any_bookmaker=True,
         captured_at=datetime.now(UTC),
     )
     over = quotes[Market.OVER_25]
-    assert over.bookmaker_id == 99
-    assert over.odd == 2.10
-    assert over.opposite_odd == 1.75
-    expected = (1 / 2.10) / ((1 / 2.10) + (1 / 1.75))
+    assert over.bookmaker_id == 34
+    assert over.odd == 2.00
+    assert over.opposite_odd == 1.80
+    expected = (1 / 2.00) / ((1 / 2.00) + (1 / 1.80))
     assert over.devig_probability == pytest.approx(expected)
 
 
-def test_only_bookmaker_id_locks_to_exact_bookmaker() -> None:
+def test_non_whitelisted_bookmaker_is_ignored() -> None:
+    raw = [{"bookmakers": [bookmaker(99, 2.10, 1.75, 1.65, 2.40)]}]
+    quotes = extract_best_quotes(
+        raw,
+        bookmaker_priority=(8, 11, 34),
+        allow_any_bookmaker=True,
+        captured_at=datetime.now(UTC),
+    )
+    assert quotes == {}
+
+
+def test_only_bookmaker_id_locks_to_exact_whitelisted_bookmaker() -> None:
     raw = [
         {
             "bookmakers": [
                 bookmaker(8, 1.85, 2.00, 1.75, 2.10),
-                bookmaker(99, 2.10, 1.75, 1.65, 2.40),
+                bookmaker(34, 2.10, 1.75, 1.65, 2.40),
+                bookmaker(99, 2.30, 1.60, 1.55, 2.50),
             ]
         }
     ]
@@ -73,6 +86,18 @@ def test_only_bookmaker_id_locks_to_exact_bookmaker() -> None:
     )
     assert quotes[Market.OVER_25].bookmaker_id == 8
     assert quotes[Market.OVER_25].odd == 1.85
+
+
+def test_only_bookmaker_id_cannot_select_non_whitelisted_bookmaker() -> None:
+    raw = [{"bookmakers": [bookmaker(99, 2.30, 1.60, 1.55, 2.50)]}]
+    quotes = extract_best_quotes(
+        raw,
+        bookmaker_priority=(99,),
+        allow_any_bookmaker=True,
+        only_bookmaker_id=99,
+        captured_at=datetime.now(UTC),
+    )
+    assert quotes == {}
 
 
 def test_requires_both_sides_of_market() -> None:
