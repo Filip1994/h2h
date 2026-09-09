@@ -1,14 +1,16 @@
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 from typing import Any
 
-from src.quantbot.strong_signal_bankroll import STRONG_SIGNAL_PORTFOLIO, portfolio
-
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "src"))
+
+from quantbot.strong_signal_bankroll import STRONG_SIGNAL_PORTFOLIO, portfolio
+
 LEDGER_FILE = "strong_signal_ledger.json"
-TERMINAL = {"WIN", "LOSS", "VOID", "REVIEW"}
 
 
 def load_json(path: Path) -> list[dict[str, Any]]:
@@ -46,36 +48,39 @@ def _canonical_key(item: dict[str, Any]) -> str:
 
 
 def _as_virtual(item: dict[str, Any]) -> dict[str, Any]:
-    """Normalize a signal into the isolated virtual portfolio contract."""
+    """Normalize a signal without importing Production settlement into it."""
     row = dict(item)
     row["virtual_portfolio"] = STRONG_SIGNAL_PORTFOLIO
     row["signal_class"] = "STRONG_SIGNAL"
     row["not_a_production_bet"] = True
 
-    if not row.get("virtual_settled"):
-        if row.get("status") not in (None, "PENDING"):
-            row["production_status"] = row.get("status")
-        if row.get("profit") not in (None, 0, 0.0):
-            row["production_profit"] = row.get("profit")
-        if row.get("result") is not None:
-            row["production_result"] = row.get("result")
-        if row.get("settled_at") is not None:
-            row["production_settled_at"] = row.get("settled_at")
-        if row.get("settlement_type") is not None:
-            row["production_settlement_type"] = row.get("settlement_type")
-        for key in (
-            "status",
-            "profit",
-            "result",
-            "settled_at",
-            "settlement_type",
-            "virtual_profit",
-        ):
-            row.pop(key, None)
-        row["status"] = "PENDING"
-        row["profit"] = 0.0
-        row["virtual_profit"] = 0.0
-        row["virtual_settled"] = False
+    if row.get("virtual_settled") is True:
+        row["virtual_profit"] = float(row.get("virtual_profit") or 0.0)
+        return row
+
+    if row.get("status") not in (None, "PENDING"):
+        row["production_status"] = row.get("status")
+    if row.get("profit") not in (None, 0, 0.0):
+        row["production_profit"] = row.get("profit")
+    if row.get("result") is not None:
+        row["production_result"] = row.get("result")
+    if row.get("settled_at") is not None:
+        row["production_settled_at"] = row.get("settled_at")
+    if row.get("settlement_type") is not None:
+        row["production_settlement_type"] = row.get("settlement_type")
+    for key in (
+        "status",
+        "profit",
+        "result",
+        "settled_at",
+        "settlement_type",
+        "virtual_profit",
+    ):
+        row.pop(key, None)
+    row["status"] = "PENDING"
+    row["profit"] = 0.0
+    row["virtual_profit"] = 0.0
+    row["virtual_settled"] = False
     return row
 
 
@@ -83,7 +88,6 @@ def load_or_migrate_ledger(root: Path) -> list[dict[str, Any]]:
     ledger_path = root / LEDGER_FILE
     if ledger_path.exists():
         return [_as_virtual(x) for x in load_json(ledger_path)]
-
     legacy = load_json(root / "strong_signals.json")
     migrated = [_as_virtual(x) for x in legacy]
     ledger_path.write_text(
@@ -146,7 +150,6 @@ def build(
     ledger = load_or_migrate_ledger(root)
     alerts = load_json(root / "intraday_alerts.json")
     observations = load_jsonl(root / "data" / "market_timing_snapshots.jsonl")
-
     strong_updates = [
         x
         for x in alerts
