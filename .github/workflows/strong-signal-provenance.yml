@@ -2,7 +2,7 @@ name: Strong Signal provenance audit
 
 on:
   workflow_run:
-    workflows: ["QuantBet settlement watchdog"]
+    workflows: ["QuantBet adaptive watchlist monitor"]
     types: [completed]
 
 permissions:
@@ -10,7 +10,7 @@ permissions:
   actions: read
 
 concurrency:
-  group: quantbet-strong-signal-provenance
+  group: quantbet-football-api-global
   cancel-in-progress: false
 
 jobs:
@@ -49,6 +49,9 @@ jobs:
         run: git checkout --detach "${TARGET_SHA}"
 
       - name: Reconcile Strong Signal generation and publication
+        env:
+          SOURCE_RUN_ID: ${{ github.event.workflow_run.id }}
+          SOURCE_RUN_STARTED_AT: ${{ github.event.workflow_run.run_started_at }}
         run: python tools/reconcile_strong_signal_run.py
 
       - name: Verify generated public contract
