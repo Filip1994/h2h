@@ -21,7 +21,9 @@ def load_json(path: Path) -> list[dict[str, Any]]:
 
 
 def key(row: dict[str, Any]) -> str:
-    return str(row.get("id") or row.get("signal_id") or row.get("observation_id") or "")
+    return str(
+        row.get("id") or row.get("signal_id") or row.get("observation_id") or ""
+    )
 
 
 def active(row: dict[str, Any]) -> bool:
@@ -79,10 +81,15 @@ def build_evidence(root: Path) -> dict[str, Any]:
                 value = json.loads(line)
             except json.JSONDecodeError:
                 continue
-            if isinstance(value, dict) and str(value.get("event_id")) not in previous_event_ids:
+            if (
+                isinstance(value, dict)
+                and str(value.get("event_id")) not in previous_event_ids
+            ):
                 new_events.append(value)
 
-    strong_after = [x for x in after if str(x.get("signal_class") or "").upper() == STRONG]
+    strong_after = [
+        x for x in after if str(x.get("signal_class") or "").upper() == STRONG
+    ]
     new_rows = [x for x in strong_after if key(x) in set(new_ids)]
     history = [x for x in strong_after if not active(x)]
     active_rows = [x for x in strong_after if active(x)]
@@ -96,21 +103,27 @@ def build_evidence(root: Path) -> dict[str, Any]:
             "dataset_delta": len(after) - len(before),
             "new_strong_signals": len(new_rows),
             "new_strong_signal_ids": [key(x) for x in new_rows],
-            "existing_or_deduplicated_strong_signals": len(strong_after) - len(new_rows),
+            "existing_or_deduplicated_strong_signals": len(strong_after)
+            - len(new_rows),
             "duplicate_public_ids": duplicated_ids,
             "active_strong_signals": len(active_rows),
             "history_strong_signals": len(history),
             "new_classification_events": len(new_events),
-            "new_classification_event_ids": [str(x.get("event_id")) for x in new_events],
+            "new_classification_event_ids": [
+                str(x.get("event_id")) for x in new_events
+            ],
             "public_near_misses_total": len(near),
         },
         "reconciliation": {
-            "dataset_delta_equals_new_strong_signals": (len(after) - len(before)) == len(new_rows),
+            "dataset_delta_equals_new_strong_signals": (len(after) - len(before))
+            == len(new_rows),
             "new_ids_unique": len(new_ids) == len(set(new_ids)),
             "public_ids_unique": not duplicated_ids,
             "active_status_contract": all(active(x) for x in active_rows),
             "history_excludes_pending": all(not active(x) for x in history),
-            "no_new_signal_id_missing_from_public": all(key(x) in after_ids for x in new_rows),
+            "no_new_signal_id_missing_from_public": all(
+                key(x) in after_ids for x in new_rows
+            ),
             "strong_records_are_isolated": all(
                 x.get("virtual_portfolio") == "STRONG_SIGNALS_VIRTUAL"
                 and x.get("not_a_production_bet") is True
