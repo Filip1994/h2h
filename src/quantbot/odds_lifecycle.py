@@ -42,9 +42,7 @@ def _load(path: Path) -> list[dict[str, Any]]:
 def observations_for(
     path: Path, *, fixture_id: int, market: str, bookmaker_id: int
 ) -> list[dict[str, Any]]:
-    key = lifecycle_key(
-        fixture_id=fixture_id, market=market, bookmaker_id=bookmaker_id
-    )
+    key = lifecycle_key(fixture_id=fixture_id, market=market, bookmaker_id=bookmaker_id)
     rows = []
     for item in _load(path):
         try:
