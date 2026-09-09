@@ -845,14 +845,18 @@
     "xi": 0.0015,
     "model_version": "dc-value-v2.1.0",
     "calibration_status": "IDENTITY_UNVALIDATED",
-    "status": "PENDING",
-    "profit": 0.0,
+    "status": "LOSS",
+    "profit": -500.0,
     "signal_source": "DAILY_BULLETIN",
     "signal_sent_at": "2026-09-09T07:08:08.421056+02:00",
     "closing_odd": 2.28,
     "closing_opposite_odd": 1.59,
     "closing_market_probability_devig": 0.410853,
-    "closing_odds_captured_at": "2026-09-09T16:17:31.850421+00:00"
+    "closing_odds_captured_at": "2026-09-09T16:17:31.850421+00:00",
+    "result": "1:2",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00",
+    "clv_odds_pct": -0.052632,
+    "clv_probability_pp": -0.022218
   },
   {
     "id": "1552142_UNDER_2_5",
@@ -896,14 +900,18 @@
     "xi": 0.0015,
     "model_version": "dc-value-v2.1.0",
     "calibration_status": "IDENTITY_UNVALIDATED",
-    "status": "PENDING",
-    "profit": 0.0,
+    "status": "WIN",
+    "profit": 1250.0,
     "signal_source": "DAILY_BULLETIN",
     "signal_sent_at": "2026-09-09T07:08:08.421056+02:00",
     "closing_odd": 3.6,
     "closing_opposite_odd": 1.28,
     "closing_market_probability_devig": 0.262295,
-    "closing_odds_captured_at": "2026-09-09T16:17:31.850421+00:00"
+    "closing_odds_captured_at": "2026-09-09T16:17:31.850421+00:00",
+    "result": "1:0",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00",
+    "clv_odds_pct": -0.027778,
+    "clv_probability_pp": -0.008538
   },
   {
     "id": "1497691_UNDER_2_5",
@@ -947,13 +955,17 @@
     "xi": 0.0015,
     "model_version": "dc-value-v2.1.0",
     "calibration_status": "IDENTITY_UNVALIDATED",
-    "status": "PENDING",
-    "profit": 0.0,
+    "status": "LOSS",
+    "profit": -500.0,
     "signal_source": "DAILY_BULLETIN",
     "signal_sent_at": "2026-09-09T07:08:08.421056+02:00",
     "closing_odd": 2.35,
     "closing_opposite_odd": 1.57,
     "closing_market_probability_devig": 0.40051,
-    "closing_odds_captured_at": "2026-09-09T16:17:31.850421+00:00"
+    "closing_odds_captured_at": "2026-09-09T16:17:31.850421+00:00",
+    "result": "2:1",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00",
+    "clv_odds_pct": -0.042553,
+    "clv_probability_pp": -0.018095
   }
 ]

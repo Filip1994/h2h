@@ -37832,9 +37832,10 @@
     "market_overround": null,
     "selected": false,
     "rejection_reason": "REJECT_NO_ODDS",
-    "status": "PENDING",
+    "status": "VOID",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1619560_UNDER_2_5_dc-value-v2.1.0",
@@ -37866,9 +37867,10 @@
     "market_overround": null,
     "selected": false,
     "rejection_reason": "REJECT_NO_ODDS",
-    "status": "PENDING",
+    "status": "VOID",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1619560_BTTS_YES_dc-value-v2.1.0",
@@ -37900,9 +37902,10 @@
     "market_overround": null,
     "selected": false,
     "rejection_reason": "REJECT_NO_ODDS",
-    "status": "PENDING",
+    "status": "VOID",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1619561_OVER_2_5_dc-value-v2.1.0",
@@ -37934,9 +37937,10 @@
     "market_overround": null,
     "selected": false,
     "rejection_reason": "REJECT_NO_ODDS",
-    "status": "PENDING",
+    "status": "VOID",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1619561_UNDER_2_5_dc-value-v2.1.0",
@@ -37968,9 +37972,10 @@
     "market_overround": null,
     "selected": false,
     "rejection_reason": "REJECT_NO_ODDS",
-    "status": "PENDING",
+    "status": "VOID",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1619561_BTTS_YES_dc-value-v2.1.0",
@@ -38002,9 +38007,10 @@
     "market_overround": null,
     "selected": false,
     "rejection_reason": "REJECT_NO_ODDS",
-    "status": "PENDING",
+    "status": "VOID",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1619562_OVER_2_5_dc-value-v2.1.0",
@@ -38036,9 +38042,10 @@
     "market_overround": null,
     "selected": false,
     "rejection_reason": "REJECT_NO_ODDS",
-    "status": "PENDING",
+    "status": "VOID",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1619562_UNDER_2_5_dc-value-v2.1.0",
@@ -38070,9 +38077,10 @@
     "market_overround": null,
     "selected": false,
     "rejection_reason": "REJECT_NO_ODDS",
-    "status": "PENDING",
+    "status": "VOID",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1619562_BTTS_YES_dc-value-v2.1.0",
@@ -38104,9 +38112,10 @@
     "market_overround": null,
     "selected": false,
     "rejection_reason": "REJECT_NO_ODDS",
-    "status": "PENDING",
+    "status": "VOID",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1619563_OVER_2_5_dc-value-v2.1.0",
@@ -38138,9 +38147,10 @@
     "market_overround": null,
     "selected": false,
     "rejection_reason": "REJECT_NO_ODDS",
-    "status": "PENDING",
+    "status": "VOID",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1619563_UNDER_2_5_dc-value-v2.1.0",
@@ -38172,9 +38182,10 @@
     "market_overround": null,
     "selected": false,
     "rejection_reason": "REJECT_NO_ODDS",
-    "status": "PENDING",
+    "status": "VOID",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1619563_BTTS_YES_dc-value-v2.1.0",
@@ -38206,9 +38217,10 @@
     "market_overround": null,
     "selected": false,
     "rejection_reason": "REJECT_NO_ODDS",
-    "status": "PENDING",
+    "status": "VOID",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1619841_OVER_2_5_dc-value-v2.1.0",
@@ -57827,9 +57839,10 @@
     "market_overround": null,
     "selected": false,
     "rejection_reason": "REJECT_NO_ODDS",
-    "status": "PENDING",
+    "status": "VOID",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1628482_UNDER_2_5_dc-value-v2.1.0",
@@ -57861,9 +57874,10 @@
     "market_overround": null,
     "selected": false,
     "rejection_reason": "REJECT_NO_ODDS",
-    "status": "PENDING",
+    "status": "VOID",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1628482_BTTS_YES_dc-value-v2.1.0",
@@ -57895,9 +57909,10 @@
     "market_overround": null,
     "selected": false,
     "rejection_reason": "REJECT_NO_ODDS",
-    "status": "PENDING",
+    "status": "VOID",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1628483_OVER_2_5_dc-value-v2.1.0",
@@ -58037,9 +58052,10 @@
     "market_overround": null,
     "selected": false,
     "rejection_reason": "REJECT_NO_ODDS",
-    "status": "PENDING",
+    "status": "VOID",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1628484_UNDER_2_5_dc-value-v2.1.0",
@@ -58071,9 +58087,10 @@
     "market_overround": null,
     "selected": false,
     "rejection_reason": "REJECT_NO_ODDS",
-    "status": "PENDING",
+    "status": "VOID",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1628484_BTTS_YES_dc-value-v2.1.0",
@@ -58105,9 +58122,10 @@
     "market_overround": null,
     "selected": false,
     "rejection_reason": "REJECT_NO_ODDS",
-    "status": "PENDING",
+    "status": "VOID",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1628485_OVER_2_5_dc-value-v2.1.0",
@@ -58589,9 +58607,10 @@
     "market_overround": null,
     "selected": false,
     "rejection_reason": "REJECT_NO_ODDS",
-    "status": "PENDING",
+    "status": "VOID",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1628490_UNDER_2_5_dc-value-v2.1.0",
@@ -58623,9 +58642,10 @@
     "market_overround": null,
     "selected": false,
     "rejection_reason": "REJECT_NO_ODDS",
-    "status": "PENDING",
+    "status": "VOID",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1628490_BTTS_YES_dc-value-v2.1.0",
@@ -58657,9 +58677,10 @@
     "market_overround": null,
     "selected": false,
     "rejection_reason": "REJECT_NO_ODDS",
-    "status": "PENDING",
+    "status": "VOID",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1634018_OVER_2_5_dc-value-v2.1.0",
@@ -70271,11 +70292,12 @@
     "market_overround": 0.058804,
     "selected": false,
     "rejection_reason": "REJECT_LOW_EV",
-    "status": "PENDING",
+    "status": "VOID",
     "outcome": null,
     "model_version": "dc-value-v2.1.0",
     "signal_id": "1558206_OVER_2_5_dc-value-v2.1.0",
-    "entry_snapshot_id": "533a8014578efb5a56fc4e2ec8dc4170203bb64e80eb022d5388e5b2d027ec72"
+    "entry_snapshot_id": "533a8014578efb5a56fc4e2ec8dc4170203bb64e80eb022d5388e5b2d027ec72",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1558206_UNDER_2_5_dc-value-v2.1.0",
@@ -70307,11 +70329,12 @@
     "market_overround": 0.058804,
     "selected": false,
     "rejection_reason": null,
-    "status": "PENDING",
+    "status": "VOID",
     "outcome": null,
     "model_version": "dc-value-v2.1.0",
     "signal_id": "1558206_UNDER_2_5_dc-value-v2.1.0",
-    "entry_snapshot_id": "7246eb60cf145998b9ace9949e36509c7b4c70629a15d5d7794497b04ec5a6e2"
+    "entry_snapshot_id": "7246eb60cf145998b9ace9949e36509c7b4c70629a15d5d7794497b04ec5a6e2",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1558206_BTTS_YES_dc-value-v2.1.0",
@@ -70343,11 +70366,12 @@
     "market_overround": 0.092896,
     "selected": false,
     "rejection_reason": "REJECT_LOW_EV",
-    "status": "PENDING",
+    "status": "VOID",
     "outcome": null,
     "model_version": "dc-value-v2.1.0",
     "signal_id": "1558206_BTTS_YES_dc-value-v2.1.0",
-    "entry_snapshot_id": "c4c18d5ceb9fbdb0f3f3542d10df74b268688d17d8fb62b7dfc415acd9de36ef"
+    "entry_snapshot_id": "c4c18d5ceb9fbdb0f3f3542d10df74b268688d17d8fb62b7dfc415acd9de36ef",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1559352_OVER_2_5_dc-value-v2.1.0",
@@ -102081,9 +102105,10 @@
     "market_overround": null,
     "selected": false,
     "rejection_reason": "REJECT_NO_ODDS",
-    "status": "PENDING",
+    "status": "VOID",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1600773_UNDER_2_5_dc-value-v2.1.0",
@@ -102115,9 +102140,10 @@
     "market_overround": null,
     "selected": false,
     "rejection_reason": "REJECT_NO_ODDS",
-    "status": "PENDING",
+    "status": "VOID",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1600773_BTTS_YES_dc-value-v2.1.0",
@@ -102149,9 +102175,10 @@
     "market_overround": null,
     "selected": false,
     "rejection_reason": "REJECT_NO_ODDS",
-    "status": "PENDING",
+    "status": "VOID",
     "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "model_version": "dc-value-v2.1.0",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1638093_OVER_2_5_dc-value-v2.1.0",
@@ -109460,9 +109487,11 @@
     "market_overround": 0.054945,
     "selected": false,
     "rejection_reason": "REJECT_ODD",
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-value-v2.1.0",
+    "result": "1:0",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1552142_UNDER_2_5_dc-value-v2.1.0",
@@ -109489,9 +109518,11 @@
     "market_overround": 0.054945,
     "selected": true,
     "rejection_reason": null,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-value-v2.1.0",
+    "result": "1:0",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1552142_BTTS_YES_dc-value-v2.1.0",
@@ -109518,9 +109549,11 @@
     "market_overround": 0.071829,
     "selected": false,
     "rejection_reason": "REJECT_LOW_EV",
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-value-v2.1.0",
+    "result": "1:0",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1497690_OVER_2_5_dc-value-v2.1.0",
@@ -109547,9 +109580,11 @@
     "market_overround": 0.061728,
     "selected": false,
     "rejection_reason": "REJECT_LOW_EV",
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-value-v2.1.0",
+    "result": "1:2",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1497690_UNDER_2_5_dc-value-v2.1.0",
@@ -109576,9 +109611,11 @@
     "market_overround": 0.065612,
     "selected": false,
     "rejection_reason": "REJECT_LOW_EV",
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-value-v2.1.0",
+    "result": "1:2",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1497690_BTTS_YES_dc-value-v2.1.0",
@@ -109605,9 +109642,11 @@
     "market_overround": 0.071829,
     "selected": false,
     "rejection_reason": "REJECT_LOW_EV",
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-value-v2.1.0",
+    "result": "1:2",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1497691_OVER_2_5_dc-value-v2.1.0",
@@ -109634,9 +109673,11 @@
     "market_overround": 0.061728,
     "selected": false,
     "rejection_reason": "REJECT_LOW_EV",
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-value-v2.1.0",
+    "result": "2:1",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1497691_UNDER_2_5_dc-value-v2.1.0",
@@ -109663,9 +109704,11 @@
     "market_overround": 0.061728,
     "selected": true,
     "rejection_reason": null,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-value-v2.1.0",
+    "result": "2:1",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1497691_BTTS_YES_dc-value-v2.1.0",
@@ -109692,9 +109735,11 @@
     "market_overround": 0.081387,
     "selected": false,
     "rejection_reason": "REJECT_LOW_EV",
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-value-v2.1.0",
+    "result": "2:1",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1497692_OVER_2_5_dc-value-v2.1.0",
@@ -109721,9 +109766,11 @@
     "market_overround": 0.063919,
     "selected": false,
     "rejection_reason": "REJECT_LOW_EV",
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-value-v2.1.0",
+    "result": "2:4",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1497692_UNDER_2_5_dc-value-v2.1.0",
@@ -109750,9 +109797,11 @@
     "market_overround": 0.065373,
     "selected": false,
     "rejection_reason": "REJECT_LOW_EV",
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-value-v2.1.0",
+    "result": "2:4",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1497692_BTTS_YES_dc-value-v2.1.0",
@@ -109779,9 +109828,11 @@
     "market_overround": 0.081387,
     "selected": false,
     "rejection_reason": "REJECT_LOW_EV",
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-value-v2.1.0",
+    "result": "2:4",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1497694_OVER_2_5_dc-value-v2.1.0",
@@ -109808,9 +109859,11 @@
     "market_overround": 0.058804,
     "selected": false,
     "rejection_reason": "REJECT_LOW_EV",
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-value-v2.1.0",
+    "result": "0:1",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1497694_UNDER_2_5_dc-value-v2.1.0",
@@ -109837,9 +109890,11 @@
     "market_overround": 0.058804,
     "selected": false,
     "rejection_reason": "REJECT_LOW_EV",
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-value-v2.1.0",
+    "result": "0:1",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1497694_BTTS_YES_dc-value-v2.1.0",
@@ -109866,9 +109921,11 @@
     "market_overround": 0.071829,
     "selected": false,
     "rejection_reason": "REJECT_LOW_EV",
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-value-v2.1.0",
+    "result": "0:1",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1559993_OVER_2_5_dc-value-v2.1.0",
@@ -109895,9 +109952,11 @@
     "market_overround": 0.053361,
     "selected": false,
     "rejection_reason": "REJECT_LOW_EV",
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-value-v2.1.0",
+    "result": "0:0",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1559993_UNDER_2_5_dc-value-v2.1.0",
@@ -109924,9 +109983,11 @@
     "market_overround": 0.066848,
     "selected": false,
     "rejection_reason": "REJECT_LOW_EV",
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-value-v2.1.0",
+    "result": "0:0",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1559993_BTTS_YES_dc-value-v2.1.0",
@@ -109953,9 +110014,11 @@
     "market_overround": 0.07604,
     "selected": false,
     "rejection_reason": "REJECT_LOW_EV",
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-value-v2.1.0",
+    "result": "0:0",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1612237_OVER_2_5_dc-value-v2.1.0",
@@ -109982,9 +110045,11 @@
     "market_overround": 0.059233,
     "selected": false,
     "rejection_reason": null,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-value-v2.1.0",
+    "result": "1:1",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1612237_UNDER_2_5_dc-value-v2.1.0",
@@ -110011,9 +110076,11 @@
     "market_overround": 0.059233,
     "selected": false,
     "rejection_reason": "REJECT_LOW_EV",
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-value-v2.1.0",
+    "result": "1:1",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1612237_BTTS_YES_dc-value-v2.1.0",
@@ -110040,9 +110107,11 @@
     "market_overround": 0.073763,
     "selected": false,
     "rejection_reason": "REJECT_LOW_EV",
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-value-v2.1.0",
+    "result": "1:1",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1612238_OVER_2_5_dc-value-v2.1.0",
@@ -110069,9 +110138,11 @@
     "market_overround": 0.077922,
     "selected": false,
     "rejection_reason": "REJECT_LOW_EV",
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-value-v2.1.0",
+    "result": "2:1",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1612238_UNDER_2_5_dc-value-v2.1.0",
@@ -110098,9 +110169,11 @@
     "market_overround": 0.077922,
     "selected": false,
     "rejection_reason": "REJECT_ODD",
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-value-v2.1.0",
+    "result": "2:1",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1612238_BTTS_YES_dc-value-v2.1.0",
@@ -110127,9 +110200,11 @@
     "market_overround": 0.081387,
     "selected": false,
     "rejection_reason": "REJECT_LOW_EV",
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-value-v2.1.0",
+    "result": "2:1",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1603999_OVER_2_5_dc-value-v2.1.0",
@@ -110156,9 +110231,11 @@
     "market_overround": 0.062475,
     "selected": false,
     "rejection_reason": "REJECT_LOW_EV",
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-value-v2.1.0",
+    "result": "2:2",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1603999_UNDER_2_5_dc-value-v2.1.0",
@@ -110185,9 +110262,11 @@
     "market_overround": 0.062475,
     "selected": false,
     "rejection_reason": "REJECT_LOW_EV",
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-value-v2.1.0",
+    "result": "2:2",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1603999_BTTS_YES_dc-value-v2.1.0",
@@ -110214,9 +110293,11 @@
     "market_overround": 0.088239,
     "selected": false,
     "rejection_reason": "REJECT_LOW_EV",
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-value-v2.1.0",
+    "result": "2:2",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1603024_OVER_2_5_dc-value-v2.1.0",
@@ -110243,9 +110324,11 @@
     "market_overround": 0.063919,
     "selected": false,
     "rejection_reason": "REJECT_LOW_EV",
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-value-v2.1.0",
+    "result": "1:2",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1603024_UNDER_2_5_dc-value-v2.1.0",
@@ -110272,9 +110355,11 @@
     "market_overround": 0.069024,
     "selected": true,
     "rejection_reason": null,
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-value-v2.1.0",
+    "result": "1:2",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1603024_BTTS_YES_dc-value-v2.1.0",
@@ -110301,9 +110386,11 @@
     "market_overround": 0.071829,
     "selected": false,
     "rejection_reason": "REJECT_LOW_EV",
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-value-v2.1.0",
+    "result": "1:2",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1603025_OVER_2_5_dc-value-v2.1.0",
@@ -110330,9 +110417,11 @@
     "market_overround": 0.054945,
     "selected": false,
     "rejection_reason": "REJECT_ODD",
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-value-v2.1.0",
+    "result": "2:1",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1603025_UNDER_2_5_dc-value-v2.1.0",
@@ -110359,9 +110448,11 @@
     "market_overround": 0.054945,
     "selected": false,
     "rejection_reason": "REJECT_LOW_EV",
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "status": "SETTLED",
+    "outcome": 0,
+    "model_version": "dc-value-v2.1.0",
+    "result": "2:1",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1603025_BTTS_YES_dc-value-v2.1.0",
@@ -110388,9 +110479,11 @@
     "market_overround": 0.084401,
     "selected": false,
     "rejection_reason": "REJECT_LOW_EV",
-    "status": "PENDING",
-    "outcome": null,
-    "model_version": "dc-value-v2.1.0"
+    "status": "SETTLED",
+    "outcome": 1,
+    "model_version": "dc-value-v2.1.0",
+    "result": "2:1",
+    "settled_at": "2026-09-09T20:19:09.803045+00:00"
   },
   {
     "id": "1498658_OVER_2_5_dc-value-v2.1.0",
