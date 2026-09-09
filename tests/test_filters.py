@@ -61,9 +61,7 @@ def test_youth_reserve_amateur_and_b_team_exclusions_remain_blocked() -> None:
     assert not is_allowed_match(
         "Germany", "Bundesliga", "Bayern Munich II", "Augsburg", league_id=78
     )
-    assert not is_allowed_match(
-        "France", "Ligue 1", "Nice", "Lyon", league_id=61
-    )
+    assert not is_allowed_match("France", "Ligue 1", "Nice", "Lyon", league_id=61)
 
 
 def test_exact_country_name_fallback_is_deterministic() -> None:
