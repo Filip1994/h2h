@@ -22,16 +22,16 @@ def build_audit(root: Path = ROOT) -> dict[str, Any]:
     bets = _load(root / "bets.json", [])
 
     if not isinstance(health, dict):
-        raise RuntimeError("generation_health.json is not an object")
+        raise TypeError("generation_health.json is not an object")
     if not isinstance(predictions, list):
-        raise RuntimeError("predictions.json is not a list")
+        raise TypeError("predictions.json is not a list")
     if not isinstance(bets, list):
-        raise RuntimeError("bets.json is not a list")
+        raise TypeError("bets.json is not a list")
 
     pipeline = health.get("pipeline") or {}
     rejection_records = health.get("funnel_rejections") or []
     if not isinstance(rejection_records, list):
-        raise RuntimeError("funnel_rejections is not a list")
+        raise TypeError("funnel_rejections is not a list")
 
     reason_counts = Counter(
         str(item.get("reason"))
