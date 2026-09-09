@@ -60,8 +60,11 @@ def test_legacy_builder_uses_isolated_strong_signal_contract(tmp_path) -> None:
     assert [item["id"] for item in data] == ["signal-1", "signal-2"]
     assert all(item["virtual_portfolio"] == "STRONG_SIGNALS_VIRTUAL" for item in data)
     assert all(item["not_a_production_bet"] is True for item in data)
-    assert all(item["status"] == "PENDING" for item in data)
-    assert all(item["virtual_profit"] == 0.0 for item in data)
+    assert data[0]["status"] == "WIN"
+    assert data[0]["virtual_settled"] is False
+    assert data[0]["virtual_profit"] == 0.0
+    assert data[1]["status"] == "PENDING"
+    assert data[1]["virtual_profit"] == 0.0
     assert (
         json.loads((tmp_path / "strong_signals.json").read_text(encoding="utf-8"))
         == data
