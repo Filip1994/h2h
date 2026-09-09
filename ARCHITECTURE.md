@@ -108,6 +108,28 @@ stateDiagram-v2
 - **Signal classification:** Strong Signal / Near Miss observational classification, isolated from Production accounting.
 - **Dashboard:** derived from persisted canonical public data; browser does not call the provider API.
 
+### Canonical Strong/Near writer ownership
+
+`watchlist.yml` is the **only scheduled producer** for Strong Signals, Near Misses, market-timing observations and `intraday_watchlist_state.json`.
+
+`settlement-watchdog.yml` is settlement/recovery-only. It must not invoke `main.py watchlist` and must not write Strong/Near state. Manual recovery uses the same canonical watchlist workflow rather than a second signal-producing path.
+
+The canonical writer persists `watchlist_run_meta.json` with producer identity, GitHub run ID/attempt, source SHA and UTC generation time. Before publication, a candidate writer compares its run ID with the currently published marker and fails closed if it is older or if the existing marker is malformed. After a concurrent push race, the same check is repeated against `origin/main` before any rebase; an older writer is rejected rather than rebasing stale state over a newer signal snapshot.
+
+Canonical outputs and owners:
+
+| Output | Authoritative producer | Boundary |
+| --- | --- | --- |
+| `intraday_watchlist_state.json` | `watchlist.yml` | Signal observation state |
+| `intraday_alerts.json` | `watchlist.yml` | Strong/Near virtual observations |
+| `strong_signal_ledger.json` | `watchlist.yml` + public bucket builder | Strong signal history |
+| `near_misses.json` | `watchlist.yml` + public bucket builder | Near-miss history |
+| `market_timing_metrics.json` | `watchlist.yml` | Market timing observations |
+| `data/intraday_signal_events.jsonl` | `watchlist.yml` | Signal-class transitions |
+| `watchlist_run_meta.json` | `watchlist.yml` | Writer provenance/ordering authority |
+
+This is an observability/control-plane contract. It does not change Strong Signal thresholds, virtual-accounting semantics, Production settlement or lifecycle mathematics.
+
 ## Research boundary
 
 Research datasets and experiments may contain historical H2H material or future Model V2 features. Such material is not Production input unless promoted through the explicit research-to-production gate.

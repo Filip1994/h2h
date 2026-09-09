@@ -41,7 +41,11 @@ def test_funnel_audit_reconciles_selected_predictions(tmp_path) -> None:
                 },
                 "funnel_rejections": [
                     {"fixture_id": 1, "stage": "strategy", "reason": "REJECT_LOW_EV"},
-                    {"fixture_id": 2, "stage": "risk_staking", "reason": "RISK_OR_CAPACITY"},
+                    {
+                        "fixture_id": 2,
+                        "stage": "risk_staking",
+                        "reason": "RISK_OR_CAPACITY",
+                    },
                 ],
             }
         ),
