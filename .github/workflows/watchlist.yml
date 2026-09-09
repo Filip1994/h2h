@@ -57,7 +57,7 @@ jobs:
       - name: Build public Strong and Near Miss datasets
         run: python tools/build_public_signal_buckets.py
       - name: Rebuild canonical Near Miss lifecycle dataset
-        run: python tools/build_near_miss_lifecycle.py
+        run: python tools/finalize_near_miss_contract.py
       - name: Validate Strong Signal publication contract
         run: |
           set -euo pipefail
@@ -90,7 +90,7 @@ jobs:
           rows = json.loads(Path("near_misses.json").read_text())
           assert isinstance(rows, list)
           required = {
-              "id", "prediction_id", "fixture_id", "event_id", "market",
+              "id", "prediction_id", "fixture_id", "event_id", "market", "selection",
               "home_name", "away_name", "match", "league", "kickoff",
               "bookmaker_id", "bookmaker", "near_miss_reason", "status",
               "not_a_production_bet", "opening_odd", "opening_captured_at",
