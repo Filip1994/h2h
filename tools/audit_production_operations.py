@@ -12,7 +12,6 @@ COVERAGE = ROOT / "data" / "odds_collection_coverage.jsonl"
 ELIGIBILITY = ROOT / "data" / "eligibility_coverage.jsonl"
 STATE = ROOT / "odds_collection_state.json"
 BUDGET = ROOT / "odds_collection_budget.json"
-METRICS = ROOT / "odds_collection_metrics.json"
 API_HISTORY = ROOT / "api_usage_history.json"
 REPORT = ROOT / "production_operations_gate.md"
 
@@ -57,7 +56,6 @@ def main() -> int:
     eligibility = load_jsonl(ELIGIBILITY)
     state = load_json(STATE, {})
     budget = load_json(BUDGET, {})
-    metrics = load_json(METRICS, {})
     api_history = load_json(API_HISTORY, [])
 
     lifecycle_keys: dict[tuple[int, str, int], list[dict]] = defaultdict(list)
