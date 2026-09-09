@@ -61,9 +61,13 @@ class GlobalQuotaGovernor:
             "requests",
         }
         if not required.issubset(payload):
-            raise GlobalQuotaStateError("GLOBAL_QUOTA_STATE_INVALID: missing ledger fields")
+            raise GlobalQuotaStateError(
+                "GLOBAL_QUOTA_STATE_INVALID: missing ledger fields"
+            )
         if payload["schema_version"] != self.SCHEMA_VERSION:
-            raise GlobalQuotaStateError("GLOBAL_QUOTA_STATE_INVALID: unsupported schema")
+            raise GlobalQuotaStateError(
+                "GLOBAL_QUOTA_STATE_INVALID: unsupported schema"
+            )
         if payload["date"] != today:
             return
         if int(payload["daily_capacity"]) != self.daily_capacity:
@@ -79,9 +83,13 @@ class GlobalQuotaGovernor:
         if int(payload["consumed"]) + int(payload["reserved"]) > int(
             payload["daily_capacity"]
         ):
-            raise GlobalQuotaStateError("GLOBAL_QUOTA_STATE_INVALID: totals exceed capacity")
+            raise GlobalQuotaStateError(
+                "GLOBAL_QUOTA_STATE_INVALID: totals exceed capacity"
+            )
         if not isinstance(payload["requests"], list):
-            raise GlobalQuotaStateError("GLOBAL_QUOTA_STATE_INVALID: requests is not a list")
+            raise GlobalQuotaStateError(
+                "GLOBAL_QUOTA_STATE_INVALID: requests is not a list"
+            )
 
     def _load(self) -> dict[str, Any]:
         today = datetime.now(UTC).date().isoformat()
@@ -90,9 +98,13 @@ class GlobalQuotaGovernor:
         except FileNotFoundError:
             payload = self._new_day(today)
         except (json.JSONDecodeError, OSError) as exc:
-            raise GlobalQuotaStateError("GLOBAL_QUOTA_STATE_INVALID: unreadable ledger") from exc
+            raise GlobalQuotaStateError(
+                "GLOBAL_QUOTA_STATE_INVALID: unreadable ledger"
+            ) from exc
         if not isinstance(payload, dict):
-            raise GlobalQuotaStateError("GLOBAL_QUOTA_STATE_INVALID: ledger is not an object")
+            raise GlobalQuotaStateError(
+                "GLOBAL_QUOTA_STATE_INVALID: ledger is not an object"
+            )
         self._validate_existing(payload, today)
         if payload.get("date") != today:
             payload = self._new_day(today)
