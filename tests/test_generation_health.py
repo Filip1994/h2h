@@ -84,7 +84,7 @@ def test_clean_generation_is_healthy_with_pipeline_counts() -> None:
     assert health["pipeline"]["selections_produced"] == 1
 
 
-def test_missing_canonical_candidate_counter_is_not_reconstructed_from_market_count() -> None:
+def test_missing_canonical_candidate_counter_is_not_reconstructed() -> None:
     result = _result(
         telemetry={
             "fixtures_discovered": 3,
