@@ -6,6 +6,7 @@ import pytest
 from tools.signal_writer_guard import assert_not_stale, build_metadata, is_stale
 
 
+# Ordering is intentionally based on GitHub run identity, not wall-clock time.
 def test_newer_writer_wins_even_when_timestamp_is_older():
     candidate = build_metadata(
         run_id=200,
