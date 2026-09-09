@@ -1,6 +1,6 @@
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime, timedelta  # noqa: I001
 
-from tools.watchlist_runtime_gate import evaluate  # noqa: I001
+from tools.watchlist_runtime_gate import evaluate
 
 
 NOW = datetime(2026, 9, 10, 12, 0, tzinfo=UTC)
