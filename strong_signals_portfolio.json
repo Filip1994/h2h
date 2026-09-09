@@ -4,11 +4,11 @@
   "not_a_production_bet": true,
   "initial_bank": 10000.0,
   "current_bank": 10000.0,
-  "total_profit": 0.0,
-  "total_stake": 0.0,
+  "total_profit": 0,
+  "total_stake": 0,
   "roi": 0.0,
   "win_rate": 0.0,
   "completed_count": 0,
-  "open_stake": 0.0,
+  "open_stake": 8500.0,
   "current_drawdown": 0.0
 }
