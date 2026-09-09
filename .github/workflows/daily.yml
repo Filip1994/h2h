@@ -81,7 +81,7 @@ jobs:
       - name: Capture generation completion
         id: generation-complete
         run: echo "timestamp=$(python -c 'from datetime import datetime,UTC; print(datetime.now(UTC).isoformat())')" >> "$GITHUB_OUTPUT"
-      - name: Commit ledger, health and raw API archive
+      - name: Commit ledger, health and safe raw API archives
         run: |
           set -euo pipefail
           files=(bets.json predictions.json calibration.json ledger_meta.json api_usage.json api_usage_history.json generation_health.json generation_health_history.json)
@@ -96,7 +96,16 @@ jobs:
           else
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add --ignore-errors "${files[@]}" data/raw_api
+            git add --ignore-errors "${files[@]}"
+            if [ -d data/raw_api ]; then
+              while IFS= read -r -d '' archive; do
+                git add -- "$archive"
+              done < <(find data/raw_api -type f -size -90M -print0)
+              oversized="$(find data/raw_api -type f -size +90M -print -quit)"
+              if [ -n "$oversized" ]; then
+                echo "Skipping raw API archive(s) over 90 MiB to stay below GitHub's 100 MiB file limit: $oversized"
+              fi
+            fi
             git commit -m "Update QuantBet daily ledger, health and API archive"
             for attempt in 1 2 3; do
               if git push; then
