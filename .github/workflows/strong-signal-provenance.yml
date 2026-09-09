@@ -21,29 +21,31 @@ jobs:
       - uses: actions/checkout@v7
         with:
           ref: main
-          fetch-depth: 20
+          fetch-depth: 200
 
       - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
 
-      - name: Identify scheduled-run public-data commit
+      - name: Identify exact scheduled-run public-data commit
         id: target
         env:
-          RUN_STARTED_AT: ${{ github.event.workflow_run.run_started_at }}
+          SOURCE_RUN_ID: ${{ github.event.workflow_run.id }}
         run: |
           set -euo pipefail
-          target=$(git log main --since="${RUN_STARTED_AT}" --format='%H %s' -- strong_signals.json | grep 'Update QuantBet signal classification observations' | head -n 1 | cut -d' ' -f1 || true)
+          target=$(git log main -S"${SOURCE_RUN_ID}" --format='%H' -- watchlist_run_meta.json | head -n 1 || true)
           if [ -z "${target}" ]; then
-            target=$(git log main --since="${RUN_STARTED_AT}" --format='%H' -- strong_signals.json | head -n 1 || true)
+            git fetch origin main --deepen=1000
+            target=$(git log main -S"${SOURCE_RUN_ID}" --format='%H' -- watchlist_run_meta.json | head -n 1 || true)
           fi
           if [ -z "${target}" ]; then
-            target=$(git rev-parse main)
+            echo "No canonical watchlist commit contains scheduled source run ${SOURCE_RUN_ID}; refusing ambiguous provenance." >&2
+            exit 1
           fi
           echo "sha=${target}" >> "$GITHUB_OUTPUT"
           echo "Strong Signal data commit: ${target}"
 
-      - name: Checkout scheduled-run data commit
+      - name: Checkout exact scheduled-run data commit
         env:
           TARGET_SHA: ${{ steps.target.outputs.sha }}
         run: git checkout --detach "${TARGET_SHA}"
@@ -59,21 +61,42 @@ jobs:
           python tools/validate_public_dashboard.py
           python -m json.tool strong_signal_run_evidence.json >/dev/null
 
-      - name: Publish machine-readable evidence
+      - name: Preserve generated evidence before switching to canonical main
+        run: cp strong_signal_run_evidence.json /tmp/strong_signal_run_evidence.json
+
+      - name: Publish machine-readable evidence without stale overwrite
+        env:
+          SOURCE_RUN_ID: ${{ github.event.workflow_run.id }}
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git fetch origin main
           git checkout --detach origin/main
-          cp "$GITHUB_WORKSPACE/strong_signal_run_evidence.json" strong_signal_run_evidence.json
+          python tools/provenance_publish_guard.py check \
+            --source-run "${SOURCE_RUN_ID}" \
+            --current-path strong_signal_run_evidence.json
+          cp /tmp/strong_signal_run_evidence.json strong_signal_run_evidence.json
           git add strong_signal_run_evidence.json
           if git diff --cached --quiet; then
             echo "Strong Signal evidence unchanged."
             exit 0
           fi
           git commit -m "chore: persist Strong Signal run evidence"
-          git push origin HEAD:main
+          for attempt in 1 2 3; do
+            if git push origin HEAD:main; then exit 0; fi
+            git fetch origin main
+            python tools/provenance_publish_guard.py check \
+              --source-run "${SOURCE_RUN_ID}" \
+              --current-path <(git show origin/main:strong_signal_run_evidence.json) \
+              || {
+                echo "Stale Strong Signal provenance rejected after remote advanced." >&2
+                exit 1
+              }
+            git rebase origin/main
+          done
+          echo "Unable to publish Strong Signal evidence after retries" >&2
+          exit 1
 
       - name: Report reconciliation
-        run: cat strong_signal_run_evidence.json
+        run: cat /tmp/strong_signal_run_evidence.json
