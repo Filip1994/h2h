@@ -3,11 +3,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_intraday_scanner_is_24_7_and_preserves_writer_concurrency():
+def test_intraday_scanner_is_24_7_and_uses_global_api_concurrency():
     workflow = (ROOT / ".github/workflows/intraday.yml").read_text(encoding="utf-8")
     assert 'cron: "*/30 * * * *"' in workflow
     assert 'timezone: "Europe/Belgrade"' in workflow
-    assert "group: quantbet-ledger" in workflow
+    assert "group: quantbet-football-api-global" in workflow
     assert "cancel-in-progress: false" in workflow
     assert 'INTRADAY_MODE: "true"' in workflow
 

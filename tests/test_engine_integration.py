@@ -115,33 +115,35 @@ class FakeAPI:
         ]
 
 
-def test_engine_selects_one_market_and_blocks_fixture_on_rerun(settings) -> None:
+def test_engine_persists_all_qualifying_markets_and_blocks_fixture_on_rerun(
+    settings,
+) -> None:
     now = datetime(2026, 9, 4, 6, 0, tzinfo=UTC)
     engine = QuantEngine(settings, api=FakeAPI(now))
     first = engine.generate(now)
-    assert len(first.new_bets) == 1
-    assert first.new_bets[0]["event_id"] == 999
-    assert first.new_bets[0]["market"] in {"OVER_2_5", "BTTS_YES"}
-    assert first.new_bets[0]["expected_value"] >= 0
+    assert len(first.new_bets) == 2
+    assert {bet["event_id"] for bet in first.new_bets} == {999}
+    assert {bet["market"] for bet in first.new_bets} == {"OVER_2_5", "BTTS_YES"}
+    assert all(bet["expected_value"] >= 0 for bet in first.new_bets)
     assert len(engine.prediction_store.load()) == 3
     assert first.telemetry["funnel"] == {
         "discovered": 1,
         "eligible": 1,
         "modelled": 1,
         "predictions": 3,
-        "candidates": 1,
-        "selections": 1,
+        "candidates": 2,
+        "selections": 2,
     }
     assert first.telemetry["fixtures_without_odds"] == 0
 
     second = engine.generate(now)
     assert second.new_bets == ()
-    assert len(engine.bet_store.load()) == 1
+    assert len(engine.bet_store.load()) == 2
     assert second.telemetry["funnel"]["discovered"] == 1
-    assert second.telemetry["funnel"]["eligible"] == 0
-    assert second.telemetry["funnel"]["modelled"] == 0
-    assert second.telemetry["funnel"]["predictions"] == 0
-    assert second.telemetry["funnel"]["candidates"] == 0
+    assert second.telemetry["funnel"]["eligible"] == 1
+    assert second.telemetry["funnel"]["modelled"] == 1
+    assert second.telemetry["funnel"]["predictions"] == 3
+    assert second.telemetry["funnel"]["candidates"] == 2
     assert second.telemetry["funnel"]["selections"] == 0
 
 

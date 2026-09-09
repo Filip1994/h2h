@@ -50,19 +50,16 @@ def test_daily_schedule_is_continuous_and_not_hourly_business_window() -> None:
     assert "06-23" not in text
 
 
-def test_shared_ledger_lock_is_job_level_not_workflow_level() -> None:
+def test_shared_football_api_lock_is_job_level() -> None:
     text = _workflow()
     assert "jobs:\n  generate:\n    concurrency:" in text
-    assert "group: quantbet-ledger" in text
-    assert (
-        "# Do not put the whole workflow in the shared ledger concurrency group."
-        in text
-    )
+    assert "group: quantbet-football-api-global" in text
+    assert "cancel-in-progress: false" in text
 
 
 def test_guard_is_rechecked_after_lock_to_prevent_duplicate_bulletins() -> None:
     text = _workflow()
-    assert "Re-check today's bulletin health after acquiring ledger lock" in text
+    assert "Re-check today's bulletin health after acquiring global API lock" in text
     assert "python tools/bulletin_health.py --guard" in text
     assert "generate=false" in text
     gate = text.index("id: gate")

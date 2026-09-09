@@ -17,10 +17,7 @@ def _result(*diagnostics: str, telemetry=None, **usage):
 
 def test_429_is_classified_as_degraded_without_blocking() -> None:
     result = _result(
-        rate_limit_events=1,
-        retry_events=1,
-        api_error_events=0,
-        network_error_events=0,
+        rate_limit_events=1, retry_events=1, api_error_events=0, network_error_events=0
     )
     health = build_success_health(datetime.now(UTC), result)
     assert health["status"] == "DEGRADED"
@@ -44,7 +41,7 @@ def test_fixture_dixon_coles_failure_is_observed_not_blocked() -> None:
     assert health["status"] != "BLOCKED"
 
 
-def test_clean_generation_is_healthy_with_pipeline_counts() -> None:
+def test_clean_generation_is_healthy_with_full_pipeline_funnel() -> None:
     telemetry = {
         "fixtures_discovered": 10,
         "fixtures_parse_failures": 0,
@@ -68,6 +65,7 @@ def test_clean_generation_is_healthy_with_pipeline_counts() -> None:
         network_error_events=0,
     )
     health = build_success_health(datetime.now(UTC), result)
+    assert health["schema_version"] == 4
     assert health["status"] == "HEALTHY"
     assert health["classification_reasons"] == []
     assert health["funnel"] == {
@@ -75,16 +73,23 @@ def test_clean_generation_is_healthy_with_pipeline_counts() -> None:
         "eligible": 4,
         "modelled": 4,
         "predictions": 12,
+        "odds_available": 0,
+        "valid_quotes": 0,
         "candidates": 2,
-        "selections": 1,
+        "ev_pass": 0,
+        "edge_pass": 0,
+        "risk_checks": 2,
+        "selected": 1,
+        "persisted_bets": 1,
+        "settled": 0,
     }
     assert health["funnel_semantics"]["candidates"].startswith(
-        "Fixture-level candidates"
+        "Market-level candidates"
     )
     assert health["pipeline"]["selections_produced"] == 1
 
 
-def test_missing_canonical_candidate_counter_is_not_reconstructed() -> None:
+def test_explicit_candidate_counter_is_preserved() -> None:
     result = _result(
         telemetry={
             "fixtures_discovered": 3,
@@ -96,14 +101,13 @@ def test_missing_canonical_candidate_counter_is_not_reconstructed() -> None:
         },
     )
     health = build_success_health(datetime.now(UTC), result)
-    assert health["funnel"]["candidates"] == 0
+    assert health["funnel"]["candidates"] == 5
+    assert health["funnel"]["selected"] == 1
 
 
 def test_budget_exhaustion_is_degraded_and_not_a_rpm_threshold() -> None:
     result = _result(
-        telemetry={
-            "fixture_failures": {"api": 0, "dixon_coles": 0, "other": 0},
-        },
+        telemetry={"fixture_failures": {"api": 0, "dixon_coles": 0, "other": 0}},
         budget_exhaustion_events=1,
         retry_events=0,
         rate_limit_events=0,
@@ -161,6 +165,7 @@ def test_fatal_generation_failure_is_classified_blocked_but_observation_only() -
         RuntimeError("generation failed"),
         telemetry={"fixtures_discovered": 5},
     )
+    assert health["schema_version"] == 4
     assert health["status"] == "BLOCKED"
     assert health["classification_reasons"] == ["RuntimeError"]
     assert health["pipeline"]["fixtures_discovered"] == 5
