@@ -25,7 +25,7 @@ def test_dashboard_has_one_shared_design_system_and_all_primary_sectors():
     css = read("assets/qb-dashboard.css")
     js = read("assets/qb-dashboard.js")
     assert ".shell" in css and ".lifecycle" in css and ".clv" in css
-    assert "QB.productionCard" in js and "QB.signalCard" in js and "QB.lifecycle" in js
+    assert "const productionCard" in js and "const signalCard" in js and "const lifecycle" in js
     for page in PAGES:
         text = read(page)
         assert "./assets/qb-dashboard.css" in text
@@ -74,7 +74,7 @@ def test_dashboard_zero_pick_contract_and_truthful_state_labels():
         "ERROR",
     ):
         assert state in js
-    assert "QB.status=" in js
+    assert "const status =" in js
 
 
 def test_strong_and_near_pages_have_active_and_history_contract():
@@ -87,7 +87,7 @@ def test_strong_and_near_pages_have_active_and_history_contract():
         assert 'id="active-cards"' in page
         assert 'id="history-cards"' in page
     assert "renderBucket" in js
-    assert "status||'PENDING'" in js
+    assert "String(x.status || 'PENDING')" in js
 
 
 def test_history_preserves_accounting_buckets_and_does_not_invent_lifecycle():
