@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import Any
 
-
 MARKET_DISPLAY = {
     "OVER_2_5": "Over 2.5",
     "UNDER_2_5": "Under 2.5",
