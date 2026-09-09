@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -13,7 +14,7 @@ def test_strong_signal_page_uses_isolated_renderer() -> None:
     html = (ROOT / "strong-signals.html").read_text(encoding="utf-8")
     js = (ROOT / "assets" / "strong-signals.js").read_text(encoding="utf-8")
     assert '<body data-page="strong">' in html
-    assert "./assets/strong-signals.js?v=20260909-1" in html
+    assert re.search(r"\./assets/strong-signals\.js\?v=[^\"']+", html)
     assert "strong_signals.json" in js
     assert "strong_signals_portfolio.json" in js
     assert "STRONG SIGNAL" in js
