@@ -11,9 +11,7 @@ from tools.system_health import check_system_health
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def check_settlement_health(
-    root: Path, now: datetime, max_age_minutes: int = 30
-) -> dict:
+def check_settlement_health(root: Path, now: datetime, max_age_minutes: int = 30) -> dict:
     report = check_system_health(root, now=now, stale_minutes=max_age_minutes)
     stale = [
         error
@@ -58,10 +56,7 @@ def main() -> int:
         print("ERROR: settlement/system health failed closed.")
         print(json.dumps(report, ensure_ascii=False, indent=2))
         return 1
-    print(
-        "Settlement health: OK; "
-        f"active={report.get('active_count', 0)}"
-    )
+    print(f"Settlement health: OK; active={report.get('active_count', 0)}")
     return 0
 
 
