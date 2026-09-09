@@ -3,19 +3,18 @@ name: QuantBet adaptive watchlist monitor
 on:
   workflow_dispatch:
   schedule:
-    - cron: "*/2 6-23 * * *"
+    - cron: "*/2 * * * *"
       timezone: "Europe/Belgrade"
 
 permissions:
   contents: write
 
-concurrency:
-  group: quantbet-ledger
-  cancel-in-progress: false
-
 jobs:
   watchlist:
     runs-on: ubuntu-latest
+    concurrency:
+      group: quantbet-ledger
+      cancel-in-progress: false
     env:
       API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
       GMAIL_USER: ${{ secrets.GMAIL_USER }}
