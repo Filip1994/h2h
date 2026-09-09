@@ -3,84 +3,65 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from pathlib import Path
 
+from tools.system_health import check_system_health
+
 ROOT = Path(__file__).resolve().parents[1]
-
-
-def _load(path: Path) -> list[dict]:
-    if not path.exists():
-        return []
-    try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, TypeError, ValueError, json.JSONDecodeError):
-        return []
-    return payload if isinstance(payload, list) else []
-
-
-def _parse(value: object) -> datetime | None:
-    if not value:
-        return None
-    try:
-        return datetime.fromisoformat(str(value)).astimezone(UTC)
-    except ValueError:
-        return None
 
 
 def check_settlement_health(
     root: Path, now: datetime, max_age_minutes: int = 30
 ) -> dict:
-    cutoff = now - timedelta(minutes=max_age_minutes)
-    stale: list[dict] = []
-    for source_name in ("bets.json", "intraday_alerts.json"):
-        for item in _load(root / source_name):
-            if str(item.get("status", "")).upper() != "PENDING":
-                continue
-            kickoff = _parse(item.get("kickoff"))
-            if kickoff is None or kickoff + timedelta(minutes=90) > cutoff:
-                continue
-            stale.append(
-                {
-                    "source": source_name,
-                    "id": item.get("id"),
-                    "event_id": item.get("event_id"),
-                    "match": item.get("match"),
-                    "kickoff": item.get("kickoff"),
-                    "eligible_at": (kickoff + timedelta(minutes=90)).isoformat(),
-                }
-            )
+    report = check_system_health(root, now=now, stale_minutes=max_age_minutes)
+    stale = [
+        error
+        for error in report.get("errors", [])
+        if error.get("error") == "STALE_ACTIVE"
+    ]
     return {
-        "checked_at": now.isoformat(),
+        "checked_at": report["checked_at"],
         "max_age_minutes": max_age_minutes,
         "stale_pending_count": len(stale),
-        "status": "FAIL" if stale else "OK",
+        "active_count": report.get("active_count"),
+        "status": report["status"],
         "stale_pending": stale,
+        "errors": report.get("errors", []),
     }
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Detect stale pending QuantBet settlements"
+        description="Detect stale or otherwise unsafe QuantBet settlements"
     )
     parser.add_argument("--max-age-minutes", type=int, default=30)
     args = parser.parse_args()
-    report = check_settlement_health(ROOT, datetime.now(UTC), args.max_age_minutes)
+    try:
+        report = check_settlement_health(
+            ROOT, datetime.now(UTC), args.max_age_minutes
+        )
+    except RuntimeError as exc:
+        report = {
+            "checked_at": datetime.now(UTC).isoformat(),
+            "max_age_minutes": args.max_age_minutes,
+            "stale_pending_count": 0,
+            "active_count": None,
+            "status": "FAIL",
+            "stale_pending": [],
+            "errors": [{"error": str(exc)}],
+        }
     (ROOT / "settlement_health.json").write_text(
         json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
     if report["status"] == "FAIL":
-        print(
-            f"ERROR: {report['stale_pending_count']} settlement(s) remain PENDING "
-            "after the health threshold."
-        )
-        for item in report["stale_pending"]:
-            print(
-                f" - {item['source']} {item['id']} event={item['event_id']} "
-                f"kickoff={item['kickoff']}"
-            )
+        print("ERROR: settlement/system health failed closed.")
+        print(json.dumps(report, ensure_ascii=False, indent=2))
         return 1
-    print("Settlement health: OK")
+    print(
+        "Settlement health: OK; "
+        f"active={report.get('active_count', 0)}"
+    )
     return 0
 
 
