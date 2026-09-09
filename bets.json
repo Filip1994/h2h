@@ -895,7 +895,11 @@
     "status": "PENDING",
     "profit": 0.0,
     "signal_source": "DAILY_BULLETIN",
-    "signal_sent_at": "2026-09-09T07:08:08.421056+02:00"
+    "signal_sent_at": "2026-09-09T07:08:08.421056+02:00",
+    "closing_odd": 3.6,
+    "closing_opposite_odd": 1.28,
+    "closing_market_probability_devig": 0.262295,
+    "closing_odds_captured_at": "2026-09-09T15:06:13.633316+00:00"
   },
   {
     "id": "1497691_UNDER_2_5",
@@ -942,6 +946,10 @@
     "status": "PENDING",
     "profit": 0.0,
     "signal_source": "DAILY_BULLETIN",
-    "signal_sent_at": "2026-09-09T07:08:08.421056+02:00"
+    "signal_sent_at": "2026-09-09T07:08:08.421056+02:00",
+    "closing_odd": 2.35,
+    "closing_opposite_odd": 1.57,
+    "closing_market_probability_devig": 0.40051,
+    "closing_odds_captured_at": "2026-09-09T15:06:13.633316+00:00"
   }
 ]
