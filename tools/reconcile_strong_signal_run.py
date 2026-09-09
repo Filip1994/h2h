@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 from pathlib import Path
 from typing import Any
@@ -94,7 +95,15 @@ def build_evidence(root: Path) -> dict[str, Any]:
     near = load_json(root / "near_misses.json")
 
     return {
-        "schema_version": 1,
+        "schema_version": 2,
+        "source_run": {
+            "workflow": os.environ.get("GITHUB_WORKFLOW", "QuantBet adaptive watchlist monitor"),
+            "run_id": os.environ.get("SOURCE_RUN_ID") or None,
+            "run_started_at": os.environ.get("SOURCE_RUN_STARTED_AT") or None,
+            "data_commit": subprocess.check_output(
+                ["git", "rev-parse", "HEAD"], cwd=root, text=True
+            ).strip(),
+        },
         "strong_signal_provenance": {
             "before_public_strong_signals_total": len(before),
             "after_public_strong_signals_total": len(after),
