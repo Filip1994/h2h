@@ -1,4 +1,4 @@
-from quantbot.strong_signal_bankroll import STRONG_SIGNAL_INITIAL_BANK, portfolio
+from quantbot.strong_signal_bankroll import STRONG_SIGNAL_INITIAL_BANK, portfolio  # noqa: I001
 
 
 VIRTUAL = "STRONG_SIGNALS_VIRTUAL"
