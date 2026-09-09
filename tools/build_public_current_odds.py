@@ -19,13 +19,17 @@ def _active(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return [
         record
         for record in records
-        if str(record.get("status", "")).upper() in {"PENDING", "OPEN", "ACTIVE", "WATCHING"}
+        if str(record.get("status", "")).upper()
+        in {"PENDING", "OPEN", "ACTIVE", "WATCHING"}
     ]
 
 
 def build(root: Path) -> dict[str, Any]:
     targets: dict[tuple[int, str, int], dict[str, Any]] = {}
-    for source, path in (("PRODUCTION", root / "bets.json"), ("STRONG_SIGNAL", root / "strong_signals.json")):
+    for source, path in (
+        ("PRODUCTION", root / "bets.json"),
+        ("STRONG_SIGNAL", root / "strong_signals.json"),
+    ):
         for record in _active(_load_json(path, [])):
             fixture_id = record.get("event_id", record.get("fixture_id"))
             market = record.get("market")
@@ -38,7 +42,8 @@ def build(root: Path) -> dict[str, Any]:
                 "market": str(market),
                 "selection": str(record.get("selection") or market),
                 "bookmaker_id": int(bookmaker_id),
-                "bookmaker_name": record.get("bookmaker") or record.get("bookmaker_name"),
+                "bookmaker_name": record.get("bookmaker")
+                or record.get("bookmaker_name"),
             }
 
     latest: dict[tuple[int, str, int], dict[str, Any]] = {}
@@ -79,7 +84,11 @@ def build(root: Path) -> dict[str, Any]:
             continue
         age = max(0.0, (now - row["_observed"]).total_seconds() / 60.0)
         kickoff = datetime.fromisoformat(str(row["kickoff"])).astimezone(UTC)
-        state = "CLOSED" if now >= kickoff else ("LIVE" if age <= FRESHNESS_MINUTES else "STALE")
+        state = (
+            "CLOSED"
+            if now >= kickoff
+            else ("LIVE" if age <= FRESHNESS_MINUTES else "STALE")
+        )
         output.append(
             {
                 **target,
@@ -91,7 +100,11 @@ def build(root: Path) -> dict[str, Any]:
                 "current_freshness_state": state,
             }
         )
-    return {"generated_at": now.isoformat(), "freshness_window_minutes": FRESHNESS_MINUTES, "items": output}
+    return {
+        "generated_at": now.isoformat(),
+        "freshness_window_minutes": FRESHNESS_MINUTES,
+        "items": output,
+    }
 
 
 def main() -> int:

@@ -82,7 +82,9 @@ class BetStore:
         """Append bets idempotently by fixture + market, not fixture alone."""
         bets = self.load()
         blocked = self.blocked_market_keys(bets)
-        blocked_fixtures = {fixture_id for fixture_id, market in blocked if market is None}
+        blocked_fixtures = {
+            fixture_id for fixture_id, market in blocked if market is None
+        }
         appended: list[dict[str, Any]] = []
         for bet in new_bets:
             fixture_id = int(bet["event_id"])
