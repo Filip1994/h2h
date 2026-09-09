@@ -6,7 +6,7 @@ import os
 from datetime import UTC, datetime
 from typing import Any
 
-from .league_registry import classification_for, REGISTRY
+from .league_registry import REGISTRY, classification_for
 
 PACKET_SCHEMA_VERSION = 2
 STRATEGY_VERSION = "production-decision-v1"
