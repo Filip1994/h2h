@@ -47,9 +47,7 @@ def portfolio(rows: list[dict[str, Any]]) -> StrongSignalPortfolio:
     completed = [row for row in strong if _terminal(row)]
     total_profit = sum(_virtual_profit(row) for row in completed)
     total_stake = sum(float(row.get("stake") or 0.0) for row in completed)
-    wins = sum(
-        1 for row in completed if str(row.get("status") or "").upper() == "WIN"
-    )
+    wins = sum(1 for row in completed if str(row.get("status") or "").upper() == "WIN")
     open_stake = sum(
         float(row.get("stake") or 0.0) for row in strong if not _terminal(row)
     )
