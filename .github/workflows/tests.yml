@@ -25,4 +25,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: python tools/audit_odds_lifecycle.py --output /tmp/odds-lifecycle-audit.md
+      - name: Forensic signal classification audit
+        if: github.event_name == 'pull_request'
+        run: python tools/audit_signal_classification.py > /tmp/signal-classification-audit.txt
       - run: pytest
