@@ -9,48 +9,20 @@ on:
         default: false
         type: boolean
   schedule:
-    - cron: "*/5 * * * *"
+    - cron: "*/30 * * * *"
       timezone: "Europe/Belgrade"
 
-permissions:
-  actions: write
-  contents: write
-
-concurrency:
-  group: quantbet-ledger
-  cancel-in-progress: false
+# Do not put the whole workflow in the shared ledger concurrency group.
+# The guard must be able to start on schedule even while another writer is busy;
+# the actual generation/ledger mutation acquires the shared writer lock below.
+# GitHub permits only one pending item per concurrency group by default, so the
+# scheduled cadence remains bounded while the newest scheduled run can take over.
 
 jobs:
-  guard:
-    runs-on: ubuntu-latest
-    outputs:
-      complete: ${{ steps.health.outputs.complete }}
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          ref: ${{ github.event.repository.default_branch }}
-      - uses: actions/setup-python@v7
-        with:
-          python-version: "3.12"
-      - name: Check today's bulletin health
-        id: health
-        env:
-          FORCE_BULLETIN: ${{ github.event_name == 'workflow_dispatch' && inputs.force || false }}
-        run: |
-          if [ "$FORCE_BULLETIN" = "true" ]; then
-            echo "complete=false" >> "$GITHUB_OUTPUT"
-            echo "Forced bulletin run requested."
-            exit 0
-          fi
-          if python tools/bulletin_health.py --guard; then
-            echo "complete=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "complete=false" >> "$GITHUB_OUTPUT"
-          fi
-
   generate:
-    needs: guard
-    if: needs.guard.outputs.complete != 'true'
+    concurrency:
+      group: quantbet-ledger
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     env:
       API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
@@ -60,6 +32,7 @@ jobs:
       PAPER_MODE: ${{ vars.PAPER_MODE || 'true' }}
       API_REQUEST_BUDGET: ${{ vars.API_REQUEST_BUDGET || '7500' }}
       API_BUDGET_RESERVE: ${{ vars.API_BUDGET_RESERVE || '500' }}
+      FORCE_BULLETIN: ${{ github.event_name == 'workflow_dispatch' && inputs.force || false }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -68,20 +41,38 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
-      - uses: actions/cache@v4
-        with:
-          path: .cache/api
-          key: api-cache-${{ runner.os }}-${{ github.run_id }}
-          restore-keys: api-cache-${{ runner.os }}-
-      - run: pip install -r requirements.txt
+      - name: Re-check today's bulletin health after acquiring ledger lock
+        id: gate
+        run: |
+          set -euo pipefail
+          if [ "$FORCE_BULLETIN" = "true" ]; then
+            echo "generate=true" >> "$GITHUB_OUTPUT"
+            echo "Forced bulletin run requested."
+            exit 0
+          fi
+          if python tools/bulletin_health.py --guard; then
+            echo "generate=false" >> "$GITHUB_OUTPUT"
+            echo "Today's bulletin is already complete; scheduled run is a no-op."
+          else
+            echo "generate=true" >> "$GITHUB_OUTPUT"
+            echo "Today's bulletin is not complete; scheduled generation will proceed."
+          fi
+      - name: Install dependencies
+        if: steps.gate.outputs.generate == 'true'
+        run: pip install -r requirements.txt
       - name: Capture generation start
+        if: steps.gate.outputs.generate == 'true'
         id: generation-start
         run: echo "timestamp=$(python -c 'from datetime import datetime,UTC; print(datetime.now(UTC).isoformat())')" >> "$GITHUB_OUTPUT"
-      - run: python main.py generate --no-email
+      - name: Generate committed bulletin source
+        if: steps.gate.outputs.generate == 'true'
+        run: python main.py generate --no-email
       - name: Capture generation completion
+        if: steps.gate.outputs.generate == 'true'
         id: generation-complete
         run: echo "timestamp=$(python -c 'from datetime import datetime,UTC; print(datetime.now(UTC).isoformat())')" >> "$GITHUB_OUTPUT"
       - name: Commit ledger, health and safe raw API archives
+        if: steps.gate.outputs.generate == 'true'
         run: |
           set -euo pipefail
           files=(bets.json predictions.json calibration.json ledger_meta.json api_usage.json api_usage_history.json generation_health.json generation_health_history.json)
@@ -127,13 +118,16 @@ jobs:
             exit 1
           fi
       - name: Send committed bulletin
+        if: steps.gate.outputs.generate == 'true'
         run: python main.py send-report
       - name: Write canonical success marker
+        if: steps.gate.outputs.generate == 'true'
         run: |
           python tools/bulletin_health.py --write-success \
             --generation-started-at "${{ steps.generation-start.outputs.timestamp }}" \
             --generation-completed-at "${{ steps.generation-complete.outputs.timestamp }}"
       - name: Commit bulletin health marker
+        if: steps.gate.outputs.generate == 'true'
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
