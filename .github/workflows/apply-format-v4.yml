@@ -32,7 +32,7 @@ jobs:
       - run: ruff check . --fix
       - run: rm -f .github/workflows/apply-format-v4.yml
       - run: |
-          git checkout -- .github/workflows/tests.yml
+          git checkout origin/main -- .github/workflows/tests.yml
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add .
