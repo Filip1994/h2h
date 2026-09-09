@@ -1,0 +1,59 @@
+name: Apply global Football API serialization
+on:
+  push:
+    branches: [fix/78-global-quota-operational]
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+      - name: Serialize all Football API workflows
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          files = [
+              "daily.yml",
+              "monitor.yml",
+              "calibrate.yml",
+              "intraday.yml",
+              "watchlist.yml",
+              "odds-capture.yml",
+              "closing-capture.yml",
+              "clv-persistence.yml",
+              "settlement-watchdog.yml",
+          ]
+          group = "quantbet-football-api-global"
+          for name in files:
+              p = Path(".github/workflows") / name
+              if not p.exists():
+                  continue
+              s = p.read_text()
+              if "group: " + group in s:
+                  continue
+              marker = "concurrency:\n"
+              if marker in s:
+                  start = s.index(marker)
+                  end = s.find("\n\njobs:", start)
+                  block = f"concurrency:\n  group: {group}\n  cancel-in-progress: false"
+                  if end != -1:
+                      s = s[:start] + block + s[end:]
+                  else:
+                      s = s.replace(marker, block + "\n", 1)
+              else:
+                  insert_at = s.find("\njobs:")
+                  if insert_at == -1:
+                      raise SystemExit(f"jobs marker missing in {name}")
+                  block = f"\nconcurrency:\n  group: {group}\n  cancel-in-progress: false\n"
+                  s = s[:insert_at] + block + s[insert_at:]
+              p.write_text(s)
+          PY
+          rm -f .github/workflows/apply-78-global-quota.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/workflows
+          git commit -m "chore: serialize Football API workflows globally"
+          git push
