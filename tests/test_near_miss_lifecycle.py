@@ -1,4 +1,3 @@
-# ruff: noqa
 # fmt: off
 import json
 from datetime import UTC, datetime, timedelta
