@@ -40,7 +40,9 @@ def normalize_catalogue(rows: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
     return sorted(normalized, key=lambda item: (item["id"], item["name"].casefold()))
 
 
-def extract_observed_bookmakers(odds_rows: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
+def extract_observed_bookmakers(
+    odds_rows: Iterable[dict[str, Any]],
+) -> list[dict[str, Any]]:
     """Extract exact bookmaker identities from fixture /odds response rows."""
     seen: dict[int, dict[str, Any]] = {}
     for row in odds_rows:
@@ -75,16 +77,26 @@ def _iter_archived_odds(root: Path, since: datetime) -> Iterable[dict[str, Any]]
                     if not isinstance(captured, str):
                         continue
                     try:
-                        captured_at = datetime.fromisoformat(captured.replace("Z", "+00:00"))
+                        captured_at = datetime.fromisoformat(
+                            captured.replace("Z", "+00:00")
+                        )
                     except ValueError:
                         continue
                     if captured_at < since or record.get("endpoint") != "odds":
                         continue
                     payload = record.get("payload", {})
-                    response = payload.get("response", []) if isinstance(payload, dict) else []
+                    response = (
+                        payload.get("response", []) if isinstance(payload, dict) else []
+                    )
                     for fixture in response if isinstance(response, list) else []:
-                        bookmakers = fixture.get("bookmakers", []) if isinstance(fixture, dict) else []
-                        for bookmaker in bookmakers if isinstance(bookmakers, list) else []:
+                        bookmakers = (
+                            fixture.get("bookmakers", [])
+                            if isinstance(fixture, dict)
+                            else []
+                        )
+                        for bookmaker in (
+                            bookmakers if isinstance(bookmakers, list) else []
+                        ):
                             if isinstance(bookmaker, dict):
                                 yield bookmaker
         except OSError:
@@ -147,21 +159,44 @@ def write_report(report: dict[str, Any], output_dir: Path) -> tuple[Path, Path]:
         json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
     with csv_path.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=["id", "name", "country", "code", "region", "logo", "catalogue", "observed_in_fixture_odds"])
+        writer = csv.DictWriter(
+            handle,
+            fieldnames=[
+                "id",
+                "name",
+                "country",
+                "code",
+                "region",
+                "logo",
+                "catalogue",
+                "observed_in_fixture_odds",
+            ],
+        )
         writer.writeheader()
-        observed_ids = {row["id"] for row in report["fixture_odds_observed"]["bookmakers"]}
+        observed_ids = {
+            row["id"] for row in report["fixture_odds_observed"]["bookmakers"]
+        }
         for row in report["catalogue"]["bookmakers"]:
-            writer.writerow({
-                **{key: row.get(key, "") for key in ("id", "name", "country", "code", "region", "logo")},
-                "catalogue": True,
-                "observed_in_fixture_odds": row["id"] in observed_ids,
-            })
+            writer.writerow(
+                {
+                    **{
+                        key: row.get(key, "")
+                        for key in ("id", "name", "country", "code", "region", "logo")
+                    },
+                    "catalogue": True,
+                    "observed_in_fixture_odds": row["id"] in observed_ids,
+                }
+            )
     return json_path, csv_path
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Generate a complete API-Football bookmaker inventory.")
-    parser.add_argument("--output-dir", type=Path, default=Path("diagnostics/bookmakers"))
+    parser = argparse.ArgumentParser(
+        description="Generate a complete API-Football bookmaker inventory."
+    )
+    parser.add_argument(
+        "--output-dir", type=Path, default=Path("diagnostics/bookmakers")
+    )
     parser.add_argument("--observation-window-hours", type=int, default=24)
     args = parser.parse_args()
     if args.observation_window_hours < 0:
@@ -172,9 +207,13 @@ def main() -> int:
     client = APIFootballClient(settings)
     catalogue = normalize_catalogue(client.get("odds/bookmakers"))
     if not catalogue:
-        raise RuntimeError("API /odds/bookmakers je vratio prazan ili nevalidan katalog")
+        raise RuntimeError(
+            "API /odds/bookmakers je vratio prazan ili nevalidan katalog"
+        )
     window_start = started_at
-    observed = extract_observed_bookmakers(_iter_archived_odds(settings.root, window_start))
+    observed = extract_observed_bookmakers(
+        _iter_archived_odds(settings.root, window_start)
+    )
     completed_at = datetime.now(UTC)
     report = build_report(
         catalogue,
