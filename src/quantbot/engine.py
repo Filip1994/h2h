@@ -164,7 +164,10 @@ class QuantEngine:
                     + ", ".join(missing)
                 )
         existing_bets = self.bet_store.load()
-        blocked_fixture_ids = self.bet_store.blocked_fixture_ids(existing_bets)
+        blocked_market_keys = self.bet_store.blocked_market_keys(existing_bets)
+        blocked_fixture_ids = {
+            fixture_id for fixture_id, market in blocked_market_keys if market is None
+        }
         diagnostics: list[str] = []
         candidates: list[MarketCandidate] = []
         prediction_records: list[dict[str, Any]] = []
@@ -200,10 +203,7 @@ class QuantEngine:
                 diagnostics.append(f"fixture_parse: {exc}")
                 continue
             fixture_id = int(fields["fixture_id"])
-            if fixture_id in blocked_fixture_ids or fields["status"] not in {
-                "NS",
-                "TBD",
-            }:
+            if fields["status"] not in {"NS", "TBD"}:
                 continue
             if not (
                 decision_timestamp + timedelta(minutes=15)
