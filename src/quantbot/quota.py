@@ -97,16 +97,18 @@ class GlobalQuotaGovernor:
             now = datetime.now(UTC)
             payload["reserved"] += cost
             payload.setdefault("reserved_by_workflow", {})[workflow] = payload.setdefault("reserved_by_workflow", {}).get(workflow, 0) + cost
-            payload.setdefault("requests", []).append({
-                "reservation_id": reservation_id,
-                "timestamp": now.isoformat(),
-                "timestamp_epoch": time.time(),
-                "workflow": workflow,
-                "endpoint": endpoint,
-                "request_type": request_type,
-                "cost": cost,
-                "status": "reserved",
-            })
+            payload.setdefault("requests", []).append(
+                {
+                    "reservation_id": reservation_id,
+                    "timestamp": now.isoformat(),
+                    "timestamp_epoch": time.time(),
+                    "workflow": workflow,
+                    "endpoint": endpoint,
+                    "request_type": request_type,
+                    "cost": cost,
+                    "status": "reserved",
+                }
+            )
             self._save_unlocked(payload)
             return reservation_id
         finally:
@@ -158,3 +160,6 @@ class GlobalQuotaGovernor:
                 "quota_pressure_state": state,
                 "request_count": len(payload.get("requests", [])),
             }
+        finally:
+            fcntl.flock(lock.fileno(), fcntl.LOCK_UN)
+            lock.close()
