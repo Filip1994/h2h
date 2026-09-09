@@ -1,0 +1,47 @@
+name: Apply live odds dashboard wiring
+on:
+  push:
+    branches: [fix/76-dashboard-live-odds]
+
+jobs:
+  patch:
+    if: github.actor == 'Filip1994'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch dashboard and Pages build
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('assets/qb-dashboard.js')
+          s = p.read_text()
+          old = "  const lifecycle = x => `<div class=\"lifecycle\">${stage('OPENING',x.opening_odd,x.opening_captured_at || x.opening_odds_captured_at)}${stage('PICK',x.odd,x.pick_captured_at || x.odds_captured_at || x.created_at)}${stage('CLOSING',x.closing_odd || x.closing_5m_odd,x.closing_captured_at || x.closing_odds_captured_at || x.closing_5m_odds_captured_at)}</div>`;"
+          new = "  const liveStage = x => `<div class=\"stage live-stage\"><label>CURRENT / LIVE</label><b>${odd(x.current_odds)}</b><small>${x.current_observed_at ? when(x.current_observed_at) + ' · ' + esc(x.current_freshness_state || 'OBSERVED') : 'Unavailable'}</small></div>`;\n  const lifecycle = x => `<div class=\"lifecycle\">${stage('OPENING',x.opening_odd,x.opening_captured_at || x.opening_odds_captured_at)}${stage('PICK',x.odd,x.pick_captured_at || x.odds_captured_at || x.created_at)}${liveStage(x)}${stage('CLOSING',x.closing_odd || x.closing_5m_odd,x.closing_captured_at || x.closing_odds_captured_at || x.closing_5m_odds_captured_at)}</div>`;"
+          if old not in s:
+              raise SystemExit('lifecycle definition not found')
+          s = s.replace(old, new, 1)
+          needle = "const bets=await load('bets.json'),meta=await load('ledger_meta.json'),capture=await optional('odds_collection_state.json'),strong=(await optional('strong_signals.json'))||[],near=(await optional('near_misses.json'))||[],prod=production(bets),"
+          replacement = "const bets=await load('bets.json'),meta=await load('ledger_meta.json'),capture=await optional('odds_collection_state.json'),current=(await optional('current_odds.json'))||{items:[]},strong=(await optional('strong_signals.json'))||[],near=(await optional('near_misses.json'))||[],mergeCurrent=list=>Array.isArray(list)?list.map(x=>{const k=String(x.event_id??x.fixture_id)+'|'+String(x.market)+'|'+String(x.bookmaker_id);const y=(current.items||[]).find(i=>String(i.fixture_id)+'|'+String(i.market)+'|'+String(i.bookmaker_id)===k);return y?{...x,...y}:x;}):[],prod=mergeCurrent(production(bets)),strong=mergeCurrent(strong),near=mergeCurrent(near),"
+          if needle not in s:
+              raise SystemExit('render load block not found')
+          s = s.replace(needle, replacement, 1)
+          p.write_text(s)
+
+          p = Path('.github/workflows/pages.yml')
+          s = p.read_text()
+          if 'tools/build_public_current_odds.py' not in s:
+              s = s.replace('      - name: Build isolated public signal datasets\n        run: python tools/build_public_signal_buckets.py\n', '      - name: Build isolated public signal datasets\n        run: python tools/build_public_signal_buckets.py\n      - name: Build latest persisted current odds dataset\n        run: python tools/build_public_current_odds.py\n', 1)
+              s = s.replace('      - name: Build static artifact\n', '      - name: Build static artifact\n', 1)
+              s = s.replace('          cp bets.json ledger_meta.json _site/\n', '          cp bets.json ledger_meta.json current_odds.json _site/\n', 1)
+              s = s.replace('      - name: Build isolated public signal datasets\n', '      - name: Build isolated public signal datasets\n', 1)
+              s = s.replace('      - uses: actions/configure-pages@v5\n', '      - uses: actions/configure-pages@v5\n', 1)
+          p.write_text(s)
+          PY
+          rm -f .github/workflows/apply-76-dashboard.yml
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add assets/qb-dashboard.js .github/workflows/pages.yml .github/workflows/apply-76-dashboard.yml tools/build_public_current_odds.py tests/test_public_current_odds.py
+          git commit -m 'feat: show latest persisted current odds on dashboard'
+          git push
