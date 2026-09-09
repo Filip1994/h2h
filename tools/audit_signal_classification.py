@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 from collections import Counter
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -60,17 +60,32 @@ def audit(root: Path = ROOT) -> dict[str, Any]:
     by_date: dict[str, dict[str, int]] = {}
     for date in selected_dates:
         rows = [r for r in timing if iso_date(r.get("captured_at")) == date]
-        classes = Counter(str(r.get("signal_class") or r.get("signal_state") or "OBSERVED") for r in rows)
+        classes = Counter(
+            str(r.get("signal_class") or r.get("signal_state") or "OBSERVED")
+            for r in rows
+        )
         by_date[date] = {
-            "fixtures_discovered": len({r.get("fixture_id") for r in rows if r.get("fixture_id") is not None}),
+            "fixtures_discovered": len(
+                {r.get("fixture_id") for r in rows if r.get("fixture_id") is not None}
+            ),
             "markets_evaluated": len(rows),
             "valid_odds_observations": len(rows),
             "strong_signals": classes.get("STRONG_SIGNAL", classes.get("STRONG", 0)),
             "near_misses": classes.get("NEAR_MISS", 0),
             "observed_only": classes.get("OBSERVED", 0),
             "alerts": sum(1 for a in alerts if iso_date(a.get("signal_sent_at")) == date),
-            "public_strong": sum(1 for a in alerts if iso_date(a.get("signal_sent_at")) == date and str(a.get("signal_class")) == "STRONG_SIGNAL"),
-            "public_near_miss": sum(1 for a in alerts if iso_date(a.get("signal_sent_at")) == date and str(a.get("signal_class")) == "NEAR_MISS"),
+            "public_strong": sum(
+                1
+                for a in alerts
+                if iso_date(a.get("signal_sent_at")) == date
+                and str(a.get("signal_class")) == "STRONG_SIGNAL"
+            ),
+            "public_near_miss": sum(
+                1
+                for a in alerts
+                if iso_date(a.get("signal_sent_at")) == date
+                and str(a.get("signal_class")) == "NEAR_MISS"
+            ),
         }
 
     return {
@@ -85,7 +100,7 @@ def audit(root: Path = ROOT) -> dict[str, Any]:
             "watchlist": "*/2 6-23 * * * Europe/Belgrade",
             "intraday": "*/30 6-23 * * * Europe/Belgrade",
             "classification_source": "watchlist.py market observation",
-            "public_strong_builder": "tools/build_public_strong_signals.py",
+            "public_builder": "tools/build_public_signal_buckets.py",
         },
         "guardrails": [
             "Counts are derived from persisted observations, not dashboard emptiness.",
@@ -105,7 +120,7 @@ def render_report(result: dict[str, Any]) -> str:
         "",
         "The audit reads persisted market-timing observations, alerts, predictions and generation-health history. It does not infer a zero-signal day from the public Strong Signals file alone.",
         "",
-        "Current workflow roles are Watchlist (`*/2 6-23` Europe/Belgrade) for adaptive odds observations/classification and Intraday (`*/30 6-23`) for generation/scanning. The persisted market-timing stream is therefore the primary evidence for observed Strong/Near-Miss/Observed classifications.",
+        "Current workflow roles are Watchlist (`*/2 6-23` Europe/Belgrade) for adaptive odds observations/classification and Intraday (`*/30 6-23`) for generation/scanning. The persisted market-timing stream is the primary evidence for observed Strong/Near-Miss/Observed classifications.",
         "",
         "## Persisted evidence",
         "",
@@ -134,17 +149,17 @@ def render_report(result: dict[str, Any]) -> str:
         "",
         "## Root-cause findings",
         "",
-        "1. The persisted observation stream already contains `NEAR_MISS`, but public history is built primarily from Strong Signal records/alerts; this creates a visibility gap rather than proof that Near Misses do not exist.",
+        "1. The persisted observation stream is intended to contain `NEAR_MISS`, but public history is built primarily from Strong Signal records/alerts; this creates a visibility gap rather than proof that Near Misses do not exist.",
         "2. Watchlist state persists only `was_strong` and last-seen data for prediction keys, so class transitions are not first-class historical events.",
         "3. Strong classification and Near-Miss classification are calculated in separate functions (`is_strong_signal` and `_near_miss`), creating a drift risk even though their current thresholds match the documented semantics.",
-        "4. The current public builder does not explicitly filter a canonical class; it merges previous public records, alerts and intraday bets, so a first-class Strong/Near-Miss bucket contract is missing.",
-        "5. Existing generation-health records can be degraded for model/fixture failures while the market-timing stream can still contain valid observations. These telemetry layers must remain distinct in the audit funnel.",
+        "4. The current public builder does not explicitly enforce a canonical class bucket; it merges prior public records, alerts and intraday bets.",
+        "5. Existing generation-health records can be degraded for model/fixture failures while the market-timing stream can contain valid observations. These telemetry layers must remain distinct in the audit funnel.",
         "",
         "## Phase 0 gate",
         "",
         "**PASS — audit completed before behavioral implementation on this branch.**",
         "",
-        "No thresholds, model mathematics, eligibility, staking or Production accounting were changed by the audit.",
+        "No thresholds, model mathematics, eligibility, staking or Production accounting were changed by this audit.",
         "",
     ]
     return "\n".join(lines)
@@ -154,5 +169,3 @@ if __name__ == "__main__":
     result = audit()
     report = render_report(result)
     print(report)
-    (ROOT / "docs" / "audits" / "issue-52-signal-classification-phase0.md").parent.mkdir(parents=True, exist_ok=True)
-    (ROOT / "docs" / "audits" / "issue-52-signal-classification-phase0.md").write_text(report, encoding="utf-8")
