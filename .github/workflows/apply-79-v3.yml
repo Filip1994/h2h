@@ -1,0 +1,37 @@
+name: Apply immutable decision packet integration v3
+on:
+  push:
+    branches: [fix/79-immutable-decision-packets-v3]
+
+jobs:
+  patch:
+    if: github.actor == 'Filip1994'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('src/quantbot/engine.py'); s=p.read_text()
+          if 'from .decision_packet import build_packet' not in s:
+              s=s.replace('from .dixon_coles import DixonColesFitError, DixonColesModel\n', 'from .dixon_coles import DixonColesFitError, DixonColesModel\nfrom .decision_packet import build_packet\n', 1)
+          target='''                        probability_edge=probability_edge,\n                        calibration_status=calibration_status,\n'''
+          repl='''                        probability_edge=probability_edge,\n                        calibration_status=calibration_status,\n                        model_version=MODEL_VERSION,\n                        model_fitted_matches=model.fitted_matches,\n                        model_team_count=len(model.team_ids),\n                        model_training_cutoff=decision_timestamp.isoformat(),\n                        model_training_identity=hashlib.sha256(\n                            json.dumps({"fitted_matches": model.fitted_matches, "team_ids": list(model.team_ids)}, sort_keys=True).encode("utf-8")\n                        ).hexdigest(),\n'''
+          if target not in s: raise SystemExit('candidate metadata target missing')
+          s=s.replace(target,repl,1)
+          if 'calibration_hash = hashlib.sha256' not in s:
+              s=s.replace('        signal_source = (\n', '        calibration_hash = None\n        try:\n            calibration_hash = hashlib.sha256(self.settings.calibration_file.read_bytes()).hexdigest()\n        except OSError:\n            pass\n        signal_source = (\n', 1)
+          target='''        for bet in proposed_bets:\n            bet["signal_source"] = signal_source\n            bet["signal_sent_at"] = now_local.isoformat()\n'''
+          repl='''        candidate_by_id = {\n            f"{candidate.fixture_id}_{candidate.market.value}_{MODEL_VERSION}": (candidate, stake)\n            for candidate, stake in allocations\n        }\n        for bet in proposed_bets:\n            bet["signal_source"] = signal_source\n            bet["signal_sent_at"] = now_local.isoformat()\n            candidate_stake = candidate_by_id.get(str(bet.get("prediction_id")))\n            if candidate_stake is not None:\n                candidate, stake = candidate_stake\n                packet = build_packet(\n                    candidate,\n                    stake,\n                    settings=self.settings,\n                    decision_timestamp=decision_timestamp,\n                    calibration_hash=calibration_hash,\n                )\n                bet["decision_packet"] = packet\n                bet["decision_packet_id"] = packet["packet_id"]\n                bet["decision_packet_integrity_hash"] = packet["integrity_hash"]\n'''
+          if target not in s: raise SystemExit('signal block missing')
+          s=s.replace(target,repl,1)
+          p.write_text(s)
+          PY
+          rm -f .github/workflows/apply-79-v3.yml
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add src/quantbot/engine.py .github/workflows/apply-79-v3.yml
+          git commit -m 'feat: atomically persist immutable Production decision packets'
+          git push
