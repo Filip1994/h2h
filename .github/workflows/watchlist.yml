@@ -12,8 +12,11 @@ jobs:
   watchlist:
     runs-on: ubuntu-latest
     concurrency:
-      group: quantbet-football-api-global
-      cancel-in-progress: false
+      # Do not let the 5-minute watchlist queue behind continuous API capture.
+      # The quota governor is the provider-budget authority; this group only
+      # serializes watchlist publication and cancels stale scans.
+      group: quantbet-watchlist
+      cancel-in-progress: true
     env:
       API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
       GMAIL_USER: ${{ secrets.GMAIL_USER }}
