@@ -75,9 +75,7 @@ def build_audit(root: Path = ROOT) -> dict[str, Any]:
         "reconciliation": {
             "selected_predictions_persisted": not selected_not_persisted,
             "reason_records_auditable": all(
-                isinstance(item, dict)
-                and item.get("stage")
-                and item.get("reason")
+                isinstance(item, dict) and item.get("stage") and item.get("reason")
                 for item in rejection_records
             ),
             "monotonic_fixture_stages": (
@@ -90,12 +88,16 @@ def build_audit(root: Path = ROOT) -> dict[str, Any]:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Audit persisted QuantBet decision funnel")
+    parser = argparse.ArgumentParser(
+        description="Audit persisted QuantBet decision funnel"
+    )
     parser.add_argument("--output", default="decision_funnel_audit.json")
     args = parser.parse_args()
     audit = build_audit()
     output = ROOT / args.output
-    output.write_text(json.dumps(audit, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    output.write_text(
+        json.dumps(audit, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
     if not all(audit["reconciliation"].values()):
         raise SystemExit("Decision funnel audit failed reconciliation")
     print(json.dumps(audit, ensure_ascii=False))
