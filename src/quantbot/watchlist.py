@@ -444,4 +444,4 @@ def run_watchlist(settings: Settings, now: datetime | None = None) -> dict[str, 
         "useful_observations": timing_stats["useful_observations"],
         "api_requests": api.request_count,
     }
-# fmt: on
+ # fmt: on
