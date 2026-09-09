@@ -35,16 +35,16 @@ def test_dashboard_is_mobile_first_and_avoids_page_level_overflow():
     assert "@media(max-width:520px)" in css
     assert ".shell{padding:0 13px}" in css
     assert "overflow-x:auto" in css
+    viewport = 'meta name="viewport" content="width=device-width,initial-scale=1"'
     for page in PAGES:
         text = (ROOT / page).read_text(encoding="utf-8")
-        assert 'meta name="viewport" content="width=device-width,initial-scale=1"' in text
+        assert viewport in text
         assert "width:100vw" not in text
 
 
 def test_dashboard_keeps_production_and_observational_semantics_explicit():
-    assert "PRODUCTION · PAPER BET" in (ROOT / "production.html").read_text(
-        encoding="utf-8"
-    )
+    production = (ROOT / "production.html").read_text(encoding="utf-8")
+    assert "PRODUCTION · PAPER BET" in production
     strong = (ROOT / "strong-signals.html").read_text(encoding="utf-8")
     near = (ROOT / "near-misses.html").read_text(encoding="utf-8")
     assert "NOT A PRODUCTION BET" in strong
