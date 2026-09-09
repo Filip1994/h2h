@@ -61,8 +61,17 @@ def key(item: dict) -> tuple[int, str, int] | None:
 def refresh_lifecycle_fields(
     bet: dict, snapshots: list[dict], *, prediction: dict | None = None
 ) -> None:
+    entry = next(
+        (
+            snapshot
+            for snapshot in snapshots
+            if snapshot.get("snapshot_id") == bet.get("entry_snapshot_id")
+        ),
+        None,
+    )
+    pick_timestamp = bet.get("odds_captured_at") or (entry or {}).get("odds_captured_at")
     try:
-        pick_at = datetime.fromisoformat(str(bet["odds_captured_at"])).astimezone(UTC)
+        pick_at = datetime.fromisoformat(str(pick_timestamp)).astimezone(UTC)
         kickoff = datetime.fromisoformat(str(bet["kickoff"])).astimezone(UTC)
         observations = observations_for(
             SNAP,
@@ -74,7 +83,7 @@ def refresh_lifecycle_fields(
         return
     contract = lifecycle_contract(observations, pick_at=pick_at, kickoff=kickoff)
     opening = contract["opening"]
-    pick = contract["pick"]
+    pick = contract["pick"] or entry
     closing = contract["closing"]
     if opening:
         bet["opening_odd"] = opening.get("odd")
@@ -89,6 +98,8 @@ def refresh_lifecycle_fields(
     if pick:
         bet["pick_snapshot_id"] = pick.get("snapshot_id")
         bet["pick_coverage"] = "PROVEN"
+        bet.setdefault("odd", pick.get("odd"))
+        bet.setdefault("odds_captured_at", pick.get("odds_captured_at"))
     else:
         bet["pick_coverage"] = "UNAVAILABLE"
     if closing:
@@ -98,10 +109,21 @@ def refresh_lifecycle_fields(
         bet["closing_coverage"] = "PROVEN"
     else:
         bet["closing_coverage"] = "UNAVAILABLE"
-    bet["lifecycle_coverage"] = contract["coverage"]
-    if contract["clv_available"]:
-        bet["clv_odds_pct"] = contract["clv_odds_pct"]
-        bet["clv_status"] = "COMPUTABLE"
+    bet["lifecycle_coverage"] = (
+        "FULLY_AUDITABLE"
+        if bet.get("opening_odd") is not None
+        and pick
+        and bet.get("closing_odd") is not None
+        else "PARTIAL"
+        if bet.get("opening_odd") is not None or pick or bet.get("closing_odd") is not None
+        else "UNRECOVERABLE"
+    )
+    if bet.get("odd") is not None and bet.get("closing_odd") is not None:
+        pick_odd = float(bet["odd"])
+        close_odd = float(bet["closing_odd"])
+        if pick_odd > 1 and close_odd > 1:
+            bet["clv_odds_pct"] = round((pick_odd / close_odd) - 1.0, 6)
+            bet["clv_status"] = "COMPUTABLE"
     else:
         bet["clv_status"] = "NOT_COMPUTABLE"
     if prediction is not None:
@@ -246,7 +268,6 @@ def t5(settings: Settings) -> int:
             )
         except (KeyError, TypeError, ValueError):
             continue
-
         prediction = predictions.get(key(bet))
         signal = (
             str(
@@ -286,7 +307,6 @@ def closing(settings: Settings) -> int:
         if snapshot.get("snapshot_id")
     }
     changed = 0
-
     for bet in bets:
         if str(bet.get("status", "")).upper() not in TERMINAL:
             continue
@@ -317,7 +337,6 @@ def closing(settings: Settings) -> int:
         except (KeyError, TypeError, ValueError):
             bet["clv_status"] = "NOT_COMPUTABLE"
             continue
-
         entry = next(
             (
                 snapshot
@@ -358,7 +377,6 @@ def closing(settings: Settings) -> int:
             changed += 1
         bet["closing_snapshot_id"] = canonical_id
         refresh_lifecycle_fields(bet, snapshots)
-
     BetStore(settings.bets_file).save(bets)
     return changed
 
@@ -370,10 +388,10 @@ def main() -> int:
     )
     phase = parser.parse_args().phase
     settings = Settings.from_env(ROOT)
-    if phase in {"entry", "all"}:
-        print(f"ENTRY snapshots: {entries(settings)}")
     if phase in {"intermediate", "all"}:
         print(f"INTERMEDIATE snapshots: {intermediate(settings)}")
+    if phase in {"entry", "all"}:
+        print(f"ENTRY snapshots: {entries(settings)}")
     if phase in {"t5", "all"}:
         print(f"T5 snapshots: {t5(settings)}")
     if phase in {"closing", "all"}:
