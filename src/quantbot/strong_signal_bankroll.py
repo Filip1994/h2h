@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import Any
 
 STRONG_SIGNAL_INITIAL_BANK = 10_000.0
+STRONG_SIGNAL_PORTFOLIO = "STRONG_SIGNALS_VIRTUAL"
 
 
 @dataclass(frozen=True, slots=True)
@@ -23,11 +24,16 @@ def _terminal(row: dict[str, Any]) -> bool:
     return str(row.get("status") or "").upper() in {"WIN", "LOSS", "VOID", "REVIEW"}
 
 
+def _is_virtual(row: dict[str, Any]) -> bool:
+    return row.get("virtual_portfolio") == STRONG_SIGNAL_PORTFOLIO
+
+
 def portfolio(rows: list[dict[str, Any]]) -> StrongSignalPortfolio:
     strong = [
         row
         for row in rows
         if str(row.get("signal_class") or "").upper() == "STRONG_SIGNAL"
+        and _is_virtual(row)
     ]
     completed = [row for row in strong if _terminal(row)]
     total_profit = sum(
