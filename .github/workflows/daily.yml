@@ -16,17 +16,14 @@ on:
       - QuantBet intraday strong-signal scanner
     types: [completed]
 
-# Do not put the whole workflow in the shared ledger concurrency group.
-# The guard must be able to start on schedule even while another writer is busy;
-# the actual generation/ledger mutation acquires the shared writer lock below.
-# The workflow_run trigger is an additional scheduled-production handoff: every
-# completed 24/7 intraday scan gets a chance to produce the first daily bulletin
-# without depending on a manual dispatch or on the daily cron being delivered.
+# The generation job mutates the shared ledger and may call Football API.
+# Serialize it with every other Football API workflow; the application-level
+# quota governor remains the final per-request guard inside the process.
 
 jobs:
   generate:
     concurrency:
-      group: quantbet-ledger
+      group: quantbet-football-api-global
       cancel-in-progress: false
     runs-on: ubuntu-latest
     env:
@@ -46,7 +43,7 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
-      - name: Re-check today's bulletin health after acquiring ledger lock
+      - name: Re-check today's bulletin health after acquiring global API lock
         id: gate
         run: |
           set -euo pipefail
