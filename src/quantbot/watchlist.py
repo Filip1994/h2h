@@ -14,6 +14,7 @@ from .alerts import (
 from .api import APIBudgetExceeded, APIError, APIFootballClient
 from .config import Settings
 from .markets import extract_best_quotes
+from .market_timing import append_snapshots, build_snapshot
 from .risk import kelly_stake, portfolio_analytics
 from .storage import BetStore, atomic_write_json
 from .types import Market
@@ -51,15 +52,20 @@ def _seconds_to_kickoff(kickoff: datetime, now: datetime) -> float:
 
 
 def cadence_seconds(seconds_to_kickoff: float) -> int:
-    if seconds_to_kickoff > 3 * 3600:
+    """Adaptive observation cadence: spend calls where market timing matters most."""
+    if seconds_to_kickoff > 6 * 3600:
         return 3600
-    if seconds_to_kickoff > 2 * 3600:
+    if seconds_to_kickoff > 3 * 3600:
         return 1800
-    if seconds_to_kickoff > 3600:
+    if seconds_to_kickoff > 2 * 3600:
         return 900
-    if seconds_to_kickoff > 1800:
+    if seconds_to_kickoff > 3600:
         return 600
-    return 300
+    if seconds_to_kickoff > 1800:
+        return 300
+    if seconds_to_kickoff > 600:
+        return 180
+    return 120
 
 
 def _near_miss(
@@ -184,6 +190,7 @@ def run_watchlist(settings: Settings, now: datetime | None = None) -> dict[str, 
     opportunities_sent = 0
     updates_sent = 0
     t5_captured = 0
+    snapshots: list[dict[str, Any]] = []
     api = APIFootballClient(settings)
 
     for fixture_id, fixture_predictions in by_fixture.items():
@@ -246,14 +253,13 @@ def run_watchlist(settings: Settings, now: datetime | None = None) -> dict[str, 
                 if linked_bet
                 else kelly_stake(analytics.current_bank, decision, quote.odd, settings)
             )
-            if not _near_miss(
+            near_miss = _near_miss(
                 float(prediction.get("model_probability") or 0.0),
                 calibrated,
                 quote.odd,
                 quote.devig_probability,
                 settings,
-            ):
-                continue
+            )
             key = str(prediction["id"])
             previous = state.setdefault(key, {})
             was_strong = bool(previous.get("was_strong"))
@@ -267,6 +273,20 @@ def run_watchlist(settings: Settings, now: datetime | None = None) -> dict[str, 
                     "probability_edge": edge,
                 },
                 settings,
+            )
+            signal_state = "STRONG" if strong else "NEAR_MISS" if near_miss else "OBSERVED"
+            snapshots.append(
+                build_snapshot(
+                    fixture_id=fixture_id,
+                    prediction=prediction,
+                    quote=quote,
+                    decision_probability=decision,
+                    expected_value=ev,
+                    probability_edge=edge,
+                    seconds_to_kickoff=seconds,
+                    signal_state=signal_state,
+                    captured_at=now_utc,
+                )
             )
             previous["was_strong"] = strong
             previous["last_seen_at"] = now_utc.isoformat()
@@ -297,7 +317,6 @@ def run_watchlist(settings: Settings, now: datetime | None = None) -> dict[str, 
                         signal_updates.append(event)
                         previous["last_alert_ev"] = ev
                         previous["last_alert_edge"] = edge
-
             elif strong and not linked_bet and not was_strong:
                 event = _event_from_prediction(
                     prediction,
@@ -340,6 +359,7 @@ def run_watchlist(settings: Settings, now: datetime | None = None) -> dict[str, 
             if send_strong_signal_email(subject, html_body, settings):
                 updates_sent += len(signal_updates)
 
+    timing_stats = append_snapshots(root, snapshots, api_requests=api.request_count)
     for event in alerts:
         bet = linked.get((int(event.get("event_id", 0)), str(event.get("market", ""))))
         _apply_linked_result(event, bet)
@@ -351,6 +371,8 @@ def run_watchlist(settings: Settings, now: datetime | None = None) -> dict[str, 
         "opportunities_sent": opportunities_sent,
         "updates_sent": updates_sent,
         "t5_captured": t5_captured,
+        "snapshots_appended": timing_stats["snapshots_appended"],
+        "useful_observations": timing_stats["useful_observations"],
         "api_requests": api.request_count,
     }
 
