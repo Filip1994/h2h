@@ -34,7 +34,7 @@ def load_json(name: str):
 def records(name: str):
     value = load_json(name)
     if not isinstance(value, list):
-        raise AssertionError(f"{name}: expected JSON array")
+        raise TypeError(f"{name}: expected JSON array")
     return value
 
 
@@ -138,13 +138,9 @@ def main() -> int:
     assert "const clv" in js
     assert "n === 0" in js and "Even" in js
     assert "fetch('./' + name + '?v=' + Date.now()" in js
-
-    # The renderer intentionally bounds DOM work while retaining full JSON history.
     assert "slice(0,200)" in js
     assert "slice().reverse().slice(0,200)" in js
-
-    # Detect accidental HTML script/data interpolation that could execute generated content.
-    assert not re.search(r"<script[^>]+src=[^>]*\\.json", js, re.I)
+    assert not re.search(r"<script[^>]+src=[^>]*\\.json", js, re.IGNORECASE)
     print(
         f"PASS public dashboard contract: bets={len(bets)} strong={len(strong)} near={len(near)}"
     )
