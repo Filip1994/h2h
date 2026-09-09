@@ -11,6 +11,7 @@ from .api import APIBudgetExceeded, APIError, APIFootballClient
 from .calibration import ProbabilityCalibrator
 from .config import Settings
 from .dixon_coles import DixonColesFitError, DixonColesModel
+from .decision_packet import build_packet
 from .filters import eligibility_decision
 from .markets import extract_best_quotes
 from .parsing import current_fixture_fields, match_record_from_api
@@ -332,6 +333,13 @@ class QuantEngine:
                         expected_value=expected_value,
                         probability_edge=probability_edge,
                         calibration_status=calibration_status,
+                        model_version=MODEL_VERSION,
+                        model_fitted_matches=model.fitted_matches,
+                        model_team_count=len(model.team_ids),
+                        model_training_cutoff=decision_timestamp.isoformat(),
+                        model_training_identity=hashlib.sha256(
+                            json.dumps({"fitted_matches": model.fitted_matches, "team_ids": list(model.team_ids)}, sort_keys=True).encode("utf-8")
+                        ).hexdigest(),
                     )
                 )
             if fixture_candidates:
@@ -370,12 +378,34 @@ class QuantEngine:
             )
             for candidate, stake in allocations
         ]
+        calibration_hash = None
+        try:
+            calibration_hash = hashlib.sha256(self.settings.calibration_file.read_bytes()).hexdigest()
+        except OSError:
+            pass
         signal_source = (
             "INTRADAY_ALERT" if self.settings.intraday_mode else "DAILY_BULLETIN"
         )
+        candidate_by_id = {
+            f"{candidate.fixture_id}_{candidate.market.value}_{MODEL_VERSION}": (candidate, stake)
+            for candidate, stake in allocations
+        }
         for bet in proposed_bets:
             bet["signal_source"] = signal_source
             bet["signal_sent_at"] = now_local.isoformat()
+            candidate_stake = candidate_by_id.get(str(bet.get("prediction_id")))
+            if candidate_stake is not None:
+                candidate, stake = candidate_stake
+                packet = build_packet(
+                    candidate,
+                    stake,
+                    settings=self.settings,
+                    decision_timestamp=decision_timestamp,
+                    calibration_hash=calibration_hash,
+                )
+                bet["decision_packet"] = packet
+                bet["decision_packet_id"] = packet["packet_id"]
+                bet["decision_packet_integrity_hash"] = packet["integrity_hash"]
         appended = self.bet_store.append_unique_fixtures(proposed_bets)
         telemetry["selections_produced"] = len(appended)
         telemetry["funnel"] = {
