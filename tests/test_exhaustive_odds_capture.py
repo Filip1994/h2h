@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
 
+from quantbot.api import APIBudgetExceeded
 from quantbot.markets import extract_all_valid_quotes
 from quantbot.odds_collection import cadence_minutes, collect
 
@@ -88,8 +89,6 @@ def test_collector_creates_real_opening_then_intermediate(monkeypatch, settings)
     now = datetime(2026, 9, 11, 0, 0, tzinfo=UTC)
 
     class FakeAPI:
-        request_count = 0
-
         def __init__(self, _settings):
             self.request_count = 0
 
@@ -146,12 +145,13 @@ def test_collector_records_no_odds_without_fabricating_opening(monkeypatch, sett
 def test_daily_budget_is_bounded(monkeypatch, settings):
     import quantbot.odds_collection as module
 
-    settings = type(settings)(**{
-        **{field: getattr(settings, field) for field in settings.__dataclass_fields__},
-        "api_request_budget": 3,
-        "api_budget_reserve": 1,
-    })
-
+    settings = type(settings)(
+        **{
+            **{field: getattr(settings, field) for field in settings.__dataclass_fields__},
+            "api_request_budget": 3,
+            "api_budget_reserve": 1,
+        }
+    )
     kickoff = datetime(2026, 9, 10, 12, 0, tzinfo=UTC)
     now = datetime(2026, 9, 10, 0, 0, tzinfo=UTC)
 
@@ -159,12 +159,17 @@ def test_daily_budget_is_bounded(monkeypatch, settings):
         def __init__(self, _settings):
             self.request_count = 0
 
-        def fixtures_by_date(self, _date):
+        def _consume(self):
+            if self.request_count >= 2:
+                raise APIBudgetExceeded("test budget")
             self.request_count += 1
+
+        def fixtures_by_date(self, _date):
+            self._consume()
             return [fixture_payload(102, kickoff)] if _date == "2026-09-10" else []
 
         def odds(self, _fixture_id):
-            self.request_count += 1
+            self._consume()
             return odds_payload()
 
     monkeypatch.setattr(module, "APIFootballClient", FakeAPI)
