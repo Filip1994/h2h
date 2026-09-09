@@ -1,0 +1,73 @@
+name: Strong Signal provenance audit
+
+on:
+  workflow_run:
+    workflows: ["QuantBet settlement watchdog"]
+    types: [completed]
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: quantbet-strong-signal-provenance
+  cancel-in-progress: false
+
+jobs:
+  reconcile:
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'schedule' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+          fetch-depth: 20
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Identify scheduled-run public-data commit
+        id: target
+        env:
+          RUN_STARTED_AT: ${{ github.event.workflow_run.run_started_at }}
+        run: |
+          set -euo pipefail
+          target=$(git log main --since="${RUN_STARTED_AT}" --format='%H' -- strong_signals.json | head -n 1 || true)
+          if [ -z "${target}" ]; then
+            target=$(git rev-parse main)
+          fi
+          echo "sha=${target}" >> "$GITHUB_OUTPUT"
+          echo "Strong Signal data commit: ${target}"
+
+      - name: Checkout scheduled-run data commit
+        env:
+          TARGET_SHA: ${{ steps.target.outputs.sha }}
+        run: git checkout --detach "${TARGET_SHA}"
+
+      - name: Reconcile Strong Signal generation and publication
+        run: python tools/reconcile_strong_signal_run.py
+
+      - name: Verify generated public contract
+        run: |
+          python tools/validate_public_dashboard.py
+          python -m json.tool strong_signal_run_evidence.json >/dev/null
+
+      - name: Publish machine-readable evidence
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git checkout --detach origin/main
+          cp "$GITHUB_WORKSPACE/strong_signal_run_evidence.json" strong_signal_run_evidence.json
+          git add strong_signal_run_evidence.json
+          if git diff --cached --quiet; then
+            echo "Strong Signal evidence unchanged."
+            exit 0
+          fi
+          git commit -m "chore: persist Strong Signal run evidence"
+          git push origin HEAD:main
+
+      - name: Report reconciliation
+        run: cat strong_signal_run_evidence.json
