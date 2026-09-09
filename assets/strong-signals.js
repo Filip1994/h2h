@@ -25,7 +25,7 @@
     if (status === 'PENDING' && kickoffDate(row)?.getTime() <= Date.now()) return 'SKIPPED';
     return status;
   };
-  const result = (row) => row.result || row.virtual_result || row.production_result || '—';
+  const result = (row) => row.result || row.virtual_result || '—';
   const load = async (name) => {
     const response = await fetch(`./${name}?v=${Date.now()}`, { cache: 'no-store' });
     if (!response.ok) throw new Error(`${name} HTTP ${response.status}`);
