@@ -7,7 +7,7 @@ on:
     paths:
       - ".github/workflows/monitor.yml"
   schedule:
-    - cron: "*/5 * * * *"
+    - cron: "2/5 * * * *"
 
 permissions:
   actions: write
