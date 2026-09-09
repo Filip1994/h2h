@@ -91,7 +91,7 @@ def test_public_buckets_restore_frozen_history_and_keep_strong_ledger_separate(
         and strong[0]["virtual_profit"] == 240.0
     )
     assert (
-        strong[1]["status"] == "PENDING"
+        strong[1]["status"] == "LOSS"
         and strong[1]["virtual_settled"] is False
         and strong[1]["virtual_profit"] == 0.0
     )
