@@ -1,4 +1,4 @@
-from quantbot.strong_signal_bankroll import STRONG_SIGNAL_INITIAL_BANK, portfolio  # noqa: I001
+from quantbot.strong_signal_bankroll import STRONG_SIGNAL_INITIAL_BANK, portfolio
 
 
 VIRTUAL = "STRONG_SIGNALS_VIRTUAL"
@@ -12,6 +12,7 @@ def test_strong_signal_bankroll_is_independent_from_production() -> None:
             "status": "WIN",
             "stake": 100.0,
             "virtual_profit": 90.0,
+            "virtual_settled": True,
             "settled_at": "2026-09-08T12:00:00+00:00",
         },
         {
@@ -52,6 +53,7 @@ def test_strong_signal_bankroll_uses_virtual_profit() -> None:
                 "stake": 100.0,
                 "profit": -100.0,
                 "virtual_profit": -100.0,
+                "virtual_settled": True,
                 "settled_at": "2026-09-08T12:00:00+00:00",
             }
         ]
