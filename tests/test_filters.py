@@ -55,7 +55,6 @@ def test_africa_is_blocked_except_egypt_and_morocco() -> None:
 
 def test_youth_reserve_amateur_and_b_team_exclusions_remain_blocked() -> None:
     assert not allowed("England", 39, "U21 Premier League")
-    assert not allowed("Spain", 140, "La Liga",) if False else True
     assert not is_allowed_match(
         "Spain", "La Liga", "Real Madrid B", "Getafe", league_id=140
     )
@@ -64,7 +63,7 @@ def test_youth_reserve_amateur_and_b_team_exclusions_remain_blocked() -> None:
     )
     assert not is_allowed_match(
         "France", "Ligue 1", "Nice", "Lyon", league_id=61
-    ) if False else True
+    )
 
 
 def test_exact_country_name_fallback_is_deterministic() -> None:
@@ -74,10 +73,32 @@ def test_exact_country_name_fallback_is_deterministic() -> None:
     assert not is_allowed_match("England", "Unknown League", "Birmingham", "Leeds")
 
 
+def test_production_and_collector_share_identical_gate_outcomes() -> None:
+    cases = [
+        ("England", 39, "Premier League", True),
+        ("England", 41, "League One", False),
+        ("Spain", 999001, "Unknown League", False),
+        ("Tanzania", 999002, "Premier League", False),
+        ("Egypt", 233, "Premier League", True),
+        ("Egypt", 999003, "Third Division", False),
+        ("Morocco", 200, "Botola Pro", True),
+        ("Morocco", 999004, "Botola 3", False),
+    ]
+    for country, league_id, league, expected in cases:
+        decision = eligibility_decision(
+            country, league_id, league, "Home FC", "Away FC"
+        )
+        collector_gate = is_allowed_match(
+            country, league, "Home FC", "Away FC", league_id=league_id
+        )
+        assert decision.eligible is expected
+        assert collector_gate is expected
+
+
 def test_optional_country_exclusion_is_exact() -> None:
     assert not is_allowed_match(
         "Brazil", "Serie A", "Flamengo", "Bahia", ("brazil",), league_id=71
     )
-    assert is_allowed_match(
-        "Brazilian State", "Serie A", "Flamengo", "Bahia", ("brazil",), league_id=None
-    ) is False
+    assert not is_allowed_match(
+        "Brazilian State", "Serie A", "Flamengo", "Bahia", ("brazil",)
+    )
