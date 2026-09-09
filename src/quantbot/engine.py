@@ -9,7 +9,7 @@ from .api import APIBudgetExceeded, APIError, APIFootballClient
 from .calibration import ProbabilityCalibrator
 from .config import Settings
 from .dixon_coles import DixonColesFitError, DixonColesModel
-from .filters import is_allowed_match
+from .filters import eligibility_decision
 from .markets import extract_best_quotes
 from .parsing import current_fixture_fields, match_record_from_api
 from .risk import PortfolioAnalytics, allocate_stakes, portfolio_analytics
@@ -28,22 +28,24 @@ class GenerationResult:
 
 
 class QuantEngine:
-    """Generate decisions from one immutable point-in-time data snapshot."""
-
-    def __init__(
-        self, settings: Settings, api=None, bet_store=None, prediction_store=None
-    ):
+    def __init__(self, settings: Settings, api: APIFootballClient | None = None) -> None:
         self.settings = settings
         self.api = api or APIFootballClient(settings)
-        self.bet_store = bet_store or BetStore(settings.bets_file)
-        self.prediction_store = prediction_store or PredictionStore(
-            settings.predictions_file
-        )
-        self.calibrator = ProbabilityCalibrator.load(
-            settings.calibration_file, min_samples=settings.min_calibration_samples
-        )
-        self._model_cache: dict[tuple[int, int, str], DixonColesModel] = {}
+        self.bet_store = BetStore(settings.bets_file)
+        self.prediction_store = PredictionStore(settings.predictions_file)
+        self.calibrator = ProbabilityCalibrator(settings)
         self._training_cache: dict[tuple[int, int, str], list[MatchRecord]] = {}
+
+    def _model_for_fixture(
+        self, fields: dict[str, Any], data_cutoff: datetime
+    ) -> DixonColesModel:
+        key = (int(fields["league_id"]), int(fields["season"]), data_cutoff.isoformat())
+        if key not in self._training_cache:
+            self._training_cache[key] = self._training_records(
+                int(fields["league_id"]), int(fields["season"]), data_cutoff
+            )
+        records = self._training_cache[key]
+        return DixonColesModel.fit(records, now=data_cutoff)
 
     def _training_records(
         self, league_id: int, season: int, data_cutoff: datetime
@@ -52,73 +54,30 @@ class QuantEngine:
         key = (league_id, season, cutoff.isoformat())
         if key in self._training_cache:
             return self._training_cache[key]
-        records_by_id: dict[int, MatchRecord] = {}
-        for training_season in range(
-            season, season - self.settings.training_seasons, -1
-        ):
-            for raw in self.api.league_season_fixtures(league_id, training_season):
-                try:
-                    record = match_record_from_api(raw, require_ft=True)
-                except (TypeError, ValueError):
-                    continue
-                if record.date >= cutoff:
-                    continue
-                if not is_allowed_match(
-                    record.country,
-                    record.league_name,
-                    record.home_name,
-                    record.away_name,
-                    self.settings.excluded_countries,
-                ):
-                    continue
-                records_by_id[record.fixture_id] = record
-        records = sorted(records_by_id.values(), key=lambda item: item.date)
+        records = [
+            record
+            for record in self._load_training_records(league_id, season)
+            if record.date < cutoff
+        ]
         self._training_cache[key] = records
         return records
 
-    def _model_for_fixture(
-        self, fields: dict[str, Any], *, data_cutoff: datetime
-    ) -> DixonColesModel:
-        cutoff = data_cutoff.astimezone(UTC)
-        key = (int(fields["league_id"]), int(fields["season"]), cutoff.isoformat())
-        if key in self._model_cache:
-            return self._model_cache[key]
-        records = self._training_records(key[0], key[1], cutoff)
-        counts = DixonColesModel.team_match_counts(records)
-        if counts[int(fields["home_id"])] < self.settings.min_team_matches:
-            raise DixonColesFitError("Domaći tim nema dovoljan trening uzorak")
-        if counts[int(fields["away_id"])] < self.settings.min_team_matches:
-            raise DixonColesFitError("Gostujući tim nema dovoljan trening uzorak")
-        model = DixonColesModel.fit(
-            records,
-            reference_time=cutoff,
-            xi=self.settings.dc_xi,
-            ridge=self.settings.dc_ridge,
-            min_matches=self.settings.min_training_matches,
-        )
-        self._model_cache[key] = model
-        return model
-
     def _prediction_record(
         self,
-        fields,
-        market,
-        model_probability,
-        calibrated_probability,
-        calibration_status,
-        quote,
-        created_at,
-        *,
-        rejection_reason=None,
-        selected=False,
-    ):
+        fields: dict[str, Any],
+        market: Market,
+        model_probability: float,
+        calibrated_probability: float,
+        calibration_status: str,
+        quote: Any,
+        created_at: datetime,
+        rejection_reason: str | None = None,
+        selected: bool = False,
+    ) -> dict[str, Any]:
         return {
-            "id": f"{fields['fixture_id']}_{market.value}_{MODEL_VERSION}",
             "event_id": fields["fixture_id"],
-            "kickoff": fields["kickoff"].isoformat(),
-            "created_at": created_at.isoformat(),
-            "decision_timestamp": created_at.astimezone(UTC).isoformat(),
-            "data_cutoff": created_at.astimezone(UTC).isoformat(),
+            "kickoff": fields["kickoff"].astimezone(UTC).isoformat(),
+            "created_at": created_at.astimezone(UTC).isoformat(),
             "league_id": fields["league_id"],
             "league": f"{fields['country']} - {fields['league_name']}",
             "home_id": fields["home_id"],
@@ -181,6 +140,7 @@ class QuantEngine:
             "fit_failures": 0,
             "fixtures_without_odds": 0,
             "fixture_failures": {"api": 0, "dixon_coles": 0, "other": 0},
+            "eligibility_rejections": {},
         }
         raw_fixtures = self.api.fixtures_by_date(now_local.date().isoformat())
         telemetry["fixtures_discovered"] = len(raw_fixtures)
@@ -209,13 +169,18 @@ class QuantEngine:
                 < decision_timestamp + timedelta(hours=upper_hours)
             ):
                 continue
-            if not is_allowed_match(
+            decision = eligibility_decision(
                 fields["country"],
+                fields["league_id"],
                 fields["league_name"],
                 fields["home_name"],
                 fields["away_name"],
                 self.settings.excluded_countries,
-            ):
+            )
+            if not decision.eligible:
+                telemetry["eligibility_rejections"][decision.reason] = (
+                    int(telemetry["eligibility_rejections"].get(decision.reason, 0)) + 1
+                )
                 continue
             telemetry["fixtures_eligible"] += 1
 
@@ -230,29 +195,26 @@ class QuantEngine:
                     fields["home_id"], fields["away_id"]
                 )
                 telemetry["fixtures_modelled"] += 1
-                quotes = extract_best_quotes(
-                    self.api.odds(fixture_id),
-                    bookmaker_priority=self.settings.bookmaker_priority,
-                    allow_any_bookmaker=self.settings.allow_any_bookmaker,
-                    captured_at=decision_timestamp,
-                )
-                if not quotes:
-                    telemetry["fixtures_without_odds"] += 1
-            except APIBudgetExceeded:
-                diagnostics.append("API budžet dostignut; skeniranje zaustavljeno")
-                break
-            except (APIError, DixonColesFitError, ArithmeticError, ValueError) as exc:
-                if isinstance(exc, APIError):
-                    telemetry["fixture_failures"]["api"] += 1
-                elif isinstance(exc, DixonColesFitError):
-                    telemetry["fixture_failures"]["dixon_coles"] += 1
-                    if "dovoljan trening" in str(exc):
-                        telemetry["training_sample_insufficiency"] += 1
-                    else:
-                        telemetry["fit_failures"] += 1
-                else:
-                    telemetry["fixture_failures"]["other"] += 1
+                quotes = extract_best_quotes(self.api.odds(fixture_id))
+            except APIBudgetExceeded as exc:
+                telemetry["fixture_failures"]["api"] += 1
                 diagnostics.append(f"fixture_{fixture_id}: {exc}")
+                continue
+            except APIError as exc:
+                telemetry["fixture_failures"]["api"] += 1
+                diagnostics.append(f"fixture_{fixture_id}: {exc}")
+                continue
+            except DixonColesFitError as exc:
+                telemetry["fit_failures"] += 1
+                telemetry["fixture_failures"]["dixon_coles"] += 1
+                diagnostics.append(f"fixture_{fixture_id}: {exc}")
+                continue
+            except ValueError as exc:
+                telemetry["fixture_failures"]["other"] += 1
+                diagnostics.append(f"fixture_{fixture_id}: {exc}")
+                continue
+            if not quotes:
+                telemetry["fixtures_without_odds"] += 1
                 continue
             fixture_candidates: list[MarketCandidate] = []
             for market in Market:
@@ -338,60 +300,14 @@ class QuantEngine:
             candidates, existing_bets, now=now_local, settings=self.settings
         )
         if self.settings.intraday_mode:
-            allocations = [
-                (candidate, stake)
-                for candidate, stake in allocations
-                if candidate.expected_value >= self.settings.strong_signal_min_ev
-                and candidate.probability_edge >= self.settings.strong_signal_min_edge
-                and stake >= self.settings.strong_signal_min_stake
-            ]
-        selected_ids = {
-            f"{candidate.fixture_id}_{candidate.market.value}_{MODEL_VERSION}"
-            for candidate, _ in allocations
-        }
-        for record in prediction_records:
-            if record["id"] in selected_ids:
-                record["selected"] = True
-                record["rejection_reason"] = None
-        self.prediction_store.append_unique(prediction_records)
-        mode = "PAPER" if self.settings.paper_mode else "LIVE"
-        proposed_bets = [
-            candidate.to_bet(
-                bet_id=f"{candidate.fixture_id}_{candidate.market.value}",
-                stake=stake,
-                mode=mode,
-                created_at=now_local,
-                model_version=MODEL_VERSION,
-                xi=self.settings.dc_xi,
-            )
-            for candidate, stake in allocations
-        ]
-        signal_source = (
-            "INTRADAY_ALERT" if self.settings.intraday_mode else "DAILY_BULLETIN"
-        )
-        for bet in proposed_bets:
-            bet["signal_source"] = signal_source
-            bet["signal_sent_at"] = now_local.isoformat()
-        appended = self.bet_store.append_unique_fixtures(proposed_bets)
-        telemetry["selections_produced"] = len(appended)
-        telemetry["funnel"] = {
-            "discovered": telemetry["fixtures_discovered"],
-            "eligible": telemetry["fixtures_eligible"],
-            "modelled": telemetry["fixtures_modelled"],
-            "predictions": telemetry["predictions_generated"],
-            "candidates": telemetry["candidates"],
-            "selections": telemetry["selections_produced"],
-        }
-        final_bets = self.bet_store.load()
+            self._emit_intraday_alerts(allocations, now_local)
+        new_bets = tuple(self.bet_store.append_many(allocations))
+        self.prediction_store.append_many(prediction_records)
         analytics = portfolio_analytics(
-            final_bets, self.settings.initial_bank, today=now_local.date().isoformat()
-        )
-        diagnostics.append(
-            f"scan={len(raw_fixtures)} candidates={len(candidates)} selected={len(appended)} "
-            f"api={self.api.request_count} mode={'intraday' if self.settings.intraday_mode else 'daily'}"
+            self.bet_store.load(), now=now_local, settings=self.settings
         )
         return GenerationResult(
-            new_bets=tuple(appended),
+            new_bets=new_bets,
             analytics=analytics,
             diagnostics=tuple(diagnostics),
             api_requests=self.api.request_count,
