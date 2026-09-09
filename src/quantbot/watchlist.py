@@ -15,6 +15,7 @@ from .api import APIBudgetExceeded, APIError, APIFootballClient
 from .config import Settings
 from .market_timing import append_snapshots, build_snapshot
 from .markets import extract_best_quotes
+from .risk import kelly_stake
 from .signal_classification import classification_fields, classify_signal
 from .storage import BetStore, atomic_write_json
 from .strong_signal_bankroll import portfolio as strong_signal_portfolio
