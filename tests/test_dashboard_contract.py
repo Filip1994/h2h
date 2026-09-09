@@ -1,4 +1,6 @@
 from pathlib import Path
+import subprocess
+import sys
 
 ROOT = Path(__file__).parents[1]
 PAGES = [
@@ -173,3 +175,14 @@ def test_high_volume_observational_buckets_use_compact_list_layout():
 
 def test_obsolete_competing_preview_is_removed():
     assert not (ROOT / "dashboard_preview.html").exists()
+
+
+def test_public_dashboard_contract_executes_against_current_generated_data():
+    result = subprocess.run(
+        [sys.executable, str(ROOT / "tools" / "validate_public_dashboard.py")],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
