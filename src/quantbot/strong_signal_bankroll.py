@@ -21,11 +21,25 @@ class StrongSignalPortfolio:
 
 
 def _terminal(row: dict[str, Any]) -> bool:
-    return str(row.get("status") or "").upper() in {"WIN", "LOSS", "VOID", "REVIEW"}
+    """Only explicit virtual settlement can affect the virtual portfolio.
+
+    Production settlement fields are deliberately ignored. A linked Production
+    bet may be referenced by a Strong Signal, but its result/P&L is not a
+    Strong Signal result.
+    """
+    return bool(row.get("virtual_settled")) and str(
+        row.get("status") or ""
+    ).upper() in {"WIN", "LOSS", "VOID", "REVIEW"}
 
 
 def _is_virtual(row: dict[str, Any]) -> bool:
     return row.get("virtual_portfolio") == STRONG_SIGNAL_PORTFOLIO
+
+
+def _virtual_profit(row: dict[str, Any]) -> float:
+    if not _terminal(row):
+        return 0.0
+    return float(row.get("virtual_profit") or 0.0)
 
 
 def portfolio(rows: list[dict[str, Any]]) -> StrongSignalPortfolio:
@@ -36,26 +50,23 @@ def portfolio(rows: list[dict[str, Any]]) -> StrongSignalPortfolio:
         and _is_virtual(row)
     ]
     completed = [row for row in strong if _terminal(row)]
-    total_profit = sum(
-        float(row.get("virtual_profit", row.get("profit") or 0.0) or 0.0)
-        for row in completed
-    )
+    total_profit = sum(_virtual_profit(row) for row in completed)
     total_stake = sum(float(row.get("stake") or 0.0) for row in completed)
     wins = sum(1 for row in completed if str(row.get("status") or "").upper() == "WIN")
     open_stake = sum(
         float(row.get("stake") or 0.0)
         for row in strong
-        if str(row.get("status") or "PENDING").upper() == "PENDING"
+        if not _terminal(row)
     )
     equity = STRONG_SIGNAL_INITIAL_BANK
     peak = equity
     for row in sorted(
         completed,
         key=lambda item: str(
-            item.get("settled_at") or item.get("signal_sent_at") or ""
+            item.get("virtual_settled_at") or item.get("signal_sent_at") or ""
         ),
     ):
-        equity += float(row.get("virtual_profit", row.get("profit") or 0.0) or 0.0)
+        equity += _virtual_profit(row)
         peak = max(peak, equity)
     current_bank = STRONG_SIGNAL_INITIAL_BANK + total_profit
     drawdown = (peak - current_bank) / peak if peak > 0.0 else 1.0
