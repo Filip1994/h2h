@@ -15,6 +15,10 @@ class GlobalQuotaExceeded(RuntimeError):
     """Raised when a request would breach the protected daily provider reserve."""
 
 
+class GlobalQuotaStateError(RuntimeError):
+    """Raised when the canonical daily quota ledger is missing or inconsistent."""
+
+
 class GlobalQuotaGovernor:
     SCHEMA_VERSION = 1
     RESERVATION_TTL_SECONDS = 7200
@@ -31,27 +35,79 @@ class GlobalQuotaGovernor:
         fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
         return handle
 
+    def _new_day(self, today: str) -> dict[str, Any]:
+        return {
+            "schema_version": self.SCHEMA_VERSION,
+            "date": today,
+            "daily_capacity": self.daily_capacity,
+            "safety_reserve": self.safety_reserve,
+            "consumed": 0,
+            "reserved": 0,
+            "consumed_by_workflow": {},
+            "reserved_by_workflow": {},
+            "requests": [],
+        }
+
+    def _validate_existing(self, payload: dict[str, Any], today: str) -> None:
+        required = {
+            "schema_version",
+            "date",
+            "daily_capacity",
+            "safety_reserve",
+            "consumed",
+            "reserved",
+            "consumed_by_workflow",
+            "reserved_by_workflow",
+            "requests",
+        }
+        if not required.issubset(payload):
+            raise GlobalQuotaStateError(
+                "GLOBAL_QUOTA_STATE_INVALID: missing ledger fields"
+            )
+        if payload["schema_version"] != self.SCHEMA_VERSION:
+            raise GlobalQuotaStateError(
+                "GLOBAL_QUOTA_STATE_INVALID: unsupported schema"
+            )
+        if payload["date"] != today:
+            return
+        if int(payload["daily_capacity"]) != self.daily_capacity:
+            raise GlobalQuotaStateError(
+                "GLOBAL_QUOTA_CONFIG_MISMATCH: daily capacity differs from canonical ledger"
+            )
+        if int(payload["safety_reserve"]) != self.safety_reserve:
+            raise GlobalQuotaStateError(
+                "GLOBAL_QUOTA_CONFIG_MISMATCH: safety reserve differs from canonical ledger"
+            )
+        if int(payload["consumed"]) < 0 or int(payload["reserved"]) < 0:
+            raise GlobalQuotaStateError("GLOBAL_QUOTA_STATE_INVALID: negative totals")
+        if int(payload["consumed"]) + int(payload["reserved"]) > int(
+            payload["daily_capacity"]
+        ):
+            raise GlobalQuotaStateError(
+                "GLOBAL_QUOTA_STATE_INVALID: totals exceed capacity"
+            )
+        if not isinstance(payload["requests"], list):
+            raise GlobalQuotaStateError(
+                "GLOBAL_QUOTA_STATE_INVALID: requests is not a list"
+            )
+
     def _load(self) -> dict[str, Any]:
         today = datetime.now(UTC).date().isoformat()
         try:
             payload = json.loads(self.path.read_text(encoding="utf-8"))
-        except (FileNotFoundError, json.JSONDecodeError):
-            payload = {}
+        except FileNotFoundError:
+            payload = self._new_day(today)
+        except (json.JSONDecodeError, OSError) as exc:
+            raise GlobalQuotaStateError(
+                "GLOBAL_QUOTA_STATE_INVALID: unreadable ledger"
+            ) from exc
+        if not isinstance(payload, dict):
+            raise GlobalQuotaStateError(
+                "GLOBAL_QUOTA_STATE_INVALID: ledger is not an object"
+            )
+        self._validate_existing(payload, today)
         if payload.get("date") != today:
-            payload = {
-                "schema_version": self.SCHEMA_VERSION,
-                "date": today,
-                "daily_capacity": self.daily_capacity,
-                "safety_reserve": self.safety_reserve,
-                "consumed": 0,
-                "reserved": 0,
-                "consumed_by_workflow": {},
-                "reserved_by_workflow": {},
-                "requests": [],
-            }
-        else:
-            payload["daily_capacity"] = self.daily_capacity
-            payload["safety_reserve"] = self.safety_reserve
+            payload = self._new_day(today)
         now = time.time()
         active = []
         expired = 0
