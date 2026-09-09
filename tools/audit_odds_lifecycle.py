@@ -54,6 +54,7 @@ def audit_raw() -> dict[str, Any]:
     bookmakers: Counter[str] = Counter()
     markets: Counter[str] = Counter()
     quotes: dict[QuoteKey, list[Quote]] = defaultdict(list)
+    fixture_evidence: dict[int, dict[str, Any]] = {}
     odds_records = 0
     quote_rows = 0
     logo_rows = 0
@@ -82,26 +83,38 @@ def audit_raw() -> dict[str, Any]:
                 if captured is None or not isinstance(response, list):
                     continue
                 odds_records += 1
+                evidence = fixture_evidence.setdefault(
+                    fixture,
+                    {
+                        "records": 0,
+                        "first_capture": None,
+                        "last_capture": None,
+                        "bookmakers": set(),
+                        "markets": set(),
+                        "selections": set(),
+                    },
+                )
+                evidence["records"] += 1
+                evidence["first_capture"] = min(
+                    evidence["first_capture"] or captured.isoformat(),
+                    captured.isoformat(),
+                )
+                evidence["last_capture"] = max(
+                    evidence["last_capture"] or captured.isoformat(),
+                    captured.isoformat(),
+                )
                 if not provider_shape and response:
                     first = response[0]
+                    bookmaker = (first.get("bookmakers") or [{}])[0]
+                    bet = (bookmaker.get("bets") or [{}])[0]
+                    selection = (bet.get("values") or [{}])[0]
                     provider_shape = {
                         "response_keys": sorted(first.keys()),
                         "fixture_keys": sorted((first.get("fixture") or {}).keys()),
                         "league_keys": sorted((first.get("league") or {}).keys()),
-                        "bookmaker_keys": sorted(
-                            (first.get("bookmakers") or [{}])[0].keys()
-                        ),
-                        "market_keys": sorted(
-                            (first.get("bookmakers") or [{}])[0]
-                            .get("bets", [{}])[0]
-                            .keys()
-                        ),
-                        "selection_keys": sorted(
-                            (first.get("bookmakers") or [{}])[0]
-                            .get("bets", [{}])[0]
-                            .get("values", [{}])[0]
-                            .keys()
-                        ),
+                        "bookmaker_keys": sorted(bookmaker.keys()),
+                        "market_keys": sorted(bet.keys()),
+                        "selection_keys": sorted(selection.keys()),
                     }
                 kickoff = None
                 if response:
@@ -129,12 +142,16 @@ def audit_raw() -> dict[str, Any]:
                         if bid is None:
                             continue
                         bookmakers[str(bid)] += 1
+                        evidence["bookmakers"].add(str(bid))
                         if bookmaker.get("logo"):
                             logo_rows += 1
                         for bet in bookmaker.get("bets") or []:
                             name = str(bet.get("name") or bet.get("id") or "")
                             markets[name] += 1
+                            evidence["markets"].add(name)
                             for value in bet.get("values") or []:
+                                selection_name = str(value.get("value") or "")
+                                evidence["selections"].add(selection_name)
                                 try:
                                     odd = float(value["odd"])
                                 except (KeyError, TypeError, ValueError):
@@ -143,8 +160,11 @@ def audit_raw() -> dict[str, Any]:
                                     continue
                                 quote_rows += 1
                                 key = (fixture, market_key(name), int(bid))
-                                selection = str(value.get("value") or "")
-                                quotes[key].append((captured, selection, odd))
+                                quotes[key].append((captured, selection_name, odd))
+
+    for evidence in fixture_evidence.values():
+        for field in ("bookmakers", "markets", "selections"):
+            evidence[field] = sorted(evidence[field])
 
     return {
         "endpoint_counts": dict(endpoint_counts),
@@ -158,6 +178,7 @@ def audit_raw() -> dict[str, Any]:
         "timing": dict(timing),
         "lead_min": min(lead_minutes) if lead_minutes else None,
         "lead_max": max(lead_minutes) if lead_minutes else None,
+        "fixture_evidence": fixture_evidence,
         "quotes": quotes,
     }
 
@@ -185,6 +206,7 @@ def audit_lifecycle(raw: dict[str, Any]) -> dict[str, Any]:
             coverage["PARTIAL"] += 1
         else:
             coverage["UNRECOVERABLE"] += 1
+            evidence = raw["fixture_evidence"].get(int(bet.get("event_id", 0)), {})
             missing.append(
                 {
                     "id": bet.get("id"),
@@ -192,9 +214,35 @@ def audit_lifecycle(raw: dict[str, Any]) -> dict[str, Any]:
                     "fixture_id": bet.get("event_id"),
                     "market": bet.get("market"),
                     "bookmaker_id": bet.get("bookmaker_id"),
+                    "archive_evidence": evidence,
                 }
             )
     return {"bets": len(bets), "coverage": dict(coverage), "missing": missing[:20]}
+
+
+def audit_snapshots() -> dict[str, Any]:
+    types: Counter[str] = Counter()
+    linked: Counter[str] = Counter()
+    lines = 0
+    if not SNAP.exists():
+        return {"lines": 0, "bytes": 0, "types": {}, "linked": {}}
+    with SNAP.open("r", encoding="utf-8", errors="replace") as handle:
+        for line in handle:
+            try:
+                item = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            lines += 1
+            types[str(item.get("snapshot_type") or item.get("type") or "UNKNOWN")] += 1
+            for key in ("prediction_id", "bet_id", "signal_id"):
+                if item.get(key) is not None:
+                    linked[key] += 1
+    return {
+        "lines": lines,
+        "bytes": SNAP.stat().st_size,
+        "types": dict(types),
+        "linked": dict(linked),
+    }
 
 
 def audit_actions() -> dict[str, Any]:
@@ -240,14 +288,16 @@ Generated: `{data["generated_at"]}`
 
 ## Conclusion
 
-The current main branch has the raw provider archive, but the canonical odds ledger is not populated consistently. Real archived API-Football odds responses contain fixture, bookmaker, market, selection and odd fields; bookmaker logo metadata is absent in the audited archive. Opening must therefore be reconstructed only from our own repeated captures. The current lifecycle still treats the pick quote as ENTRY and splits Strong Signals T-5 from Production closing/CLV persistence.
+The current main branch contains a substantial raw API-Football odds archive and a non-empty canonical snapshot file, but the lifecycle is still incomplete. The audit finds real provider odds observations, while Opening/Pick/Closing linkage is not consistently canonical and Strong Signals uses a separate T-5 persistence path. The repair must make the lifecycle real and reproducible without changing decision mathematics.
 
 ## Evidence
 
 - Raw archive files: `{data["raw_files"]}`; bytes: `{data["raw_bytes"]:,}`.
 - Odds response records: `{raw["odds_records"]}`; extracted quote rows: `{raw["quote_rows"]}`.
 - Unique fixture/market/bookmaker keys: `{raw["unique_keys"]}`.
-- Odds snapshot ledger: `{data["snapshot_lines"]}` lines; `{data["snapshot_bytes"]:,}` bytes.
+- Canonical snapshot ledger: `{data["snapshots"]["lines"]}` lines; `{data["snapshots"]["bytes"]:,}` bytes.
+- Snapshot types: `{data["snapshots"]["types"]}`.
+- Snapshot linkage counts: `{data["snapshots"]["linked"]}`.
 - Production bets inspected: `{lifecycle["bets"]}`.
 - Lifecycle coverage: `{lifecycle["coverage"]}`.
 - Provider shape: `{json.dumps(raw["provider_shape"], ensure_ascii=False)}`.
@@ -259,11 +309,10 @@ The current main branch has the raw provider archive, but the canonical odds led
 1. ENTRY is derived from the pick quote instead of selecting the earliest valid archived observation as Opening.
 2. Strong Signals T-5 closing data and Production canonical closing data have separate persistence/linkage paths.
 3. Legacy CLV can be present while lifecycle linkage is incomplete, so mathematical presence is not the same as audit completeness.
-4. Public rendering must consume one canonical lifecycle contract; backend market codes remain internal.
-5. Missing lifecycle stages must remain explicit and never be fabricated.
-6. The audited raw archive does not expose a bookmaker logo field in the provider bookmaker objects, so a deterministic verified registry is required if logos are to be displayed.
+4. The provider archive is the source of truth for actual observations; missing stages cannot be backfilled from unrelated bookmakers, selections or timestamps.
+5. The audited provider bookmaker objects do not expose a logo field, so a deterministic verified registry is required if logos are to be displayed.
 
-## Concrete missing Production records
+## Concrete missing-record evidence
 
 `{json.dumps(lifecycle["missing"], ensure_ascii=False)}`
 
@@ -290,13 +339,8 @@ def main() -> int:
         "generated_at": datetime.now(UTC).isoformat(),
         "raw_files": len(list(RAW.glob("*.jsonl"))),
         "raw_bytes": sum(path.stat().st_size for path in RAW.glob("*.jsonl")),
-        "snapshot_lines": sum(
-            1 for _ in SNAP.open("r", encoding="utf-8", errors="replace")
-        )
-        if SNAP.exists()
-        else 0,
-        "snapshot_bytes": SNAP.stat().st_size if SNAP.exists() else 0,
         "raw": raw,
+        "snapshots": audit_snapshots(),
         "lifecycle": audit_lifecycle(raw),
         "actions": audit_actions(),
         "schedules": {},
