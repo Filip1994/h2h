@@ -23,6 +23,15 @@
     .history-table .positive{color:#5fd18b}.history-table .negative{color:#ff7272}.history-table .neutral{color:var(--muted,#89919d)}
     .history-table .linked{display:inline-block;margin-top:5px;font-size:9px;letter-spacing:.08em;text-transform:uppercase}
     .empty-history{padding:28px;text-align:center;color:var(--muted,#89919d)}
+    @media (min-width:801px){
+      .history-table-wrap{overflow:visible;border:0;background:transparent}
+      .history-table,.history-table tbody{display:block;min-width:0}
+      .history-table thead{display:none}
+      .history-table tbody{display:flex;flex-direction:column;gap:8px}
+      .history-table tr{display:grid;grid-template-columns:minmax(220px,1.45fr) repeat(3,minmax(150px,1fr));gap:8px;border:1px solid var(--line,#252b33);border-radius:12px;background:var(--panel,#101419);padding:10px}
+      .history-table td{border:0;padding:5px 7px}
+      .history-table td::before{content:attr(data-label);display:block;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted,#89919d);margin-bottom:2px}
+    }
     @media (max-width:800px){
       .portfolio-banner{grid-template-columns:repeat(2,minmax(0,1fr))}
       .history-table-wrap{overflow:visible;border:0;background:transparent}
