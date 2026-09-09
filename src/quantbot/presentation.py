@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from .bookmaker_registry import bookmaker_identity
+
 MARKET_DISPLAY = {
     "OVER_2_5": "Over 2.5",
     "UNDER_2_5": "Under 2.5",
@@ -73,16 +75,19 @@ def clv_interpretation(value: Any) -> str:
 
 
 def odds_lifecycle(bet: dict[str, Any]) -> dict[str, Any]:
-    """Return explicit Opening → Pick → Closing values without inference."""
+    """Return the persisted canonical Opening → Pick → Closing values."""
     return {
         "opening": bet.get("opening_odd"),
         "pick": bet.get("odd"),
-        "closing": bet.get("closing_odd") or bet.get("closing_5m_odd"),
+        "closing": bet.get("closing_odd"),
         "opening_at": bet.get("opening_odds_captured_at"),
         "pick_at": bet.get("odds_captured_at"),
-        "closing_at": bet.get("closing_odds_captured_at")
-        or bet.get("closing_5m_odds_captured_at"),
+        "closing_at": bet.get("closing_odds_captured_at"),
     }
+
+
+def bookmaker_display(bookmaker_id: Any, bookmaker_name: Any = None) -> dict[str, Any]:
+    return bookmaker_identity(bookmaker_id, bookmaker_name)
 
 
 def skip_reason(bet: dict[str, Any]) -> str | None:

@@ -15,7 +15,9 @@ from .monitor import (
     market_outcome,
     regulation_score,
 )
+from .odds_lifecycle import lifecycle_contract, observations_for
 from .parsing import parse_datetime
+from .persistence import OddsSnapshotStore
 from .types import Market
 
 ALERT_FILE = "intraday_alerts.json"
@@ -53,9 +55,37 @@ def _apply_closing(alert: dict[str, Any], quote: Any, captured_at: datetime) -> 
     alert["closing_5m_opposite_odd"] = round(quote.opposite_odd, 4)
     alert["closing_5m_market_probability_devig"] = round(quote.devig_probability, 6)
     alert["closing_5m_odds_captured_at"] = captured_at.isoformat()
+    alert["closing_odd"] = round(quote.odd, 4)
+    alert["closing_odds_captured_at"] = captured_at.isoformat()
     clv = _clv_pct(float(alert.get("odd") or 0.0), float(quote.odd))
     if clv is not None:
         alert["clv_odds_pct"] = clv
+
+
+def _refresh_opening(alert: dict[str, Any], store_path: Path) -> None:
+    try:
+        pick_at = parse_datetime(str(alert["odds_captured_at"])).astimezone(UTC)
+        kickoff = parse_datetime(str(alert["kickoff"])).astimezone(UTC)
+        observations = observations_for(
+            store_path,
+            fixture_id=int(alert["event_id"]),
+            market=str(alert["market"]),
+            bookmaker_id=int(alert["bookmaker_id"]),
+        )
+    except (KeyError, TypeError, ValueError):
+        return
+    contract = lifecycle_contract(observations, pick_at=pick_at, kickoff=kickoff)
+    opening = contract["opening"]
+    if opening:
+        alert["opening_odd"] = opening.get("odd")
+        alert["opening_odds_captured_at"] = opening.get("odds_captured_at")
+        alert["opening_snapshot_id"] = opening.get("snapshot_id")
+        alert["opening_coverage"] = "PROVEN"
+    else:
+        alert["opening_odd"] = None
+        alert["opening_odds_captured_at"] = None
+        alert["opening_snapshot_id"] = None
+        alert["opening_coverage"] = "UNAVAILABLE"
 
 
 def capture_alert_closing_quotes(
@@ -64,6 +94,7 @@ def capture_alert_closing_quotes(
     now_utc = (now or datetime.now(UTC)).astimezone(UTC)
     alerts = _load_alerts(settings.root)
     api = APIFootballClient(settings)
+    snapshot_store = OddsSnapshotStore(settings.root / "data" / "odds_snapshots.jsonl")
     captured = 0
     changed = False
 
@@ -97,7 +128,20 @@ def capture_alert_closing_quotes(
         quote = quotes.get(market)
         if quote is None or not 0.0 <= quote.overround <= settings.max_market_overround:
             continue
+        snapshot_id = snapshot_store.append_quote(
+            quote,
+            fixture_id=fixture_id,
+            snapshot_type="CLOSING",
+            prediction_id=str(alert.get("prediction_id") or "") or None,
+            signal_id=str(alert.get("signal_id") or alert.get("id") or "") or None,
+            bet_id=str(alert.get("linked_bet_id") or "") or None,
+            captured_by="strong-signals-closing-t5",
+            source_endpoint="odds",
+            source_params={"fixture": fixture_id},
+        )
         _apply_closing(alert, quote, now_utc)
+        alert["closing_snapshot_id"] = snapshot_id
+        _refresh_opening(alert, settings.root / "data" / "odds_snapshots.jsonl")
         captured += 1
         changed = True
 
@@ -110,7 +154,14 @@ def _copy_linked_result(alert: dict[str, Any], bet: dict[str, Any]) -> bool:
     if str(bet.get("status", "")).upper() == "PENDING":
         return False
     changed = False
-    for key in ("status", "profit", "result", "outcome", "settled_at"):
+    for key in (
+        "status",
+        "profit",
+        "result",
+        "outcome",
+        "settled_at",
+        "closing_snapshot_id",
+    ):
         if bet.get(key) is not None and alert.get(key) != bet[key]:
             alert[key] = bet[key]
             changed = True
@@ -119,6 +170,8 @@ def _copy_linked_result(alert: dict[str, Any], bet: dict[str, Any]) -> bool:
         "closing_5m_opposite_odd",
         "closing_5m_market_probability_devig",
         "closing_5m_odds_captured_at",
+        "closing_odd",
+        "closing_odds_captured_at",
     ):
         if bet.get(key) is not None and alert.get(key) != bet[key]:
             alert[key] = bet[key]

@@ -13,11 +13,8 @@ if str(SRC) not in sys.path:
 
 from quantbot.config import Settings
 from quantbot.markets import extract_best_quotes
-from quantbot.persistence import (
-    OddsSnapshotStore,
-    record_prediction_quote,
-    snapshot_id,
-)
+from quantbot.odds_lifecycle import lifecycle_contract, observations_for
+from quantbot.persistence import OddsSnapshotStore, record_prediction_quote, snapshot_id
 from quantbot.storage import BetStore, atomic_write_json
 from quantbot.types import Market, OddsQuote
 
@@ -61,9 +58,94 @@ def key(item: dict) -> tuple[int, str, int] | None:
         return None
 
 
+def refresh_lifecycle_fields(
+    bet: dict, snapshots: list[dict], *, prediction: dict | None = None
+) -> None:
+    entry = next(
+        (
+            snapshot
+            for snapshot in snapshots
+            if snapshot.get("snapshot_id") == bet.get("entry_snapshot_id")
+        ),
+        None,
+    )
+    pick_timestamp = bet.get("odds_captured_at") or (entry or {}).get(
+        "odds_captured_at"
+    )
+    try:
+        pick_at = datetime.fromisoformat(str(pick_timestamp)).astimezone(UTC)
+        kickoff = datetime.fromisoformat(str(bet["kickoff"])).astimezone(UTC)
+        observations = observations_for(
+            SNAP,
+            fixture_id=int(bet["event_id"]),
+            market=str(bet["market"]),
+            bookmaker_id=int(bet["bookmaker_id"]),
+        )
+    except (KeyError, TypeError, ValueError):
+        return
+    contract = lifecycle_contract(observations, pick_at=pick_at, kickoff=kickoff)
+    opening = contract["opening"]
+    pick = contract["pick"] or entry
+    closing = contract["closing"]
+    if opening:
+        bet["opening_odd"] = opening.get("odd")
+        bet["opening_odds_captured_at"] = opening.get("odds_captured_at")
+        bet["opening_snapshot_id"] = opening.get("snapshot_id")
+        bet["opening_coverage"] = "PROVEN"
+    else:
+        bet["opening_odd"] = None
+        bet["opening_odds_captured_at"] = None
+        bet["opening_snapshot_id"] = None
+        bet["opening_coverage"] = "UNAVAILABLE"
+    if pick:
+        bet["pick_snapshot_id"] = pick.get("snapshot_id")
+        bet["pick_coverage"] = "PROVEN"
+        bet.setdefault("odd", pick.get("odd"))
+        bet.setdefault("odds_captured_at", pick.get("odds_captured_at"))
+    else:
+        bet["pick_coverage"] = "UNAVAILABLE"
+    if closing:
+        bet["closing_snapshot_id"] = closing.get("snapshot_id")
+        bet["closing_coverage"] = "PROVEN"
+    elif bet.get("closing_odd") is not None:
+        bet["closing_coverage"] = "PROVEN"
+    else:
+        bet["closing_coverage"] = "UNAVAILABLE"
+    bet["lifecycle_coverage"] = (
+        "FULLY_AUDITABLE"
+        if bet.get("opening_odd") is not None
+        and pick
+        and bet.get("closing_odd") is not None
+        else "PARTIAL"
+        if bet.get("opening_odd") is not None
+        or pick
+        or bet.get("closing_odd") is not None
+        else "UNRECOVERABLE"
+    )
+    if bet.get("odd") is not None and bet.get("closing_odd") is not None:
+        pick_odd = float(bet["odd"])
+        close_odd = float(bet["closing_odd"])
+        if pick_odd > 1 and close_odd > 1:
+            bet["clv_odds_pct"] = round((pick_odd / close_odd) - 1.0, 6)
+            bet["clv_status"] = "COMPUTABLE"
+    else:
+        bet["clv_status"] = "NOT_COMPUTABLE"
+    if prediction is not None:
+        prediction["opening_odd"] = bet.get("opening_odd")
+        prediction["opening_odds_captured_at"] = bet.get("opening_odds_captured_at")
+        prediction["opening_snapshot_id"] = bet.get("opening_snapshot_id")
+        prediction["pick_snapshot_id"] = bet.get("pick_snapshot_id")
+        prediction["closing_odd"] = bet.get("closing_odd")
+        prediction["closing_odds_captured_at"] = bet.get("closing_odds_captured_at")
+        prediction["closing_snapshot_id"] = bet.get("closing_snapshot_id")
+        prediction["clv_odds_pct"] = bet.get("clv_odds_pct")
+        prediction["clv_status"] = bet.get("clv_status")
+
+
 def entries(settings: Settings) -> int:
     predictions = load_list(settings.predictions_file)
     bets = BetStore(settings.bets_file).load()
+    snapshots = load_snapshots()
     bet_by_key = {key(b): str(b["id"]) for b in bets if key(b) and b.get("id")}
     store = OddsSnapshotStore(SNAP)
     changed = 0
@@ -86,17 +168,20 @@ def entries(settings: Settings) -> int:
             )
             prediction["entry_snapshot_id"] = snapshot
             changed += 1
+            snapshots.append(
+                next(row for row in store.load() if row.get("snapshot_id") == snapshot)
+            )
 
-    if changed:
+    pred_map = {key(p): p for p in predictions if key(p)}
+    for bet in bets:
+        prediction = pred_map.get(key(bet))
+        if prediction and prediction.get("entry_snapshot_id"):
+            bet["prediction_id"] = prediction.get("id")
+            bet["signal_id"] = prediction.get("signal_id") or prediction.get("id")
+            bet["entry_snapshot_id"] = prediction.get("entry_snapshot_id")
+            refresh_lifecycle_fields(bet, snapshots, prediction=prediction)
+    if changed or bets:
         atomic_write_json(settings.predictions_file, predictions)
-        bets = BetStore(settings.bets_file).load()
-        pred_map = {key(p): p for p in predictions if key(p)}
-        for bet in bets:
-            prediction = pred_map.get(key(bet))
-            if prediction and prediction.get("entry_snapshot_id"):
-                bet["prediction_id"] = prediction.get("id")
-                bet["signal_id"] = prediction.get("signal_id") or prediction.get("id")
-                bet["entry_snapshot_id"] = prediction.get("entry_snapshot_id")
         BetStore(settings.bets_file).save(bets)
     return changed
 
@@ -191,7 +276,6 @@ def t5(settings: Settings) -> int:
             )
         except (KeyError, TypeError, ValueError):
             continue
-
         prediction = predictions.get(key(bet))
         signal = (
             str(
@@ -231,11 +315,9 @@ def closing(settings: Settings) -> int:
         if snapshot.get("snapshot_id")
     }
     changed = 0
-
     for bet in bets:
         if str(bet.get("status", "")).upper() not in TERMINAL:
             continue
-
         if any(
             bet.get(field) is None
             for field in (
@@ -247,7 +329,6 @@ def closing(settings: Settings) -> int:
         ):
             bet["clv_status"] = "NOT_COMPUTABLE"
             continue
-
         try:
             kickoff = datetime.fromisoformat(str(bet["kickoff"])).astimezone(UTC)
             captured_at = datetime.fromisoformat(
@@ -264,7 +345,6 @@ def closing(settings: Settings) -> int:
         except (KeyError, TypeError, ValueError):
             bet["clv_status"] = "NOT_COMPUTABLE"
             continue
-
         entry = next(
             (
                 snapshot
@@ -278,7 +358,6 @@ def closing(settings: Settings) -> int:
             bet.get("signal_id") or (entry or {}).get("signal_id") or prediction_id
         )
         overround = (1.0 / odd) + (1.0 / opposite_odd) - 1.0
-
         canonical = {
             "fixture_id": fixture_id,
             "market": market.value,
@@ -298,29 +377,14 @@ def closing(settings: Settings) -> int:
             "source_request_hash": None,
             "captured_by": "monitor-closing-capture",
         }
-
         canonical_id = snapshot_id(canonical)
         if canonical_id not in existing_ids:
             store.append(canonical)
             existing_ids.add(canonical_id)
             snapshots.append({**canonical, "snapshot_id": canonical_id})
             changed += 1
-
+        refresh_lifecycle_fields(bet, snapshots)
         bet["closing_snapshot_id"] = canonical_id
-
-        if entry:
-            bet["clv_odds_pct"] = round(
-                float(entry["odd"]) / float(canonical["odd"]) - 1, 6
-            )
-            bet["clv_probability_pp"] = round(
-                float(canonical["devig_probability"])
-                - float(entry["devig_probability"]),
-                6,
-            )
-            bet["clv_status"] = "COMPUTABLE"
-        else:
-            bet["clv_status"] = "NOT_COMPUTABLE"
-
     BetStore(settings.bets_file).save(bets)
     return changed
 
@@ -332,10 +396,10 @@ def main() -> int:
     )
     phase = parser.parse_args().phase
     settings = Settings.from_env(ROOT)
-    if phase in {"entry", "all"}:
-        print(f"ENTRY snapshots: {entries(settings)}")
     if phase in {"intermediate", "all"}:
         print(f"INTERMEDIATE snapshots: {intermediate(settings)}")
+    if phase in {"entry", "all"}:
+        print(f"ENTRY snapshots: {entries(settings)}")
     if phase in {"t5", "all"}:
         print(f"T5 snapshots: {t5(settings)}")
     if phase in {"closing", "all"}:

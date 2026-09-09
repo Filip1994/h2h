@@ -6,10 +6,11 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from .bookmaker_registry import bookmaker_identity
 from .types import OddsQuote
 
-SNAPSHOT_SCHEMA_VERSION = 1
-SNAPSHOT_TYPES = {"ENTRY", "INTERMEDIATE", "T5", "CLOSING"}
+SNAPSHOT_SCHEMA_VERSION = 2
+SNAPSHOT_TYPES = {"OPENING", "ENTRY", "INTERMEDIATE", "T5", "CLOSING"}
 
 
 def source_request_hash(endpoint: str, params: dict[str, Any]) -> str:
@@ -69,6 +70,11 @@ class OddsSnapshotStore:
             raise ValueError(f"Nepoznat snapshot_type: {snapshot_type}")
         item = dict(record)
         item["schema_version"] = SNAPSHOT_SCHEMA_VERSION
+        identity = bookmaker_identity(item.get("bookmaker_id"), item.get("bookmaker"))
+        item["bookmaker"] = identity["bookmaker"]
+        item["bookmaker_logo_url"] = identity["logo_url"]
+        item["bookmaker_logo_source"] = identity["logo_source"]
+        item["bookmaker_logo_verified"] = identity["logo_verified"]
         item["snapshot_id"] = snapshot_id(item)
         if item["snapshot_id"] in self._ids:
             return None
@@ -161,4 +167,5 @@ def record_prediction_quote(
         signal_id=str(prediction.get("signal_id") or prediction.get("id") or "")
         or None,
         captured_by=captured_by,
+        source_params={"fixture": int(prediction["event_id"])},
     )
