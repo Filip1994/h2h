@@ -63,9 +63,16 @@ def test_dashboard_zero_pick_contract_and_truthful_state_labels():
         assert 'id="bank"' in text
         assert 'id="pnl"' in text
         assert 'id="roi"' in text
-        assert 'data-generation' in text
-        assert 'data-capture' in text
-    for state in ("RUNNING", "NO SIGNALS", "NO ELIGIBLE FIXTURES", "STALE", "NO DATA", "ERROR"):
+        assert "data-generation" in text
+        assert "data-capture" in text
+    for state in (
+        "RUNNING",
+        "NO SIGNALS",
+        "NO ELIGIBLE FIXTURES",
+        "STALE",
+        "NO DATA",
+        "ERROR",
+    ):
         assert state in js
     assert "QB.status=" in js
 
