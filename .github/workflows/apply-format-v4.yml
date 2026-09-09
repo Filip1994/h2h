@@ -1,0 +1,26 @@
+name: Apply format v4
+
+on:
+  push:
+    branches: [fix/ci-syntax-v4]
+
+jobs:
+  format:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - run: pip install ruff==0.16.6
+      - run: ruff format .
+      - run: ruff check . --fix
+      - run: rm -f .github/workflows/apply-format-v4.yml
+      - run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add .
+          git diff --cached --quiet || git commit -m "chore: apply repository formatting"
+          git push
