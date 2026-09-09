@@ -9,7 +9,7 @@ def test_intraday_scanner_is_24_7_and_preserves_writer_concurrency():
     assert 'timezone: "Europe/Belgrade"' in workflow
     assert "group: quantbet-ledger" in workflow
     assert "cancel-in-progress: false" in workflow
-    assert "INTRADAY_MODE: \"true\"" in workflow
+    assert 'INTRADAY_MODE: "true"' in workflow
 
 
 def test_intraday_run_persists_truthful_health_and_does_not_change_threshold_contract():
