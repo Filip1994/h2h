@@ -183,7 +183,8 @@ def audit_actions() -> dict[str, Any]:
 def build_report(data: dict[str, Any]) -> str:
     raw = data["raw"]
     lifecycle = data["lifecycle"]
-    return f"""# QuantBet Odds Lifecycle — Phase 0 Forensic Audit
+    return (
+        f"""# QuantBet Odds Lifecycle — Phase 0 Forensic Audit
 
 Generated: `{data['generated_at']}`
 
@@ -224,6 +225,7 @@ The archive contains real API-Football odds responses, while the current persist
 - Preserve raw API provenance and append-only audit history.
 - Do not alter Dixon-Coles, calibration, EV/edge, risk/Kelly, eligibility or CLV mathematics.
 """
+    )
 
 
 def main() -> int:
