@@ -44,10 +44,10 @@ jobs:
       - run: python main.py watchlist
       - name: Build public Strong and Near Miss datasets
         run: python tools/build_public_signal_buckets.py
-      - name: Commit watchlist, signal history and bounded API archive
+      - name: Commit watchlist, signal history, quota and bounded API archive
         run: |
           set -euo pipefail
-          files=(intraday_watchlist_state.json intraday_alerts.json strong_signal_ledger.json strong_signals.json strong_signals_portfolio.json near_misses.json market_timing_metrics.json)
+          files=(intraday_watchlist_state.json intraday_alerts.json strong_signal_ledger.json strong_signals.json strong_signals_portfolio.json near_misses.json market_timing_metrics.json data/football_api_quota.json)
           changed=0
           for file in "${files[@]}"; do
             if [ -e "$file" ] && ! git diff --quiet -- "$file"; then changed=1; fi
