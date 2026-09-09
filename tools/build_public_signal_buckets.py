@@ -13,8 +13,15 @@ from quantbot.strong_signal_bankroll import STRONG_SIGNAL_PORTFOLIO, portfolio
 LEDGER_FILE = "strong_signal_ledger.json"
 LEGACY_SETTLEMENTS_FILE = "strong_signal_legacy_settlements.json"
 LEGACY_H2H_KEYS = {
-    "h2h_enabled", "h2h_available", "h2h_rate", "h2h_n", "h2h_effective_n",
-    "h2h_history", "h2h_snapshot_id", "h2h_status", "h2h_error",
+    "h2h_enabled",
+    "h2h_available",
+    "h2h_rate",
+    "h2h_n",
+    "h2h_effective_n",
+    "h2h_history",
+    "h2h_snapshot_id",
+    "h2h_status",
+    "h2h_error",
 }
 TERMINAL_STATUSES = {"WIN", "LOSS", "VOID", "REVIEW"}
 NON_ACTIVE_STATUSES = {"SKIPPED", "SETTLED", "VOID", "REVIEW", "WIN", "LOSS"}
@@ -49,7 +56,9 @@ def load_jsonl(path: Path) -> list[dict[str, Any]]:
 
 
 def _canonical_key(item: dict[str, Any]) -> str:
-    return str(item.get("id") or item.get("signal_id") or item.get("observation_id") or "")
+    return str(
+        item.get("id") or item.get("signal_id") or item.get("observation_id") or ""
+    )
 
 
 def _strip_legacy_h2h(row: dict[str, Any]) -> None:
@@ -66,7 +75,9 @@ def _as_virtual(item: dict[str, Any]) -> dict[str, Any]:
     _strip_legacy_h2h(row)
 
     if row.get("virtual_settled") is True:
-        virtual_status = str(row.get("virtual_status") or row.get("status") or "PENDING").upper()
+        virtual_status = str(
+            row.get("virtual_status") or row.get("status") or "PENDING"
+        ).upper()
         row["virtual_status"] = virtual_status
         row["status"] = virtual_status
         row["virtual_profit"] = float(row.get("virtual_profit") or 0.0)
@@ -86,7 +97,9 @@ def _as_virtual(item: dict[str, Any]) -> dict[str, Any]:
         if row.get("settlement_type") is not None:
             row["production_settlement_type"] = row.get("settlement_type")
         row["status"] = source_status
-        row["profit"] = 0.0 if source_status == "SKIPPED" else float(row.get("profit") or 0.0)
+        row["profit"] = (
+            0.0 if source_status == "SKIPPED" else float(row.get("profit") or 0.0)
+        )
         row["virtual_profit"] = 0.0
         row["virtual_settled"] = False
         return row
@@ -101,7 +114,14 @@ def _as_virtual(item: dict[str, Any]) -> dict[str, Any]:
         row["production_settled_at"] = row.get("settled_at")
     if row.get("settlement_type") is not None:
         row["production_settlement_type"] = row.get("settlement_type")
-    for key in ("status", "profit", "result", "settled_at", "settlement_type", "virtual_profit"):
+    for key in (
+        "status",
+        "profit",
+        "result",
+        "settled_at",
+        "settlement_type",
+        "virtual_profit",
+    ):
         row.pop(key, None)
     row["status"] = "PENDING"
     row["profit"] = 0.0
@@ -177,8 +197,15 @@ def merge(
             protected = {
                 field: current.get(field)
                 for field in (
-                    "virtual_settled", "virtual_status", "virtual_profit", "status",
-                    "profit", "result", "settled_at", "settlement_type", "virtual_settled_at",
+                    "virtual_settled",
+                    "virtual_status",
+                    "virtual_profit",
+                    "status",
+                    "profit",
+                    "result",
+                    "settled_at",
+                    "settlement_type",
+                    "virtual_settled_at",
                 )
             }
             current.update(item)
@@ -190,7 +217,9 @@ def merge(
         merged[key] = current
     return sorted(
         merged.values(),
-        key=lambda item: str(item.get("signal_sent_at") or item.get("captured_at") or ""),
+        key=lambda item: str(
+            item.get("signal_sent_at") or item.get("captured_at") or ""
+        ),
     )
 
 
@@ -222,7 +251,8 @@ def observation_public(
         or (f"{home} vs {away}" if home and away else None)
     )
     return {
-        "id": row.get("observation_id") or f"{row.get('prediction_id')}:{row.get('captured_at')}",
+        "id": row.get("observation_id")
+        or f"{row.get('prediction_id')}:{row.get('captured_at')}",
         "prediction_id": row.get("prediction_id"),
         "event_id": row.get("fixture_id"),
         "market": row.get("market"),
@@ -264,7 +294,11 @@ def build(root: Path = ROOT) -> tuple[list[dict[str, Any]], list[dict[str, Any]]
     observations = load_jsonl(root / "data" / "market_timing_snapshots.jsonl")
     alert_lookup: dict[str, dict[str, Any]] = {}
     for alert in alerts:
-        for key in (alert.get("prediction_id"), alert.get("event_id"), alert.get("fixture_id")):
+        for key in (
+            alert.get("prediction_id"),
+            alert.get("event_id"),
+            alert.get("fixture_id"),
+        ):
             if key is not None and str(key):
                 alert_lookup[str(key)] = alert
     strong_updates = [
@@ -279,11 +313,15 @@ def build(root: Path = ROOT) -> tuple[list[dict[str, Any]], list[dict[str, Any]]
     near = []
     for observation in observations:
         if (
-            str(observation.get("signal_class") or observation.get("signal_state") or "").upper()
+            str(
+                observation.get("signal_class") or observation.get("signal_state") or ""
+            ).upper()
             != "NEAR_MISS"
         ):
             continue
-        source = alert_lookup.get(str(observation.get("prediction_id") or "")) or alert_lookup.get(
+        source = alert_lookup.get(
+            str(observation.get("prediction_id") or "")
+        ) or alert_lookup.get(
             str(observation.get("fixture_id") or observation.get("event_id") or "")
         )
         near.append(observation_public(observation, source))
