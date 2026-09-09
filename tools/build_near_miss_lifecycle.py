@@ -1,3 +1,4 @@
+# fmt: off
 from __future__ import annotations
 
 import json
@@ -51,9 +52,7 @@ def lifecycle_key(row: dict[str, Any]) -> tuple[str, str, str, str]:
     )
 
 
-def exact_identity(
-    row: dict[str, Any], *, fixture: str, market: str, bookmaker: str
-) -> bool:
+def exact_identity(row: dict[str, Any], *, fixture: str, market: str, bookmaker: str) -> bool:
     return (
         str(row.get("fixture_id") or row.get("event_id") or "") == fixture
         and str(row.get("market") or "") == market
@@ -62,21 +61,12 @@ def exact_identity(
 
 
 def prediction_identity(prediction: dict[str, Any]) -> dict[str, Any]:
-    home = (
-        prediction.get("home_name")
-        or prediction.get("home_team")
-        or prediction.get("home")
-    )
-    away = (
-        prediction.get("away_name")
-        or prediction.get("away_team")
-        or prediction.get("away")
-    )
+    home = prediction.get("home_name") or prediction.get("home_team") or prediction.get("home")
+    away = prediction.get("away_name") or prediction.get("away_team") or prediction.get("away")
     return {
         "home_name": home,
         "away_name": away,
-        "match": prediction.get("match")
-        or (f"{home} vs {away}" if home and away else None),
+        "match": prediction.get("match") or (f"{home} vs {away}" if home and away else None),
         "league": prediction.get("league") or prediction.get("league_name"),
         "kickoff": prediction.get("kickoff"),
     }
@@ -101,10 +91,8 @@ def build(root: Path = ROOT, now: datetime | None = None) -> list[dict[str, Any]
     existing = existing if isinstance(existing, list) else []
 
     candidates = [
-        row
-        for row in observations
-        if str(row.get("signal_class") or row.get("signal_state") or "").upper()
-        == "NEAR_MISS"
+        row for row in observations
+        if str(row.get("signal_class") or row.get("signal_state") or "").upper() == "NEAR_MISS"
     ]
     candidates.extend(row for row in existing if isinstance(row, dict))
     groups: dict[tuple[str, str, str, str], list[dict[str, Any]]] = {}
@@ -135,32 +123,26 @@ def build(root: Path = ROOT, now: datetime | None = None) -> list[dict[str, Any]
         near_at = parse_dt(latest.get("captured_at") or latest.get("odds_captured_at"))
 
         strong = [
-            row
-            for row in alerts
+            row for row in alerts
             if isinstance(row, dict)
             and exact_identity(row, fixture=fixture, market=market, bookmaker=bookmaker)
             and str(row.get("signal_class") or "").upper() == "STRONG_SIGNAL"
         ]
         linked_bets = [
-            row
-            for row in bets
+            row for row in bets
             if isinstance(row, dict)
             and exact_identity(row, fixture=fixture, market=market, bookmaker=bookmaker)
         ]
         promotions = strong or [
-            row
-            for row in linked_bets
+            row for row in linked_bets
             if str(row.get("signal_source") or "").upper() == "INTRADAY_ALERT"
         ]
         pick = (
             min(
                 promotions,
                 key=lambda row: parse_dt(
-                    row.get("signal_sent_at")
-                    or row.get("odds_captured_at")
-                    or row.get("created_at")
-                )
-                or datetime.max.replace(tzinfo=UTC),
+                    row.get("signal_sent_at") or row.get("odds_captured_at") or row.get("created_at")
+                ) or datetime.max.replace(tzinfo=UTC),
             )
             if promotions
             else None
@@ -170,18 +152,15 @@ def build(root: Path = ROOT, now: datetime | None = None) -> list[dict[str, Any]
             or (pick or {}).get("odds_captured_at")
             or (pick or {}).get("created_at")
         )
-
         same_canonical = [
-            row
-            for row in canonical
+            row for row in canonical
             if exact_identity(row, fixture=fixture, market=market, bookmaker=bookmaker)
             and parse_dt(row.get("odds_captured_at"))
             and kickoff
             and parse_dt(row.get("odds_captured_at")) < kickoff
         ]
         pre_pick = [
-            row
-            for row in same_canonical
+            row for row in same_canonical
             if pick_at is None or parse_dt(row.get("odds_captured_at")) < pick_at
         ]
         opening_pool = pre_pick or same_canonical
@@ -195,8 +174,7 @@ def build(root: Path = ROOT, now: datetime | None = None) -> list[dict[str, Any]
             else first
         )
         t5 = [
-            row
-            for row in same_canonical
+            row for row in same_canonical
             if str(row.get("snapshot_type") or "").upper() == "T5"
         ]
         closing = (
@@ -208,7 +186,6 @@ def build(root: Path = ROOT, now: datetime | None = None) -> list[dict[str, Any]
             if t5
             else None
         )
-
         if promotions:
             status = "PROMOTED"
         elif kickoff and now >= kickoff:
@@ -247,14 +224,11 @@ def build(root: Path = ROOT, now: datetime | None = None) -> list[dict[str, Any]
             "pick_odd": pick.get("odd") if pick else None,
             "pick_opposite_odd": pick.get("opposite_odd") if pick else None,
             "pick_captured_at": (
-                pick.get("odds_captured_at")
-                if pick and pick.get("odds_captured_at")
+                pick.get("odds_captured_at") if pick and pick.get("odds_captured_at")
                 else (pick_at.isoformat() if pick_at else None)
             ),
             "pick_observation_id": pick.get("signal_id") if pick else None,
-            "promoted_to_signal_id": (
-                (pick.get("signal_id") or pick.get("id")) if pick else None
-            ),
+            "promoted_to_signal_id": ((pick.get("signal_id") or pick.get("id")) if pick else None),
             "closing_odd": closing.get("odd") if closing else None,
             "closing_opposite_odd": closing.get("opposite_odd") if closing else None,
             "closing_captured_at": closing.get("odds_captured_at") if closing else None,
@@ -276,11 +250,7 @@ def build(root: Path = ROOT, now: datetime | None = None) -> list[dict[str, Any]
             "profit": 0.0,
             "virtual_profit": 0.0,
             "signal_sent_at": near_at.isoformat() if near_at else None,
-            "source_observation_ids": [
-                item.get("observation_id")
-                for item in items
-                if item.get("observation_id")
-            ],
+            "source_observation_ids": [item.get("observation_id") for item in items if item.get("observation_id")],
             "production_linked_bet_id": None,
         }
         if linked_bets:
@@ -301,14 +271,5 @@ def build(root: Path = ROOT, now: datetime | None = None) -> list[dict[str, Any]
 
 if __name__ == "__main__":
     rows = build()
-    print(
-        json.dumps(
-            {
-                "near_misses": len(rows),
-                "active": sum(row["status"] == "PENDING" for row in rows),
-                "expired": sum(row["status"] == "EXPIRED" for row in rows),
-                "promoted": sum(row["status"] == "PROMOTED" for row in rows),
-            },
-            ensure_ascii=False,
-        )
-    )
+    print(json.dumps({"near_misses": len(rows), "active": sum(row["status"] == "PENDING" for row in rows), "expired": sum(row["status"] == "EXPIRED" for row in rows), "promoted": sum(row["status"] == "PROMOTED" for row in rows)}, ensure_ascii=False))
+# fmt: on
