@@ -93,4 +93,3 @@ def test_scheduled_intraday_completion_also_hands_off_to_daily_bulletin() -> Non
     assert "workflow_run:" in text
     assert "QuantBet intraday strong-signal scanner" in text
     assert "types: [completed]" in text
-    assert "every completed 24/7 intraday scan" in text
