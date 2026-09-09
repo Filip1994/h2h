@@ -88,21 +88,39 @@ def eligibility_decision(
 
     if normalized_country in {normalize_text(item) for item in excluded_countries}:
         decision = EligibilityDecision(
-            False, "INELIGIBLE_COUNTRY", league_id, normalized_country, normalized_league, None
+            False,
+            "INELIGIBLE_COUNTRY",
+            league_id,
+            normalized_country,
+            normalized_league,
+            None,
         )
         _emit_eligibility_event(decision)
         return decision
 
     if contains_excluded_keyword(league_name, home_name, away_name):
         decision = EligibilityDecision(
-            False, "EXPLICIT_EXCLUSION", league_id, normalized_country, normalized_league, None
+            False,
+            "EXPLICIT_EXCLUSION",
+            league_id,
+            normalized_country,
+            normalized_league,
+            None,
         )
         _emit_eligibility_event(decision)
         return decision
 
-    if normalized_country in AFRICA_COUNTRIES and normalized_country not in {"egypt", "morocco"}:
+    if normalized_country in AFRICA_COUNTRIES and normalized_country not in {
+        "egypt",
+        "morocco",
+    }:
         decision = EligibilityDecision(
-            False, "INELIGIBLE_COUNTRY", league_id, normalized_country, normalized_league, None
+            False,
+            "INELIGIBLE_COUNTRY",
+            league_id,
+            normalized_country,
+            normalized_league,
+            None,
         )
         _emit_eligibility_event(decision)
         return decision
@@ -110,7 +128,12 @@ def eligibility_decision(
     classification = classification_for_fixture(league_id, country, league_name)
     if classification is None:
         decision = EligibilityDecision(
-            False, "UNKNOWN_LEAGUE_TIER", league_id, normalized_country, normalized_league, None
+            False,
+            "UNKNOWN_LEAGUE_TIER",
+            league_id,
+            normalized_country,
+            normalized_league,
+            None,
         )
         _emit_eligibility_event(decision)
         return decision
@@ -158,13 +181,23 @@ def eligibility_decision(
         for pattern in _TEAM_SUFFIX_PATTERNS
     ):
         decision = EligibilityDecision(
-            False, "EXPLICIT_EXCLUSION", league_id, normalized_country, normalized_league, classification.tier
+            False,
+            "EXPLICIT_EXCLUSION",
+            league_id,
+            normalized_country,
+            normalized_league,
+            classification.tier,
         )
         _emit_eligibility_event(decision)
         return decision
 
     decision = EligibilityDecision(
-        True, "ELIGIBLE", league_id, normalized_country, normalized_league, classification.tier
+        True,
+        "ELIGIBLE",
+        league_id,
+        normalized_country,
+        normalized_league,
+        classification.tier,
     )
     _emit_eligibility_event(decision)
     return decision
