@@ -128,7 +128,9 @@ def _load_state(settings: Settings) -> dict[str, Any]:
     return value
 
 
-def _state_entry(state: dict[str, Any], fields: dict[str, Any], now: datetime) -> dict[str, Any]:
+def _state_entry(
+    state: dict[str, Any], fields: dict[str, Any], now: datetime
+) -> dict[str, Any]:
     key = str(fields["fixture_id"])
     fixtures = state["fixtures"]
     item = fixtures.get(key)
@@ -226,13 +228,19 @@ def _lifecycle_metrics(settings: Settings, day: date) -> dict[str, Any]:
     closing = 0
     entry = 0
     for key, observations in by_key.items():
-        observations.sort(key=lambda row: _parse(row.get("odds_captured_at")) or datetime.min.replace(tzinfo=UTC))
+        observations.sort(
+            key=lambda row: (
+                _parse(row.get("odds_captured_at")) or datetime.min.replace(tzinfo=UTC)
+            )
+        )
         first = observations[0] if observations else None
         if first:
             opening += 1
         if any(str(row.get("snapshot_type")) == "ENTRY" for row in observations):
             entry += 1
-        if any(str(row.get("snapshot_type")) in {"T5", "CLOSING"} for row in observations):
+        if any(
+            str(row.get("snapshot_type")) in {"T5", "CLOSING"} for row in observations
+        ):
             closing += 1
     return {
         "lifecycle_keys": len(by_key),
@@ -270,7 +278,12 @@ def _production_signal_coverage(settings: Settings, day: date) -> dict[str, Any]
                 partial += 1
                 continue
             contract = lifecycle_contract(
-                observations_for(settings.root / "data" / "odds_snapshots.jsonl", fixture_id=fixture_id, market=market, bookmaker_id=bookmaker_id),
+                observations_for(
+                    settings.root / "data" / "odds_snapshots.jsonl",
+                    fixture_id=fixture_id,
+                    market=market,
+                    bookmaker_id=bookmaker_id,
+                ),
                 pick_at=pick_at,
                 kickoff=kickoff,
             )
@@ -288,7 +301,9 @@ def collect(settings: Settings, now: datetime | None = None) -> dict[str, Any]:
     now = (now or datetime.now(UTC)).astimezone(UTC)
     state = _load_state(settings)
     budget = _load_budget(settings, now.astimezone(settings.timezone).date())
-    remaining = max(0, int(budget["working_budget"]) - int(budget.get("requests_used") or 0))
+    remaining = max(
+        0, int(budget["working_budget"]) - int(budget.get("requests_used") or 0)
+    )
     api: APIFootballClient | None = None
     if remaining > 0:
         run_settings = replace(
@@ -307,7 +322,9 @@ def collect(settings: Settings, now: datetime | None = None) -> dict[str, Any]:
     scanned_at: list[str] = []
     coverage_path = _coverage_path(settings)
     snapshot_store = OddsSnapshotStore(settings.root / "data" / "odds_snapshots.jsonl")
-    existing_snapshot_rows = _load_jsonl(settings.root / "data" / "odds_snapshots.jsonl")
+    existing_snapshot_rows = _load_jsonl(
+        settings.root / "data" / "odds_snapshots.jsonl"
+    )
     existing_keys = {
         (int(row["fixture_id"]), str(row["market"]), int(row["bookmaker_id"]))
         for row in existing_snapshot_rows
@@ -395,13 +412,17 @@ def collect(settings: Settings, now: datetime | None = None) -> dict[str, Any]:
                         added = 0
                         seconds_to_kickoff = (kickoff - now).total_seconds()
                         snapshot_type = (
-                            "T5"
-                            if 120 <= seconds_to_kickoff <= 480
-                            else "INTERMEDIATE"
+                            "T5" if 120 <= seconds_to_kickoff <= 480 else "INTERMEDIATE"
                         )
                         for quote in quotes:
-                            key = (int(fields["fixture_id"]), quote.market.value, quote.bookmaker_id)
-                            lifecycle_type = "OPENING" if key not in existing_keys else snapshot_type
+                            key = (
+                                int(fields["fixture_id"]),
+                                quote.market.value,
+                                quote.bookmaker_id,
+                            )
+                            lifecycle_type = (
+                                "OPENING" if key not in existing_keys else snapshot_type
+                            )
                             snapshot_id = snapshot_store.append_quote(
                                 quote,
                                 fixture_id=int(fields["fixture_id"]),
@@ -415,9 +436,16 @@ def collect(settings: Settings, now: datetime | None = None) -> dict[str, Any]:
                         observations_captured += added
                         fixture_results["QUERIED"] += 1
                         item["last_outcome"] = "QUERIED"
-                        item["observations"] = int(item.get("observations") or 0) + added
+                        item["observations"] = (
+                            int(item.get("observations") or 0) + added
+                        )
                         item["opening_observed"] = any(
-                            (int(fields["fixture_id"]), quote.market.value, quote.bookmaker_id) not in existing_keys
+                            (
+                                int(fields["fixture_id"]),
+                                quote.market.value,
+                                quote.bookmaker_id,
+                            )
+                            not in existing_keys
                             for quote in quotes
                         ) or bool(item.get("opening_observed"))
                         _record_outcome(
@@ -465,7 +493,9 @@ def collect(settings: Settings, now: datetime | None = None) -> dict[str, Any]:
     atomic_write_json(_state_path(settings), state)
 
     lifecycle = _lifecycle_metrics(settings, now.astimezone(settings.timezone).date())
-    signal = _production_signal_coverage(settings, now.astimezone(settings.timezone).date())
+    signal = _production_signal_coverage(
+        settings, now.astimezone(settings.timezone).date()
+    )
     queried = int(fixture_results["QUERIED"])
     no_odds = int(fixture_results["NO_ODDS_RESPONSE"])
     invalid = int(fixture_results["INVALID_RESPONSE"])
@@ -486,7 +516,9 @@ def collect(settings: Settings, now: datetime | None = None) -> dict[str, Any]:
         "api_requests_used_this_run": api.request_count,
         "daily_working_budget": budget["working_budget"],
         "daily_budget_used": budget["requests_used"],
-        "daily_budget_remaining": max(0, budget["working_budget"] - budget["requests_used"]),
+        "daily_budget_remaining": max(
+            0, budget["working_budget"] - budget["requests_used"]
+        ),
         "observations_captured": observations_captured,
         "observations_per_fixture": round(observations_captured / max(1, queried), 4),
         "provider_availability_by_ttk": dict(sorted(scanned_buckets.items())),
@@ -494,13 +526,15 @@ def collect(settings: Settings, now: datetime | None = None) -> dict[str, Any]:
         **lifecycle,
         **signal,
         "degraded": bool(
-            len(eligible) > 0
-            and (queried / max(1, len(eligible))) < 0.80
+            len(eligible) > 0 and (queried / max(1, len(eligible))) < 0.80
         ),
         "degraded_reasons": [
             reason
             for reason, condition in (
-                ("LOW_ODDS_QUERY_COVERAGE", len(eligible) > 0 and queried / max(1, len(eligible)) < 0.80),
+                (
+                    "LOW_ODDS_QUERY_COVERAGE",
+                    len(eligible) > 0 and queried / max(1, len(eligible)) < 0.80,
+                ),
                 ("BUDGET_EXHAUSTED", budget_exhausted > 0),
                 ("API_ERRORS", errors > 0),
             )

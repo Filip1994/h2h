@@ -147,7 +147,10 @@ def test_daily_budget_is_bounded(monkeypatch, settings):
 
     settings = type(settings)(
         **{
-            **{field: getattr(settings, field) for field in settings.__dataclass_fields__},
+            **{
+                field: getattr(settings, field)
+                for field in settings.__dataclass_fields__
+            },
             "api_request_budget": 3,
             "api_budget_reserve": 1,
         }
