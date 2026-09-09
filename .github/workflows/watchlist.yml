@@ -44,6 +44,28 @@ jobs:
       - run: python main.py watchlist
       - name: Build public Strong and Near Miss datasets
         run: python tools/build_public_signal_buckets.py
+      - name: Validate Strong Signal publication contract
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          ledger = json.loads(Path("strong_signal_ledger.json").read_text())
+          public = json.loads(Path("strong_signals.json").read_text())
+          portfolio = json.loads(Path("strong_signals_portfolio.json").read_text())
+
+          ledger_rows = ledger.get("signals", ledger if isinstance(ledger, list) else [])
+          public_rows = public.get("signals", public if isinstance(public, list) else [])
+          assert isinstance(ledger_rows, list)
+          assert isinstance(public_rows, list)
+          assert isinstance(portfolio, dict)
+          assert portfolio.get("initial_bankroll_rsd") == 10000
+          assert portfolio.get("virtual_settled_only") is True
+          strong_public = [r for r in public_rows if str(r.get("signal_class", "")).upper() == "STRONG_SIGNAL"]
+          assert len(strong_public) <= len(ledger_rows)
+          print(f"Strong publication contract OK: ledger={len(ledger_rows)} public_strong={len(strong_public)}")
+          PY
       - name: Commit watchlist, signal history, quota and bounded API archive
         run: |
           set -euo pipefail
