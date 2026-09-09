@@ -72,10 +72,17 @@ def main() -> int:
         lifecycle_keys[key].append(row)
         captured = parse(row.get("odds_captured_at"))
         kickoff = parse(row.get("kickoff"))
-        if captured and kickoff and captured >= kickoff and row.get("snapshot_type") in {"T5", "CLOSING"}:
+        if (
+            captured
+            and kickoff
+            and captured >= kickoff
+            and row.get("snapshot_type") in {"T5", "CLOSING"}
+        ):
             post_kickoff_closing += 1
 
-    snapshot_types = Counter(str(row.get("snapshot_type") or "UNKNOWN") for row in snapshots)
+    snapshot_types = Counter(
+        str(row.get("snapshot_type") or "UNKNOWN") for row in snapshots
+    )
     opening_keys = sum(
         any(row.get("snapshot_type") == "OPENING" for row in rows)
         for rows in lifecycle_keys.values()
@@ -89,17 +96,26 @@ def main() -> int:
         for rows in lifecycle_keys.values()
     )
 
-    coverage_outcomes = Counter(str(row.get("outcome") or "UNKNOWN") for row in coverage)
-    eligibility_reasons = Counter(str(row.get("reason") or "UNKNOWN") for row in eligibility)
+    coverage_outcomes = Counter(
+        str(row.get("outcome") or "UNKNOWN") for row in coverage
+    )
+    eligibility_reasons = Counter(
+        str(row.get("reason") or "UNKNOWN") for row in eligibility
+    )
     state_fixtures = state.get("fixtures", {}) if isinstance(state, dict) else {}
     state_with_outcome = sum(
-        isinstance(value, dict) and value.get("last_outcome") for value in state_fixtures.values()
+        isinstance(value, dict) and value.get("last_outcome")
+        for value in state_fixtures.values()
     )
 
     current_budget = {
         "working": int(budget.get("working_budget") or 0),
         "used": int(budget.get("requests_used") or 0),
-        "remaining": max(0, int(budget.get("working_budget") or 0) - int(budget.get("requests_used") or 0)),
+        "remaining": max(
+            0,
+            int(budget.get("working_budget") or 0)
+            - int(budget.get("requests_used") or 0),
+        ),
     }
 
     historical_by_day: dict[str, int] = defaultdict(int)
@@ -113,7 +129,8 @@ def main() -> int:
     sha = os.getenv("GITHUB_SHA", "unknown")
 
     checks = {
-        "budget_within_working_limit": current_budget["used"] <= current_budget["working"],
+        "budget_within_working_limit": current_budget["used"]
+        <= current_budget["working"],
         "no_post_kickoff_closing": post_kickoff_closing == 0,
         "malformed_snapshot_rows": malformed == 0,
         "coverage_has_explicit_outcomes": bool(coverage_outcomes),
