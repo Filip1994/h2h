@@ -1,8 +1,6 @@
 from datetime import UTC, datetime, timedelta
 import json
 
-import pytest
-
 from tools.system_health import check_system_health
 
 
@@ -34,12 +32,10 @@ def test_stale_pending_is_a_system_failure(tmp_path):
 
 def test_malformed_active_record_cannot_hide_from_health(tmp_path):
     now = datetime(2026, 9, 9, 20, 0, tzinfo=UTC)
-    write_json(tmp_path, "bets.json", [base_row(kickoff=None)])
-    write_json(tmp_path, "intraday_alerts.json", [])
-    # Replace the valid default with an invalid timestamp.
     row = base_row()
     row["kickoff"] = "not-a-date"
     write_json(tmp_path, "bets.json", [row])
+    write_json(tmp_path, "intraday_alerts.json", [])
 
     report = check_system_health(tmp_path, now=now)
 
