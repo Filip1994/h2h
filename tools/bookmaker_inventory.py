@@ -4,9 +4,10 @@ import argparse
 import csv
 import json
 import os
+from collections.abc import Iterable
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 from quantbot.api import APIFootballClient
 from quantbot.config import Settings
@@ -77,9 +78,7 @@ def _iter_archived_odds(root: Path, since: datetime) -> Iterable[dict[str, Any]]
                     if not isinstance(captured, str):
                         continue
                     try:
-                        captured_at = datetime.fromisoformat(
-                            captured.replace("Z", "+00:00")
-                        )
+                        captured_at = datetime.fromisoformat(captured)
                     except ValueError:
                         continue
                     if captured_at < since or record.get("endpoint") != "odds":
