@@ -1,0 +1,26 @@
+name: Fix packet imports
+on:
+  push:
+    branches: [fix/79-immutable-decision-packets-v3]
+
+jobs:
+  patch:
+    if: github.actor == 'Filip1994'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('src/quantbot/engine.py'); s=p.read_text()
+          s=s.replace('from dataclasses import dataclass\n', 'import hashlib\nimport json\nfrom dataclasses import dataclass\n', 1)
+          p.write_text(s)
+          PY
+          rm -f .github/workflows/fix-79-imports.yml
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add src/quantbot/engine.py .github/workflows/fix-79-imports.yml
+          git commit -m 'fix: import packet hash dependencies'
+          git push
