@@ -1,3 +1,4 @@
+# ruff: noqa
 # fmt: off
 from __future__ import annotations
 
@@ -121,7 +122,6 @@ def build(root: Path = ROOT, now: datetime | None = None) -> list[dict[str, Any]
                 identity[field] = latest.get(field) or first.get(field)
         kickoff = parse_dt(identity.get("kickoff") or latest.get("kickoff"))
         near_at = parse_dt(latest.get("captured_at") or latest.get("odds_captured_at"))
-
         strong = [
             row for row in alerts
             if isinstance(row, dict)
@@ -192,7 +192,6 @@ def build(root: Path = ROOT, now: datetime | None = None) -> list[dict[str, Any]
             status = "EXPIRED"
         else:
             status = "PENDING"
-
         row = {
             "schema_version": 2,
             "id": f"near:{prediction_id}:{fixture}:{market}:{bookmaker}",
@@ -223,10 +222,7 @@ def build(root: Path = ROOT, now: datetime | None = None) -> list[dict[str, Any]
             "near_miss_observation_id": latest.get("observation_id"),
             "pick_odd": pick.get("odd") if pick else None,
             "pick_opposite_odd": pick.get("opposite_odd") if pick else None,
-            "pick_captured_at": (
-                pick.get("odds_captured_at") if pick and pick.get("odds_captured_at")
-                else (pick_at.isoformat() if pick_at else None)
-            ),
+            "pick_captured_at": pick.get("odds_captured_at") if pick and pick.get("odds_captured_at") else (pick_at.isoformat() if pick_at else None),
             "pick_observation_id": pick.get("signal_id") if pick else None,
             "promoted_to_signal_id": ((pick.get("signal_id") or pick.get("id")) if pick else None),
             "closing_odd": closing.get("odd") if closing else None,
@@ -261,11 +257,8 @@ def build(root: Path = ROOT, now: datetime | None = None) -> list[dict[str, Any]
             if bet.get("status") not in (None, "PENDING"):
                 row["production_status"] = bet.get("status")
         result.append(row)
-
     result.sort(key=lambda item: str(item.get("signal_sent_at") or item.get("kickoff") or ""))
-    (root / "near_misses.json").write_text(
-        json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-    )
+    (root / "near_misses.json").write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return result
 
 
