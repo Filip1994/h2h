@@ -1,16 +1,16 @@
 from datetime import UTC, datetime
 from types import SimpleNamespace
 
-from quantbot.decision_packet import build_packet, verify_packet
+from quantbot.decision_packet import build_packet, registry_snapshot, verify_packet
 from quantbot.types import Market, OddsQuote
 
 
-def test_decision_packet_is_self_verifying(settings) -> None:
+def test_decision_packet_is_self_verifying_and_registry_pinned(settings) -> None:
     candidate = SimpleNamespace(
         fixture_id=123,
-        league_id=1,
-        league_name="Test League",
-        country="Test",
+        league_id=39,
+        league_name="Premier League",
+        country="England",
         home_id=10,
         home_name="Home",
         away_id=20,
@@ -45,7 +45,20 @@ def test_decision_packet_is_self_verifying(settings) -> None:
         calibration_hash="cal-hash",
     )
     assert verify_packet(packet)
+    assert packet["schema_version"] == 2
     assert packet["decision"]["pick_observation_id"]
     assert packet["model"]["training_sample"]["identity"] == "train-hash"
+    assert packet["strategy"]["registry_version"] == registry_snapshot(39)["version"]
+    assert packet["strategy"]["registry_league_id"] == 39
+    assert packet["strategy"]["registry_classification"]["tier"] == 1
+
     packet["decision"]["pick_odd"] = 2.2
     assert not verify_packet(packet)
+
+
+def test_registry_snapshot_is_deterministic(settings) -> None:
+    first = registry_snapshot(39)
+    second = registry_snapshot(39)
+    assert first == second
+    assert first["version"]
+    assert first["classification"]["league_name"] == "Premier League"
