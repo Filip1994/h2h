@@ -54,11 +54,14 @@ jobs:
       - name: Persist intraday generation health
         if: always()
         run: python tools/intraday_health.py --run-status "${{ steps.scan.outcome == 'success' && 'success' || 'failure' }}"
+      - name: Audit persisted decision funnel
+        if: always() && steps.scan.outcome == 'success'
+        run: python tools/funnel_audit.py
       - name: Commit intraday ledger, signals, quota, health and safe raw API archives
         if: always()
         run: |
           set -euo pipefail
-          files=(bets.json predictions.json ledger_meta.json api_usage.json api_usage_history.json generation_health.json generation_health_history.json intraday_alerts.json intraday_watchlist_state.json intraday_health.json data/football_api_quota.json)
+          files=(bets.json predictions.json ledger_meta.json api_usage.json api_usage_history.json generation_health.json generation_health_history.json intraday_alerts.json intraday_watchlist_state.json intraday_health.json decision_funnel_audit.json data/football_api_quota.json)
           changed=0
           for file in "${files[@]}"; do
             if [ -e "$file" ] && ! git diff --quiet -- "$file"; then changed=1; fi
