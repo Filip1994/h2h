@@ -31,12 +31,13 @@ def bookmaker(
     }
 
 
-def test_extracts_best_paired_quote_and_devigs() -> None:
+def test_extracts_best_quote_from_every_bookmaker() -> None:
     raw = [
         {
             "bookmakers": [
                 bookmaker(8, 1.85, 2.00, 1.75, 2.10),
                 bookmaker(11, 1.90, 1.95, 1.70, 2.20),
+                bookmaker(99, 2.10, 1.75, 1.65, 2.40),
             ]
         }
     ]
@@ -47,11 +48,31 @@ def test_extracts_best_paired_quote_and_devigs() -> None:
         captured_at=datetime.now(UTC),
     )
     over = quotes[Market.OVER_25]
-    assert over.bookmaker_id == 11
-    assert over.odd == 1.90
-    assert over.opposite_odd == 1.95
-    expected = (1 / 1.90) / ((1 / 1.90) + (1 / 1.95))
+    assert over.bookmaker_id == 99
+    assert over.odd == 2.10
+    assert over.opposite_odd == 1.75
+    expected = (1 / 2.10) / ((1 / 2.10) + (1 / 1.75))
     assert over.devig_probability == pytest.approx(expected)
+
+
+def test_only_bookmaker_id_locks_to_exact_bookmaker() -> None:
+    raw = [
+        {
+            "bookmakers": [
+                bookmaker(8, 1.85, 2.00, 1.75, 2.10),
+                bookmaker(99, 2.10, 1.75, 1.65, 2.40),
+            ]
+        }
+    ]
+    quotes = extract_best_quotes(
+        raw,
+        bookmaker_priority=(8,),
+        allow_any_bookmaker=True,
+        only_bookmaker_id=8,
+        captured_at=datetime.now(UTC),
+    )
+    assert quotes[Market.OVER_25].bookmaker_id == 8
+    assert quotes[Market.OVER_25].odd == 1.85
 
 
 def test_requires_both_sides_of_market() -> None:

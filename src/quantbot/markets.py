@@ -99,28 +99,26 @@ def extract_best_quotes(
     captured_at: datetime,
     only_bookmaker_id: int | None = None,
 ) -> dict[Market, OddsQuote]:
+    """Select the best valid quote across every provider bookmaker before Pick.
+
+    ``bookmaker_priority`` is retained for backwards-compatible configuration and
+    display ordering, but it is never a coverage or selection filter. Once a Pick
+    exists, callers can pass ``only_bookmaker_id`` to lock lifecycle reads to the
+    exact Pick bookmaker.
+    """
     bookmakers = _bookmakers(raw_odds)
 
-    def collect(pool: list[dict[str, Any]]) -> dict[Market, OddsQuote]:
-        collected: dict[Market, OddsQuote] = {}
-        for bookmaker in pool:
-            for quote in _quotes_for_bookmaker(bookmaker, captured_at):
-                current = collected.get(quote.market)
-                if current is None or quote.odd > current.odd:
-                    collected[quote.market] = quote
-        return collected
-
     if only_bookmaker_id is not None:
-        return collect(
-            [item for item in bookmakers if _bookmaker_id(item) == only_bookmaker_id]
-        )
+        pool = [
+            item for item in bookmakers if _bookmaker_id(item) == only_bookmaker_id
+        ]
+    else:
+        pool = bookmakers
 
-    preferred = [
-        item for item in bookmakers if _bookmaker_id(item) in bookmaker_priority
-    ]
-    quotes = collect(preferred)
-    if allow_any_bookmaker and len(quotes) < len(Market):
-        fallback = collect(bookmakers)
-        for market, quote in fallback.items():
-            quotes.setdefault(market, quote)
-    return quotes
+    collected: dict[Market, OddsQuote] = {}
+    for bookmaker in pool:
+        for quote in _quotes_for_bookmaker(bookmaker, captured_at):
+            current = collected.get(quote.market)
+            if current is None or quote.odd > current.odd:
+                collected[quote.market] = quote
+    return collected
