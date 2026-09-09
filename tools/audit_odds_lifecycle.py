@@ -123,7 +123,9 @@ def audit_lifecycle(raw: dict[str, Any]) -> dict[str, Any]:
             continue
         values = sorted(raw["quotes"].get(key, []), key=lambda item: item[0])
         pick_at = parse_dt(bet.get("odds_captured_at"))
-        opening = bool(pick_at and any(captured <= pick_at for captured, _, _ in values))
+        opening = bool(
+            pick_at and any(captured <= pick_at for captured, _, _ in values)
+        )
         closing = bool(
             bet.get("closing_odd") is not None
             and parse_dt(bet.get("closing_odds_captured_at")) is not None
@@ -183,10 +185,9 @@ def audit_actions() -> dict[str, Any]:
 def build_report(data: dict[str, Any]) -> str:
     raw = data["raw"]
     lifecycle = data["lifecycle"]
-    return (
-        f"""# QuantBet Odds Lifecycle — Phase 0 Forensic Audit
+    return f"""# QuantBet Odds Lifecycle — Phase 0 Forensic Audit
 
-Generated: `{data['generated_at']}`
+Generated: `{data["generated_at"]}`
 
 ## Conclusion
 
@@ -194,12 +195,12 @@ The archive contains real API-Football odds responses, while the current persist
 
 ## Evidence
 
-- Raw archive files: `{data['raw_files']}`; bytes: `{data['raw_bytes']:,}`.
-- Odds response records: `{raw['odds_records']}`; extracted quote rows: `{raw['quote_rows']}`.
-- Unique fixture/market/bookmaker keys: `{raw['unique_keys']}`.
-- Production bets inspected: `{lifecycle['bets']}`.
-- Lifecycle coverage: `{lifecycle['coverage']}`.
-- Provider bookmaker logo metadata observed on `{raw['logo_rows']}` quote containers.
+- Raw archive files: `{data["raw_files"]}`; bytes: `{data["raw_bytes"]:,}`.
+- Odds response records: `{raw["odds_records"]}`; extracted quote rows: `{raw["quote_rows"]}`.
+- Unique fixture/market/bookmaker keys: `{raw["unique_keys"]}`.
+- Production bets inspected: `{lifecycle["bets"]}`.
+- Lifecycle coverage: `{lifecycle["coverage"]}`.
+- Provider bookmaker logo metadata observed on `{raw["logo_rows"]}` quote containers.
 
 ## Root causes
 
@@ -211,12 +212,12 @@ The archive contains real API-Football odds responses, while the current persist
 
 ## Schedule evidence
 
-- Workflow schedules: `{json.dumps(data['schedules'], ensure_ascii=False)}`.
-- Recent Actions schedule evidence: `{json.dumps(data['actions'], ensure_ascii=False)}`.
+- Workflow schedules: `{json.dumps(data["schedules"], ensure_ascii=False)}`.
+- Recent Actions schedule evidence: `{json.dumps(data["actions"], ensure_ascii=False)}`.
 
 ## Missing-record evidence
 
-`{json.dumps(lifecycle['missing'], ensure_ascii=False)}`
+`{json.dumps(lifecycle["missing"], ensure_ascii=False)}`
 
 ## Implementation guardrails
 
@@ -225,7 +226,6 @@ The archive contains real API-Football odds responses, while the current persist
 - Preserve raw API provenance and append-only audit history.
 - Do not alter Dixon-Coles, calibration, EV/edge, risk/Kelly, eligibility or CLV mathematics.
 """
-    )
 
 
 def main() -> int:
