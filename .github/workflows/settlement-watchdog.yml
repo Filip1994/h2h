@@ -7,7 +7,7 @@ on:
 
 permissions:
   actions: write
-  contents: write
+  contents: read
 
 concurrency:
   group: quantbet-settlement-watchdog
@@ -102,6 +102,8 @@ jobs:
   strong-signal-watchlist:
     name: Scheduled Strong Signal watchlist
     if: ${{ github.event_name == 'schedule' }}
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     concurrency:
       group: quantbet-strong-signal-scheduled
