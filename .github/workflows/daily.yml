@@ -11,12 +11,17 @@ on:
   schedule:
     - cron: "*/30 * * * *"
       timezone: "Europe/Belgrade"
+  workflow_run:
+    workflows:
+      - QuantBet intraday strong-signal scanner
+    types: [completed]
 
 # Do not put the whole workflow in the shared ledger concurrency group.
 # The guard must be able to start on schedule even while another writer is busy;
 # the actual generation/ledger mutation acquires the shared writer lock below.
-# GitHub permits only one pending item per concurrency group by default, so the
-# scheduled cadence remains bounded while the newest scheduled run can take over.
+# The workflow_run trigger is an additional scheduled-production handoff: every
+# completed 24/7 intraday scan gets a chance to produce the first daily bulletin
+# without depending on a manual dispatch or on the daily cron being delivered.
 
 jobs:
   generate:
