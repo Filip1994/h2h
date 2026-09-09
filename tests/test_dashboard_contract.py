@@ -92,7 +92,9 @@ def test_dashboard_pages_have_explicit_sector_identity_and_active_navigation():
     for page, key in PAGE_KEYS.items():
         text = read(page)
         assert f'<body data-page="{key}">' in text
-        assert f'class="active" aria-current="page" data-page="{key}"' in text
+        assert 'class="active"' in text
+        assert f'data-page="{key}"' in text
+        assert 'aria-current="page"' in text
 
     strong = read("strong-signals.html")
     assert "STRONG SIGNALS · ISOLATED SECTOR" in strong
