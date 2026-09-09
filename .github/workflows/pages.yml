@@ -26,6 +26,7 @@ on:
       - ledger_meta.json
       - intraday_alerts.json
       - strong_signals.json
+      - strong_signal_ledger.json
       - strong_signals_portfolio.json
       - near_misses.json
       - bulletin_health.json
@@ -34,6 +35,8 @@ on:
       - generation_health_history.json
       - intraday_health.json
       - deployment_meta.json
+      - tools/build_public_signal_buckets.py
+      - src/quantbot/strong_signal_bankroll.py
       - .github/workflows/pages.yml
   schedule:
     - cron: "17 * * * *"
@@ -56,6 +59,8 @@ jobs:
         with:
           ref: main
           fetch-depth: 1
+      - name: Build isolated public signal datasets
+        run: python tools/build_public_signal_buckets.py
       - uses: actions/configure-pages@v5
       - name: Build static artifact
         env:
@@ -70,7 +75,7 @@ jobs:
           cp index.html production.html strong-signals.html near-misses.html history.html _site/
           cp assets/qb-dashboard.css assets/qb-dashboard.js _site/assets/
           cp bets.json ledger_meta.json _site/
-          for file in intraday_alerts.json strong_signals.json strong_signals_portfolio.json near_misses.json bulletin_health.json odds_collection_state.json generation_health.json generation_health_history.json intraday_health.json; do
+          for file in intraday_alerts.json strong_signal_ledger.json strong_signals.json strong_signals_portfolio.json near_misses.json bulletin_health.json odds_collection_state.json generation_health.json generation_health_history.json intraday_health.json; do
             [ -f "$file" ] && cp "$file" _site/ || true
           done
           test -s _site/index.html
@@ -83,6 +88,7 @@ jobs:
           test -s _site/bets.json
           test -s _site/ledger_meta.json
           test -s _site/strong_signals_portfolio.json
+          test -s _site/strong_signal_ledger.json
           python - <<'PY'
           import hashlib
           import json
@@ -93,7 +99,7 @@ jobs:
 
           site = Path('_site')
           files = {}
-          for name in ('bets.json', 'ledger_meta.json', 'bulletin_health.json', 'odds_collection_state.json', 'generation_health.json', 'intraday_health.json', 'strong_signals_portfolio.json'):
+          for name in ('bets.json', 'ledger_meta.json', 'bulletin_health.json', 'odds_collection_state.json', 'generation_health.json', 'intraday_health.json', 'strong_signal_ledger.json', 'strong_signals_portfolio.json'):
               path = site / name
               if path.exists():
                   raw = path.read_bytes()
@@ -112,7 +118,7 @@ jobs:
           }
           (site / 'deployment_meta.json').write_text(json.dumps(deployment, indent=2) + '\n', encoding='utf-8')
           print(json.dumps(deployment, indent=2))
-          for name in ('bets.json', 'ledger_meta.json', 'bulletin_health.json', 'odds_collection_state.json', 'generation_health.json', 'intraday_health.json', 'strong_signals_portfolio.json'):
+          for name in ('bets.json', 'ledger_meta.json', 'bulletin_health.json', 'odds_collection_state.json', 'generation_health.json', 'intraday_health.json', 'strong_signal_ledger.json', 'strong_signals_portfolio.json'):
               path = site / name
               if not path.exists():
                   print(name, 'not present')
