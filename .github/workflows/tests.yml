@@ -28,4 +28,7 @@ jobs:
       - name: Forensic signal classification audit
         if: github.event_name == 'pull_request'
         run: python tools/audit_signal_classification.py > /tmp/signal-classification-audit.txt
+      - name: Forensic exhaustive odds capture audit
+        if: github.event_name == 'pull_request'
+        run: python tools/audit_exhaustive_odds_capture.py > /tmp/exhaustive-odds-capture-audit.md
       - run: pytest

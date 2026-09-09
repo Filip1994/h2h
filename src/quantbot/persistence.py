@@ -101,11 +101,17 @@ class OddsSnapshotStore:
         captured_by: str = "UNKNOWN",
         source_endpoint: str = "odds",
         source_params: dict[str, Any] | None = None,
+        kickoff: datetime | None = None,
+        league_id: int | None = None,
+        league: str | None = None,
     ) -> str | None:
         params = source_params or {"fixture": fixture_id}
         return self.append(
             {
                 "fixture_id": fixture_id,
+                "league_id": league_id,
+                "league": league,
+                "kickoff": kickoff.astimezone(UTC).isoformat() if kickoff else None,
                 "market": quote.market.value,
                 "bookmaker_id": quote.bookmaker_id,
                 "bookmaker": quote.bookmaker_name,
@@ -168,4 +174,9 @@ def record_prediction_quote(
         or None,
         captured_by=captured_by,
         source_params={"fixture": int(prediction["event_id"])},
+        kickoff=datetime.fromisoformat(str(prediction["kickoff"])).astimezone(UTC)
+        if prediction.get("kickoff")
+        else None,
+        league_id=int(prediction["league_id"]) if prediction.get("league_id") else None,
+        league=str(prediction["league"]) if prediction.get("league") else None,
     )

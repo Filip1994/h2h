@@ -28,6 +28,7 @@ from quantbot.config import Settings
 from quantbot.engine import QuantEngine
 from quantbot.generation_health import build_failure_health, build_success_health
 from quantbot.monitor import LedgerMonitor, skip_bet
+from quantbot.odds_collection import collect as collect_exhaustive_odds
 from quantbot.reporting import build_email, send_email
 from quantbot.risk import portfolio_analytics
 from quantbot.storage import BetStore, atomic_write_json
@@ -224,6 +225,13 @@ def run_watchlist_command() -> int:
     return 0
 
 
+def run_exhaustive_odds() -> int:
+    settings = Settings.from_env(ROOT)
+    result = collect_exhaustive_odds(settings)
+    print(json.dumps(result, ensure_ascii=False))
+    return 0
+
+
 def run_capture_closing() -> int:
     settings = Settings.from_env(ROOT)
     captured = capture_five_minute_closing_quotes(settings)
@@ -334,6 +342,9 @@ def parser() -> argparse.ArgumentParser:
     subcommands.add_parser(
         "watchlist", help="Adaptivno prati pikove i near-miss signale"
     )
+    subcommands.add_parser(
+        "capture-odds", help="Exhaustive fixture-universe-first odds capture"
+    )
     subcommands.add_parser("monitor", help="Snimi closing odds i poravnaj rezultate")
     subcommands.add_parser(
         "capture-closing", help="Snimi T-5 closing odds za signalizovane utakmice"
@@ -361,6 +372,8 @@ def main() -> int:
         return run_send_report()
     if args.command == "watchlist":
         return run_watchlist_command()
+    if args.command == "capture-odds":
+        return run_exhaustive_odds()
     if args.command == "monitor" or args.command == "settle":
         return run_monitor()
     if args.command == "capture-closing":

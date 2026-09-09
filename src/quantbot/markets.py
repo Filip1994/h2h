@@ -34,6 +34,63 @@ def _bookmaker_values(bookmaker: dict[str, Any]) -> dict[str, dict[str, float]]:
     return parsed
 
 
+def _bookmakers(raw_odds: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    bookmakers: list[dict[str, Any]] = []
+    for payload in raw_odds:
+        bookmakers.extend(
+            item for item in (payload.get("bookmakers") or []) if isinstance(item, dict)
+        )
+    return bookmakers
+
+
+def _quotes_for_bookmaker(
+    bookmaker: dict[str, Any], captured_at: datetime
+) -> list[OddsQuote]:
+    bookmaker_id = _bookmaker_id(bookmaker)
+    if bookmaker_id is None:
+        return []
+    bookmaker_name = str(bookmaker.get("name") or f"Bookmaker {bookmaker_id}")
+    values = _bookmaker_values(bookmaker)
+    totals = values.get("goals over/under", {})
+    btts = values.get("both teams score", {})
+    pairs = {
+        Market.OVER_25: (totals.get("over 2.5"), totals.get("under 2.5")),
+        Market.UNDER_25: (totals.get("under 2.5"), totals.get("over 2.5")),
+        Market.BTTS_YES: (btts.get("yes"), btts.get("no")),
+    }
+    quotes: list[OddsQuote] = []
+    for market, (odd, opposite_odd) in pairs.items():
+        if odd is None or opposite_odd is None:
+            continue
+        quotes.append(
+            OddsQuote(
+                market=market,
+                odd=odd,
+                opposite_odd=opposite_odd,
+                bookmaker_id=bookmaker_id,
+                bookmaker_name=bookmaker_name,
+                captured_at=captured_at,
+            )
+        )
+    return quotes
+
+
+def extract_all_valid_quotes(
+    raw_odds: list[dict[str, Any]], *, captured_at: datetime
+) -> list[OddsQuote]:
+    """Extract every valid supported market quote from every provider bookmaker."""
+    quotes: list[OddsQuote] = []
+    seen: set[tuple[int, Market, float, float]] = set()
+    for bookmaker in _bookmakers(raw_odds):
+        for quote in _quotes_for_bookmaker(bookmaker, captured_at):
+            identity = (quote.bookmaker_id, quote.market, quote.odd, quote.opposite_odd)
+            if identity in seen:
+                continue
+            seen.add(identity)
+            quotes.append(quote)
+    return quotes
+
+
 def extract_best_quotes(
     raw_odds: list[dict[str, Any]],
     *,
@@ -42,42 +99,15 @@ def extract_best_quotes(
     captured_at: datetime,
     only_bookmaker_id: int | None = None,
 ) -> dict[Market, OddsQuote]:
-    bookmakers: list[dict[str, Any]] = []
-    for payload in raw_odds:
-        bookmakers.extend(
-            item for item in (payload.get("bookmakers") or []) if isinstance(item, dict)
-        )
+    bookmakers = _bookmakers(raw_odds)
 
     def collect(pool: list[dict[str, Any]]) -> dict[Market, OddsQuote]:
         collected: dict[Market, OddsQuote] = {}
         for bookmaker in pool:
-            bookmaker_id = _bookmaker_id(bookmaker)
-            if bookmaker_id is None:
-                continue
-            bookmaker_name = str(bookmaker.get("name") or f"Bookmaker {bookmaker_id}")
-            values = _bookmaker_values(bookmaker)
-            totals = values.get("goals over/under", {})
-            btts = values.get("both teams score", {})
-
-            pairs = {
-                Market.OVER_25: (totals.get("over 2.5"), totals.get("under 2.5")),
-                Market.UNDER_25: (totals.get("under 2.5"), totals.get("over 2.5")),
-                Market.BTTS_YES: (btts.get("yes"), btts.get("no")),
-            }
-            for market, (odd, opposite_odd) in pairs.items():
-                if odd is None or opposite_odd is None:
-                    continue
-                quote = OddsQuote(
-                    market=market,
-                    odd=odd,
-                    opposite_odd=opposite_odd,
-                    bookmaker_id=bookmaker_id,
-                    bookmaker_name=bookmaker_name,
-                    captured_at=captured_at,
-                )
-                current = collected.get(market)
+            for quote in _quotes_for_bookmaker(bookmaker, captured_at):
+                current = collected.get(quote.market)
                 if current is None or quote.odd > current.odd:
-                    collected[market] = quote
+                    collected[quote.market] = quote
         return collected
 
     if only_bookmaker_id is not None:
