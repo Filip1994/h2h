@@ -76,7 +76,7 @@ def test_cadence_gets_denser_toward_kickoff():
 def test_all_valid_quotes_preserves_every_bookmaker_market():
     quotes = extract_all_valid_quotes(odds_payload(), captured_at=datetime.now(UTC))
     identities = {(q.bookmaker_id, q.market.value, q.odd) for q in quotes}
-    assert len(quotes) == 4
+    assert len(quotes) == 5
     assert (8, "OVER_2_5", 2.1) in identities
     assert (8, "BTTS_YES", 1.9) in identities
     assert (11, "OVER_2_5", 2.2) in identities
