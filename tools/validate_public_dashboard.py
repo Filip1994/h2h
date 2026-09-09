@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import re
+import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -127,6 +128,12 @@ def main() -> int:
         )
 
     js = (ROOT / "assets/qb-dashboard.js").read_text(encoding="utf-8")
+    subprocess.run(
+        ["node", "--check", str(ROOT / "assets/qb-dashboard.js")],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
     for page in PAGES.values():
         assert (
             f"page==='{'overview' if page == 'overview' else page}'" in js or page in js
