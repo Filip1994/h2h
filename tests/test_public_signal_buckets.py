@@ -6,7 +6,9 @@ from src.quantbot.strong_signal_bankroll import portfolio
 from tools.build_public_signal_buckets import build
 
 
-def test_public_buckets_restore_frozen_history_and_keep_strong_ledger_separate(tmp_path) -> None:
+def test_public_buckets_restore_frozen_history_and_keep_strong_ledger_separate(
+    tmp_path,
+) -> None:
     (tmp_path / "strong_signals.json").write_text(
         json.dumps(
             [
