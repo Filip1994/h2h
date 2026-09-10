@@ -339,9 +339,7 @@ def _publishable_near_miss(row: dict[str, Any]) -> bool:
 
 def build(root: Path = ROOT) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     near = [
-        row
-        for row in build_near_miss_lifecycle(root)
-        if _publishable_near_miss(row)
+        row for row in build_near_miss_lifecycle(root) if _publishable_near_miss(row)
     ]
     (root / "near_misses.json").write_text(
         json.dumps(near, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
