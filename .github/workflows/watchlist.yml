@@ -54,7 +54,8 @@ jobs:
       - name: Gate scanner fixture discovery and API activity
         run: python tools/watchlist_runtime_gate.py --run-output watchlist_run_output.json
       - name: Record scanner freshness heartbeat
-        run: python - <<'PY'
+        run: |
+          python - <<'PY'
           import json
           from datetime import UTC, datetime
           from pathlib import Path
@@ -68,6 +69,8 @@ jobs:
           PY
       - name: Build public Strong and Near Miss datasets
         run: python tools/build_public_signal_buckets.py
+      - name: Normalize legacy Production contamination from virtual Strong Signals
+        run: python tools/normalize_strong_virtual_state.py
       - name: Rebuild canonical Near Miss lifecycle dataset
         run: python tools/finalize_near_miss_contract.py
       - name: Validate Strong Signal publication contract
