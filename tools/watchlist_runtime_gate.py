@@ -228,7 +228,11 @@ def main() -> int:
     if not isinstance(predictions, list):
         predictions = []
     payload = evaluate(run_result, [item for item in predictions if isinstance(item, dict)], now=now, lookahead_hours=args.lookahead_hours)
-    payload["production_quote_guard"] = _production_quote_guard(Settings.from_env(), now=now, previous_health=previous_health)
+    quote_guard = _production_quote_guard(Settings.from_env(), now=now, previous_health=previous_health)
+    payload["production_quote_guard"] = quote_guard
+    if quote_guard["stale_picks"] > 0:
+        payload["status"] = "ERROR"
+        payload["errors"].append("PRODUCTION_PICKS_WITH_STALE_QUOTES")
     args.output.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print(json.dumps(payload, ensure_ascii=False))
     return 1 if payload["status"] == "ERROR" else 0
