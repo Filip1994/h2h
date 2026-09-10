@@ -9,8 +9,9 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "tools"))
 
-from quantbot.strong_signal_bankroll import STRONG_SIGNAL_PORTFOLIO, portfolio
 from build_near_miss_lifecycle import build as build_near_miss_lifecycle
+
+from quantbot.strong_signal_bankroll import STRONG_SIGNAL_PORTFOLIO, portfolio
 
 LEDGER_FILE = "strong_signal_ledger.json"
 LEGACY_SETTLEMENTS_FILE = "strong_signal_legacy_settlements.json"
