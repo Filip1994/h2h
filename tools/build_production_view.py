@@ -92,6 +92,7 @@ def main() -> int:
     enriched = [enrich(b, now) for b in bets if isinstance(b, dict)]
     active = [b for b in enriched if str(b.get("status", "PENDING")).upper() == "PENDING"]
     history = [b for b in enriched if str(b.get("status", "PENDING")).upper() != "PENDING"]
+    history.sort(key=lambda b: parse_dt(b.get("settled_at")) or datetime.min.replace(tzinfo=UTC), reverse=True)
     meta = load_json(ROOT / "ledger_meta.json", {})
     metrics = load_json(METRICS, {})
     snapshots = load_jsonl(SNAPSHOTS)
