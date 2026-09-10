@@ -4,9 +4,6 @@ on:
   workflow_dispatch:
   schedule:
     - cron: "*/5 * * * *"
-  push:
-    paths:
-      - ops/force_production_scan.txt
 
 permissions:
   contents: write
