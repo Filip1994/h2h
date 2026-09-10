@@ -1,18 +1,40 @@
-<!doctype html><html lang="sr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><title>QuantBet · Overview</title><link rel="stylesheet" href="./assets/qb-dashboard.css"></head><body data-page="overview"><header class="topbar"><div class="shell"><div class="topbar-inner"><div class="brand">⚡ QUANTBET <small>FOOTBALL INTELLIGENCE</small></div><div class="status-pill" data-status>LOADING</div></div><nav class="nav" data-nav><a class="active" aria-current="page" data-page="overview" href="./">OVERVIEW</a><a data-page="production" href="./production.html">PRODUCTION</a><a data-page="strong" href="./strong-signals.html">STRONG SIGNALS</a><a data-page="near" href="./near-misses.html">NEAR MISSES</a><a data-page="history" href="./history.html">HISTORY</a></nav></div></header><main class="shell"><section class="hero"><div class="eyebrow">FOOTBALL · COMMAND CENTER</div><h1>Know what is<br>happening now.</h1><p>Jedan javni Football dashboard za Production paper betting, Strong Signals, Near Misses i istoriju. Backend podaci ostaju izvor istine; UI ne izmišlja nedostajuće vrednosti.</p><div class="freshness"><span>STATUS <b data-status>—</b></span><span>GENERATION <b data-generation>—</b></span><span>ODDS CAPTURE <b data-capture>—</b></span><span>TIMEZONE <b>Europe/Belgrade</b></span></div></section><section class="grid"><div class="panel kpi"><label>PAPER MODE</label><strong id="paper">—</strong></div><div class="panel kpi"><label>PRODUCTION BANK</label><strong id="bank">—</strong></div><div class="panel kpi"><label>SETTLED P/L</label><strong id="pnl">—</strong></div><div class="panel kpi"><label>ROI</label><strong id="roi">—</strong></div></section><section class="section"><h2>Production snapshot</h2><div class="sub">Samo trenutno aktivne i predstojeće Production odluke; završeni mečevi ne ostaju u "happening now" prikazu.</div></section><div id="current-summary" class="cards overview-snapshot"></div><div class="notice"><b>Accounting:</b> Production je jedini sektor koji utiče na bank/P&L/ROI. Strong Signals i Near Misses ostaju odvojeni. Opening → Pick → Closing prikazuje samo stvarno zabeležene odds observatione.</div><footer class="footer">QuantBet Football · scheduled/adaptive polling · javni podaci se osvežavaju kada backend objavi novi dataset.</footer></main><script src="./assets/qb-dashboard.js?v=20260909-2"></script><script>
-(() => {
-  const esc = v => String(v ?? '').replace(/[&<>\"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));
-  const when = v => { if (!v) return '—'; const d = new Date(v); if (Number.isNaN(d.getTime())) return esc(v); return new Intl.DateTimeFormat('sr-RS',{timeZone:'Europe/Belgrade',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}).format(d).replace(',',' ·'); };
-  const market = v => ({OVER_2_5:'Over 2.5',UNDER_2_5:'Under 2.5',BTTS_YES:'BTTS — Yes',BTTS_NO:'BTTS — No',GG:'BTTS — Yes',NG:'BTTS — No'}[v] || v || '—');
-  const odd = v => v == null || v === '' ? '—' : Number(v).toFixed(2);
-  const render = async () => {
-    try {
-      const r = await fetch('./bets.json?v=' + Date.now(), {cache:'no-store'}); if (!r.ok) throw Error('bets.json HTTP ' + r.status);
-      const bets = await r.json(); const now = Date.now(); const liveWindow = 4 * 60 * 60 * 1000;
-      const active = (Array.isArray(bets) ? bets : []).filter(x => String(x.signal_source || 'DAILY_BULLETIN') !== 'INTRADAY_ALERT').filter(x => String(x.status || '').toUpperCase() === 'PENDING').filter(x => { const t = new Date(x.kickoff || x.date).getTime(); return Number.isFinite(t) && t >= now - liveWindow; }).sort((a,b) => new Date(a.kickoff || a.date) - new Date(b.kickoff || b.date));
-      const root = document.getElementById('current-summary'); if (!root) return;
-      root.innerHTML = active.length ? active.slice(0,12).map(x => `<article class="card overview-list-row"><div><div class="teams">${esc(x.match || 'Meč')}</div><div class="league">${esc(x.league || '')} · ${esc(market(x.market_display || x.market))}</div></div><div class="overview-list-meta"><span>BOOKMAKER <b>${esc(x.bookmaker || '—')}</b></span><span>PICK <b>${odd(x.odd)}</b></span><span>EV <b>${Number.isFinite(Number(x.expected_value)) ? (100*Number(x.expected_value)).toFixed(1)+'%' : '—'}</b></span><span>KICKOFF <b>${when(x.kickoff || x.date)}</b></span></div></article>`).join('') : '<div class="card empty">Nema aktivnih ili predstojećih Production odluka.</div>';
-    } catch (e) { const root = document.getElementById('current-summary'); if (root) root.innerHTML = '<div class="card empty">Production snapshot trenutno nije dostupan.</div>'; }
-  };
-  render(); setInterval(render,60000);
-})();
-</script></body></html>
+<!doctype html>
+<html lang="sr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>QuantBet · Production</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;margin:0;background:#0b0f14;color:#edf2f7}main{max-width:1200px;margin:auto;padding:28px}h1{margin:0 0 8px;font-size:32px}h2{margin:28px 0 12px}.muted{color:#9aa6b2}.top{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}.status{padding:7px 11px;border:1px solid #33404d;border-radius:999px;font-weight:700}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:22px 0}.kpi,.card{background:#121821;border:1px solid #27313d;border-radius:14px;padding:16px}.kpi small{display:block;color:#9aa6b2}.kpi strong{display:block;font-size:24px;margin-top:5px}.cards{display:grid;gap:12px}.card-head{display:flex;justify-content:space-between;gap:12px}.teams{font-size:19px;font-weight:750}.meta{color:#9aa6b2;font-size:13px}.odds{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}.odd{background:#0d131b;border-radius:10px;padding:10px}.odd b{display:block;font-size:21px;margin-top:3px}.live{border-color:#527b5f}.missing{opacity:.65}.table-wrap{overflow:auto;margin-top:12px}.history{width:100%;border-collapse:collapse;min-width:850px}.history th,.history td{text-align:left;padding:10px;border-bottom:1px solid #27313d}.positive{color:#76d39b}.negative{color:#ff8585}.footer{margin-top:30px;color:#718096;font-size:13px}@media(max-width:800px){.grid{grid-template-columns:repeat(2,1fr)}.odds{grid-template-columns:repeat(2,1fr)}.top{display:block}.status{display:inline-block;margin-top:12px}}
+  </style>
+</head>
+<body>
+<main>
+  <div class="top"><div><div class="muted">QUANTBET · FOOTBALL · PAPER TRADING</div><h1>PRODUCTION</h1><div class="muted">Овде гледамо само стварне Production пикове. Нема Strong-а, нема Near Miss-а.</div></div><div id="status" class="status">УЧИТАВАЊЕ</div></div>
+  <div class="grid">
+    <div class="kpi"><small>BANK</small><strong id="bank">—</strong></div>
+    <div class="kpi"><small>P/L</small><strong id="pnl">—</strong></div>
+    <div class="kpi"><small>ROI</small><strong id="roi">—</strong></div>
+    <div class="kpi"><small>ПОСЛЕДЊЕ ОСВЕЖЕЊЕ</small><strong id="updated">—</strong></div>
+  </div>
+
+  <h2>Активни Production пикови</h2>
+  <div id="active" class="cards"><div class="card muted">Учитавање…</div></div>
+
+  <h2>Историја</h2>
+  <div class="table-wrap"><table class="history"><thead><tr><th>МЕЧ</th><th>MARKET</th><th>BOOKMAKER</th><th>OPENING</th><th>PICK</th><th>LIVE</th><th>CLOSING</th><th>CLV</th><th>STATUS</th><th>P/L</th></tr></thead><tbody id="history"></tbody></table></div>
+  <div class="footer">Правила: Opening = прва стварно сачувана квота за тачан fixture/market/bookmaker. Live = последњи стварно сачуван snapshot. Closing = стварна квота 2–8 минута пре почетка. Ако податак не постоји, приказује се —. Ништа се не измишља.</div>
+</main>
+<script>
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const odd=v=>v==null||v===''?'—':Number(v).toFixed(2);
+const when=v=>{if(!v)return'—';const d=new Date(v);if(Number.isNaN(d.getTime()))return'—';return new Intl.DateTimeFormat('sr-RS',{timeZone:'Europe/Belgrade',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(d)};
+const pct=v=>v==null||v===''?'—':((Number(v)*100).toFixed(2)+'%');
+const lifecycle=x=>x.production_lifecycle||{};
+function card(x){const l=lifecycle(x),live=l.live||{},closing=l.closing||{},opening=l.opening||{};const liveCls=l.live_state==='FRESH'?'live':'';return `<article class="card"><div class="card-head"><div><div class="teams">${esc(x.match||'Меч')}</div><div class="meta">${esc(x.league||'')} · ${esc(x.market||'')}</div></div><div class="meta">KICKOFF · ${when(x.kickoff)}</div></div><div class="meta" style="margin-top:8px">BOOKMAKER · <b>${esc(x.bookmaker||'—')}</b> · STAKE · <b>${esc(x.stake??'—')} RSD</b></div><div class="odds"><div class="odd"><span class="meta">OPENING</span><b>${odd(opening.odd)}</b><span class="meta">${when(opening.captured_at)}</span></div><div class="odd"><span class="meta">PICK</span><b>${odd(l.pick?.odd??x.odd)}</b><span class="meta">${when(l.pick?.captured_at||x.odds_captured_at)}</span></div><div class="odd ${liveCls}"><span class="meta">LIVE · ${esc(l.live_state||'NO DATA')}</span><b>${odd(live.odd)}</b><span class="meta">${when(live.captured_at)}</span></div><div class="odd"><span class="meta">CLOSING</span><b>${odd(closing.odd)}</b><span class="meta">${when(closing.captured_at)}</span></div></div></article>`}
+function row(x){const l=lifecycle(x),o=l.opening||{},li=l.live||{},c=l.closing||{},p=x.profit==null?'—':`${Number(x.profit)>=0?'+':''}${Number(x.profit).toFixed(2)}`;const cl=l.clv_odds_pct==null?'—':pct(l.clv_odds_pct);return `<tr><td><b>${esc(x.match||'Меч')}</b><br><span class="meta">${when(x.kickoff)}</span></td><td>${esc(x.market||'—')}</td><td>${esc(x.bookmaker||'—')}</td><td>${odd(o.odd)}<br><span class="meta">${when(o.captured_at)}</span></td><td>${odd(l.pick?.odd??x.odd)}</td><td>${odd(li.odd)}<br><span class="meta">${when(li.captured_at)}</span></td><td>${odd(c.odd)}<br><span class="meta">${when(c.captured_at)}</span></td><td>${cl}</td><td>${esc(x.status||'—')}</td><td>${p}</td></tr>`}
+async function render(){try{const r=await fetch('./production_dashboard.json?v='+Date.now(),{cache:'no-store'});if(!r.ok)throw Error();const d=await r.json();const all=[...(d.active||[]),...(d.history||[])];const settled=(d.history||[]).filter(x=>['WIN','LOSS'].includes(String(x.status||'').toUpperCase()));const profit=settled.reduce((s,x)=>s+Number(x.profit||0),0);const stake=settled.reduce((s,x)=>s+Number(x.stake||0),0);document.getElementById('bank').textContent=((Number(d.initial_bank)||50000)+profit).toFixed(0)+' RSD';document.getElementById('pnl').textContent=(profit>=0?'+':'')+profit.toFixed(2)+' RSD';document.getElementById('roi').textContent=(stake?100*profit/stake:0).toFixed(2)+'%';document.getElementById('updated').textContent=when(d.generated_at);document.getElementById('status').textContent=`${d.active?.length||0} ACTIVE · ${d.counts?.snapshots||0} SNAPSHOTS`;document.getElementById('active').innerHTML=(d.active||[]).map(card).join('')||'<div class="card muted">Нема активних Production пикова.</div>';document.getElementById('history').innerHTML=(d.history||[]).slice().reverse().map(row).join('')||'<tr><td colspan="10" class="muted">Нема историје.</td></tr>';}catch(e){document.getElementById('status').textContent='DATA ERROR';document.getElementById('active').innerHTML='<div class="card muted">Production dashboard data тренутно није доступан.</div>';}}
+render();setInterval(render,60000);
+</script>
+</body>
+</html>
