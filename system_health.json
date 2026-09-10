@@ -1,24 +1,17 @@
 {
   "schema_version": 1,
-  "checked_at": "2026-09-09T23:15:37.096064+00:00",
+  "checked_at": "2026-09-10T05:13:07.821862+00:00",
   "stale_minutes": 30,
   "status": "OK",
-  "production_active_count": 3,
+  "production_active_count": 2,
   "intraday_active_count": 0,
-  "active_count": 3,
+  "active_count": 2,
   "errors": [],
   "sources": {
     "bets.json": {
       "records": 20,
-      "active_count": 3,
+      "active_count": 2,
       "active": [
-        {
-          "source": "bets.json",
-          "id": "1490461_UNDER_2_5",
-          "event_id": 1490461,
-          "match": "Los Angeles FC vs New York Red Bulls",
-          "kickoff": "2026-09-10T02:30:00+00:00"
-        },
         {
           "source": "bets.json",
           "id": "1634287_BTTS_YES",

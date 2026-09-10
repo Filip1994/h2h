@@ -1145,8 +1145,8 @@
     "model_training_cutoff": "2026-09-09T22:23:24.071011+00:00",
     "model_training_identity": "b5806b0f876aaf4f5bee17bdba2fb7d817b4cb034afc4903639dd181c18e088f",
     "calibration_status": "IDENTITY_UNVALIDATED",
-    "status": "PENDING",
-    "profit": 0.0,
+    "status": "WIN",
+    "profit": 1225.0,
     "signal_source": "DAILY_BULLETIN",
     "signal_sent_at": "2026-09-10T00:23:24.071011+02:00",
     "decision_packet": {
@@ -1251,7 +1251,9 @@
     "pick_coverage": "PROVEN",
     "closing_coverage": "UNAVAILABLE",
     "lifecycle_coverage": "PARTIAL",
-    "clv_status": "NOT_COMPUTABLE"
+    "clv_status": "NOT_COMPUTABLE",
+    "result": "2:0",
+    "settled_at": "2026-09-10T05:13:04.170066+00:00"
   },
   {
     "id": "1634287_BTTS_YES",

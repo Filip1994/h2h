@@ -1,7 +1,9 @@
 {
-  "checked_at": "2026-09-09T20:19:16.383769+00:00",
+  "checked_at": "2026-09-10T05:13:07.867377+00:00",
   "max_age_minutes": 30,
   "stale_pending_count": 0,
+  "active_count": 2,
   "status": "OK",
-  "stale_pending": []
+  "stale_pending": [],
+  "errors": []
 }
