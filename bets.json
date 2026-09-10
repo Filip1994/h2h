@@ -1457,8 +1457,8 @@
     "model_training_cutoff": "2026-09-09T22:23:24.071011+00:00",
     "model_training_identity": "5ccefc2bf90627d761fb9a92940a296488f6ca1b2285dc6a3f25cd76e6b5492e",
     "calibration_status": "IDENTITY_UNVALIDATED",
-    "status": "PENDING",
-    "profit": 0.0,
+    "status": "WIN",
+    "profit": 750.0,
     "signal_source": "DAILY_BULLETIN",
     "signal_sent_at": "2026-09-10T00:23:24.071011+02:00",
     "decision_packet": {
@@ -1562,6 +1562,8 @@
     "closing_odds_captured_at": "2026-09-09T22:23:49.454674+00:00",
     "closing_recovery": true,
     "closing_recovery_snapshot_type": "INTERMEDIATE",
-    "clv_odds_pct": 0.0
+    "clv_odds_pct": 0.0,
+    "result": "3:0",
+    "settled_at": "2026-09-10T16:42:27.851902+00:00"
   }
 ]
