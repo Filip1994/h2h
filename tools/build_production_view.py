@@ -6,6 +6,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from quantbot.odds_lifecycle import lifecycle_contract, observations_for
+
 ROOT = Path(__file__).resolve().parents[1]
 BETS = ROOT / "bets.json"
 SNAPSHOTS = ROOT / "data" / "odds_snapshots.jsonl"
@@ -47,39 +49,6 @@ def load_jsonl(path: Path) -> list[dict[str, Any]]:
     return rows
 
 
-def key(row: dict[str, Any]) -> tuple[int, str, int] | None:
-    try:
-        return int(row["fixture_id"]), str(row["market"]), int(row["bookmaker_id"])
-    except (KeyError, TypeError, ValueError):
-        return None
-
-
-def first_observation(rows: list[dict[str, Any]], pick_at: datetime | None) -> dict[str, Any] | None:
-    candidates = [r for r in rows if parse_dt(r.get("odds_captured_at")) is not None]
-    if pick_at is not None:
-        candidates = [r for r in candidates if parse_dt(r.get("odds_captured_at")) <= pick_at]
-    return candidates[0] if candidates else None
-
-
-def latest_observation(rows: list[dict[str, Any]], now: datetime) -> dict[str, Any] | None:
-    candidates = [r for r in rows if (ts := parse_dt(r.get("odds_captured_at"))) is not None and ts <= now]
-    return candidates[-1] if candidates else None
-
-
-def closing_observation(rows: list[dict[str, Any]], kickoff: datetime | None) -> dict[str, Any] | None:
-    if kickoff is None:
-        return None
-    candidates: list[dict[str, Any]] = []
-    for row in rows:
-        ts = parse_dt(row.get("odds_captured_at"))
-        if ts is None or ts > kickoff:
-            continue
-        seconds = (kickoff - ts).total_seconds()
-        if 120 <= seconds <= 480:
-            candidates.append(row)
-    return candidates[-1] if candidates else None
-
-
 def compact_observation(row: dict[str, Any] | None) -> dict[str, Any] | None:
     if not row:
         return None
@@ -94,45 +63,67 @@ def compact_observation(row: dict[str, Any] | None) -> dict[str, Any] | None:
     }
 
 
-def enrich(bet: dict[str, Any], grouped: dict[tuple[int, str, int], list[dict[str, Any]]], now: datetime) -> dict[str, Any]:
+def enrich(bet: dict[str, Any], now: datetime) -> dict[str, Any]:
     try:
-        k = (int(bet["event_id"]), str(bet["market"]), int(bet["bookmaker_id"]))
+        fixture_id = int(bet["event_id"])
+        market = str(bet["market"])
+        bookmaker_id = int(bet["bookmaker_id"])
     except (KeyError, TypeError, ValueError):
-        k = None
-    rows = grouped.get(k, []) if k else []
+        fixture_id = None
+        market = ""
+        bookmaker_id = None
+
     pick_at = parse_dt(bet.get("odds_captured_at") or bet.get("created_at"))
     kickoff = parse_dt(bet.get("kickoff"))
-    opening = first_observation(rows, pick_at)
-    live = latest_observation(rows, now)
-    closing = closing_observation(rows, kickoff)
-    live_ts = parse_dt(live.get("odds_captured_at")) if live else None
+    observations = (
+        observations_for(
+            SNAPSHOTS,
+            fixture_id=fixture_id,
+            market=market,
+            bookmaker_id=bookmaker_id,
+        )
+        if fixture_id is not None and bookmaker_id is not None
+        else []
+    )
+
+    contract = (
+        lifecycle_contract(observations, pick_at=pick_at, kickoff=kickoff)
+        if pick_at is not None
+        else {
+            "opening": None,
+            "pick": None,
+            "closing": None,
+            "closing_recovered": False,
+            "coverage": "UNRECOVERABLE",
+            "clv_odds_pct": None,
+            "clv_status": "NOT_COMPUTABLE",
+        }
+    )
+
+    latest = observations[-1] if observations else None
+    live_ts = parse_dt(latest.get("odds_captured_at")) if latest else None
     if live_ts is None:
         live_state = "NO_OBSERVATION"
     else:
         age_minutes = max(0.0, (now - live_ts).total_seconds() / 60.0)
         live_state = "FRESH" if age_minutes <= 15 else "STALE"
-    closing_odd = closing.get("odd") if closing else None
-    pick_odd = bet.get("odd")
-    clv = None
-    try:
-        if float(pick_odd) > 1.0 and float(closing_odd) > 1.0:
-            clv = round(float(pick_odd) / float(closing_odd) - 1.0, 6)
-    except (TypeError, ValueError):
-        pass
+
     item = dict(bet)
     item["production_lifecycle"] = {
-        "opening": compact_observation(opening),
-        "pick": {
+        "opening": compact_observation(contract.get("opening")),
+        "pick": compact_observation(contract.get("pick"))
+        or {
             "odd": bet.get("odd"),
             "captured_at": bet.get("odds_captured_at"),
-            "observation_id": bet.get("pick_observation_id"),
+            "observation_id": bet.get("pick_snapshot_id") or bet.get("pick_observation_id"),
         },
-        "live": compact_observation(live),
+        "live": compact_observation(latest),
         "live_state": live_state,
-        "closing": compact_observation(closing),
-        "closing_rule": "T-2m_to_T-8m_exact_pre_kickoff_observation",
-        "clv_odds_pct": clv,
-        "coverage": "FULL" if opening and live and closing else "PARTIAL",
+        "closing": compact_observation(contract.get("closing")),
+        "closing_rule": "canonical lifecycle: T-2m_to_T-8m, with latest honest pre-kickoff recovery if exact T5 is missed",
+        "closing_recovered": bool(contract.get("closing_recovered")),
+        "clv_odds_pct": contract.get("clv_odds_pct"),
+        "coverage": "FULL" if contract.get("opening") and contract.get("pick") and contract.get("closing") else "PARTIAL",
     }
     return item
 
@@ -142,36 +133,25 @@ def main() -> int:
     bets = load_json(BETS, [])
     if not isinstance(bets, list):
         bets = []
-    snapshots = load_jsonl(SNAPSHOTS)
-    grouped: dict[tuple[int, str, int], list[dict[str, Any]]] = defaultdict(list)
-    for row in snapshots:
-        k = key(row)
-        ts = parse_dt(row.get("odds_captured_at"))
-        if k and ts:
-            grouped[k].append(row)
-    for rows in grouped.values():
-        rows.sort(key=lambda r: parse_dt(r.get("odds_captured_at")) or datetime.min.replace(tzinfo=UTC))
-
-    production = [b for b in bets if str(b.get("signal_source", "DAILY_BULLETIN")).upper() != "INTRADAY_ALERT"]
-    enriched = [enrich(b, grouped, now) for b in production if isinstance(b, dict)]
+    enriched = [enrich(b, now) for b in bets if isinstance(b, dict)]
     active = [b for b in enriched if str(b.get("status", "PENDING")).upper() == "PENDING"]
     history = [b for b in enriched if str(b.get("status", "PENDING")).upper() != "PENDING"]
     meta = load_json(ROOT / "ledger_meta.json", {})
     output = {
-        "schema_version": 1,
+        "schema_version": 2,
         "generated_at": now.isoformat(),
         "truth": "data/odds_snapshots.jsonl + bets.json",
         "rules": {
-            "opening": "first persisted observation for the exact Production fixture/market/bookmaker at or before Pick",
+            "opening": "canonical lifecycle: first OPENING/INTERMEDIATE observation for the exact Production fixture/market/bookmaker at or before Pick",
             "live": "latest persisted observation for the exact Production fixture/market/bookmaker",
-            "closing": "latest exact-bookmaker observation 2-8 minutes before kickoff; otherwise null",
+            "closing": "canonical lifecycle: T-2m to T-8m exact observation; if missed, latest honest INTERMEDIATE/T5/CLOSING observation after Pick and before kickoff",
             "clv": "Pick odd / Closing odd - 1; null when Closing is unavailable",
             "missing_data": "null; dashboard renders as —",
         },
         "initial_bank": meta.get("initial_bank", 50000),
         "active": active,
         "history": history,
-        "counts": {"production": len(enriched), "active": len(active), "history": len(history), "snapshots": len(snapshots)},
+        "counts": {"production": len(enriched), "active": len(active), "history": len(history), "snapshots": sum(1 for _ in load_jsonl(SNAPSHOTS))},
     }
     OUT.write_text(json.dumps(output, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(output["counts"], ensure_ascii=False))
