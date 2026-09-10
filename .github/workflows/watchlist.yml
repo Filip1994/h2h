@@ -52,8 +52,11 @@ jobs:
           set -o pipefail
           python main.py watchlist | tee watchlist_run_output.json
       - name: Gate scanner fixture discovery and API activity
+        id: runtime-gate
+        continue-on-error: true
         run: python tools/watchlist_runtime_gate.py --run-output watchlist_run_output.json
       - name: Record scanner freshness heartbeat
+        if: always()
         run: |
           python - <<'PY'
           import json
@@ -68,12 +71,16 @@ jobs:
           Path("watchlist_freshness.json").write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
           PY
       - name: Build public Strong and Near Miss datasets
+        if: always()
         run: python tools/build_public_signal_buckets.py
       - name: Normalize legacy Production contamination from virtual Strong Signals
+        if: always()
         run: python tools/normalize_strong_virtual_state.py
       - name: Rebuild canonical Near Miss lifecycle dataset
+        if: always()
         run: python tools/finalize_near_miss_contract.py
       - name: Validate Strong Signal publication contract
+        if: always()
         run: |
           set -euo pipefail
           python - <<'PY'
@@ -96,6 +103,7 @@ jobs:
           print(f"Strong publication contract OK: ledger={len(ledger_rows)} public_strong={len(strong_public)}")
           PY
       - name: Validate Near Miss lifecycle contract
+        if: always()
         run: |
           set -euo pipefail
           python - <<'PY'
@@ -129,6 +137,7 @@ jobs:
           print(f"Near Miss lifecycle contract OK: rows={len(rows)}")
           PY
       - name: Create canonical writer provenance marker
+        if: always()
         env:
           RUN_ID: ${{ github.run_id }}
           RUN_ATTEMPT: ${{ github.run_attempt }}
@@ -143,6 +152,7 @@ jobs:
             --workflow "${WORKFLOW}" \
             --sha "${SOURCE_SHA}"
       - name: Reject stale writer before publication
+        if: always()
         run: |
           set -euo pipefail
           git fetch origin main
@@ -156,6 +166,7 @@ jobs:
             --current-path /tmp/current-watchlist-run-meta.json
           mv "${SIGNAL_WRITER_META}.pending" "${SIGNAL_WRITER_META}"
       - name: Commit watchlist, runtime health, freshness, signal history, provenance, quota and bounded API archive
+        if: always()
         run: |
           set -euo pipefail
           files=(watchlist_run_output.json watchlist_runtime_health.json watchlist_freshness.json intraday_watchlist_state.json intraday_alerts.json strong_signal_ledger.json strong_signals.json strong_signals_portfolio.json near_misses.json market_timing_metrics.json "${SIGNAL_WRITER_META}")
@@ -191,4 +202,9 @@ jobs:
             fi
           done
           echo "Unable to push after retries" >&2
+          exit 1
+      - name: Fail after publication when runtime gate is unhealthy
+        if: always() && steps.runtime-gate.outcome == 'failure'
+        run: |
+          echo "Runtime gate reported an unhealthy condition. Strong/Near publication was preserved for diagnosis; the workflow remains failed for operational alerting." >&2
           exit 1
