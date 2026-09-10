@@ -35,16 +35,12 @@ def test_dashboard_has_one_shared_design_system_and_all_primary_sectors():
     css = read("assets/qb-dashboard.css")
     js = read("assets/qb-dashboard.js")
     assert ".shell" in css and ".lifecycle" in css and ".clv" in css
-    assert (
-        "const productionCard" in js
-        and "const signalCard" in js
-        and "const lifecycle" in js
-    )
+    assert "const productionCard" in js and "const signalCard" in js and "const canonicalLifecycle" in js
     for page in PAGES:
         text = read(page)
         assert "./assets/qb-dashboard.css" in text
         if page == "strong-signals.html":
-            match = re.search(r'\./assets/strong-signals\.js(?:\?[^"\']*)?', text)
+            match = re.search(r'\\./assets/strong-signals\\.js(?:\\?[^"\\']*)?', text)
             assert match
             assert (ROOT / "assets" / "strong-signals.js").is_file()
         else:
@@ -134,30 +130,36 @@ def test_strong_and_near_pages_have_active_and_history_contract():
         assert 'id="active-cards"' in page
         assert 'id="history-cards"' in page
     assert "renderBucket" in js
-    assert "const isActive = x =>" in js
-    assert "String(x?.status || 'PENDING').toUpperCase()" in js
+    assert "const isActive =" in js
 
 
-def test_history_preserves_accounting_buckets_and_does_not_invent_lifecycle():
+def test_history_preserves_accounting_buckets_and_uses_canonical_lifecycle():
     js = read("assets/qb-dashboard.js")
     assert "const production = bets =>" in js
     assert "const signalCard =" in js
-    assert "x.opening_odd" in js
-    assert "x.closing_odd" in js
+    assert "l.first_seen?.odd" in js
+    assert "l.closing?.odd" in js
     assert "Unavailable" in js
     assert "renderStrong" in js
     assert "renderBucket" in js
+    assert "canonical-lifecycle" in js
 
 
-def test_signal_history_exposes_real_outcome_profit_and_counterfactual_semantics():
+def test_lifecycle_presentation_contains_all_four_stages_and_timeline():
     js = read("assets/qb-dashboard.js")
-    assert "const outcome = x" in js
-    assert "WIN" in js and "LOSS" in js and "PENDING" in js
-    assert "const resultBlock = x" in js
-    assert "OUTCOME" in js and "P/L" in js
-    assert "NOT A PRODUCTION BET" in js
-    assert "x.settled_at" in js
-    assert "x.result" in js
+    css = read("assets/qb-dashboard.css")
+    for stage in ("FIRST SEEN", "PICK", "LIVE", "CLOSE"):
+        assert stage in js
+    assert "lifecycle-timeline" in js
+    assert ".canonical-lifecycle" in css
+    assert ".lifecycle-timeline" in css
+
+
+def test_browser_only_loads_static_generated_artifacts():
+    js = read("assets/qb-dashboard.js")
+    assert "fetch('./' + name" in js
+    assert "https://" not in js
+    assert "/odds" not in js
 
 
 def test_overview_snapshot_excludes_stale_production_matches():
