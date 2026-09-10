@@ -1,16 +1,16 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-09-10T16:22:21.385425+00:00",
+  "generated_at": "2026-09-10T16:23:55.864952+00:00",
   "truth": "data/odds_snapshots.jsonl + bets.json",
   "monitoring": {
-    "last_odds_scan_at": "2026-09-10T16:22:09.610054+00:00",
+    "last_odds_scan_at": "2026-09-10T16:23:55.284643+00:00",
     "last_snapshot_at": "2026-09-10T16:22:09.610054+00:00",
-    "scan_age_minutes": 0.19625618333333333,
+    "scan_age_minutes": 0.009671816666666666,
     "scan_state": "FRESH",
-    "api_requests_last_scan": 56,
+    "api_requests_last_scan": 0,
     "daily_budget_used": 1119,
     "daily_budget_remaining": 6381,
-    "observations_last_scan": 231
+    "observations_last_scan": 0
   },
   "rules": {
     "opening": "first real persisted observation for exact fixture/market/bookmaker at or before Pick",
@@ -194,18 +194,10 @@
           "bookmaker": "Bet365"
         },
         "live_state": "STALE",
-        "live_age_minutes": 1078.5321791833333,
-        "closing": {
-          "observation_id": null,
-          "odd": 2.5,
-          "opposite_odd": 1.5,
-          "captured_at": "2026-09-09T22:23:49.454674+00:00",
-          "snapshot_type": "INTERMEDIATE",
-          "bookmaker_id": 8,
-          "bookmaker": "Bet365"
-        },
-        "closing_recovered": true,
-        "clv_odds_pct": 0.0,
+        "live_age_minutes": 1080.1068379666667,
+        "closing": null,
+        "closing_recovered": false,
+        "clv_odds_pct": null,
         "coverage": "PARTIAL"
       }
     }
@@ -360,16 +352,8 @@
           "bookmaker": "1xBet"
         },
         "live_state": "STALE",
-        "live_age_minutes": 7397.315708583334,
-        "closing": {
-          "observation_id": null,
-          "odd": 1.92,
-          "opposite_odd": 1.9,
-          "captured_at": "2026-09-05T13:05:02.442910+00:00",
-          "snapshot_type": "CLOSING",
-          "bookmaker_id": 11,
-          "bookmaker": "1xBet"
-        },
+        "live_age_minutes": 7398.890367366666,
+        "closing": null,
         "closing_recovered": false,
         "clv_odds_pct": null,
         "coverage": "PARTIAL"
@@ -457,16 +441,8 @@
           "bookmaker": "1xBet"
         },
         "live_state": "STALE",
-        "live_age_minutes": 7213.16299945,
-        "closing": {
-          "observation_id": null,
-          "odd": 2.21,
-          "opposite_odd": 1.64,
-          "captured_at": "2026-09-05T16:09:11.605458+00:00",
-          "snapshot_type": "CLOSING",
-          "bookmaker_id": 11,
-          "bookmaker": "1xBet"
-        },
+        "live_age_minutes": 7214.737658233334,
+        "closing": null,
         "closing_recovered": false,
         "clv_odds_pct": null,
         "coverage": "PARTIAL"
@@ -554,16 +530,8 @@
           "bookmaker": "1xBet"
         },
         "live_state": "STALE",
-        "live_age_minutes": 7075.596506633333,
-        "closing": {
-          "observation_id": null,
-          "odd": 1.92,
-          "opposite_odd": 1.84,
-          "captured_at": "2026-09-05T18:26:45.595027+00:00",
-          "snapshot_type": "CLOSING",
-          "bookmaker_id": 11,
-          "bookmaker": "1xBet"
-        },
+        "live_age_minutes": 7077.171165416667,
+        "closing": null,
         "closing_recovered": false,
         "clv_odds_pct": null,
         "coverage": "PARTIAL"
@@ -656,18 +624,10 @@
           "bookmaker": "Bet365"
         },
         "live_state": "STALE",
-        "live_age_minutes": 5561.051798,
-        "closing": {
-          "observation_id": null,
-          "odd": 2.62,
-          "opposite_odd": 1.44,
-          "captured_at": "2026-09-06T19:41:18.277545+00:00",
-          "snapshot_type": "CLOSING",
-          "bookmaker_id": 8,
-          "bookmaker": "Bet365"
-        },
+        "live_age_minutes": 5562.626456783333,
+        "closing": null,
         "closing_recovered": false,
-        "clv_odds_pct": 0.0,
+        "clv_odds_pct": null,
         "coverage": "PARTIAL"
       }
     },
@@ -758,18 +718,10 @@
           "bookmaker": "Bet365"
         },
         "live_state": "STALE",
-        "live_age_minutes": 6728.520584566667,
-        "closing": {
-          "observation_id": null,
-          "odd": 3.4,
-          "opposite_odd": 1.33,
-          "captured_at": "2026-09-06T00:13:50.150351+00:00",
-          "snapshot_type": "CLOSING",
-          "bookmaker_id": 8,
-          "bookmaker": "Bet365"
-        },
+        "live_age_minutes": 6730.095243350001,
+        "closing": null,
         "closing_recovered": false,
-        "clv_odds_pct": 0.0,
+        "clv_odds_pct": null,
         "coverage": "PARTIAL"
       }
     },
@@ -853,7 +805,7 @@
           "bookmaker": "Bet365"
         },
         "live_state": "STALE",
-        "live_age_minutes": 6750.3999516,
+        "live_age_minutes": 6751.974610383333,
         "closing": null,
         "closing_recovered": false,
         "clv_odds_pct": null,
@@ -947,18 +899,10 @@
           "bookmaker": "1xBet"
         },
         "live_state": "STALE",
-        "live_age_minutes": 5789.4520383,
-        "closing": {
-          "observation_id": null,
-          "odd": 2.62,
-          "opposite_odd": 1.38,
-          "captured_at": "2026-09-06T15:52:54.263127+00:00",
-          "snapshot_type": "CLOSING",
-          "bookmaker_id": 11,
-          "bookmaker": "1xBet"
-        },
+        "live_age_minutes": 5791.026697083334,
+        "closing": null,
         "closing_recovered": false,
-        "clv_odds_pct": 0.080153,
+        "clv_odds_pct": null,
         "coverage": "PARTIAL"
       }
     },
@@ -1049,18 +993,10 @@
           "bookmaker": "Bet365"
         },
         "live_state": "STALE",
-        "live_age_minutes": 4533.20246355,
-        "closing": {
-          "observation_id": null,
-          "odd": 2.2,
-          "opposite_odd": 1.65,
-          "captured_at": "2026-09-07T12:49:09.237612+00:00",
-          "snapshot_type": "CLOSING",
-          "bookmaker_id": 8,
-          "bookmaker": "Bet365"
-        },
+        "live_age_minutes": 4534.777122333334,
+        "closing": null,
         "closing_recovered": false,
-        "clv_odds_pct": 0.0,
+        "clv_odds_pct": null,
         "coverage": "PARTIAL"
       }
     },
@@ -1144,7 +1080,7 @@
           "bookmaker": "Bet365"
         },
         "live_state": "STALE",
-        "live_age_minutes": 5368.397205233333,
+        "live_age_minutes": 5369.971864016667,
         "closing": null,
         "closing_recovered": false,
         "clv_odds_pct": null,
@@ -1231,7 +1167,7 @@
           "bookmaker": "1xBet"
         },
         "live_state": "STALE",
-        "live_age_minutes": 5368.397205233333,
+        "live_age_minutes": 5369.971864016667,
         "closing": null,
         "closing_recovered": false,
         "clv_odds_pct": null,
@@ -1327,18 +1263,10 @@
           "bookmaker": "Bet365"
         },
         "live_state": "STALE",
-        "live_age_minutes": 2793.434907533333,
-        "closing": {
-          "observation_id": null,
-          "odd": 2.0,
-          "opposite_odd": 1.8,
-          "captured_at": "2026-09-08T17:48:55.290973+00:00",
-          "snapshot_type": "INTERMEDIATE",
-          "bookmaker_id": 8,
-          "bookmaker": "Bet365"
-        },
-        "closing_recovered": true,
-        "clv_odds_pct": 0.0,
+        "live_age_minutes": 2795.0095663166667,
+        "closing": null,
+        "closing_recovered": false,
+        "clv_odds_pct": null,
         "coverage": "PARTIAL"
       }
     },
@@ -1431,18 +1359,10 @@
           "bookmaker": "Bet365"
         },
         "live_state": "STALE",
-        "live_age_minutes": 2793.42955315,
-        "closing": {
-          "observation_id": null,
-          "odd": 2.05,
-          "opposite_odd": 1.75,
-          "captured_at": "2026-09-08T17:48:55.612236+00:00",
-          "snapshot_type": "INTERMEDIATE",
-          "bookmaker_id": 8,
-          "bookmaker": "Bet365"
-        },
-        "closing_recovered": true,
-        "clv_odds_pct": 0.097561,
+        "live_age_minutes": 2795.004211933333,
+        "closing": null,
+        "closing_recovered": false,
+        "clv_odds_pct": null,
         "coverage": "PARTIAL"
       }
     },
@@ -1535,18 +1455,10 @@
           "bookmaker": "Bet365"
         },
         "live_state": "STALE",
-        "live_age_minutes": 3026.3280807166666,
-        "closing": {
-          "observation_id": null,
-          "odd": 1.7,
-          "opposite_odd": 2.1,
-          "captured_at": "2026-09-08T13:56:01.700582+00:00",
-          "snapshot_type": "INTERMEDIATE",
-          "bookmaker_id": 8,
-          "bookmaker": "Bet365"
-        },
-        "closing_recovered": true,
-        "clv_odds_pct": 0.088235,
+        "live_age_minutes": 3027.9027395000003,
+        "closing": null,
+        "closing_recovered": false,
+        "clv_odds_pct": null,
         "coverage": "PARTIAL"
       }
     },
@@ -1635,18 +1547,10 @@
           "bookmaker": "1xBet"
         },
         "live_state": "STALE",
-        "live_age_minutes": 1444.8192806333332,
-        "closing": {
-          "observation_id": null,
-          "odd": 2.28,
-          "opposite_odd": 1.59,
-          "captured_at": "2026-09-09T16:17:32.228587+00:00",
-          "snapshot_type": "INTERMEDIATE",
-          "bookmaker_id": 11,
-          "bookmaker": "1xBet"
-        },
-        "closing_recovered": true,
-        "clv_odds_pct": -0.052632,
+        "live_age_minutes": 1446.3939394166666,
+        "closing": null,
+        "closing_recovered": false,
+        "clv_odds_pct": null,
         "coverage": "PARTIAL"
       }
     },
@@ -1735,18 +1639,10 @@
           "bookmaker": "Bet365"
         },
         "live_state": "STALE",
-        "live_age_minutes": 1444.8133010499998,
-        "closing": {
-          "observation_id": null,
-          "odd": 3.6,
-          "opposite_odd": 1.28,
-          "captured_at": "2026-09-09T16:17:32.587362+00:00",
-          "snapshot_type": "INTERMEDIATE",
-          "bookmaker_id": 8,
-          "bookmaker": "Bet365"
-        },
-        "closing_recovered": true,
-        "clv_odds_pct": -0.027778,
+        "live_age_minutes": 1446.3879598333333,
+        "closing": null,
+        "closing_recovered": false,
+        "clv_odds_pct": null,
         "coverage": "PARTIAL"
       }
     },
@@ -1835,18 +1731,10 @@
           "bookmaker": "Bet365"
         },
         "live_state": "STALE",
-        "live_age_minutes": 1444.8077911166665,
-        "closing": {
-          "observation_id": null,
-          "odd": 2.35,
-          "opposite_odd": 1.57,
-          "captured_at": "2026-09-09T16:17:32.917958+00:00",
-          "snapshot_type": "INTERMEDIATE",
-          "bookmaker_id": 8,
-          "bookmaker": "Bet365"
-        },
-        "closing_recovered": true,
-        "clv_odds_pct": -0.042553,
+        "live_age_minutes": 1446.3824499,
+        "closing": null,
+        "closing_recovered": false,
+        "clv_odds_pct": null,
         "coverage": "PARTIAL"
       }
     },
@@ -2026,7 +1914,7 @@
           "bookmaker": "Unibet"
         },
         "live_state": "STALE",
-        "live_age_minutes": 1078.9552402333334,
+        "live_age_minutes": 1080.5298990166668,
         "closing": null,
         "closing_recovered": false,
         "clv_odds_pct": null,
@@ -2209,7 +2097,7 @@
           "bookmaker": "Betfair"
         },
         "live_state": "STALE",
-        "live_age_minutes": 1078.9552402333334,
+        "live_age_minutes": 1080.5298990166668,
         "closing": null,
         "closing_recovered": false,
         "clv_odds_pct": null,
