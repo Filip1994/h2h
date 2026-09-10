@@ -113537,11 +113537,11 @@
     "opening_odds_captured_at": null,
     "opening_snapshot_id": null,
     "pick_snapshot_id": "009ab53f67f1a9710d9475a80846abb03b905c8339487b6deddfc3222c0b5cf9",
-    "closing_odd": null,
-    "closing_odds_captured_at": null,
+    "closing_odd": 2.5,
+    "closing_odds_captured_at": "2026-09-09T22:23:49.454674+00:00",
     "closing_snapshot_id": "a509ba6cb06f815ed93ecefbec74afc2504a8e0caf5f21c7356b4e819e29e5b0",
-    "clv_odds_pct": null,
-    "clv_status": "NOT_COMPUTABLE"
+    "clv_odds_pct": 0.0,
+    "clv_status": "COMPUTABLE"
   },
   {
     "id": "1594824_UNDER_2_5_dc-value-v2.1.0",
