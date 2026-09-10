@@ -2,6 +2,8 @@ name: Production · 72h odds lifecycle
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
   schedule:
     - cron: "*/5 * * * *"
 
@@ -15,8 +17,6 @@ concurrency:
 env:
   API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
   PAPER_MODE: ${{ vars.PAPER_MODE || 'true' }}
-  # API-Football Pro allowance. Production is intentionally allowed to use
-  # the full daily provider budget; quota is accounting, not a soft brake.
   API_REQUEST_BUDGET: '7500'
   API_BUDGET_RESERVE: '0'
   TIMEZONE: UTC
