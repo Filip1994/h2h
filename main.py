@@ -13,17 +13,7 @@ if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
 from quantbot import MODEL_VERSION
-from quantbot.alerts import (
-    build_strong_signal_email,
-    is_strong_signal,
-    send_strong_signal_email,
-)
 from quantbot.calibration import refit_calibration
-from quantbot.closing import (
-    build_closing_day_email,
-    capture_five_minute_closing_quotes,
-    send_html_email,
-)
 from quantbot.config import Settings
 from quantbot.engine import QuantEngine
 from quantbot.generation_health import build_failure_health, build_success_health
@@ -32,20 +22,21 @@ from quantbot.odds_collection import collect as collect_exhaustive_odds
 from quantbot.reporting import build_email, send_email
 from quantbot.risk import portfolio_analytics
 from quantbot.storage import BetStore, atomic_write_json
-from quantbot.watchlist import run_watchlist
 
 
 def write_ledger_meta(settings: Settings, updated_at: datetime) -> None:
-    payload = {
-        "initial_bank": settings.initial_bank,
-        "paper_mode": settings.paper_mode,
-        "model_version": MODEL_VERSION,
-        "github_repository": settings.github_repository,
-        "updated_at": updated_at.isoformat(),
-        "decision_timestamp": updated_at.astimezone(UTC).isoformat(),
-        "data_cutoff": updated_at.astimezone(UTC).isoformat(),
-    }
-    atomic_write_json(ROOT / "ledger_meta.json", payload)
+    atomic_write_json(
+        ROOT / "ledger_meta.json",
+        {
+            "initial_bank": settings.initial_bank,
+            "paper_mode": settings.paper_mode,
+            "model_version": MODEL_VERSION,
+            "github_repository": settings.github_repository,
+            "updated_at": updated_at.isoformat(),
+            "decision_timestamp": updated_at.astimezone(UTC).isoformat(),
+            "data_cutoff": updated_at.astimezone(UTC).isoformat(),
+        },
+    )
 
 
 def write_api_usage(settings: Settings, updated_at: datetime, result) -> None:
@@ -61,37 +52,28 @@ def write_api_usage(settings: Settings, updated_at: datetime, result) -> None:
     history: list[dict] = []
     if settings.api_usage_history_file.exists():
         try:
-            loaded = json.loads(
-                settings.api_usage_history_file.read_text(encoding="utf-8")
-            )
+            loaded = json.loads(settings.api_usage_history_file.read_text(encoding="utf-8"))
             if isinstance(loaded, list):
                 history = loaded
         except (OSError, TypeError, ValueError, json.JSONDecodeError):
-            history = []
+            pass
     history.append(usage)
     atomic_write_json(settings.api_usage_history_file, history[-90:])
 
 
 def write_generation_health(settings: Settings, payload: dict) -> None:
     atomic_write_json(ROOT / "generation_health.json", payload)
-    history_path = ROOT / "generation_health_history.json"
+    path = ROOT / "generation_health_history.json"
     history: list[dict] = []
-    if history_path.exists():
+    if path.exists():
         try:
-            loaded = json.loads(history_path.read_text(encoding="utf-8"))
+            loaded = json.loads(path.read_text(encoding="utf-8"))
             if isinstance(loaded, list):
                 history = loaded
         except (OSError, TypeError, ValueError, json.JSONDecodeError):
-            history = []
+            pass
     history.append(payload)
-    atomic_write_json(history_path, history[-90:])
-
-
-def persist_intraday_strong_signals(
-    settings: Settings, strong: tuple[dict, ...], generated_at: datetime
-) -> None:
-    """Deprecated compatibility hook: watchlist.yml is the sole Strong/Near producer."""
-    return
+    atomic_write_json(path, history[-90:])
 
 
 def run_generate(*, deliver_email: bool = True) -> int:
@@ -106,33 +88,21 @@ def run_generate(*, deliver_email: bool = True) -> int:
             build_failure_health(generated_at, engine.api.usage_snapshot(), exc),
         )
         raise
+
     write_ledger_meta(settings, generated_at)
     write_api_usage(settings, generated_at, result)
     write_generation_health(settings, build_success_health(generated_at, result))
-    if settings.intraday_mode:
-        strong = tuple(
-            bet for bet in result.new_bets if is_strong_signal(bet, settings)
-        )
-        persist_intraday_strong_signals(settings, strong, generated_at)
-        subject, html_body = build_strong_signal_email(result, settings, generated_at)
-        (ROOT / "report_preview.html").write_text(html_body, encoding="utf-8")
-        (ROOT / "report_subject.txt").write_text(subject, encoding="utf-8")
-        if deliver_email and settings.intraday_alert_enabled and strong:
-            send_strong_signal_email(subject, html_body, settings)
-        print(f"🚨 Strong signals: {len(strong)} / new bets: {len(result.new_bets)}")
-    else:
-        subject, html_body = build_email(result, settings, generated_at)
-        (ROOT / "report_preview.html").write_text(html_body, encoding="utf-8")
-        (ROOT / "report_subject.txt").write_text(subject, encoding="utf-8")
-        if deliver_email:
-            send_email(subject, html_body, settings)
+
+    subject, html_body = build_email(result, settings, generated_at)
+    (ROOT / "report_preview.html").write_text(html_body, encoding="utf-8")
+    (ROOT / "report_subject.txt").write_text(subject, encoding="utf-8")
+    if deliver_email:
+        send_email(subject, html_body, settings)
+
     for line in result.diagnostics:
         print(line)
     print(f"API usage: {json.dumps(result.api_usage, ensure_ascii=False)}")
-    print(
-        f"Generation health: {json.dumps(build_success_health(generated_at, result), ensure_ascii=False)}"
-    )
-    print(f"✅ Sačuvano novih tipova: {len(result.new_bets)}")
+    print(f"Production picks: {len(result.new_bets)}")
     return 0
 
 
@@ -150,59 +120,10 @@ def run_send_report() -> int:
     return 0 if sent or not settings.gmail_user else 1
 
 
-def run_watchlist_command() -> int:
-    settings = Settings.from_env(ROOT)
-    result = run_watchlist(settings)
-    print(json.dumps(result, ensure_ascii=False))
-    return 0
-
-
 def run_exhaustive_odds() -> int:
     settings = Settings.from_env(ROOT)
     result = collect_exhaustive_odds(settings)
     print(json.dumps(result, ensure_ascii=False))
-    return 0
-
-
-def run_capture_closing() -> int:
-    settings = Settings.from_env(ROOT)
-    captured = capture_five_minute_closing_quotes(settings)
-    print(f"📌 T-5 closing snapshots captured: {captured}")
-    return 0
-
-
-def run_closing_report(day: str | None = None) -> int:
-    settings = Settings.from_env(ROOT)
-    target_day = day or datetime.now(settings.timezone).date().isoformat()
-    bets = BetStore(settings.bets_file).load()
-    selected = [
-        b
-        for b in bets
-        if str(b.get("date") or str(b.get("created_at") or "")[:10]) == target_day
-        and str(b.get("signal_source", "")) in {"DAILY_BULLETIN", "INTRADAY_ALERT"}
-    ]
-    alerts_path = ROOT / "intraday_alerts.json"
-    if alerts_path.exists():
-        try:
-            alerts = json.loads(alerts_path.read_text(encoding="utf-8"))
-        except (OSError, TypeError, ValueError, json.JSONDecodeError):
-            alerts = []
-        if isinstance(alerts, list):
-            linked_ids = {str(b.get("id")) for b in selected}
-            for alert in alerts:
-                if not isinstance(alert, dict):
-                    continue
-                if str(alert.get("signal_sent_at") or "")[:10] != target_day:
-                    continue
-                linked_id = str(alert.get("linked_bet_id") or "")
-                if linked_id and linked_id in linked_ids:
-                    continue
-                selected.append(alert)
-    subject, html_body = build_closing_day_email(settings, target_day, selected)
-    (ROOT / "closing_report_preview.html").write_text(html_body, encoding="utf-8")
-    (ROOT / "closing_report_subject.txt").write_text(subject, encoding="utf-8")
-    send_html_email(subject, html_body, settings)
-    print(f"📘 Closing day report: {target_day} · {len(selected)} signals")
     return 0
 
 
@@ -216,11 +137,7 @@ def run_monitor() -> int:
 def run_skip(identifier: str) -> int:
     settings = Settings.from_env(ROOT)
     changed = skip_bet(BetStore(settings.bets_file), identifier)
-    print(
-        "✅ Tip je prebačen u SKIPPED."
-        if changed
-        else "⚠️ PENDING tip sa tim ID-em nije pronađen."
-    )
+    print("Production bet marked SKIPPED" if changed else "Pending Production bet not found")
     return 0 if changed else 2
 
 
@@ -261,35 +178,17 @@ def run_analytics() -> int:
 
 
 def parser() -> argparse.ArgumentParser:
-    cli = argparse.ArgumentParser(description="QuantBet Football")
-    subcommands = cli.add_subparsers(dest="command", required=True)
-    generate = subcommands.add_parser(
-        "generate", help="Generiši dnevni ili intraday bilten"
-    )
+    cli = argparse.ArgumentParser(description="QuantBet Football Production")
+    sub = cli.add_subparsers(dest="command", required=True)
+    generate = sub.add_parser("generate", help="Generate Production picks and email")
     generate.add_argument("--no-email", action="store_true")
-    subcommands.add_parser(
-        "send-report", help="Pošalji poslednji generisani email report"
-    )
-    subcommands.add_parser(
-        "watchlist", help="Adaptivno prati pikove i near-miss signale"
-    )
-    subcommands.add_parser(
-        "capture-odds", help="Exhaustive fixture-universe-first odds capture"
-    )
-    subcommands.add_parser("monitor", help="Snimi closing odds i poravnaj rezultate")
-    subcommands.add_parser(
-        "capture-closing", help="Snimi T-5 closing odds za signalizovane utakmice"
-    )
-    closing = subcommands.add_parser(
-        "closing-report", help="Pošalji završni closing-day bilten"
-    )
-    closing.add_argument("--day")
-    subcommands.add_parser("settle", help="Alias za monitor")
-    subcommands.add_parser(
-        "calibrate", help="Refituj Platt kalibraciju iz OOS prediction ledgera"
-    )
-    subcommands.add_parser("analytics", help="Prikaži portfolio metrike")
-    skip = subcommands.add_parser("skip", help="Prebaci tačan bet ID u SKIPPED")
+    sub.add_parser("send-report", help="Send the last Production email")
+    sub.add_parser("capture-odds", help="Capture the 72h odds universe")
+    sub.add_parser("monitor", help="Settle finished Production bets")
+    sub.add_parser("settle", help="Alias for monitor")
+    sub.add_parser("calibrate", help="Refit model calibration manually")
+    sub.add_parser("analytics", help="Show Production portfolio metrics")
+    skip = sub.add_parser("skip", help="Mark one pending Production bet as SKIPPED")
     skip.add_argument("--id", dest="identifier")
     skip.add_argument("--issue-title")
     return cli
@@ -301,26 +200,20 @@ def main() -> int:
         return run_generate(deliver_email=not args.no_email)
     if args.command == "send-report":
         return run_send_report()
-    if args.command == "watchlist":
-        return run_watchlist_command()
     if args.command == "capture-odds":
         return run_exhaustive_odds()
     if args.command in {"monitor", "settle"}:
         return run_monitor()
-    if args.command == "capture-closing":
-        return run_capture_closing()
-    if args.command == "closing-report":
-        return run_closing_report(args.day)
+    if args.command == "skip":
+        identifier = args.identifier or args.issue_title or os.getenv("ISSUE_TITLE", "")
+        if not identifier:
+            raise SystemExit("skip requires --id, --issue-title or ISSUE_TITLE")
+        return run_skip(identifier)
     if args.command == "calibrate":
         return run_calibrate()
     if args.command == "analytics":
         return run_analytics()
-    if args.command == "skip":
-        identifier = args.identifier or args.issue_title or os.getenv("ISSUE_TITLE", "")
-        if not identifier:
-            raise SystemExit("skip zahteva --id, --issue-title ili ISSUE_TITLE")
-        return run_skip(identifier)
-    raise SystemExit(f"Nepoznata komanda: {args.command}")
+    raise SystemExit(f"Unknown command: {args.command}")
 
 
 if __name__ == "__main__":
