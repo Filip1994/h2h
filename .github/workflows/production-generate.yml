@@ -3,7 +3,7 @@ name: Production · daily picks
 on:
   workflow_dispatch:
   schedule:
-    - cron: "10 0 * * *"
+    - cron: "11 0 * * *"
       timezone: "Europe/Belgrade"
 
 permissions:
