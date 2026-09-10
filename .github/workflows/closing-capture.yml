@@ -40,6 +40,8 @@ jobs:
         run: python tools/recover_missing_closing.py
       - name: Build isolated public Strong Signal dataset
         run: python tools/build_public_signal_buckets.py
+      - name: Normalize legacy Production contamination from virtual Strong Signals
+        run: python tools/normalize_strong_virtual_state.py
       - name: Resolve Strong Signal Opening-Pick-Closing lifecycle
         run: python tools/enrich_public_strong_signal_lifecycle.py
       - name: Commit T-5 snapshots, recovered closes, isolated Strong Signals and raw API archive
