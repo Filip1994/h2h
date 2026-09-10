@@ -2,6 +2,9 @@ name: Production · 72h odds lifecycle
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - tools/build_production_view.py
   schedule:
     - cron: "*/5 * * * *"
 
