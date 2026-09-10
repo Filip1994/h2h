@@ -1,4 +1,4 @@
-from __future__
+from __future__ import annotations
 
 import argparse
 import json
@@ -66,9 +66,14 @@ def _first_number(payload: dict, *keys: str) -> int | None:
 def _production_quote_guard(settings: Settings, *, now: datetime, previous_health: dict) -> dict:
     """Keep every open Production pick on an exact-bookmaker quote <=30m old.
 
-    This guard is independent of the six-hour Strong/Near lookahead. It warms
+    The guard is independent of the six-hour Strong/Near lookahead. It warms
     every open Production pick before T-6h, so the T-6h cadence never starts
     from a quote that is many hours old.
+
+    Important: Football odds are fixture-wide responses. Multiple open picks
+    can reference the same fixture, so this function performs at most one API
+    odds request per fixture during a single guard invocation and reuses the
+    response for all picks on that fixture.
     """
     bets = BetStore(settings.bets_file).load()
     predictions = _load_json(settings.predictions_file, [])
@@ -86,6 +91,8 @@ def _production_quote_guard(settings: Settings, *, now: datetime, previous_healt
     api = APIFootballClient(settings)
     active = []
     errors = []
+    raw_by_fixture: dict[int, Any] = {}
+    fixture_errors: dict[int, str] = {}
 
     for bet in bets:
         if str(bet.get("status", "")).upper() not in {"PENDING", "OPEN", "ACTIVE"}:
@@ -101,11 +108,22 @@ def _production_quote_guard(settings: Settings, *, now: datetime, previous_healt
         row = picks.setdefault(key, {})
         captured = _parse(row.get("quote_captured_at"))
         due = captured is None or (now - captured).total_seconds() >= MAX_QUOTE_AGE_SECONDS
-        if due:
+        if due and fixture_id not in raw_by_fixture and fixture_id not in fixture_errors:
             try:
-                raw = api.odds(fixture_id)
+                raw_by_fixture[fixture_id] = api.odds(fixture_id)
+            except APIBudgetExceeded:
+                row["status"] = "API_BUDGET_EXCEEDED"
+                errors.append(f"{fixture_id}:API_BUDGET_EXCEEDED")
+                fixture_errors[fixture_id] = "API_BUDGET_EXCEEDED"
+                break
+            except APIError as exc:
+                fixture_errors[fixture_id] = str(exc)
+                errors.append(f"{fixture_id}:API_ERROR")
+
+        if due and fixture_id in raw_by_fixture:
+            try:
                 quotes = extract_best_quotes(
-                    raw,
+                    raw_by_fixture[fixture_id],
                     bookmaker_priority=settings.bookmaker_priority,
                     allow_any_bookmaker=settings.allow_any_bookmaker,
                     captured_at=now,
@@ -132,20 +150,19 @@ def _production_quote_guard(settings: Settings, *, now: datetime, previous_healt
                     })
                 else:
                     row["status"] = "NO_VALID_CURRENT_QUOTE"
-            except APIBudgetExceeded:
-                row["status"] = "API_BUDGET_EXCEEDED"
-                errors.append(f"{key}:API_BUDGET_EXCEEDED")
-                break
-            except APIError as exc:
-                row["status"] = "API_ERROR"
+            except (TypeError, ValueError, KeyError) as exc:
+                row["status"] = "QUOTE_PARSE_ERROR"
                 row["error"] = str(exc)
-                errors.append(f"{key}:API_ERROR")
+                errors.append(f"{key}:QUOTE_PARSE_ERROR")
+        elif due and fixture_id in fixture_errors:
+            row["status"] = "API_ERROR"
+            row["error"] = fixture_errors[fixture_id]
 
         captured = _parse(row.get("quote_captured_at"))
         age = (now - captured).total_seconds() if captured is not None else None
         if age is None or age > MAX_QUOTE_AGE_SECONDS:
             row["status"] = "STALE_QUOTE"
-        elif row.get("status") in {"API_ERROR", "NO_VALID_CURRENT_QUOTE"}:
+        elif row.get("status") in {"API_ERROR", "NO_VALID_CURRENT_QUOTE", "QUOTE_PARSE_ERROR"}:
             row["status"] = "FRESH_FROM_LAST_VALID_OBSERVATION"
         row["quote_age_seconds"] = round(age, 1) if age is not None else None
         active.append({
@@ -161,13 +178,15 @@ def _production_quote_guard(settings: Settings, *, now: datetime, previous_healt
 
     stale = [p for p in active if p["status"] == "STALE_QUOTE"]
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "max_quote_age_seconds": MAX_QUOTE_AGE_SECONDS,
         "checked_at": now.isoformat(),
         "active_production_picks": len(active),
         "fresh_picks": len(active) - len(stale),
         "stale_picks": len(stale),
         "api_requests": api.request_count,
+        "fixtures_requested": len(raw_by_fixture) + len(fixture_errors),
+        "fixture_request_coalescing": True,
         "errors": errors,
         "picks": picks,
     }
