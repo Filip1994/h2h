@@ -1,11 +1,16 @@
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 
-from src.quantbot.markets import ALLOWED_BOOKMAKER_IDS
-
 ROOT = Path(__file__).resolve().parents[1]
+SRC = ROOT / "src"
+if str(SRC) not in sys.path:
+    sys.path.insert(0, str(SRC))
+
+from quantbot.markets import ALLOWED_BOOKMAKER_IDS
+
 BETS = ROOT / "bets.json"
 
 
