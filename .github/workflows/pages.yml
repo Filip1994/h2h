@@ -16,8 +16,8 @@ on:
       - bets.json
       - ledger_meta.json
       - system_health.json
+      - tools/build_production_view.py
       - assets/qb-dashboard.css
-      - assets/qb-dashboard.js
       - .github/workflows/pages.yml
 
 permissions:
@@ -41,6 +41,8 @@ jobs:
         with:
           ref: main
           fetch-depth: 1
+      - name: Build Production view
+        run: python tools/build_production_view.py
       - name: Build static Production site
         run: |
           set -euo pipefail
