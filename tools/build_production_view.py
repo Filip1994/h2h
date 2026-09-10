@@ -1,13 +1,18 @@
 from __future__ import annotations
 
 import json
+import sys
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+ROOT = Path(__file__).resolve().parents[1]
+SRC = ROOT / "src"
+if str(SRC) not in sys.path:
+    sys.path.insert(0, str(SRC))
+
 from quantbot.odds_lifecycle import lifecycle_contract, observations_for
 
-ROOT = Path(__file__).resolve().parents[1]
 BETS = ROOT / "bets.json"
 SNAPSHOTS = ROOT / "data" / "odds_snapshots.jsonl"
 METRICS = ROOT / "odds_collection_metrics.json"
