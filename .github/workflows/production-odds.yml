@@ -17,7 +17,7 @@ env:
   PAPER_MODE: ${{ vars.PAPER_MODE || 'true' }}
   API_REQUEST_BUDGET: ${{ vars.API_REQUEST_BUDGET || '7500' }}
   API_BUDGET_RESERVE: ${{ vars.API_BUDGET_RESERVE || '500' }}
-  TIMEZONE: Europe/Belgrade
+  TIMEZONE: UTC
 
 jobs:
   capture:
