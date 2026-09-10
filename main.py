@@ -91,7 +91,7 @@ def persist_intraday_strong_signals(
     settings: Settings, strong: tuple[dict, ...], generated_at: datetime
 ) -> None:
     """Deprecated compatibility hook: watchlist.yml is the sole Strong/Near producer."""
-    return None
+    return
 
 
 def run_generate(*, deliver_email: bool = True) -> int:
