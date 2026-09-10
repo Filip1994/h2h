@@ -7,9 +7,10 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
+sys.path.insert(0, str(ROOT / "tools"))
 
 from quantbot.strong_signal_bankroll import STRONG_SIGNAL_PORTFOLIO, portfolio
-from tools.build_near_miss_lifecycle import build as build_near_miss_lifecycle
+from build_near_miss_lifecycle import build as build_near_miss_lifecycle
 
 LEDGER_FILE = "strong_signal_ledger.json"
 LEGACY_SETTLEMENTS_FILE = "strong_signal_legacy_settlements.json"
@@ -106,8 +107,6 @@ def _as_virtual(item: dict[str, Any]) -> dict[str, Any]:
         row["virtual_settled"] = False
         return row
 
-    # Pending Strong Signals remain pending; never erase lifecycle fields by
-    # normalizing an unrelated Production-linked status into the public row.
     row["status"] = "PENDING"
     row["profit"] = 0.0
     row["virtual_profit"] = 0.0
@@ -214,8 +213,6 @@ def _public_strong_event(
     row: dict[str, Any], source: dict[str, Any] | None = None
 ) -> dict[str, Any]:
     source = source or {}
-    # Preserve event lifecycle/status when supplied. Missing lifecycle fields
-    # remain missing rather than being fabricated as PENDING.
     out = dict(row)
     for key in ("match", "league", "kickoff", "home_name", "away_name"):
         if out.get(key) is None and source.get(key) is not None:
@@ -242,10 +239,7 @@ def _public_strong_event(
 
 
 def build(root: Path = ROOT) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-    # Near Miss public data has a single canonical lifecycle owner. Always
-    # rebuild it first so the public bucket cannot flatten lifecycle state.
     near = build_near_miss_lifecycle(root)
-
     ledger = load_or_migrate_ledger(root)
     settlements = _legacy_settlement_map(root)
     alerts = load_json(root / "intraday_alerts.json")
