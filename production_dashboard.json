@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-09-10T14:44:04.084631+00:00",
+  "generated_at": "2026-09-10T14:46:02.479635+00:00",
   "truth": "data/odds_snapshots.jsonl + bets.json",
   "rules": {
     "opening": "first persisted observation for the exact Production fixture/market/bookmaker at or before Pick",
