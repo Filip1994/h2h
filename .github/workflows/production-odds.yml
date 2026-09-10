@@ -1,8 +1,6 @@
 name: Production · 72h odds lifecycle
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
   schedule:
     - cron: "*/5 * * * *"
