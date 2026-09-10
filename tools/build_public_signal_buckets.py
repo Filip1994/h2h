@@ -318,8 +318,34 @@ def _legacy_near_miss_projection(
     return result
 
 
+def _publishable_near_miss(row: dict[str, Any]) -> bool:
+    return all(
+        str(row.get(field) or "").strip()
+        for field in (
+            "prediction_id",
+            "fixture_id",
+            "market",
+            "selection",
+            "home_name",
+            "away_name",
+            "match",
+            "league",
+            "kickoff",
+            "bookmaker_id",
+            "bookmaker",
+        )
+    )
+
+
 def build(root: Path = ROOT) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-    near = build_near_miss_lifecycle(root)
+    near = [
+        row
+        for row in build_near_miss_lifecycle(root)
+        if _publishable_near_miss(row)
+    ]
+    (root / "near_misses.json").write_text(
+        json.dumps(near, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
     ledger = load_or_migrate_ledger(root)
     settlements = _legacy_settlement_map(root)
     alerts = load_json(root / "intraday_alerts.json")
@@ -336,9 +362,16 @@ def build(root: Path = ROOT) -> tuple[list[dict[str, Any]], list[dict[str, Any]]
         for row in near
         if row.get("near_miss_observation_id")
     )
-    near.extend(_legacy_near_miss_projection(observations, alerts, represented_ids))
+    near.extend(
+        row
+        for row in _legacy_near_miss_projection(observations, alerts, represented_ids)
+        if _publishable_near_miss(row)
+    )
     near.sort(
         key=lambda row: str(row.get("signal_sent_at") or row.get("kickoff") or "")
+    )
+    (root / "near_misses.json").write_text(
+        json.dumps(near, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
     observation_lookup: dict[str, dict[str, Any]] = {}
     for observation in observations:
