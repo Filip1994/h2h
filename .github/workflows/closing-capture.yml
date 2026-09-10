@@ -9,8 +9,8 @@ permissions:
   contents: write
 
 concurrency:
-  group: quantbet-football-api-global
-  cancel-in-progress: false
+  group: quantbet-closing
+  cancel-in-progress: true
 
 jobs:
   capture:
@@ -36,11 +36,13 @@ jobs:
       - run: pip install -r requirements.txt
       - run: python main.py capture-closing
       - run: python tools/capture_alert_closing.py
+      - name: Recover missed pre-kickoff closes from immutable observations
+        run: python tools/recover_missing_closing.py
       - name: Build isolated public Strong Signal dataset
         run: python tools/build_public_signal_buckets.py
       - name: Resolve Strong Signal Opening-Pick-Closing lifecycle
         run: python tools/enrich_public_strong_signal_lifecycle.py
-      - name: Commit T-5 snapshots, isolated Strong Signals and raw API archive
+      - name: Commit T-5 snapshots, recovered closes, isolated Strong Signals and raw API archive
         run: |
           set -euo pipefail
           files=(bets.json intraday_alerts.json strong_signal_ledger.json strong_signals.json strong_signals_portfolio.json near_misses.json)
@@ -50,7 +52,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add "${files[@]}" data/raw_api
-          git commit -m "Capture QuantBet T-5 closing odds and API archive"
+          git commit -m "Capture and recover QuantBet closing odds"
           for attempt in 1 2 3; do
             if git push; then exit 0; fi
             git fetch origin main
