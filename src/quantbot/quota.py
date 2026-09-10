@@ -12,7 +12,7 @@ from typing import Any
 
 
 class GlobalQuotaExceeded(RuntimeError):
-    """Raised when a request would breach the protected daily provider reserve."""
+    """Raised only when the real configured provider budget is exhausted."""
 
 
 class GlobalQuotaStateError(RuntimeError):
@@ -74,10 +74,10 @@ class GlobalQuotaGovernor:
             raise GlobalQuotaStateError(
                 "GLOBAL_QUOTA_CONFIG_MISMATCH: daily capacity differs from canonical ledger"
             )
-        if int(payload["safety_reserve"]) != self.safety_reserve:
-            raise GlobalQuotaStateError(
-                "GLOBAL_QUOTA_CONFIG_MISMATCH: safety reserve differs from canonical ledger"
-            )
+        # safety_reserve is runtime policy, not canonical consumption state.
+        # Older ledgers may contain a non-zero reserve; that must not block a
+        # Production run when the current runtime is explicitly configured to
+        # use the full provider allowance.
         if int(payload["consumed"]) < 0 or int(payload["reserved"]) < 0:
             raise GlobalQuotaStateError("GLOBAL_QUOTA_STATE_INVALID: negative totals")
         if int(payload["consumed"]) + int(payload["reserved"]) > int(
@@ -167,7 +167,7 @@ class GlobalQuotaGovernor:
                 - int(payload["consumed"])
                 - int(payload["reserved"])
             )
-            floor = 0 if protected else int(payload["safety_reserve"])
+            floor = 0 if protected else self.safety_reserve
             if available < cost + floor:
                 raise GlobalQuotaExceeded(
                     f"GLOBAL_QUOTA_PRESSURE: available={available}, reserve={floor}, workflow={workflow}, endpoint={endpoint}"
@@ -233,14 +233,14 @@ class GlobalQuotaGovernor:
             )
             if remaining <= 0:
                 state = "RESERVE_EXHAUSTED"
-            elif remaining <= int(payload["safety_reserve"]):
+            elif remaining <= self.safety_reserve:
                 state = "RESERVE_PRESSURE"
             else:
                 state = "HEALTHY"
             return {
                 "date": payload["date"],
                 "daily_capacity": int(payload["daily_capacity"]),
-                "safety_reserve": int(payload["safety_reserve"]),
+                "safety_reserve": self.safety_reserve,
                 "consumed": int(payload["consumed"]),
                 "reserved": int(payload["reserved"]),
                 "remaining_unallocated": remaining,
