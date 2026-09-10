@@ -63,8 +63,13 @@ def _first_number(payload: dict, *keys: str) -> int | None:
     return None
 
 
-def _production_quote_guard(settings: Settings, *, now: datetime) -> dict:
-    """Keep every open Production pick on an exact-bookmaker quote <=30m old."""
+def _production_quote_guard(settings: Settings, *, now: datetime, previous_health: dict) -> dict:
+    """Keep every open Production pick on an exact-bookmaker quote <=30m old.
+
+    This guard is independent of the six-hour Strong/Near lookahead. It warms
+    every open Production pick before T-6h, so the T-6h cadence never starts
+    from a quote that is many hours old.
+    """
     bets = BetStore(settings.bets_file).load()
     predictions = _load_json(settings.predictions_file, [])
     if not isinstance(predictions, list):
@@ -74,8 +79,8 @@ def _production_quote_guard(settings: Settings, *, now: datetime) -> dict:
         for p in predictions
         if isinstance(p, dict) and p.get("event_id") is not None and p.get("market")
     }
-    previous = _load_json(settings.root / "production_quote_state.json", {})
-    picks = previous.get("picks", {}) if isinstance(previous, dict) else {}
+    previous_guard = previous_health.get("production_quote_guard", {}) if isinstance(previous_health, dict) else {}
+    picks = previous_guard.get("picks", {}) if isinstance(previous_guard, dict) else {}
     if not isinstance(picks, dict):
         picks = {}
     api = APIFootballClient(settings)
@@ -143,10 +148,19 @@ def _production_quote_guard(settings: Settings, *, now: datetime) -> dict:
         elif row.get("status") in {"API_ERROR", "NO_VALID_CURRENT_QUOTE"}:
             row["status"] = "FRESH_FROM_LAST_VALID_OBSERVATION"
         row["quote_age_seconds"] = round(age, 1) if age is not None else None
-        active.append({"id": key, "fixture_id": fixture_id, "market": market.value, "bookmaker_id": int(bet["bookmaker_id"]), "status": row.get("status"), "quote_age_seconds": row.get("quote_age_seconds"), "odd": row.get("odd"), "quote_captured_at": row.get("quote_captured_at")})
+        active.append({
+            "id": key,
+            "fixture_id": fixture_id,
+            "market": market.value,
+            "bookmaker_id": int(bet["bookmaker_id"]),
+            "status": row.get("status"),
+            "quote_age_seconds": row.get("quote_age_seconds"),
+            "odd": row.get("odd"),
+            "quote_captured_at": row.get("quote_captured_at"),
+        })
 
     stale = [p for p in active if p["status"] == "STALE_QUOTE"]
-    payload = {
+    return {
         "schema_version": 1,
         "max_quote_age_seconds": MAX_QUOTE_AGE_SECONDS,
         "checked_at": now.isoformat(),
@@ -157,8 +171,6 @@ def _production_quote_guard(settings: Settings, *, now: datetime) -> dict:
         "errors": errors,
         "picks": picks,
     }
-    (settings.root / "production_quote_state.json").write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    return payload
 
 
 def evaluate(run_result: dict, predictions: list[dict], *, now: datetime, lookahead_hours: float) -> dict:
@@ -208,6 +220,7 @@ def main() -> int:
     run_result = _load_run_result(args.run_output)
     predictions = _load_json(args.predictions, [])
     now = datetime.now(UTC)
+    previous_health = _load_json(args.output, {})
     if not isinstance(run_result, dict):
         payload = {"schema_version": 1, "status": "ERROR", "checked_at": now.isoformat(), "errors": ["WATCHLIST_RESULT_NOT_VALID_JSON_OBJECT"], "observation_only": True}
         args.output.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
@@ -215,7 +228,7 @@ def main() -> int:
     if not isinstance(predictions, list):
         predictions = []
     payload = evaluate(run_result, [item for item in predictions if isinstance(item, dict)], now=now, lookahead_hours=args.lookahead_hours)
-    payload["production_quote_guard"] = _production_quote_guard(Settings.from_env(), now=now)
+    payload["production_quote_guard"] = _production_quote_guard(Settings.from_env(), now=now, previous_health=previous_health)
     args.output.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print(json.dumps(payload, ensure_ascii=False))
     return 1 if payload["status"] == "ERROR" else 0
