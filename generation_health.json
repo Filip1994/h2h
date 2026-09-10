@@ -1,17 +1,17 @@
 {
   "schema_version": 4,
-  "timestamp": "2026-09-10T00:30:41.756715+00:00",
+  "timestamp": "2026-09-10T05:43:12.115624+00:00",
   "status": "HEALTHY",
   "classification_reasons": [],
   "pipeline": {
     "fixtures_discovered": 190,
     "fixtures_parse_failures": 0,
-    "fixtures_eligible": 4,
-    "fixtures_modelled": 4,
-    "predictions_generated": 12,
-    "candidates_evaluated": 12,
-    "candidates_qualified": 2,
-    "candidates": 2,
+    "fixtures_eligible": 0,
+    "fixtures_modelled": 0,
+    "predictions_generated": 0,
+    "candidates_evaluated": 0,
+    "candidates_qualified": 0,
+    "candidates": 0,
     "selections_produced": 0,
     "training_sample_insufficiency": 0,
     "fit_failures": 0,
@@ -22,128 +22,57 @@
       "other": 0
     },
     "eligibility_rejections": {
-      "UNKNOWN_LEAGUE_TIER": 6
+      "EXPLICIT_EXCLUSION": 3,
+      "UNKNOWN_LEAGUE_TIER": 3
     },
     "funnel_rejections": [
       {
-        "fixture_id": 1600590,
+        "fixture_id": 1637313,
+        "stage": "eligible",
+        "reason": "EXPLICIT_EXCLUSION"
+      },
+      {
+        "fixture_id": 1636760,
         "stage": "eligible",
         "reason": "UNKNOWN_LEAGUE_TIER"
       },
       {
-        "fixture_id": 1600591,
+        "fixture_id": 1635897,
         "stage": "eligible",
         "reason": "UNKNOWN_LEAGUE_TIER"
       },
       {
-        "fixture_id": 1636684,
+        "fixture_id": 1534852,
+        "stage": "eligible",
+        "reason": "EXPLICIT_EXCLUSION"
+      },
+      {
+        "fixture_id": 1534855,
         "stage": "eligible",
         "reason": "UNKNOWN_LEAGUE_TIER"
       },
       {
-        "fixture_id": 1635082,
+        "fixture_id": 1637321,
         "stage": "eligible",
-        "reason": "UNKNOWN_LEAGUE_TIER"
-      },
-      {
-        "fixture_id": 1559635,
-        "stage": "eligible",
-        "reason": "UNKNOWN_LEAGUE_TIER"
-      },
-      {
-        "fixture_id": 1490461,
-        "market": "OVER_2_5",
-        "stage": "strategy",
-        "reason": "REJECT_ODD"
-      },
-      {
-        "fixture_id": 1490461,
-        "market": "BTTS_YES",
-        "stage": "strategy",
-        "reason": "REJECT_LOW_EV"
-      },
-      {
-        "fixture_id": 1490462,
-        "market": "OVER_2_5",
-        "stage": "strategy",
-        "reason": "REJECT_ODD"
-      },
-      {
-        "fixture_id": 1490462,
-        "market": "BTTS_YES",
-        "stage": "strategy",
-        "reason": "REJECT_LOW_EV"
-      },
-      {
-        "fixture_id": 1490464,
-        "market": "OVER_2_5",
-        "stage": "strategy",
-        "reason": "REJECT_ODD"
-      },
-      {
-        "fixture_id": 1490464,
-        "market": "UNDER_2_5",
-        "stage": "strategy",
-        "reason": "REJECT_LOW_EV"
-      },
-      {
-        "fixture_id": 1490464,
-        "market": "BTTS_YES",
-        "stage": "strategy",
-        "reason": "REJECT_ODD"
-      },
-      {
-        "fixture_id": 1490465,
-        "market": "OVER_2_5",
-        "stage": "strategy",
-        "reason": "REJECT_LOW_EV"
-      },
-      {
-        "fixture_id": 1490465,
-        "market": "UNDER_2_5",
-        "stage": "strategy",
-        "reason": "REJECT_LOW_EV"
-      },
-      {
-        "fixture_id": 1490465,
-        "market": "BTTS_YES",
-        "stage": "strategy",
-        "reason": "REJECT_ODD"
-      },
-      {
-        "fixture_id": 1636685,
-        "stage": "eligible",
-        "reason": "UNKNOWN_LEAGUE_TIER"
-      },
-      {
-        "fixture_id": 1490461,
-        "market": "UNDER_2_5",
-        "stage": "risk_staking",
-        "reason": "RISK_OR_CAPACITY"
-      },
-      {
-        "fixture_id": 1490462,
-        "market": "UNDER_2_5",
-        "stage": "risk_staking",
-        "reason": "RISK_OR_CAPACITY"
+        "reason": "EXPLICIT_EXCLUSION"
       }
     ],
-    "odds_available": 4,
-    "valid_quotes": 12,
-    "ev_pass": 2,
-    "edge_pass": 2,
-    "risk_rejections": 2,
+    "odds_available": 0,
+    "valid_quotes": 0,
+    "ev_pass": 0,
+    "edge_pass": 0,
+    "risk_rejections": 0,
     "duplicate_rejections": 0,
     "persistence_failures": 0,
-    "risk_checks": 2,
+    "risk_checks": 0,
     "funnel": {
       "discovered": 190,
-      "eligible": 4,
-      "modelled": 4,
-      "predictions": 12,
+      "eligible": 0,
+      "modelled": 0,
+      "predictions": 0,
       "odds_available": 0,
       "valid_quotes": 0,
-      "candidates": 2,
+      "candidates": 0,
       "ev_pass": 0,
       "edge_pass": 0,
       "risk_checks": 0,
@@ -154,12 +83,12 @@
   },
   "funnel": {
     "discovered": 190,
-    "eligible": 4,
-    "modelled": 4,
-    "predictions": 12,
+    "eligible": 0,
+    "modelled": 0,
+    "predictions": 0,
     "odds_available": 0,
     "valid_quotes": 0,
-    "candidates": 2,
+    "candidates": 0,
     "ev_pass": 0,
     "edge_pass": 0,
     "risk_checks": 0,
@@ -184,106 +113,34 @@
   },
   "funnel_rejections": [
     {
-      "fixture_id": 1600590,
+      "fixture_id": 1637313,
+      "stage": "eligible",
+      "reason": "EXPLICIT_EXCLUSION"
+    },
+    {
+      "fixture_id": 1636760,
       "stage": "eligible",
       "reason": "UNKNOWN_LEAGUE_TIER"
     },
     {
-      "fixture_id": 1600591,
+      "fixture_id": 1635897,
       "stage": "eligible",
       "reason": "UNKNOWN_LEAGUE_TIER"
     },
     {
-      "fixture_id": 1636684,
+      "fixture_id": 1534852,
+      "stage": "eligible",
+      "reason": "EXPLICIT_EXCLUSION"
+    },
+    {
+      "fixture_id": 1534855,
       "stage": "eligible",
       "reason": "UNKNOWN_LEAGUE_TIER"
     },
     {
-      "fixture_id": 1635082,
+      "fixture_id": 1637321,
       "stage": "eligible",
-      "reason": "UNKNOWN_LEAGUE_TIER"
-    },
-    {
-      "fixture_id": 1559635,
-      "stage": "eligible",
-      "reason": "UNKNOWN_LEAGUE_TIER"
-    },
-    {
-      "fixture_id": 1490461,
-      "market": "OVER_2_5",
-      "stage": "strategy",
-      "reason": "REJECT_ODD"
-    },
-    {
-      "fixture_id": 1490461,
-      "market": "BTTS_YES",
-      "stage": "strategy",
-      "reason": "REJECT_LOW_EV"
-    },
-    {
-      "fixture_id": 1490462,
-      "market": "OVER_2_5",
-      "stage": "strategy",
-      "reason": "REJECT_ODD"
-    },
-    {
-      "fixture_id": 1490462,
-      "market": "BTTS_YES",
-      "stage": "strategy",
-      "reason": "REJECT_LOW_EV"
-    },
-    {
-      "fixture_id": 1490464,
-      "market": "OVER_2_5",
-      "stage": "strategy",
-      "reason": "REJECT_ODD"
-    },
-    {
-      "fixture_id": 1490464,
-      "market": "UNDER_2_5",
-      "stage": "strategy",
-      "reason": "REJECT_LOW_EV"
-    },
-    {
-      "fixture_id": 1490464,
-      "market": "BTTS_YES",
-      "stage": "strategy",
-      "reason": "REJECT_ODD"
-    },
-    {
-      "fixture_id": 1490465,
-      "market": "OVER_2_5",
-      "stage": "strategy",
-      "reason": "REJECT_LOW_EV"
-    },
-    {
-      "fixture_id": 1490465,
-      "market": "UNDER_2_5",
-      "stage": "strategy",
-      "reason": "REJECT_LOW_EV"
-    },
-    {
-      "fixture_id": 1490465,
-      "market": "BTTS_YES",
-      "stage": "strategy",
-      "reason": "REJECT_ODD"
-    },
-    {
-      "fixture_id": 1636685,
-      "stage": "eligible",
-      "reason": "UNKNOWN_LEAGUE_TIER"
-    },
-    {
-      "fixture_id": 1490461,
-      "market": "UNDER_2_5",
-      "stage": "risk_staking",
-      "reason": "RISK_OR_CAPACITY"
-    },
-    {
-      "fixture_id": 1490462,
-      "market": "UNDER_2_5",
-      "stage": "risk_staking",
-      "reason": "RISK_OR_CAPACITY"
+      "reason": "EXPLICIT_EXCLUSION"
     }
   ],
   "fixture_failures": {
@@ -292,13 +149,13 @@
     "other": 0
   },
   "api": {
-    "request_count": 9,
+    "request_count": 1,
     "request_budget": 7500,
     "working_budget": 7000,
     "reserve": 500,
-    "remaining_working": 6991,
+    "remaining_working": 6999,
     "cache_hits": 0,
-    "cache_misses": 9,
+    "cache_misses": 1,
     "cache_hit_rate": 0.0,
     "rate_limit_events": 0,
     "retry_events": 0,
@@ -307,25 +164,26 @@
     "api_error_events": 0,
     "network_error_events": 0,
     "endpoint_requests": {
-      "fixtures": 5,
-      "odds": 4
+      "fixtures": 1
     },
     "endpoint_cache_hits": {},
     "global_quota": {
       "date": "2026-09-10",
       "daily_capacity": 7500,
       "safety_reserve": 500,
-      "consumed": 9,
+      "consumed": 405,
       "reserved": 0,
-      "remaining_unallocated": 7491,
+      "remaining_unallocated": 7095,
       "consumed_by_workflow": {
-        "QuantBet intraday strong-signal scanner": 9
+        "QuantBet exhaustive odds capture": 395,
+        "QuantBet intraday strong-signal scanner": 10
       },
       "reserved_by_workflow": {
+        "QuantBet exhaustive odds capture": 0,
         "QuantBet intraday strong-signal scanner": 0
       },
       "quota_pressure_state": "HEALTHY",
-      "request_count": 9
+      "request_count": 405
     }
   },
   "new_bets": 0,
