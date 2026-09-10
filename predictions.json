@@ -101883,7 +101883,7 @@
     "pick_snapshot_id": "e47ea93fe48b3f4cf99cd8d11ae86669b2f49708d22ad30afff89d9077359508",
     "closing_odd": 1.7,
     "closing_odds_captured_at": "2026-09-08T13:56:01.318803+00:00",
-    "closing_snapshot_id": "c85afeb26894505071f901a739989c4bf0115ffeb64c9004d487a542b622854b",
+    "closing_snapshot_id": "15e380dd5a4d16e15c5663835c1ea2c39eb2a3bfe37f8c8b4737a5d56335e3f1",
     "clv_odds_pct": 0.088235,
     "clv_status": "COMPUTABLE"
   },
@@ -106155,7 +106155,7 @@
     "pick_snapshot_id": "19633ce775e9bf877d095d231429660e3114ef5e039b614e1e67600c9d8176bc",
     "closing_odd": 2.0,
     "closing_odds_captured_at": "2026-09-08T17:48:54.766414+00:00",
-    "closing_snapshot_id": "f3d59c91148046e4632a8f813398d43b97641e1e677eb841b6e7f321c61612e4",
+    "closing_snapshot_id": "7b9d765da7ba539c520a5971d951ac81e26e1896176ad3d6e95ffdf34fc6c47d",
     "clv_odds_pct": 0.0,
     "clv_status": "COMPUTABLE"
   },
@@ -107076,7 +107076,7 @@
     "pick_snapshot_id": "461679defb484cad505508265dc2e204f4335994341871585f098e673625a1c7",
     "closing_odd": 2.05,
     "closing_odds_captured_at": "2026-09-08T17:48:54.766414+00:00",
-    "closing_snapshot_id": "2a3493cac12defe0a240139fd9b830c53b679063217ad100609b28668f468668",
+    "closing_snapshot_id": "567cfa839e88c18953beabbd959c8da2ff6e0690c99e29ca4bb2bf33f1007690",
     "clv_odds_pct": 0.097561,
     "clv_status": "COMPUTABLE"
   },
@@ -109683,7 +109683,7 @@
     "pick_snapshot_id": "fc00379de2c4f3063185c0d5b1dc3ea9eaf570b4215186914814e2a0f151bc19",
     "closing_odd": 3.6,
     "closing_odds_captured_at": "2026-09-09T16:17:31.850421+00:00",
-    "closing_snapshot_id": "609180b4dd933b9753a7563200193f24ddaa579b5b47275f75a3050826879591",
+    "closing_snapshot_id": "fe5703d65e06eea0b8ba5b5910abc0f00c170a4150a21bd382c7240e56b1e9d1",
     "clv_odds_pct": -0.027778,
     "clv_status": "COMPUTABLE"
   },
@@ -109890,7 +109890,7 @@
     "pick_snapshot_id": "f530ac771e0ad1fa7ad5714b1e915bd6806997910e9fede86894806c03623de1",
     "closing_odd": 2.35,
     "closing_odds_captured_at": "2026-09-09T16:17:31.850421+00:00",
-    "closing_snapshot_id": "095911b36406d46ac1e77038679e5c339b652f99ac2e4931c79cf92c0a25fcb2",
+    "closing_snapshot_id": "abeae0e2e76ea5ddde990a6736f5f2c5c829ea5118500fd022596b5649038408",
     "clv_odds_pct": -0.042553,
     "clv_status": "COMPUTABLE"
   },
@@ -110592,7 +110592,7 @@
     "pick_snapshot_id": "d1a752f7ebde1bca617d12c925ebd95506578a17d56c55f7c037ac554bfdb0ca",
     "closing_odd": 2.28,
     "closing_odds_captured_at": "2026-09-09T16:17:31.850421+00:00",
-    "closing_snapshot_id": "d4eecc773026f8d70bc5ef0fc67e4eefcf47f7ee69d400ec4b345472bb60b5e8",
+    "closing_snapshot_id": "d69d199f11a4d98d7e29dff18a6ed5e6fef00526ccdc83a800aebfe4c994b0f7",
     "clv_odds_pct": -0.052632,
     "clv_status": "COMPUTABLE"
   },
@@ -113539,7 +113539,7 @@
     "pick_snapshot_id": "009ab53f67f1a9710d9475a80846abb03b905c8339487b6deddfc3222c0b5cf9",
     "closing_odd": null,
     "closing_odds_captured_at": null,
-    "closing_snapshot_id": null,
+    "closing_snapshot_id": "a509ba6cb06f815ed93ecefbec74afc2504a8e0caf5f21c7356b4e819e29e5b0",
     "clv_odds_pct": null,
     "clv_status": "NOT_COMPUTABLE"
   },

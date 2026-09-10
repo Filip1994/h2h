@@ -1552,8 +1552,9 @@
     "opening_coverage": "UNAVAILABLE",
     "pick_snapshot_id": "009ab53f67f1a9710d9475a80846abb03b905c8339487b6deddfc3222c0b5cf9",
     "pick_coverage": "PROVEN",
-    "closing_coverage": "UNAVAILABLE",
+    "closing_coverage": "PROVEN",
     "lifecycle_coverage": "PARTIAL",
-    "clv_status": "NOT_COMPUTABLE"
+    "clv_status": "NOT_COMPUTABLE",
+    "closing_snapshot_id": "a509ba6cb06f815ed93ecefbec74afc2504a8e0caf5f21c7356b4e819e29e5b0"
   }
 ]
