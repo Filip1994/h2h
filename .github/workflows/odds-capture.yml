@@ -39,12 +39,14 @@ jobs:
       - run: pip install -r requirements.txt
       - name: Capture complete eligible Football universe
         run: python main.py capture-odds
+      - name: Audit exhaustive odds runtime evidence
+        run: python tools/odds_collection_runtime_audit.py
       - name: Audit production operations gate
         run: python tools/audit_production_operations.py
       - name: Commit immutable observations, coverage, quota state and operations evidence
         run: |
           set -euo pipefail
-          files=(odds_collection_budget.json odds_collection_state.json odds_collection_metrics.json production_operations_gate.md data/odds_snapshots.jsonl data/odds_collection_coverage.jsonl data/eligibility_coverage.jsonl data/football_api_quota.json)
+          files=(odds_collection_budget.json odds_collection_state.json odds_collection_metrics.json odds_collection_runtime_audit.json production_operations_gate.md data/odds_snapshots.jsonl data/odds_collection_coverage.jsonl data/eligibility_coverage.jsonl data/football_api_quota.json)
           changed=0
           for file in "${files[@]}"; do
             if [ -e "$file" ] && ! git diff --quiet -- "$file"; then changed=1; fi
