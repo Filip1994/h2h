@@ -1,0 +1,44 @@
+name: Railway Postgres connectivity test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  postgres-test:
+    runs-on: ubuntu-latest
+    env:
+      RAILWAY_DATABASE_URL: ${{ secrets.RAILWAY_DATABASE_URL }}
+      PGSSLMODE: require
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Test Postgres read/write
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if ! command -v psql >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y postgresql-client
+          fi
+
+          test -n "$RAILWAY_DATABASE_URL"
+          TEST_TABLE="_quantumbet_infra_test_${GITHUB_RUN_ID}"
+          trap 'psql "$RAILWAY_DATABASE_URL" -v ON_ERROR_STOP=1 -c "DROP TABLE IF EXISTS \"$TEST_TABLE\";" >/dev/null 2>&1 || true' EXIT
+
+          psql "$RAILWAY_DATABASE_URL" -v ON_ERROR_STOP=1 <<SQL
+          CREATE TABLE "$TEST_TABLE" (
+            id bigint PRIMARY KEY,
+            payload text NOT NULL
+          );
+
+          INSERT INTO "$TEST_TABLE" (id, payload)
+          VALUES (1, 'quantumbet-railway-postgres-ok');
+
+          SELECT payload FROM "$TEST_TABLE" WHERE id = 1;
+          SQL
+
+          RESULT="$(psql "$RAILWAY_DATABASE_URL" -At -v ON_ERROR_STOP=1 -c "SELECT payload FROM \"$TEST_TABLE\" WHERE id = 1;")"
+          test "$RESULT" = "quantumbet-railway-postgres-ok"
+          echo "Postgres read/write verification: PASS"
