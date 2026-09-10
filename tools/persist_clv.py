@@ -84,7 +84,7 @@ def refresh_lifecycle_fields(
     except (KeyError, TypeError, ValueError):
         return
     contract = lifecycle_contract(observations, pick_at=pick_at, kickoff=kickoff)
-    opening = contract["opening"]
+    opening = contract.get("first_seen") or contract.get("opening")
     pick = contract["pick"] or entry
     closing = contract["closing"]
     if opening:
