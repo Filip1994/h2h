@@ -6,7 +6,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-LIFECYCLE_SCHEMA_VERSION = 1
+LIFECYCLE_SCHEMA_VERSION = 2
 CANONICAL_SNAPSHOT_TYPES = {"OPENING", "ENTRY", "INTERMEDIATE", "T5", "CLOSING"}
 
 
@@ -15,12 +15,18 @@ def parse_capture(value: Any) -> datetime | None:
         return None
     try:
         return datetime.fromisoformat(str(value)).astimezone(UTC)
-    except ValueError:
+    except (TypeError, ValueError):
         return None
 
 
-def lifecycle_key(*, fixture_id: int, market: str, bookmaker_id: int) -> tuple[int, str, int]:
-    return int(fixture_id), str(market), int(bookmaker_id)
+def _norm_selection(value: Any) -> str:
+    return str(value or "").strip()
+
+
+def lifecycle_key(
+    *, fixture_id: int, market: str, bookmaker_id: int, selection: str
+) -> tuple[int, str, int, str]:
+    return int(fixture_id), str(market), int(bookmaker_id), _norm_selection(selection)
 
 
 def _load(path: Path) -> list[dict[str, Any]]:
@@ -38,8 +44,22 @@ def _load(path: Path) -> list[dict[str, Any]]:
     return rows
 
 
-def observations_for(path: Path, *, fixture_id: int, market: str, bookmaker_id: int) -> list[dict[str, Any]]:
-    key = lifecycle_key(fixture_id=fixture_id, market=market, bookmaker_id=bookmaker_id)
+def observations_for(
+    path: Path,
+    *,
+    fixture_id: int,
+    market: str,
+    bookmaker_id: int,
+    selection: str | None = None,
+) -> list[dict[str, Any]]:
+    """Return exact fixture/market/bookmaker/selection observations in capture order."""
+    selection_norm = _norm_selection(selection or market)
+    key = lifecycle_key(
+        fixture_id=fixture_id,
+        market=market,
+        bookmaker_id=bookmaker_id,
+        selection=selection_norm,
+    )
     rows = []
     for item in _load(path):
         try:
@@ -47,6 +67,7 @@ def observations_for(path: Path, *, fixture_id: int, market: str, bookmaker_id: 
                 fixture_id=int(item["fixture_id"]),
                 market=str(item["market"]),
                 bookmaker_id=int(item["bookmaker_id"]),
+                selection=str(item.get("selection") or item["market"]),
             )
         except (KeyError, TypeError, ValueError):
             continue
@@ -56,16 +77,15 @@ def observations_for(path: Path, *, fixture_id: int, market: str, bookmaker_id: 
     return rows
 
 
+def select_first_seen(observations: list[dict[str, Any]]) -> dict[str, Any] | None:
+    """Earliest valid persisted observation. No look-ahead and no snapshot-type guesswork."""
+    return observations[0] if observations else None
+
+
 def select_opening(observations: list[dict[str, Any]], pick_at: datetime) -> dict[str, Any] | None:
-    pick_at = pick_at.astimezone(UTC)
-    candidates = [
-        item
-        for item in observations
-        if str(item.get("snapshot_type")) in {"OPENING", "INTERMEDIATE"}
-        and (captured := parse_capture(item.get("odds_captured_at"))) is not None
-        and captured <= pick_at
-    ]
-    return candidates[0] if candidates else None
+    """Legacy alias retained for compatibility; canonical semantics are FIRST_SEEN."""
+    del pick_at
+    return select_first_seen(observations)
 
 
 def select_pick(observations: list[dict[str, Any]], pick_at: datetime) -> dict[str, Any] | None:
@@ -76,9 +96,25 @@ def select_pick(observations: list[dict[str, Any]], pick_at: datetime) -> dict[s
         if str(item.get("snapshot_type")) == "ENTRY"
         and parse_capture(item.get("odds_captured_at")) == pick_at
     ]
-    if entries:
-        return entries[-1]
-    return None
+    return entries[-1] if entries else None
+
+
+def select_live(
+    observations: list[dict[str, Any]],
+    *,
+    build_at: datetime,
+    kickoff: datetime | None,
+) -> dict[str, Any] | None:
+    """Latest persisted observation available at build time and never after kickoff."""
+    build_at = build_at.astimezone(UTC)
+    cutoff = min(build_at, kickoff.astimezone(UTC)) if kickoff else build_at
+    candidates = [
+        item
+        for item in observations
+        if (captured := parse_capture(item.get("odds_captured_at"))) is not None
+        and captured <= cutoff
+    ]
+    return candidates[-1] if candidates else None
 
 
 def select_closing(
@@ -89,7 +125,7 @@ def select_closing(
     window_min_seconds: int = 120,
     window_max_seconds: int = 480,
 ) -> dict[str, Any] | None:
-    """Resolve closing from immutable observations, with honest recovery."""
+    """Resolve closing from immutable observations, with honest pre-kickoff recovery."""
     kickoff = kickoff.astimezone(UTC)
     pick_at = pick_at.astimezone(UTC) if pick_at else None
     t5_candidates: list[dict[str, Any]] = []
@@ -122,44 +158,113 @@ def clv_from_odds(pick_odd: Any, closing_odd: Any) -> float | None:
     return round((pick / closing) - 1.0, 6)
 
 
-def lifecycle_contract(observations: list[dict[str, Any]], *, pick_at: datetime, kickoff: datetime | None) -> dict[str, Any]:
-    opening = select_opening(observations, pick_at)
-    pick = select_pick(observations, pick_at)
-    closing = select_closing(observations, kickoff, pick_at=pick_at) if kickoff else None
-    opening_reason = None if opening else "NO_EARLIER_OBSERVATION"
-    pick_reason = None if pick else "NO_EXACT_ENTRY_OBSERVATION"
-    closing_recovered = bool(
-        closing and str(closing.get("snapshot_type") or "") not in {"T5", "CLOSING"}
-    )
-    closing_reason = None if closing else ("NO_VALID_PRE_KICKOFF_CLOSE" if kickoff else "KICKOFF_UNAVAILABLE")
+def _timeline_entry(item: dict[str, Any], marker: str | None = None) -> dict[str, Any]:
     return {
-        "schema_version": LIFECYCLE_SCHEMA_VERSION,
-        "opening": opening,
-        "pick": pick,
-        "closing": closing,
-        "opening_available": opening is not None,
-        "pick_available": pick is not None,
-        "closing_available": closing is not None,
-        "opening_observation_id": opening.get("observation_id") if opening else None,
-        "pick_observation_id": pick.get("observation_id") if pick else None,
-        "closing_observation_id": closing.get("observation_id") if closing else None,
-        "closing_recovered": closing_recovered,
-        "closing_snapshot_type": closing.get("snapshot_type") if closing else None,
-        "opening_unavailable_reason": opening_reason,
-        "pick_unavailable_reason": pick_reason,
-        "closing_unavailable_reason": closing_reason,
-        "coverage": "FULLY_AUDITABLE" if opening and pick and closing else "PARTIAL" if opening or pick or closing else "UNRECOVERABLE",
-        "clv_odds_pct": clv_from_odds(pick.get("odd") if pick else None, closing.get("odd") if closing else None),
-        "clv_available": bool(pick and closing),
-        "clv_status": "COMPUTABLE" if pick and closing else "NOT_COMPUTABLE",
+        "observation_id": item.get("observation_id"),
+        "odd": item.get("odd"),
+        "opposite_odd": item.get("opposite_odd"),
+        "captured_at": item.get("odds_captured_at"),
+        "snapshot_type": item.get("snapshot_type"),
+        "bookmaker_id": item.get("bookmaker_id"),
+        "bookmaker": item.get("bookmaker"),
+        "selection": item.get("selection"),
+        "marker": marker,
     }
 
 
-def canonical_observation(*, fixture_id: int, market: str, bookmaker_id: int, bookmaker: str, odd: float, opposite_odd: float, captured_at: datetime, snapshot_type: str, prediction_id: str | None = None, signal_id: str | None = None, bet_id: str | None = None, source_endpoint: str = "odds", source_request_hash: str | None = None, captured_by: str = "UNKNOWN") -> dict[str, Any]:
+def lifecycle_contract(
+    observations: list[dict[str, Any]],
+    *,
+    pick_at: datetime,
+    kickoff: datetime | None,
+    build_at: datetime | None = None,
+) -> dict[str, Any]:
+    build_at = (build_at or datetime.now(UTC)).astimezone(UTC)
+    first_seen = select_first_seen(observations)
+    pick = select_pick(observations, pick_at)
+    live = select_live(observations, build_at=build_at, kickoff=kickoff) if kickoff else select_live(observations, build_at=build_at, kickoff=None)
+    closing = select_closing(observations, kickoff, pick_at=pick_at) if kickoff else None
+    closing_recovered = bool(
+        closing and str(closing.get("snapshot_type") or "") not in {"T5", "CLOSING"}
+    )
+
+    timeline_source = [
+        item
+        for item in observations
+        if (captured := parse_capture(item.get("odds_captured_at"))) is not None
+        and captured <= build_at
+        and (kickoff is None or captured <= kickoff)
+    ]
+    markers: dict[str, str] = {}
+    if first_seen and first_seen.get("observation_id"):
+        markers[str(first_seen["observation_id"])] = "FIRST_SEEN"
+    if pick and pick.get("observation_id"):
+        markers[str(pick["observation_id"])] = "PICK"
+    if live and live.get("observation_id"):
+        markers[str(live["observation_id"])] = "LIVE"
+    if closing and closing.get("observation_id"):
+        markers[str(closing["observation_id"])] = "CLOSE"
+    timeline = [
+        _timeline_entry(item, markers.get(str(item.get("observation_id"))))
+        for item in timeline_source
+    ]
+
+    first_reason = None if first_seen else "NO_PERSISTED_OBSERVATION"
+    pick_reason = None if pick else "NO_EXACT_ENTRY_OBSERVATION"
+    live_reason = None if live else "NO_VALID_PRE_KICKOFF_OBSERVATION_AT_BUILD"
+    close_reason = None if closing else ("NO_VALID_PRE_KICKOFF_CLOSE" if kickoff else "KICKOFF_UNAVAILABLE")
+    return {
+        "schema_version": LIFECYCLE_SCHEMA_VERSION,
+        "first_seen": first_seen,
+        "pick": pick,
+        "live": live,
+        "closing": closing,
+        "first_seen_available": first_seen is not None,
+        "pick_available": pick is not None,
+        "live_available": live is not None,
+        "closing_available": closing is not None,
+        "first_seen_observation_id": first_seen.get("observation_id") if first_seen else None,
+        "pick_observation_id": pick.get("observation_id") if pick else None,
+        "live_observation_id": live.get("observation_id") if live else None,
+        "closing_observation_id": closing.get("observation_id") if closing else None,
+        "live_captured_at": live.get("odds_captured_at") if live else None,
+        "closing_recovered": closing_recovered,
+        "closing_snapshot_type": closing.get("snapshot_type") if closing else None,
+        "first_seen_unavailable_reason": first_reason,
+        "pick_unavailable_reason": pick_reason,
+        "live_unavailable_reason": live_reason,
+        "closing_unavailable_reason": close_reason,
+        "coverage": "FULLY_AUDITABLE" if first_seen and pick and closing else "PARTIAL" if first_seen or pick or live or closing else "UNRECOVERABLE",
+        "clv_odds_pct": clv_from_odds(pick.get("odd") if pick else None, closing.get("odd") if closing else None),
+        "clv_available": bool(pick and closing),
+        "clv_status": "COMPUTABLE" if pick and closing else "NOT_COMPUTABLE",
+        "timeline": timeline,
+    }
+
+
+def canonical_observation(
+    *,
+    fixture_id: int,
+    market: str,
+    bookmaker_id: int,
+    bookmaker: str,
+    odd: float,
+    opposite_odd: float,
+    captured_at: datetime,
+    snapshot_type: str,
+    selection: str | None = None,
+    prediction_id: str | None = None,
+    signal_id: str | None = None,
+    bet_id: str | None = None,
+    source_endpoint: str = "odds",
+    source_request_hash: str | None = None,
+    captured_by: str = "UNKNOWN",
+) -> dict[str, Any]:
     if snapshot_type not in CANONICAL_SNAPSHOT_TYPES:
         raise ValueError(f"Unsupported canonical snapshot type: {snapshot_type}")
     captured_iso = captured_at.astimezone(UTC).isoformat()
-    identity = "|".join((str(int(fixture_id)), str(market), str(int(bookmaker_id)), captured_iso, f"{float(odd):.4f}", f"{float(opposite_odd):.4f}", snapshot_type))
+    selection_norm = _norm_selection(selection or market)
+    identity = "|".join((str(int(fixture_id)), str(market), str(int(bookmaker_id)), selection_norm, captured_iso, f"{float(odd):.4f}", f"{float(opposite_odd):.4f}", snapshot_type))
     observation_id = hashlib.sha256(identity.encode("utf-8")).hexdigest()
     return {
         "schema_version": LIFECYCLE_SCHEMA_VERSION,
@@ -168,7 +273,7 @@ def canonical_observation(*, fixture_id: int, market: str, bookmaker_id: int, bo
         "market": str(market),
         "bookmaker_id": int(bookmaker_id),
         "bookmaker": str(bookmaker),
-        "selection": str(market),
+        "selection": selection_norm,
         "odd": round(float(odd), 4),
         "opposite_odd": round(float(opposite_odd), 4),
         "odds_captured_at": captured_iso,
@@ -188,9 +293,4 @@ def within_t5_window(captured_at: datetime, kickoff: datetime) -> bool:
 
 
 def latest_pre_kickoff(observations: list[dict[str, Any]], kickoff: datetime) -> dict[str, Any] | None:
-    kickoff = kickoff.astimezone(UTC)
-    candidates = [
-        item for item in observations
-        if (captured := parse_capture(item.get("odds_captured_at"))) is not None and captured <= kickoff
-    ]
-    return candidates[-1] if candidates else None
+    return select_live(observations, build_at=kickoff, kickoff=kickoff)
