@@ -21,8 +21,8 @@ REQUIRED_JSON = {
     "strong_signals_portfolio.json": dict,
     "near_misses.json": list,
 }
-STATUS_VALUES = {"PENDING", "WIN", "LOSS", "SKIPPED", "SETTLED", "VOID", "REVIEW"}
-TERMINAL = {"WIN", "LOSS", "VOID", "REVIEW"}
+STATUS_VALUES = {"PENDING", "WIN", "LOSS", "SKIPPED", "SETTLED", "VOID", "REVIEW", "PROMOTED", "EXPIRED", "SETTLEMENT_PENDING"}
+TERMINAL = {"WIN", "LOSS", "VOID", "REVIEW", "EXPIRED"}
 
 
 def load_json(name: str):
@@ -47,115 +47,90 @@ def validate_record_shape(name: str, rows: list[object], required: set[str]):
         assert not missing, f"{name}[{index}]: missing {missing}"
         record_id = row.get("id")
         if record_id is not None:
-            assert str(record_id) not in ids, (
-                f"{name}[{index}]: duplicate id {record_id}"
-            )
+            assert str(record_id) not in ids, f"{name}[{index}]: duplicate id {record_id}"
             ids.add(str(record_id))
         status = row.get("status")
         if status is not None:
-            assert str(status).upper() in STATUS_VALUES, (
-                f"{name}[{index}]: unknown status {status!r}"
-            )
+            assert str(status).upper() in STATUS_VALUES, f"{name}[{index}]: unknown status {status!r}"
         for key in ("odd", "opening_odd", "closing_odd", "closing_5m_odd"):
             value = row.get(key)
             if value is not None:
-                assert isinstance(value, (int, float)) and value > 1.0, (
-                    f"{name}[{index}]: invalid {key}={value!r}"
-                )
+                assert isinstance(value, (int, float)) and value > 1.0, f"{name}[{index}]: invalid {key}={value!r}"
 
 
 def validate_script_reference(page_name: str, script_basename: str) -> str:
-    """Validate the page's actual JS asset reference, including optional cache-busting."""
     text = (ROOT / page_name).read_text(encoding="utf-8")
-    pattern = re.compile(
-        rf'<script[^>]+src=["\'](?P<src>\./assets/{re.escape(script_basename)}(?:\?[^"\']*)?)["\']',
-        re.IGNORECASE,
-    )
+    pattern = re.compile(rf'<script[^>]+src=["\'](?P<src>\./assets/{re.escape(script_basename)}(?:\?[^"\']*)?)["\']', re.IGNORECASE)
     match = pattern.search(text)
     assert match, f"{page_name}: missing reference to {script_basename}"
     src = match.group("src")
     asset_path = src.removeprefix("./").split("?", 1)[0]
-    assert (ROOT / asset_path).is_file(), (
-        f"{page_name}: referenced asset does not exist: {src}"
-    )
+    assert (ROOT / asset_path).is_file(), f"{page_name}: referenced asset does not exist: {src}"
     return src
+
+
+def validate_near_miss_contract(rows: list[dict]) -> None:
+    required = {
+        "schema_version", "prediction_id", "fixture_id", "event_id", "market", "selection",
+        "home_name", "away_name", "match", "league", "kickoff", "bookmaker_id", "bookmaker",
+        "near_miss_reason", "opening_odd", "opening_captured_at", "near_miss_odd", "near_miss_captured_at",
+        "pick_odd", "pick_captured_at", "closing_odd", "closing_captured_at", "transition_history",
+        "result", "settled_at", "settlement_type", "not_a_production_bet",
+    }
+    for index, row in enumerate(rows):
+        missing = sorted(required - row.keys())
+        assert not missing, f"near_misses.json[{index}]: missing {missing}"
+        assert row["schema_version"] >= 3
+        assert row["not_a_production_bet"] is True
+        assert isinstance(row["transition_history"], list)
+        for field in ("home_name", "away_name", "match", "league", "kickoff", "bookmaker"):
+            assert str(row.get(field) or "").strip(), f"near_misses.json[{index}]: missing canonical {field}"
+        status = str(row.get("status") or "").upper()
+        assert status in STATUS_VALUES, f"near_misses.json[{index}]: invalid lifecycle status {status!r}"
+        if status in {"PENDING", "PROMOTED", "SETTLEMENT_PENDING"}:
+            assert row.get("kickoff"), f"near_misses.json[{index}]: active row missing kickoff"
 
 
 def main() -> int:
     for name, expected_type in REQUIRED_JSON.items():
         value = load_json(name)
         assert value is not None, f"missing public artifact: {name}"
-        assert isinstance(value, expected_type), (
-            f"{name}: expected {expected_type.__name__}"
-        )
-
+        assert isinstance(value, expected_type), f"{name}: expected {expected_type.__name__}"
     bets = records("bets.json")
     strong = records("strong_signals.json")
     ledger = records("strong_signal_ledger.json")
     near = records("near_misses.json")
     portfolio = load_json("strong_signals_portfolio.json")
     meta = load_json("ledger_meta.json")
-
     validate_record_shape("bets.json", bets, {"id"})
-    validate_record_shape(
-        "strong_signals.json",
-        strong,
-        {"id", "signal_class", "not_a_production_bet", "virtual_portfolio", "status"},
-    )
+    validate_record_shape("strong_signals.json", strong, {"id", "signal_class", "not_a_production_bet", "virtual_portfolio", "status"})
     validate_record_shape("strong_signal_ledger.json", ledger, {"id"})
     validate_record_shape("near_misses.json", near, {"id", "signal_class", "status"})
-
+    validate_near_miss_contract(near)
     assert isinstance(meta, dict)
     assert isinstance(portfolio, dict)
     assert portfolio.get("production") is False
     assert float(portfolio.get("initial_bank", 0)) == 10000.0
     assert len(str(portfolio.get("virtual_portfolio", "STRONG_SIGNALS_VIRTUAL"))) > 0
-
-    assert len(strong) == len(ledger), (
-        "Strong Signal public dataset diverges from canonical ledger"
-    )
-    assert all(
-        str(x.get("signal_class", "")).upper() == "STRONG_SIGNAL" for x in strong
-    )
+    assert len(strong) == len(ledger), "Strong Signal public dataset diverges from canonical ledger"
+    assert all(str(x.get("signal_class", "")).upper() == "STRONG_SIGNAL" for x in strong)
     assert all(x.get("not_a_production_bet") is True for x in strong)
     assert all(x.get("virtual_portfolio") == "STRONG_SIGNALS_VIRTUAL" for x in strong)
     for row in strong:
         terminal = str(row.get("status", "")).upper() in TERMINAL
-        assert bool(row.get("virtual_settled")) == terminal, (
-            f"Strong status/settlement mismatch for {row.get('id')}"
-        )
+        assert bool(row.get("virtual_settled")) == terminal, f"Strong status/settlement mismatch for {row.get('id')}"
         profit = float(row.get("virtual_profit") or 0.0)
-        assert profit == (float(row.get("profit") or 0.0) if terminal else 0.0), (
-            f"Strong P/L contamination for {row.get('id')}"
-        )
-
+        assert profit == (float(row.get("profit") or 0.0) if terminal else 0.0), f"Strong P/L contamination for {row.get('id')}"
     for name, page_key in PAGES.items():
         text = (ROOT / name).read_text(encoding="utf-8")
-        assert f'<body data-page="{page_key}">' in text, (
-            f"{name}: missing page identity"
-        )
-        assert 'aria-current="page"' in text and 'class="active"' in text, (
-            f"{name}: missing active navigation"
-        )
+        assert f'<body data-page="{page_key}">' in text, f"{name}: missing page identity"
+        assert 'aria-current="page"' in text and 'class="active"' in text, f"{name}: missing active navigation"
         assert "./assets/qb-dashboard.css" in text
-        assert (
-            'meta name="viewport" content="width=device-width,initial-scale=1"' in text
-        )
-
+        assert 'meta name="viewport" content="width=device-width,initial-scale=1"' in text
     js = (ROOT / "assets" / "qb-dashboard.js").read_text(encoding="utf-8")
     strong_js = (ROOT / "assets" / "strong-signals.js").read_text(encoding="utf-8")
-    subprocess.run(
-        ["node", "--check", str(ROOT / "assets" / "qb-dashboard.js")],
-        check=True,
-        capture_output=True,
-        text=True,
-    )
-    subprocess.run(
-        ["node", "--check", str(ROOT / "assets" / "strong-signals.js")],
-        check=True,
-        capture_output=True,
-        text=True,
-    )
+    subprocess.run(["node", "--check", str(ROOT / "assets" / "qb-dashboard.js")], check=True, capture_output=True, text=True)
+    subprocess.run(["node", "--check", str(ROOT / "assets" / "strong-signals.js")], check=True, capture_output=True, text=True)
     assert "function renderStrong" in js
     assert "renderBucket" in js
     assert "const production = bets =>" in js
@@ -171,10 +146,7 @@ def main() -> int:
     assert "STRONG SIGNAL" in strong_js
     assert "Promise.all" in strong_js
     referenced = validate_script_reference("strong-signals.html", "strong-signals.js")
-    print(
-        f"PASS public dashboard contract: bets={len(bets)} strong={len(strong)} near={len(near)} "
-        f"strong_asset={referenced}"
-    )
+    print(f"PASS public dashboard contract: bets={len(bets)} strong={len(strong)} near={len(near)} strong_asset={referenced}")
     return 0
 
 
