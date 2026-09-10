@@ -95,19 +95,23 @@ def main() -> int:
     meta = load_json(ROOT / "ledger_meta.json", {})
     metrics = load_json(METRICS, {})
     snapshots = load_jsonl(SNAPSHOTS)
-    scan_at = parse_dt(metrics.get("timestamp"))
+    run_at = parse_dt(metrics.get("timestamp"))
+    requests_this_run = int(metrics.get("api_requests_used_this_run") or 0)
     last_snapshot = max((parse_dt(r.get("odds_captured_at")) for r in snapshots), default=None)
-    scan_age = max(0.0, (now - scan_at).total_seconds() / 60.0) if scan_at else None
+    run_age = max(0.0, (now - run_at).total_seconds() / 60.0) if run_at else None
+    run_state = "FRESH" if run_age is not None and run_age <= 15 and requests_this_run > 0 else "RUN_NO_API" if run_age is not None and run_age <= 15 else "STALE" if run_age is not None else "NO_RUN"
     output = {
-        "schema_version": 3,
+        "schema_version": 4,
         "generated_at": now.isoformat(),
         "truth": "data/odds_snapshots.jsonl + bets.json",
         "monitoring": {
-            "last_odds_scan_at": scan_at.isoformat() if scan_at else None,
+            "last_collector_run_at": run_at.isoformat() if run_at else None,
+            "last_odds_scan_at": run_at.isoformat() if run_at and requests_this_run > 0 else None,
             "last_snapshot_at": last_snapshot.isoformat() if last_snapshot else None,
-            "scan_age_minutes": scan_age,
-            "scan_state": "FRESH" if scan_age is not None and scan_age <= 15 else "STALE" if scan_age is not None else "NO_SCAN",
-            "api_requests_last_scan": metrics.get("api_requests_used_this_run"),
+            "collector_run_age_minutes": run_age,
+            "scan_age_minutes": run_age if requests_this_run > 0 else None,
+            "scan_state": run_state,
+            "api_requests_last_scan": requests_this_run,
             "daily_budget_used": metrics.get("daily_budget_used"),
             "daily_budget_remaining": metrics.get("daily_budget_remaining"),
             "observations_last_scan": metrics.get("observations_captured"),
