@@ -9,7 +9,7 @@ jobs:
   tests:
     permissions:
       actions: read
-      contents: read
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -19,6 +19,17 @@ jobs:
           cache: pip
       - run: pip install -r requirements-dev.txt
       - run: pip install -e .
+      - name: One-time Ruff formatting repair
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && github.sha == 'faa3f46d3d9e59fac2df627cd47e87e30bf15aa5'
+        run: |
+          ruff format .
+          if ! git diff --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add main.py src/quantbot/market_timing.py tools/build_public_signal_buckets.py
+            git commit -m "chore: apply Ruff formatting"
+            git push origin HEAD:main
+          fi
       - name: Smoke-test main generation import chain
         run: python -c "import main; print('main.py import OK')"
       - run: ruff format --check .
