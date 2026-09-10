@@ -123,7 +123,7 @@ class Settings:
             api_usage_file=root / "api_usage.json",
             api_usage_history_file=root / "api_usage_history.json",
             cache_dir=root / ".cache" / "api",
-            initial_bank=_float("INITIAL_BANK_RSD", 50_000.0),
+            initial_bank=_float("INITIAL_BANK_RSD", 30_000.0),
             paper_mode=_bool("PAPER_MODE", True),
             allow_uncalibrated_live=_bool("ALLOW_UNCALIBRATED_LIVE", False),
             min_odd=_float("MIN_ODD", 1.45),
