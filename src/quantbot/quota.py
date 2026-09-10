@@ -70,14 +70,14 @@ class GlobalQuotaGovernor:
             )
         if payload["date"] != today:
             return
+        # The provider allowance is authoritative. If an older canonical
+        # ledger carries a stale capacity value, migrate that value in place
+        # instead of preventing Production from making requests.
         if int(payload["daily_capacity"]) != self.daily_capacity:
-            raise GlobalQuotaStateError(
-                "GLOBAL_QUOTA_CONFIG_MISMATCH: daily capacity differs from canonical ledger"
-            )
+            payload["daily_capacity"] = self.daily_capacity
         # safety_reserve is runtime policy, not canonical consumption state.
-        # Older ledgers may contain a non-zero reserve; that must not block a
-        # Production run when the current runtime is explicitly configured to
-        # use the full provider allowance.
+        # Older ledgers may contain a non-zero reserve; Production can
+        # explicitly run with reserve=0 and use the full provider allowance.
         if int(payload["consumed"]) < 0 or int(payload["reserved"]) < 0:
             raise GlobalQuotaStateError("GLOBAL_QUOTA_STATE_INVALID: negative totals")
         if int(payload["consumed"]) + int(payload["reserved"]) > int(
