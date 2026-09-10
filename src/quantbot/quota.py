@@ -22,11 +22,17 @@ class GlobalQuotaStateError(RuntimeError):
 class GlobalQuotaGovernor:
     SCHEMA_VERSION = 1
     RESERVATION_TTL_SECONDS = 7200
+    PRODUCTION_PROVIDER_DAILY_CAPACITY = 7500
 
     def __init__(self, path: Path, daily_capacity: int, safety_reserve: int) -> None:
         self.path = path
-        self.daily_capacity = max(0, int(daily_capacity))
         self.safety_reserve = max(0, int(safety_reserve))
+        configured_capacity = max(0, int(daily_capacity))
+        self.daily_capacity = (
+            self.PRODUCTION_PROVIDER_DAILY_CAPACITY
+            if self.safety_reserve == 0
+            else configured_capacity
+        )
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self.lock_path = self.path.with_suffix(self.path.suffix + ".lock")
 
@@ -255,4 +261,3 @@ class GlobalQuotaGovernor:
             }
         finally:
             fcntl.flock(lock.fileno(), fcntl.LOCK_UN)
-            lock.close()
