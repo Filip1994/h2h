@@ -5,6 +5,7 @@ from quantbot.odds_lifecycle import (
     canonical_observation,
     clv_from_odds,
     lifecycle_contract,
+    observations_for,
     select_closing,
     select_first_seen,
     select_live,
@@ -47,17 +48,27 @@ def test_first_seen_is_earliest_persisted_observation_independent_of_snapshot_ty
     assert select_opening(rows, base + timedelta(minutes=45))["odd"] == 1.9
 
 
-def test_first_seen_keeps_selection_isolated():
-    base = datetime(2026, 9, 9, 10, tzinfo=UTC)
-    over = observation(base + timedelta(minutes=10), 1.9, selection="OVER_2_5")
-    under = observation(
-        base + timedelta(minutes=5),
-        2.2,
-        selection="UNDER_2_5",
-        market="UNDER_2_5",
+def test_observations_for_keeps_selection_isolated(tmp_path):
+    path = tmp_path / "odds_snapshots.jsonl"
+    path.write_text(
+        "\n".join(
+            json.dumps(x)
+            for x in (
+                observation(datetime(2026, 9, 9, 10, tzinfo=UTC), 2.0, selection="OVER_2_5"),
+                observation(datetime(2026, 9, 9, 10, tzinfo=UTC), 2.2, market="UNDER_2_5", selection="UNDER_2_5"),
+            )
+        )
+        + "\n"
     )
-    assert over["selection"] == "OVER_2_5"
-    assert under["selection"] == "UNDER_2_5"
+    rows = observations_for(
+        path,
+        fixture_id=1601522,
+        market="OVER_2_5",
+        bookmaker_id=8,
+        selection="OVER_2_5",
+    )
+    assert len(rows) == 1
+    assert rows[0]["selection"] == "OVER_2_5"
 
 
 def test_pick_requires_exact_entry_timestamp():
@@ -87,11 +98,18 @@ def test_live_is_latest_persisted_at_build_and_never_after_kickoff():
     ]
     live = select_live(rows, build_at=base + timedelta(minutes=95), kickoff=kickoff)
     assert live["odd"] == 1.95
-    assert parse_dt_for_test(live["odds_captured_at"]) < kickoff
+    assert datetime.fromisoformat(live["odds_captured_at"]).astimezone(UTC) < kickoff
 
 
-def parse_dt_for_test(value: str) -> datetime:
-    return datetime.fromisoformat(value).astimezone(UTC)
+def test_live_uses_build_time_cutoff():
+    base = datetime(2026, 9, 9, 10, tzinfo=UTC)
+    kickoff = base + timedelta(hours=2)
+    rows = [
+        observation(base + timedelta(minutes=70), 2.0, "INTERMEDIATE"),
+        observation(base + timedelta(minutes=90), 1.95, "INTERMEDIATE"),
+    ]
+    live = select_live(rows, build_at=base + timedelta(minutes=80), kickoff=kickoff)
+    assert live["odd"] == 2.0
 
 
 def test_closing_is_only_t5_window_and_pre_kickoff():
