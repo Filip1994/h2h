@@ -225,17 +225,95 @@ def _public_strong_event(
     out["not_a_production_bet"] = True
     out.setdefault("virtual_profit", 0.0)
     out.setdefault("profit", 0.0)
-    out.setdefault(
-        "virtual_settled",
-        str(out.get("status") or "PENDING").upper() in TERMINAL_STATUSES,
-    )
-    if out["virtual_settled"]:
-        out["virtual_status"] = str(out.get("status") or "PENDING").upper()
-        out["virtual_profit"] = float(
-            out.get("virtual_profit") or out.get("profit") or 0.0
-        )
-        out["profit"] = out["virtual_profit"]
+    out.setdefault("virtual_settled", False)
     return out
+
+
+def _legacy_near_miss_projection(
+    observations: list[dict[str, Any]], alerts: list[dict[str, Any]],
+    represented_ids: set[str],
+) -> list[dict[str, Any]]:
+    """Keep old observational rows visible without fabricating lifecycle stages."""
+    alerts_by_prediction = {
+        str(row.get("prediction_id")): row
+        for row in alerts
+        if row.get("prediction_id") is not None
+    }
+    result: list[dict[str, Any]] = []
+    for row in observations:
+        if str(row.get("signal_class") or row.get("signal_state") or "").upper() != "NEAR_MISS":
+            continue
+        observation_id = str(row.get("observation_id") or "")
+        if observation_id and observation_id in represented_ids:
+            continue
+        alert = alerts_by_prediction.get(str(row.get("prediction_id") or ""), {})
+        match = row.get("match") or alert.get("match")
+        home = row.get("home_name") or alert.get("home_name")
+        away = row.get("away_name") or alert.get("away_name")
+        if not match and home and away:
+            match = f"{home} vs {away}"
+        result.append(
+            {
+                "schema_version": 3,
+                "id": observation_id or f"near:{row.get('prediction_id')}:{row.get('captured_at')}",
+                "signal_class": "NEAR_MISS",
+                "signal_type": "NEAR_MISS_OBSERVATION",
+                "not_a_production_bet": True,
+                "prediction_id": row.get("prediction_id"),
+                "event_id": row.get("fixture_id") or row.get("event_id"),
+                "fixture_id": row.get("fixture_id") or row.get("event_id"),
+                "market": row.get("market"),
+                "selection": row.get("selection") or row.get("market"),
+                "market_display": row.get("market_display") or row.get("market"),
+                "home_name": home,
+                "away_name": away,
+                "match": match,
+                "league": row.get("league") or alert.get("league"),
+                "kickoff": row.get("kickoff") or alert.get("kickoff"),
+                "bookmaker_id": row.get("bookmaker_id") or alert.get("bookmaker_id"),
+                "bookmaker": row.get("bookmaker") or alert.get("bookmaker"),
+                "opening_odd": None,
+                "opening_opposite_odd": None,
+                "opening_captured_at": None,
+                "opening_observation_id": None,
+                "odd": row.get("odd"),
+                "opposite_odd": row.get("opposite_odd"),
+                "near_miss_odd": row.get("odd"),
+                "near_miss_opposite_odd": row.get("opposite_odd"),
+                "near_miss_captured_at": row.get("captured_at"),
+                "near_miss_observation_id": observation_id or None,
+                "pick_odd": None,
+                "pick_opposite_odd": None,
+                "pick_captured_at": None,
+                "pick_observation_id": None,
+                "promoted_to_signal_id": None,
+                "closing_odd": None,
+                "closing_opposite_odd": None,
+                "closing_captured_at": None,
+                "closing_observation_id": None,
+                "clv_odds_pct": None,
+                "model_probability": row.get("model_probability"),
+                "calibrated_probability": row.get("calibrated_probability"),
+                "decision_probability": row.get("decision_probability"),
+                "probability_edge": row.get("probability_edge"),
+                "expected_value": row.get("expected_value"),
+                "stake": row.get("stake", row.get("virtual_stake", 0)),
+                "near_miss_reason": row.get("near_miss_reason"),
+                "transition_history": [],
+                "status": "PENDING",
+                "result": None,
+                "settled_at": None,
+                "settlement_type": None,
+                "virtual_portfolio": "NEAR_MISS_OBSERVATIONAL",
+                "virtual_settled": False,
+                "profit": 0.0,
+                "virtual_profit": 0.0,
+                "signal_sent_at": row.get("captured_at"),
+                "source_observation_ids": [observation_id] if observation_id else [],
+                "production_linked_bet_id": None,
+            }
+        )
+    return result
 
 
 def build(root: Path = ROOT) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
@@ -245,6 +323,14 @@ def build(root: Path = ROOT) -> tuple[list[dict[str, Any]], list[dict[str, Any]]
     alerts = load_json(root / "intraday_alerts.json")
     observations = load_jsonl(root / "data" / "market_timing_snapshots.jsonl")
     signal_events = load_jsonl(root / EVENT_FILE)
+
+    represented_ids = {
+        str(row.get("near_miss_observation_id"))
+        for row in near
+        if row.get("near_miss_observation_id")
+    }
+    near.extend(_legacy_near_miss_projection(observations, alerts, represented_ids))
+    near.sort(key=lambda row: str(row.get("signal_sent_at") or row.get("kickoff") or ""))
 
     observation_lookup: dict[str, dict[str, Any]] = {}
     for observation in observations:
