@@ -230,7 +230,8 @@ def _public_strong_event(
 
 
 def _legacy_near_miss_projection(
-    observations: list[dict[str, Any]], alerts: list[dict[str, Any]],
+    observations: list[dict[str, Any]],
+    alerts: list[dict[str, Any]],
     represented_ids: set[str],
 ) -> list[dict[str, Any]]:
     """Keep old observational rows visible without fabricating lifecycle stages."""
@@ -241,7 +242,10 @@ def _legacy_near_miss_projection(
     }
     result: list[dict[str, Any]] = []
     for row in observations:
-        if str(row.get("signal_class") or row.get("signal_state") or "").upper() != "NEAR_MISS":
+        if (
+            str(row.get("signal_class") or row.get("signal_state") or "").upper()
+            != "NEAR_MISS"
+        ):
             continue
         observation_id = str(row.get("observation_id") or "")
         if observation_id and observation_id in represented_ids:
@@ -255,7 +259,8 @@ def _legacy_near_miss_projection(
         result.append(
             {
                 "schema_version": 3,
-                "id": observation_id or f"near:{row.get('prediction_id')}:{row.get('captured_at')}",
+                "id": observation_id
+                or f"near:{row.get('prediction_id')}:{row.get('captured_at')}",
                 "signal_class": "NEAR_MISS",
                 "signal_type": "NEAR_MISS_OBSERVATION",
                 "not_a_production_bet": True,
@@ -330,7 +335,9 @@ def build(root: Path = ROOT) -> tuple[list[dict[str, Any]], list[dict[str, Any]]
         if row.get("near_miss_observation_id")
     }
     near.extend(_legacy_near_miss_projection(observations, alerts, represented_ids))
-    near.sort(key=lambda row: str(row.get("signal_sent_at") or row.get("kickoff") or ""))
+    near.sort(
+        key=lambda row: str(row.get("signal_sent_at") or row.get("kickoff") or "")
+    )
 
     observation_lookup: dict[str, dict[str, Any]] = {}
     for observation in observations:
