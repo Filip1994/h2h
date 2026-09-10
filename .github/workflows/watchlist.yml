@@ -9,8 +9,8 @@ permissions:
   contents: write
 
 concurrency:
-  group: quantbet-football-api-global
-  cancel-in-progress: false
+  group: quantbet-watchlist
+  cancel-in-progress: true
 
 env:
   SIGNAL_WRITER_META: watchlist_run_meta.json
@@ -53,6 +53,19 @@ jobs:
           python main.py watchlist | tee watchlist_run_output.json
       - name: Gate scanner fixture discovery and API activity
         run: python tools/watchlist_runtime_gate.py --run-output watchlist_run_output.json
+      - name: Record scanner freshness heartbeat
+        run: python - <<'PY'
+          import json
+          from datetime import UTC, datetime
+          from pathlib import Path
+          payload = {
+              "schema_version": 1,
+              "checked_at": datetime.now(UTC).isoformat(),
+              "workflow_run_id": "${{ github.run_id }}",
+              "workflow_run_attempt": "${{ github.run_attempt }}",
+          }
+          Path("watchlist_freshness.json").write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+          PY
       - name: Build public Strong and Near Miss datasets
         run: python tools/build_public_signal_buckets.py
       - name: Rebuild canonical Near Miss lifecycle dataset
@@ -139,10 +152,10 @@ jobs:
             --path "${SIGNAL_WRITER_META}.pending" \
             --current-path /tmp/current-watchlist-run-meta.json
           mv "${SIGNAL_WRITER_META}.pending" "${SIGNAL_WRITER_META}"
-      - name: Commit watchlist, runtime health, signal history, provenance, quota and bounded API archive
+      - name: Commit watchlist, runtime health, freshness, signal history, provenance, quota and bounded API archive
         run: |
           set -euo pipefail
-          files=(watchlist_run_output.json watchlist_runtime_health.json intraday_watchlist_state.json intraday_alerts.json strong_signal_ledger.json strong_signals.json strong_signals_portfolio.json near_misses.json market_timing_metrics.json "${SIGNAL_WRITER_META}")
+          files=(watchlist_run_output.json watchlist_runtime_health.json watchlist_freshness.json intraday_watchlist_state.json intraday_alerts.json strong_signal_ledger.json strong_signals.json strong_signals_portfolio.json near_misses.json market_timing_metrics.json "${SIGNAL_WRITER_META}")
           changed=0
           for file in "${files[@]}"; do
             if [ -e "$file" ] && ! git diff --quiet -- "$file"; then changed=1; fi
