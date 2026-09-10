@@ -19,6 +19,7 @@ env:
   GMAIL_APP_PASS: ${{ secrets.GMAIL_APP_PASS }}
   EMAIL_TO: ${{ secrets.EMAIL_TO }}
   PAPER_MODE: ${{ vars.PAPER_MODE || 'true' }}
+  INITIAL_BANK_RSD: '30000'
   API_REQUEST_BUDGET: ${{ vars.API_REQUEST_BUDGET || '7500' }}
   API_BUDGET_RESERVE: ${{ vars.API_BUDGET_RESERVE || '500' }}
   TIMEZONE: Europe/Belgrade
