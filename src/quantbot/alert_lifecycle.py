@@ -8,13 +8,7 @@ from typing import Any
 from .api import APIError, APIFootballClient
 from .config import Settings
 from .markets import extract_best_quotes
-from .monitor import (
-    FINISHED_STATUSES,
-    REVIEW_STATUSES,
-    VOID_STATUSES,
-    market_outcome,
-    regulation_score,
-)
+from .monitor import FINISHED_STATUSES, REVIEW_STATUSES, VOID_STATUSES, market_outcome, regulation_score
 from .odds_lifecycle import lifecycle_contract, observations_for
 from .parsing import parse_datetime
 from .persistence import OddsSnapshotStore
@@ -36,10 +30,7 @@ def _load_alerts(root: Path) -> list[dict[str, Any]]:
 
 def _save_alerts(root: Path, alerts: list[dict[str, Any]]) -> None:
     path = root / ALERT_FILE
-    path.write_text(
-        json.dumps(alerts[-1000:], ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-    )
+    path.write_text(json.dumps(alerts[-1000:], ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
 def _clv_pct(entry_odd: float, closing_odd: float) -> float | None:
@@ -66,12 +57,7 @@ def _refresh_opening(alert: dict[str, Any], store_path: Path) -> None:
     try:
         pick_at = parse_datetime(str(alert["odds_captured_at"])).astimezone(UTC)
         kickoff = parse_datetime(str(alert["kickoff"])).astimezone(UTC)
-        observations = observations_for(
-            store_path,
-            fixture_id=int(alert["event_id"]),
-            market=str(alert["market"]),
-            bookmaker_id=int(alert["bookmaker_id"]),
-        )
+        observations = observations_for(store_path, fixture_id=int(alert["event_id"]), market=str(alert["market"]), bookmaker_id=int(alert["bookmaker_id"]))
     except (KeyError, TypeError, ValueError):
         return
     contract = lifecycle_contract(observations, pick_at=pick_at, kickoff=kickoff)
@@ -86,11 +72,12 @@ def _refresh_opening(alert: dict[str, Any], store_path: Path) -> None:
         alert["opening_odds_captured_at"] = None
         alert["opening_snapshot_id"] = None
         alert["opening_coverage"] = "UNAVAILABLE"
+    if contract.get("closing"):
+        alert["closing_snapshot_id"] = contract["closing"].get("observation_id")
+        alert["closing_coverage"] = "RECOVERED_PRE_KICKOFF" if contract.get("closing_recovered") else "PROVEN"
 
 
-def capture_alert_closing_quotes(
-    settings: Settings, now: datetime | None = None
-) -> int:
+def capture_alert_closing_quotes(settings: Settings, now: datetime | None = None) -> int:
     now_utc = (now or datetime.now(UTC)).astimezone(UTC)
     alerts = _load_alerts(settings.root)
     api = APIFootballClient(settings)
@@ -118,26 +105,16 @@ def capture_alert_closing_quotes(
         except APIError as exc:
             print(f"⚠️ Alert T-5 {alert.get('id')}: {exc}")
             continue
-        quotes = extract_best_quotes(
-            raw,
-            bookmaker_priority=(bookmaker_id,),
-            allow_any_bookmaker=False,
-            captured_at=now_utc,
-            only_bookmaker_id=bookmaker_id,
-        )
+        quotes = extract_best_quotes(raw, bookmaker_priority=(bookmaker_id,), allow_any_bookmaker=False, captured_at=now_utc, only_bookmaker_id=bookmaker_id)
         quote = quotes.get(market)
         if quote is None or not 0.0 <= quote.overround <= settings.max_market_overround:
             continue
         snapshot_id = snapshot_store.append_quote(
-            quote,
-            fixture_id=fixture_id,
-            snapshot_type="CLOSING",
+            quote, fixture_id=fixture_id, snapshot_type="CLOSING",
             prediction_id=str(alert.get("prediction_id") or "") or None,
             signal_id=str(alert.get("signal_id") or alert.get("id") or "") or None,
             bet_id=str(alert.get("linked_bet_id") or "") or None,
-            captured_by="strong-signals-closing-t5",
-            source_endpoint="odds",
-            source_params={"fixture": fixture_id},
+            captured_by="strong-signals-closing-t5", source_endpoint="odds", source_params={"fixture": fixture_id},
         )
         _apply_closing(alert, quote, now_utc)
         alert["closing_snapshot_id"] = snapshot_id
@@ -150,105 +127,50 @@ def capture_alert_closing_quotes(
     return captured
 
 
-def _copy_linked_result(alert: dict[str, Any], bet: dict[str, Any]) -> bool:
-    if str(bet.get("status", "")).upper() == "PENDING":
-        return False
+def _detach_production_settlement(alert: dict[str, Any], bet: dict[str, Any]) -> bool:
+    """Keep Production outcome as linkage metadata; never settle the virtual stream from it."""
     changed = False
-    for key in (
-        "status",
-        "profit",
-        "result",
-        "outcome",
-        "settled_at",
-        "closing_snapshot_id",
-    ):
-        if bet.get(key) is not None and alert.get(key) != bet[key]:
-            alert[key] = bet[key]
+    for key in ("status", "profit", "result", "outcome", "settled_at", "settlement_type", "closing_snapshot_id"):
+        if bet.get(key) is not None:
+            target = f"production_{key}"
+            if alert.get(target) != bet[key]:
+                alert[target] = bet[key]
+                changed = True
+    if alert.get("virtual_settled") is not True:
+        if str(alert.get("status") or "PENDING").upper() != "PENDING" or float(alert.get("profit") or 0.0) != 0.0:
             changed = True
-    for key in (
-        "closing_5m_odd",
-        "closing_5m_opposite_odd",
-        "closing_5m_market_probability_devig",
-        "closing_5m_odds_captured_at",
-        "closing_odd",
-        "closing_odds_captured_at",
-    ):
-        if bet.get(key) is not None and alert.get(key) != bet[key]:
-            alert[key] = bet[key]
-            changed = True
-    if changed:
-        alert["settlement_type"] = "LINKED_BET"
-        clv = _clv_pct(
-            float(alert.get("odd") or 0.0),
-            float(alert.get("closing_5m_odd") or bet.get("closing_odd") or 0.0),
-        )
-        if clv is not None:
-            alert["clv_odds_pct"] = clv
+        alert["status"] = "PENDING"
+        alert["profit"] = 0.0
+        alert["virtual_profit"] = 0.0
+        alert["virtual_settled"] = False
+        alert.pop("result", None)
+        alert.pop("settled_at", None)
+        alert.pop("settlement_type", None)
     return changed
 
 
-def _settle_counterfactual(
-    alert: dict[str, Any],
-    status: str,
-    score: tuple[int, int] | None,
-    now: datetime,
-) -> bool:
+def _settle_counterfactual(alert: dict[str, Any], status: str, score: tuple[int, int] | None, now: datetime) -> bool:
     if status in VOID_STATUSES:
-        alert.update(
-            {
-                "status": "VOID",
-                "profit": 0.0,
-                "settled_at": now.isoformat(),
-                "result": status,
-            }
-        )
+        alert.update({"status": "VOID", "profit": 0.0, "virtual_profit": 0.0, "virtual_settled": True, "virtual_status": "VOID", "settled_at": now.isoformat(), "result": status, "settlement_type": "COUNTERFACTUAL_ALERT"})
         return True
     if status in REVIEW_STATUSES:
-        alert.update(
-            {
-                "status": "REVIEW",
-                "profit": 0.0,
-                "settled_at": now.isoformat(),
-                "result": status,
-            }
-        )
+        alert.update({"status": "REVIEW", "profit": 0.0, "virtual_profit": 0.0, "virtual_settled": True, "virtual_status": "REVIEW", "settled_at": now.isoformat(), "result": status, "settlement_type": "COUNTERFACTUAL_ALERT"})
         return True
     if status not in FINISHED_STATUSES:
         return False
     if score is None:
-        alert.update(
-            {
-                "status": "REVIEW",
-                "profit": 0.0,
-                "settled_at": now.isoformat(),
-                "result": status,
-            }
-        )
+        alert.update({"status": "REVIEW", "profit": 0.0, "virtual_profit": 0.0, "virtual_settled": True, "virtual_status": "REVIEW", "settled_at": now.isoformat(), "result": status, "settlement_type": "COUNTERFACTUAL_ALERT"})
         return True
     try:
         won = market_outcome(Market.parse(str(alert["market"])), *score)
     except (KeyError, ValueError):
-        alert.update(
-            {
-                "status": "REVIEW",
-                "profit": 0.0,
-                "settled_at": now.isoformat(),
-                "result": f"{score[0]}:{score[1]}",
-            }
-        )
+        alert.update({"status": "REVIEW", "profit": 0.0, "virtual_profit": 0.0, "virtual_settled": True, "virtual_status": "REVIEW", "settled_at": now.isoformat(), "result": f"{score[0]}:{score[1]}", "settlement_type": "COUNTERFACTUAL_ALERT"})
         return True
     stake = float(alert.get("stake") or 0.0)
     odd = float(alert.get("odd") or 1.0)
-    alert.update(
-        {
-            "status": "WIN" if won else "LOSS",
-            "profit": round(stake * (odd - 1.0), 2) if won else -stake,
-            "result": f"{score[0]}:{score[1]}",
-            "settled_at": now.isoformat(),
-            "settlement_type": "COUNTERFACTUAL_ALERT",
-        }
-    )
-    closing = float(alert.get("closing_5m_odd") or 0.0)
+    profit = round(stake * (odd - 1.0), 2) if won else -stake
+    alert.update({"status": "WIN" if won else "LOSS", "virtual_status": "WIN" if won else "LOSS", "profit": profit, "virtual_profit": profit, "virtual_settled": True, "result": f"{score[0]}:{score[1]}", "settled_at": now.isoformat(), "virtual_settled_at": now.isoformat(), "settlement_type": "COUNTERFACTUAL_ALERT"})
+    closing = float(alert.get("closing_5m_odd") or alert.get("closing_odd") or 0.0)
     clv = _clv_pct(odd, closing)
     if clv is not None:
         alert["clv_odds_pct"] = clv
@@ -260,11 +182,7 @@ def settle_intraday_alerts(settings: Settings, now: datetime | None = None) -> i
     alerts = _load_alerts(settings.root)
     if not alerts:
         return 0
-    bets = (
-        json.loads(settings.bets_file.read_text(encoding="utf-8"))
-        if settings.bets_file.exists()
-        else []
-    )
+    bets = json.loads(settings.bets_file.read_text(encoding="utf-8")) if settings.bets_file.exists() else []
     linked = {str(b.get("id")): b for b in bets if isinstance(b, dict)}
     api = APIFootballClient(settings)
     fixture_cache: dict[int, tuple[str, tuple[int, int] | None]] = {}
@@ -272,13 +190,12 @@ def settle_intraday_alerts(settings: Settings, now: datetime | None = None) -> i
     changed = False
 
     for alert in alerts:
-        if str(alert.get("status", "")).upper() != "PENDING":
-            continue
         linked_id = str(alert.get("linked_bet_id") or "")
         if linked_id and linked_id in linked:
-            if _copy_linked_result(alert, linked[linked_id]):
+            if _detach_production_settlement(alert, linked[linked_id]):
                 changed_count += 1
                 changed = True
+        if str(alert.get("status", "")).upper() != "PENDING":
             continue
         try:
             kickoff = parse_datetime(str(alert["kickoff"]))
@@ -296,9 +213,7 @@ def settle_intraday_alerts(settings: Settings, now: datetime | None = None) -> i
             if not response:
                 continue
             payload = response[0]
-            status = str(
-                ((payload.get("fixture") or {}).get("status") or {}).get("short") or ""
-            )
+            status = str(((payload.get("fixture") or {}).get("status") or {}).get("short") or "")
             score = regulation_score(payload) if status in FINISHED_STATUSES else None
             fixture_cache[fixture_id] = (status, score)
         status, score = fixture_cache[fixture_id]
