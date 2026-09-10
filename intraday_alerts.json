@@ -163,7 +163,16 @@
     "closing_5m_odds_captured_at": null,
     "result": "1:1",
     "settled_at": "2026-09-08T17:42:32.674948+00:00",
-    "settlement_type": "COUNTERFACTUAL_ALERT"
+    "settlement_type": "COUNTERFACTUAL_ALERT",
+    "closing_odd": 1.95,
+    "closing_odds_captured_at": "2026-09-08T13:12:19.877193+00:00",
+    "closing_snapshot_id": null,
+    "closing_coverage": "RECOVERED_PRE_KICKOFF",
+    "closing_recovery": true,
+    "closing_recovery_snapshot_type": "INTERMEDIATE",
+    "clv_odds_pct": 0.0,
+    "clv_status": "COMPUTABLE",
+    "lifecycle_coverage": "PARTIAL"
   },
   {
     "id": "1638078_UNDER_2_5_dc-value-v2.1.0:202609081312",
@@ -207,7 +216,16 @@
     "closing_5m_odds_captured_at": null,
     "result": "2:1",
     "settled_at": "2026-09-08T17:42:32.674948+00:00",
-    "settlement_type": "COUNTERFACTUAL_ALERT"
+    "settlement_type": "COUNTERFACTUAL_ALERT",
+    "closing_odd": 2.15,
+    "closing_odds_captured_at": "2026-09-08T13:12:20.658837+00:00",
+    "closing_snapshot_id": null,
+    "closing_coverage": "RECOVERED_PRE_KICKOFF",
+    "closing_recovery": true,
+    "closing_recovery_snapshot_type": "INTERMEDIATE",
+    "clv_odds_pct": 0.0,
+    "clv_status": "COMPUTABLE",
+    "lifecycle_coverage": "PARTIAL"
   },
   {
     "id": "1600773_BTTS_YES_dc-value-v2.1.0:202609081312",
@@ -292,7 +310,16 @@
     "closing_5m_odds_captured_at": null,
     "result": "2:0",
     "settled_at": "2026-09-08T20:19:40.881238+00:00",
-    "settlement_type": "COUNTERFACTUAL_ALERT"
+    "settlement_type": "COUNTERFACTUAL_ALERT",
+    "closing_odd": 2.0,
+    "closing_odds_captured_at": "2026-09-08T13:12:25.065069+00:00",
+    "closing_snapshot_id": null,
+    "closing_coverage": "RECOVERED_PRE_KICKOFF",
+    "closing_recovery": true,
+    "closing_recovery_snapshot_type": "INTERMEDIATE",
+    "clv_odds_pct": 0.0,
+    "clv_status": "COMPUTABLE",
+    "lifecycle_coverage": "PARTIAL"
   },
   {
     "id": "1603022_UNDER_2_5_dc-value-v2.1.0:202609081312",
@@ -336,7 +363,16 @@
     "closing_5m_odds_captured_at": null,
     "result": "3:2",
     "settled_at": "2026-09-08T20:19:40.881238+00:00",
-    "settlement_type": "COUNTERFACTUAL_ALERT"
+    "settlement_type": "COUNTERFACTUAL_ALERT",
+    "closing_odd": 2.4,
+    "closing_odds_captured_at": "2026-09-08T17:20:52.972847+00:00",
+    "closing_snapshot_id": null,
+    "closing_coverage": "RECOVERED_PRE_KICKOFF",
+    "closing_recovery": true,
+    "closing_recovery_snapshot_type": "INTERMEDIATE",
+    "clv_odds_pct": 0.0,
+    "clv_status": "COMPUTABLE",
+    "lifecycle_coverage": "PARTIAL"
   },
   {
     "id": "1563146_UNDER_2_5_dc-value-v2.1.0:202609081312",
@@ -424,7 +460,16 @@
     "closing_5m_odds_captured_at": null,
     "result": "2:1",
     "settled_at": "2026-09-08T22:45:41.284252+00:00",
-    "settlement_type": "COUNTERFACTUAL_ALERT"
+    "settlement_type": "COUNTERFACTUAL_ALERT",
+    "closing_odd": 2.0,
+    "closing_odds_captured_at": "2026-09-08T17:20:58.461188+00:00",
+    "closing_snapshot_id": null,
+    "closing_coverage": "RECOVERED_PRE_KICKOFF",
+    "closing_recovery": true,
+    "closing_recovery_snapshot_type": "INTERMEDIATE",
+    "clv_odds_pct": 0.0,
+    "clv_status": "COMPUTABLE",
+    "lifecycle_coverage": "PARTIAL"
   },
   {
     "id": "1587798_UNDER_2_5_dc-value-v2.1.0:202609081312",
@@ -468,7 +513,16 @@
     "closing_5m_odds_captured_at": null,
     "result": "2:1",
     "settled_at": "2026-09-08T22:45:41.284252+00:00",
-    "settlement_type": "COUNTERFACTUAL_ALERT"
+    "settlement_type": "COUNTERFACTUAL_ALERT",
+    "closing_odd": 2.5,
+    "closing_odds_captured_at": "2026-09-08T17:20:58.729635+00:00",
+    "closing_snapshot_id": null,
+    "closing_coverage": "RECOVERED_PRE_KICKOFF",
+    "closing_recovery": true,
+    "closing_recovery_snapshot_type": "INTERMEDIATE",
+    "clv_odds_pct": 0.0,
+    "clv_status": "COMPUTABLE",
+    "lifecycle_coverage": "PARTIAL"
   },
   {
     "id": "1588345_UNDER_2_5_dc-value-v2.1.0:202609081312",
@@ -512,7 +566,16 @@
     "closing_5m_odds_captured_at": null,
     "result": "1:1",
     "settled_at": "2026-09-08T22:45:41.284252+00:00",
-    "settlement_type": "COUNTERFACTUAL_ALERT"
+    "settlement_type": "COUNTERFACTUAL_ALERT",
+    "closing_odd": 2.2,
+    "closing_odds_captured_at": "2026-09-08T17:21:00.221962+00:00",
+    "closing_snapshot_id": null,
+    "closing_coverage": "RECOVERED_PRE_KICKOFF",
+    "closing_recovery": true,
+    "closing_recovery_snapshot_type": "INTERMEDIATE",
+    "clv_odds_pct": 0.0,
+    "clv_status": "COMPUTABLE",
+    "lifecycle_coverage": "PARTIAL"
   },
   {
     "id": "1588348_UNDER_2_5_dc-value-v2.1.0:202609081312",
@@ -556,7 +619,16 @@
     "closing_5m_odds_captured_at": null,
     "result": "5:1",
     "settled_at": "2026-09-08T22:45:41.284252+00:00",
-    "settlement_type": "COUNTERFACTUAL_ALERT"
+    "settlement_type": "COUNTERFACTUAL_ALERT",
+    "closing_odd": 3.0,
+    "closing_odds_captured_at": "2026-09-08T17:21:00.827338+00:00",
+    "closing_snapshot_id": null,
+    "closing_coverage": "RECOVERED_PRE_KICKOFF",
+    "closing_recovery": true,
+    "closing_recovery_snapshot_type": "INTERMEDIATE",
+    "clv_odds_pct": 0.0,
+    "clv_status": "COMPUTABLE",
+    "lifecycle_coverage": "PARTIAL"
   },
   {
     "id": "1635413_UNDER_2_5_dc-value-v2.1.0:202609081312",
@@ -600,7 +672,16 @@
     "closing_5m_odds_captured_at": null,
     "result": "2:1",
     "settled_at": "2026-09-08T17:42:32.674948+00:00",
-    "settlement_type": "COUNTERFACTUAL_ALERT"
+    "settlement_type": "COUNTERFACTUAL_ALERT",
+    "closing_odd": 3.25,
+    "closing_odds_captured_at": "2026-09-08T13:12:38.635600+00:00",
+    "closing_snapshot_id": null,
+    "closing_coverage": "RECOVERED_PRE_KICKOFF",
+    "closing_recovery": true,
+    "closing_recovery_snapshot_type": "INTERMEDIATE",
+    "clv_odds_pct": 0.0,
+    "clv_status": "COMPUTABLE",
+    "lifecycle_coverage": "PARTIAL"
   },
   {
     "id": "1563143_UNDER_2_5_dc-value-v2.1.0:202609081720",
