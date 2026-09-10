@@ -1,24 +1,26 @@
 {
-  "schema_version": 4,
-  "generated_at": "2026-09-10T19:19:04.163010+00:00",
+  "schema_version": 5,
+  "generated_at": "2026-09-10T21:43:23.609277+00:00",
   "truth": "data/odds_snapshots.jsonl + bets.json",
   "monitoring": {
-    "last_collector_run_at": "2026-09-10T19:17:58.244416+00:00",
-    "last_odds_scan_at": "2026-09-10T19:17:58.244416+00:00",
-    "last_snapshot_at": "2026-09-10T19:17:58.244416+00:00",
-    "collector_run_age_minutes": 1.0986432333333334,
-    "scan_age_minutes": 1.0986432333333334,
+    "last_collector_run_at": "2026-09-10T21:43:10.559023+00:00",
+    "last_odds_scan_at": "2026-09-10T21:43:10.559023+00:00",
+    "last_snapshot_at": "2026-09-10T21:43:10.559023+00:00",
+    "collector_run_age_minutes": 0.21750423333333335,
+    "scan_age_minutes": 0.21750423333333335,
     "scan_state": "FRESH",
-    "api_requests_last_scan": 70,
-    "daily_budget_used": 1204,
-    "daily_budget_remaining": 6296,
-    "observations_last_scan": 374
+    "api_requests_last_scan": 40,
+    "daily_budget_used": 1244,
+    "daily_budget_remaining": 6256,
+    "observations_last_scan": 220
   },
   "rules": {
-    "opening": "first real persisted observation for exact fixture/market/bookmaker at or before Pick",
-    "live": "latest real persisted observation for exact fixture/market/bookmaker",
-    "closing": "exact T-2m to T-8m observation, with honest pre-kickoff recovery if missed",
-    "clv": "Pick odd / Closing odd - 1; null when Closing is unavailable",
+    "first_seen": "earliest valid persisted observation for exact fixture/market/bookmaker/selection",
+    "pick": "exact ENTRY observation at production decision timestamp; null otherwise",
+    "live": "latest valid persisted observation at build time and never after kickoff; ACTIVE/PENDING only",
+    "closing": "existing T5/CLOSING rule, with honest pre-kickoff recovery if the scheduled T5 window was missed",
+    "clv": "Pick odd / Closing odd - 1; null when Pick or Closing is unavailable",
+    "timeline": "all canonical observations in chronological order through the build/kickoff cutoff",
     "missing_data": "null; dashboard renders as —"
   },
   "initial_bank": 50000.0,
@@ -179,7 +181,17 @@
       "result": "3:0",
       "settled_at": "2026-09-10T16:42:27.851902+00:00",
       "production_lifecycle": {
-        "opening": null,
+        "schema_version": 2,
+        "first_seen": {
+          "observation_id": null,
+          "odd": 2.5,
+          "opposite_odd": 1.5,
+          "captured_at": "2026-09-09T22:23:24.071011+00:00",
+          "snapshot_type": "ENTRY",
+          "bookmaker_id": 8,
+          "bookmaker": "Bet365",
+          "selection": "OVER_2_5"
+        },
         "pick": {
           "observation_id": null,
           "odd": 2.5,
@@ -187,23 +199,47 @@
           "captured_at": "2026-09-09T22:23:24.071011+00:00",
           "snapshot_type": "ENTRY",
           "bookmaker_id": 8,
-          "bookmaker": "Bet365"
+          "bookmaker": "Bet365",
+          "selection": "OVER_2_5"
         },
-        "live": {
-          "observation_id": null,
-          "odd": 2.5,
-          "opposite_odd": 1.5,
-          "captured_at": "2026-09-09T22:23:49.454674+00:00",
-          "snapshot_type": "INTERMEDIATE",
-          "bookmaker_id": 8,
-          "bookmaker": "Bet365"
-        },
-        "live_state": "STALE",
-        "live_age_minutes": 1255.2451389333332,
+        "live": null,
         "closing": null,
+        "first_seen_observation_id": null,
+        "pick_observation_id": null,
+        "live_observation_id": null,
+        "closing_observation_id": null,
+        "live_captured_at": null,
+        "live_state": "UNAVAILABLE",
+        "live_age_minutes": null,
         "closing_recovered": false,
+        "closing_snapshot_type": null,
         "clv_odds_pct": null,
-        "coverage": "PARTIAL"
+        "clv_status": "NOT_COMPUTABLE",
+        "coverage": "PARTIAL",
+        "timeline": [
+          {
+            "observation_id": null,
+            "odd": 2.5,
+            "opposite_odd": 1.5,
+            "captured_at": "2026-09-09T22:23:24.071011+00:00",
+            "snapshot_type": "ENTRY",
+            "bookmaker_id": 8,
+            "bookmaker": "Bet365",
+            "selection": "OVER_2_5",
+            "marker": null
+          },
+          {
+            "observation_id": null,
+            "odd": 2.5,
+            "opposite_odd": 1.5,
+            "captured_at": "2026-09-09T22:23:49.454674+00:00",
+            "snapshot_type": "INTERMEDIATE",
+            "bookmaker_id": 8,
+            "bookmaker": "Bet365",
+            "selection": "OVER_2_5",
+            "marker": null
+          }
+        ]
       }
     },
     {
@@ -362,7 +398,17 @@
       "result": "2:0",
       "settled_at": "2026-09-10T05:13:04.170066+00:00",
       "production_lifecycle": {
-        "opening": null,
+        "schema_version": 2,
+        "first_seen": {
+          "observation_id": null,
+          "odd": 3.45,
+          "opposite_odd": 1.29,
+          "captured_at": "2026-09-09T22:23:24.071011+00:00",
+          "snapshot_type": "ENTRY",
+          "bookmaker_id": 16,
+          "bookmaker": "Unibet",
+          "selection": "UNDER_2_5"
+        },
         "pick": {
           "observation_id": null,
           "odd": 3.45,
@@ -370,23 +416,36 @@
           "captured_at": "2026-09-09T22:23:24.071011+00:00",
           "snapshot_type": "ENTRY",
           "bookmaker_id": 16,
-          "bookmaker": "Unibet"
+          "bookmaker": "Unibet",
+          "selection": "UNDER_2_5"
         },
-        "live": {
-          "observation_id": null,
-          "odd": 3.45,
-          "opposite_odd": 1.29,
-          "captured_at": "2026-09-09T22:23:24.071011+00:00",
-          "snapshot_type": "ENTRY",
-          "bookmaker_id": 16,
-          "bookmaker": "Unibet"
-        },
-        "live_state": "STALE",
-        "live_age_minutes": 1255.6681999833334,
+        "live": null,
         "closing": null,
+        "first_seen_observation_id": null,
+        "pick_observation_id": null,
+        "live_observation_id": null,
+        "closing_observation_id": null,
+        "live_captured_at": null,
+        "live_state": "UNAVAILABLE",
+        "live_age_minutes": null,
         "closing_recovered": false,
+        "closing_snapshot_type": null,
         "clv_odds_pct": null,
-        "coverage": "PARTIAL"
+        "clv_status": "NOT_COMPUTABLE",
+        "coverage": "PARTIAL",
+        "timeline": [
+          {
+            "observation_id": null,
+            "odd": 3.45,
+            "opposite_odd": 1.29,
+            "captured_at": "2026-09-09T22:23:24.071011+00:00",
+            "snapshot_type": "ENTRY",
+            "bookmaker_id": 16,
+            "bookmaker": "Unibet",
+            "selection": "UNDER_2_5",
+            "marker": null
+          }
+        ]
       }
     },
     {
@@ -454,7 +513,17 @@
       "clv_status": "COMPUTABLE",
       "closing_snapshot_id": "d4eecc773026f8d70bc5ef0fc67e4eefcf47f7ee69d400ec4b345472bb60b5e8",
       "production_lifecycle": {
-        "opening": null,
+        "schema_version": 2,
+        "first_seen": {
+          "observation_id": null,
+          "odd": 2.16,
+          "opposite_odd": 1.65,
+          "captured_at": "2026-09-09T05:08:08.421056+00:00",
+          "snapshot_type": "ENTRY",
+          "bookmaker_id": 11,
+          "bookmaker": "1xBet",
+          "selection": "UNDER_2_5"
+        },
         "pick": {
           "observation_id": null,
           "odd": 2.16,
@@ -462,23 +531,102 @@
           "captured_at": "2026-09-09T05:08:08.421056+00:00",
           "snapshot_type": "ENTRY",
           "bookmaker_id": 11,
-          "bookmaker": "1xBet"
+          "bookmaker": "1xBet",
+          "selection": "UNDER_2_5"
         },
-        "live": {
-          "observation_id": null,
-          "odd": 2.28,
-          "opposite_odd": 1.59,
-          "captured_at": "2026-09-09T16:17:32.228587+00:00",
-          "snapshot_type": "INTERMEDIATE",
-          "bookmaker_id": 11,
-          "bookmaker": "1xBet"
-        },
-        "live_state": "STALE",
-        "live_age_minutes": 1621.5322403833334,
+        "live": null,
         "closing": null,
+        "first_seen_observation_id": null,
+        "pick_observation_id": null,
+        "live_observation_id": null,
+        "closing_observation_id": null,
+        "live_captured_at": null,
+        "live_state": "UNAVAILABLE",
+        "live_age_minutes": null,
         "closing_recovered": false,
+        "closing_snapshot_type": null,
         "clv_odds_pct": null,
-        "coverage": "PARTIAL"
+        "clv_status": "NOT_COMPUTABLE",
+        "coverage": "PARTIAL",
+        "timeline": [
+          {
+            "observation_id": null,
+            "odd": 2.16,
+            "opposite_odd": 1.65,
+            "captured_at": "2026-09-09T05:08:08.421056+00:00",
+            "snapshot_type": "ENTRY",
+            "bookmaker_id": 11,
+            "bookmaker": "1xBet",
+            "selection": "UNDER_2_5",
+            "marker": null
+          },
+          {
+            "observation_id": null,
+            "odd": 2.16,
+            "opposite_odd": 1.65,
+            "captured_at": "2026-09-09T05:08:45.646056+00:00",
+            "snapshot_type": "INTERMEDIATE",
+            "bookmaker_id": 11,
+            "bookmaker": "1xBet",
+            "selection": "UNDER_2_5",
+            "marker": null
+          },
+          {
+            "observation_id": null,
+            "odd": 2.23,
+            "opposite_odd": 1.61,
+            "captured_at": "2026-09-09T13:32:04.387866+00:00",
+            "snapshot_type": "INTERMEDIATE",
+            "bookmaker_id": 11,
+            "bookmaker": "1xBet",
+            "selection": "UNDER_2_5",
+            "marker": null
+          },
+          {
+            "observation_id": null,
+            "odd": 2.23,
+            "opposite_odd": 1.61,
+            "captured_at": "2026-09-09T14:14:19.639919+00:00",
+            "snapshot_type": "INTERMEDIATE",
+            "bookmaker_id": 11,
+            "bookmaker": "1xBet",
+            "selection": "UNDER_2_5",
+            "marker": null
+          },
+          {
+            "observation_id": null,
+            "odd": 2.23,
+            "opposite_odd": 1.61,
+            "captured_at": "2026-09-09T15:06:55.005748+00:00",
+            "snapshot_type": "INTERMEDIATE",
+            "bookmaker_id": 11,
+            "bookmaker": "1xBet",
+            "selection": "UNDER_2_5",
+            "marker": null
+          },
+          {
+            "observation_id": null,
+            "odd": 2.28,
+            "opposite_odd": 1.59,
+            "captured_at": "2026-09-09T16:17:31.850421+00:00",
+            "snapshot_type": "CLOSING",
+            "bookmaker_id": 11,
+            "bookmaker": "1xBet",
+            "selection": "UNDER_2_5",
+            "marker": null
+          },
+          {
+            "observation_id": null,
+            "odd": 2.28,
+            "opposite_odd": 1.59,
+            "captured_at": "2026-09-09T16:17:32.228587+00:00",
+            "snapshot_type": "INTERMEDIATE",
+            "bookmaker_id": 11,
+            "bookmaker": "1xBet",
+            "selection": "UNDER_2_5",
+            "marker": null
+          }
+        ]
       }
     },
     {
@@ -546,7 +694,17 @@
       "clv_status": "COMPUTABLE",
       "closing_snapshot_id": "609180b4dd933b9753a7563200193f24ddaa579b5b47275f75a3050826879591",
       "production_lifecycle": {
-        "opening": null,
+        "schema_version": 2,
+        "first_seen": {
+          "observation_id": null,
+          "odd": 3.5,
+          "opposite_odd": 1.3,
+          "captured_at": "2026-09-09T05:08:08.421056+00:00",
+          "snapshot_type": "ENTRY",
+          "bookmaker_id": 8,
+          "bookmaker": "Bet365",
+          "selection": "UNDER_2_5"
+        },
         "pick": {
           "observation_id": null,
           "odd": 3.5,
@@ -554,23 +712,124 @@
           "captured_at": "2026-09-09T05:08:08.421056+00:00",
           "snapshot_type": "ENTRY",
           "bookmaker_id": 8,
-          "bookmaker": "Bet365"
+          "bookmaker": "Bet365",
+          "selection": "UNDER_2_5"
         },
-        "live": {
-          "observation_id": null,
-          "odd": 3.6,
-          "opposite_odd": 1.28,
-          "captured_at": "2026-09-09T16:17:32.587362+00:00",
-          "snapshot_type": "INTERMEDIATE",
-          "bookmaker_id": 8,
-          "bookmaker": "Bet365"
-        },
-        "live_state": "STALE",
-        "live_age_minutes": 1621.5262608,
+        "live": null,
         "closing": null,
+        "first_seen_observation_id": null,
+        "pick_observation_id": null,
+        "live_observation_id": null,
+        "closing_observation_id": null,
+        "live_captured_at": null,
+        "live_state": "UNAVAILABLE",
+        "live_age_minutes": null,
         "closing_recovered": false,
+        "closing_snapshot_type": null,
         "clv_odds_pct": null,
-        "coverage": "PARTIAL"
+        "clv_status": "NOT_COMPUTABLE",
+        "coverage": "PARTIAL",
+        "timeline": [
+          {
+            "observation_id": null,
+            "odd": 3.5,
+            "opposite_odd": 1.3,
+            "captured_at": "2026-09-09T05:08:08.421056+00:00",
+            "snapshot_type": "ENTRY",
+            "bookmaker_id": 8,
+            "bookmaker": "Bet365",
+            "selection": "UNDER_2_5",
+            "marker": null
+          },
+          {
+            "observation_id": null,
+            "odd": 3.5,
+            "opposite_odd": 1.3,
+            "captured_at": "2026-09-09T05:08:37.267730+00:00",
+            "snapshot_type": "INTERMEDIATE",
+            "bookmaker_id": 8,
+            "bookmaker": "Bet365",
+            "selection": "UNDER_2_5",
+            "marker": null
+          },
+          {
+            "observation_id": null,
+            "odd": 3.5,
+            "opposite_odd": 1.3,
+            "captured_at": "2026-09-09T11:03:28.522460+00:00",
+            "snapshot_type": "INTERMEDIATE",
+            "bookmaker_id": 8,
+            "bookmaker": "Bet365",
+            "selection": "UNDER_2_5",
+            "marker": null
+          },
+          {
+            "observation_id": null,
+            "odd": 3.5,
+            "opposite_odd": 1.3,
+            "captured_at": "2026-09-09T11:34:11.963997+00:00",
+            "snapshot_type": "INTERMEDIATE",
+            "bookmaker_id": 8,
+            "bookmaker": "Bet365",
+            "selection": "UNDER_2_5",
+            "marker": null
+          },
+          {
+            "observation_id": null,
+            "odd": 3.6,
+            "opposite_odd": 1.28,
+            "captured_at": "2026-09-09T13:32:02.049983+00:00",
+            "snapshot_type": "INTERMEDIATE",
+            "bookmaker_id": 8,
+            "bookmaker": "Bet365",
+            "selection": "UNDER_2_5",
+            "marker": null
+          },
+          {
+            "observation_id": null,
+            "odd": 3.6,
+            "opposite_odd": 1.28,
+            "captured_at": "2026-09-09T14:14:17.266032+00:00",
+            "snapshot_type": "INTERMEDIATE",
+            "bookmaker_id": 8,
+            "bookmaker": "Bet365",
+            "selection": "UNDER_2_5",
+            "marker": null
+          },
+          {
+            "observation_id": null,
+            "odd": 3.6,
+            "opposite_odd": 1.28,
+            "captured_at": "2026-09-09T15:06:13.849561+00:00",
+            "snapshot_type": "INTERMEDIATE",
+            "bookmaker_id": 8,
+            "bookmaker": "Bet365",
+            "selection": "UNDER_2_5",
+            "marker": null
+          },
+          {
+            "observation_id": null,
+            "odd": 3.6,
+            "opposite_odd": 1.28,
+            "captured_at": "2026-09-09T16:17:31.850421+00:00",
+            "snapshot_type": "CLOSING",
+            "bookmaker_id": 8,
+            "bookmaker": "Bet365",
+            "selection": "UNDER_2_5",
+            "marker": null
+          },
+          {
+            "observation_id": null,
+            "odd": 3.6,
+            "opposite_odd": 1.28,
+            "captured_at": "2026-09-09T16:17:32.587362+00:00",
+            "snapshot_type": "INTERMEDIATE",
+            "bookmaker_id": 8,
+            "bookmaker": "Bet365",
+            "selection": "UNDER_2_5",
+            "marker": null
+          }
+        ]
       }
     },
     {
@@ -638,7 +897,17 @@
       "clv_status": "COMPUTABLE",
       "closing_snapshot_id": "095911b36406d46ac1e77038679e5c339b652f99ac2e4931c79cf92c0a25fcb2",
       "production_lifecycle": {
-        "opening": null,
+        "schema_version": 2,
+        "first_seen": {
+          "observation_id": null,
+          "odd": 2.25,
+          "opposite_odd": 1.62,
+          "captured_at": "2026-09-09T05:08:08.421056+00:00",
+          "snapshot_type": "ENTRY",
+          "bookmaker_id": 8,
+          "bookmaker": "Bet365",
+          "selection": "UNDER_2_5"
+        },
         "pick": {
           "observation_id": null,
           "odd": 2.25,
@@ -646,23 +915,124 @@
           "captured_at": "2026-09-09T05:08:08.421056+00:00",
           "snapshot_type": "ENTRY",
           "bookmaker_id": 8,
-          "bookmaker": "Bet365"
+          "bookmaker": "Bet365",
+          "selection": "UNDER_2_5"
         },
-        "live": {
-          "observation_id": null,
-          "odd": 2.35,
-          "opposite_odd": 1.57,
-          "captured_at": "2026-09-09T16:17:32.917958+00:00",
-          "snapshot_type": "INTERMEDIATE",
-          "bookmaker_id": 8,
-          "bookmaker": "Bet365"
-        },
-        "live_state": "STALE",
-        "live_age_minutes": 1621.5207508666667,
+        "live": null,
         "closing": null,
+        "first_seen_observation_id": null,
+        "pick_observation_id": null,
+        "live_observation_id": null,
+        "closing_observation_id": null,
+        "live_captured_at": null,
+        "live_state": "UNAVAILABLE",
+        "live_age_minutes": null,
         "closing_recovered": false,
+        "closing_snapshot_type": null,
         "clv_odds_pct": null,
-        "coverage": "PARTIAL"
+        "clv_status": "NOT_COMPUTABLE",
+        "coverage": "PARTIAL",
+        "timeline": [
+          {
+            "observation_id": null,
+            "odd": 2.25,
+            "opposite_odd": 1.62,
+            "captured_at": "2026-09-09T05:08:08.421056+00:00",
+            "snapshot_type": "ENTRY",
+            "bookmaker_id": 8,
+            "bookmaker": "Bet365",
+            "selection": "UNDER_2_5",
+            "marker": null
+          },
+          {
+            "observation_id": null,
+            "odd": 2.25,
+            "opposite_odd": 1.62,
+            "captured_at": "2026-09-09T05:08:44.271276+00:00",
+            "snapshot_type": "INTERMEDIATE",
+            "bookmaker_id": 8,
+            "bookmaker": "Bet365",
+            "selection": "UNDER_2_5",
+            "marker": null
+          },
+          {
+            "observation_id": null,
+            "odd": 2.25,
+            "opposite_odd": 1.62,
+            "captured_at": "2026-09-09T11:03:28.948424+00:00",
+            "snapshot_type": "INTERMEDIATE",
+            "bookmaker_id": 8,
+            "bookmaker": "Bet365",
+            "selection": "UNDER_2_5",
+            "marker": null
+          },
+          {
+            "observation_id": null,
+            "odd": 2.25,
+            "opposite_odd": 1.62,
+            "captured_at": "2026-09-09T11:34:12.259093+00:00",
+            "snapshot_type": "INTERMEDIATE",
+            "bookmaker_id": 8,
+            "bookmaker": "Bet365",
+            "selection": "UNDER_2_5",
+            "marker": null
+          },
+          {
+            "observation_id": null,
+            "odd": 2.25,
+            "opposite_odd": 1.62,
+            "captured_at": "2026-09-09T13:32:02.573269+00:00",
+            "snapshot_type": "INTERMEDIATE",
+            "bookmaker_id": 8,
+            "bookmaker": "Bet365",
+            "selection": "UNDER_2_5",
+            "marker": null
+          },
+          {
+            "observation_id": null,
+            "odd": 2.25,
+            "opposite_odd": 1.62,
+            "captured_at": "2026-09-09T14:14:18.016462+00:00",
+            "snapshot_type": "INTERMEDIATE",
+            "bookmaker_id": 8,
+            "bookmaker": "Bet365",
+            "selection": "UNDER_2_5",
+            "marker": null
+          },
+          {
+            "observation_id": null,
+            "odd": 2.35,
+            "opposite_odd": 1.57,
+            "captured_at": "2026-09-09T15:06:14.263602+00:00",
+            "snapshot_type": "INTERMEDIATE",
+            "bookmaker_id": 8,
+            "bookmaker": "Bet365",
+            "selection": "UNDER_2_5",
+            "marker": null
+          },
+          {
+            "observation_id": null,
+            "odd": 2.35,
+            "opposite_odd": 1.57,
+            "captured_at": "2026-09-09T16:17:31.850421+00:00",
+            "snapshot_type": "CLOSING",
+            "bookmaker_id": 8,
+            "bookmaker": "Bet365",
+            "selection": "UNDER_2_5",
+            "marker": null
+          },
+          {
+            "observation_id": null,
+            "odd": 2.35,
+            "opposite_odd": 1.57,
+            "captured_at": "2026-09-09T16:17:32.917958+00:00",
+            "snapshot_type": "INTERMEDIATE",
+            "bookmaker_id": 8,
+            "bookmaker": "Bet365",
+            "selection": "UNDER_2_5",
+            "marker": null
+          }
+        ]
       }
     },
     {
@@ -734,7 +1104,17 @@
       "closing_coverage": "PROVEN",
       "lifecycle_coverage": "PARTIAL",
       "production_lifecycle": {
-        "opening": null,
+        "schema_version": 2,
+        "first_seen": {
+          "observation_id": null,
+          "odd": 2.0,
+          "opposite_odd": 1.8,
+          "captured_at": "2026-09-08T00:45:18.177343+00:00",
+          "snapshot_type": "ENTRY",
+          "bookmaker_id": 8,
+          "bookmaker": "Bet365",
+          "selection": "UNDER_2_5"
+        },
         "pick": {
           "observation_id": null,
           "odd": 2.0,
@@ -742,23 +1122,102 @@
           "captured_at": "2026-09-08T00:45:18.177343+00:00",
           "snapshot_type": "ENTRY",
           "bookmaker_id": 8,
-          "bookmaker": "Bet365"
+          "bookmaker": "Bet365",
+          "selection": "UNDER_2_5"
         },
-        "live": {
-          "observation_id": null,
-          "odd": 2.0,
-          "opposite_odd": 1.8,
-          "captured_at": "2026-09-08T17:48:55.290973+00:00",
-          "snapshot_type": "INTERMEDIATE",
-          "bookmaker_id": 8,
-          "bookmaker": "Bet365"
-        },
-        "live_state": "STALE",
-        "live_age_minutes": 2970.147867283333,
+        "live": null,
         "closing": null,
+        "first_seen_observation_id": null,
+        "pick_observation_id": null,
+        "live_observation_id": null,
+        "closing_observation_id": null,
+        "live_captured_at": null,
+        "live_state": "UNAVAILABLE",
+        "live_age_minutes": null,
         "closing_recovered": false,
+        "closing_snapshot_type": null,
         "clv_odds_pct": null,
-        "coverage": "PARTIAL"
+        "clv_status": "NOT_COMPUTABLE",
+        "coverage": "PARTIAL",
+        "timeline": [
+          {
+            "observation_id": null,
+            "odd": 2.0,
+            "opposite_odd": 1.8,
+            "captured_at": "2026-09-08T00:45:18.177343+00:00",
+            "snapshot_type": "ENTRY",
+            "bookmaker_id": 8,
+            "bookmaker": "Bet365",
+            "selection": "UNDER_2_5",
+            "marker": null
+          },
+          {
+            "observation_id": null,
+            "odd": 2.0,
+            "opposite_odd": 1.8,
+            "captured_at": "2026-09-08T00:48:11.484575+00:00",
+            "snapshot_type": "INTERMEDIATE",
+            "bookmaker_id": 8,
+            "bookmaker": "Bet365",
+            "selection": "UNDER_2_5",
+            "marker": null
+          },
+          {
+            "observation_id": null,
+            "odd": 2.0,
+            "opposite_odd": 1.8,
+            "captured_at": "2026-09-08T13:12:33.926392+00:00",
+            "snapshot_type": "INTERMEDIATE",
+            "bookmaker_id": 8,
+            "bookmaker": "Bet365",
+            "selection": "UNDER_2_5",
+            "marker": null
+          },
+          {
+            "observation_id": null,
+            "odd": 2.0,
+            "opposite_odd": 1.8,
+            "captured_at": "2026-09-08T17:20:58.929807+00:00",
+            "snapshot_type": "INTERMEDIATE",
+            "bookmaker_id": 8,
+            "bookmaker": "Bet365",
+            "selection": "UNDER_2_5",
+            "marker": null
+          },
+          {
+            "observation_id": null,
+            "odd": 2.0,
+            "opposite_odd": 1.8,
+            "captured_at": "2026-09-08T17:42:25.415763+00:00",
+            "snapshot_type": "INTERMEDIATE",
+            "bookmaker_id": 8,
+            "bookmaker": "Bet365",
+            "selection": "UNDER_2_5",
+            "marker": null
+          },
+          {
+            "observation_id": null,
+            "odd": 2.0,
+            "opposite_odd": 1.8,
+            "captured_at": "2026-09-08T17:48:54.766414+00:00",
+            "snapshot_type": "CLOSING",
+            "bookmaker_id": 8,
+            "bookmaker": "Bet365",
+            "selection": "UNDER_2_5",
+            "marker": null
+          },
+          {
+            "observation_id": null,
+            "odd": 2.0,
+            "opposite_odd": 1.8,
+            "captured_at": "2026-09-08T17:48:55.290973+00:00",
+            "snapshot_type": "INTERMEDIATE",
+            "bookmaker_id": 8,
+            "bookmaker": "Bet365",
+            "selection": "UNDER_2_5",
+            "marker": null
+          }
+        ]
       }
     },
     {
@@ -830,7 +1289,17 @@
       "closing_coverage": "PROVEN",
       "lifecycle_coverage": "PARTIAL",
       "production_lifecycle": {
-        "opening": null,
+        "schema_version": 2,
+        "first_seen": {
+          "observation_id": null,
+          "odd": 2.25,
+          "opposite_odd": 1.62,
+          "captured_at": "2026-09-08T00:45:18.177343+00:00",
+          "snapshot_type": "ENTRY",
+          "bookmaker_id": 8,
+          "bookmaker": "Bet365",
+          "selection": "UNDER_2_5"
+        },
         "pick": {
           "observation_id": null,
           "odd": 2.25,
@@ -838,23 +1307,102 @@
           "captured_at": "2026-09-08T00:45:18.177343+00:00",
           "snapshot_type": "ENTRY",
           "bookmaker_id": 8,
-          "bookmaker": "Bet365"
+          "bookmaker": "Bet365",
+          "selection": "UNDER_2_5"
         },
-        "live": {
-          "observation_id": null,
-          "odd": 2.05,
-          "opposite_odd": 1.75,
-          "captured_at": "2026-09-08T17:48:55.612236+00:00",
-          "snapshot_type": "INTERMEDIATE",
-          "bookmaker_id": 8,
-          "bookmaker": "Bet365"
-        },
-        "live_state": "STALE",
-        "live_age_minutes": 2970.1425129,
+        "live": null,
         "closing": null,
+        "first_seen_observation_id": null,
+        "pick_observation_id": null,
+        "live_observation_id": null,
+        "closing_observation_id": null,
+        "live_captured_at": null,
+        "live_state": "UNAVAILABLE",
+        "live_age_minutes": null,
         "closing_recovered": false,
+        "closing_snapshot_type": null,
         "clv_odds_pct": null,
-        "coverage": "PARTIAL"
+        "clv_status": "NOT_COMPUTABLE",
+        "coverage": "PARTIAL",
+        "timeline": [
+          {
+            "observation_id": null,
+            "odd": 2.25,
+            "opposite_odd": 1.62,
+            "captured_at": "2026-09-08T00:45:18.177343+00:00",
+            "snapshot_type": "ENTRY",
+            "bookmaker_id": 8,
+            "bookmaker": "Bet365",
+            "selection": "UNDER_2_5",
+            "marker": null
+          },
+          {
+            "observation_id": null,
+            "odd": 2.25,
+            "opposite_odd": 1.62,
+            "captured_at": "2026-09-08T00:48:22.106254+00:00",
+            "snapshot_type": "INTERMEDIATE",
+            "bookmaker_id": 8,
+            "bookmaker": "Bet365",
+            "selection": "UNDER_2_5",
+            "marker": null
+          },
+          {
+            "observation_id": null,
+            "odd": 2.1,
+            "opposite_odd": 1.7,
+            "captured_at": "2026-09-08T13:12:35.857632+00:00",
+            "snapshot_type": "INTERMEDIATE",
+            "bookmaker_id": 8,
+            "bookmaker": "Bet365",
+            "selection": "UNDER_2_5",
+            "marker": null
+          },
+          {
+            "observation_id": null,
+            "odd": 2.05,
+            "opposite_odd": 1.75,
+            "captured_at": "2026-09-08T17:21:00.627422+00:00",
+            "snapshot_type": "INTERMEDIATE",
+            "bookmaker_id": 8,
+            "bookmaker": "Bet365",
+            "selection": "UNDER_2_5",
+            "marker": null
+          },
+          {
+            "observation_id": null,
+            "odd": 2.05,
+            "opposite_odd": 1.75,
+            "captured_at": "2026-09-08T17:42:25.708370+00:00",
+            "snapshot_type": "INTERMEDIATE",
+            "bookmaker_id": 8,
+            "bookmaker": "Bet365",
+            "selection": "UNDER_2_5",
+            "marker": null
+          },
+          {
+            "observation_id": null,
+            "odd": 2.05,
+            "opposite_odd": 1.75,
+            "captured_at": "2026-09-08T17:48:54.766414+00:00",
+            "snapshot_type": "CLOSING",
+            "bookmaker_id": 8,
+            "bookmaker": "Bet365",
+            "selection": "UNDER_2_5",
+            "marker": null
+          },
+          {
+            "observation_id": null,
+            "odd": 2.05,
+            "opposite_odd": 1.75,
+            "captured_at": "2026-09-08T17:48:55.612236+00:00",
+            "snapshot_type": "INTERMEDIATE",
+            "bookmaker_id": 8,
+            "bookmaker": "Bet365",
+            "selection": "UNDER_2_5",
+            "marker": null
+          }
+        ]
       }
     },
     {
@@ -926,7 +1474,17 @@
       "closing_coverage": "PROVEN",
       "lifecycle_coverage": "PARTIAL",
       "production_lifecycle": {
-        "opening": null,
+        "schema_version": 2,
+        "first_seen": {
+          "observation_id": null,
+          "odd": 1.85,
+          "opposite_odd": 1.95,
+          "captured_at": "2026-09-08T00:45:18.177343+00:00",
+          "snapshot_type": "ENTRY",
+          "bookmaker_id": 8,
+          "bookmaker": "Bet365",
+          "selection": "UNDER_2_5"
+        },
         "pick": {
           "observation_id": null,
           "odd": 1.85,
@@ -934,23 +1492,80 @@
           "captured_at": "2026-09-08T00:45:18.177343+00:00",
           "snapshot_type": "ENTRY",
           "bookmaker_id": 8,
-          "bookmaker": "Bet365"
+          "bookmaker": "Bet365",
+          "selection": "UNDER_2_5"
         },
-        "live": {
-          "observation_id": null,
-          "odd": 1.7,
-          "opposite_odd": 2.1,
-          "captured_at": "2026-09-08T13:56:01.700582+00:00",
-          "snapshot_type": "INTERMEDIATE",
-          "bookmaker_id": 8,
-          "bookmaker": "Bet365"
-        },
-        "live_state": "STALE",
-        "live_age_minutes": 3203.041040466667,
+        "live": null,
         "closing": null,
+        "first_seen_observation_id": null,
+        "pick_observation_id": null,
+        "live_observation_id": null,
+        "closing_observation_id": null,
+        "live_captured_at": null,
+        "live_state": "UNAVAILABLE",
+        "live_age_minutes": null,
         "closing_recovered": false,
+        "closing_snapshot_type": null,
         "clv_odds_pct": null,
-        "coverage": "PARTIAL"
+        "clv_status": "NOT_COMPUTABLE",
+        "coverage": "PARTIAL",
+        "timeline": [
+          {
+            "observation_id": null,
+            "odd": 1.85,
+            "opposite_odd": 1.95,
+            "captured_at": "2026-09-08T00:45:18.177343+00:00",
+            "snapshot_type": "ENTRY",
+            "bookmaker_id": 8,
+            "bookmaker": "Bet365",
+            "selection": "UNDER_2_5",
+            "marker": null
+          },
+          {
+            "observation_id": null,
+            "odd": 1.85,
+            "opposite_odd": 1.95,
+            "captured_at": "2026-09-08T00:46:54.161919+00:00",
+            "snapshot_type": "INTERMEDIATE",
+            "bookmaker_id": 8,
+            "bookmaker": "Bet365",
+            "selection": "UNDER_2_5",
+            "marker": null
+          },
+          {
+            "observation_id": null,
+            "odd": 1.7,
+            "opposite_odd": 2.1,
+            "captured_at": "2026-09-08T13:12:22.291627+00:00",
+            "snapshot_type": "INTERMEDIATE",
+            "bookmaker_id": 8,
+            "bookmaker": "Bet365",
+            "selection": "UNDER_2_5",
+            "marker": null
+          },
+          {
+            "observation_id": null,
+            "odd": 1.7,
+            "opposite_odd": 2.1,
+            "captured_at": "2026-09-08T13:56:01.318803+00:00",
+            "snapshot_type": "CLOSING",
+            "bookmaker_id": 8,
+            "bookmaker": "Bet365",
+            "selection": "UNDER_2_5",
+            "marker": null
+          },
+          {
+            "observation_id": null,
+            "odd": 1.7,
+            "opposite_odd": 2.1,
+            "captured_at": "2026-09-08T13:56:01.700582+00:00",
+            "snapshot_type": "INTERMEDIATE",
+            "bookmaker_id": 8,
+            "bookmaker": "Bet365",
+            "selection": "UNDER_2_5",
+            "marker": null
+          }
+        ]
       }
     },
     {
@@ -1013,7 +1628,17 @@
       "closing_coverage": "UNAVAILABLE",
       "lifecycle_coverage": "PARTIAL",
       "production_lifecycle": {
-        "opening": null,
+        "schema_version": 2,
+        "first_seen": {
+          "observation_id": null,
+          "odd": 1.75,
+          "opposite_odd": 2.05,
+          "captured_at": "2026-09-06T22:53:57.553111+00:00",
+          "snapshot_type": "ENTRY",
+          "bookmaker_id": 8,
+          "bookmaker": "Bet365",
+          "selection": "UNDER_2_5"
+        },
         "pick": {
           "observation_id": null,
           "odd": 1.75,
@@ -1021,23 +1646,36 @@
           "captured_at": "2026-09-06T22:53:57.553111+00:00",
           "snapshot_type": "ENTRY",
           "bookmaker_id": 8,
-          "bookmaker": "Bet365"
+          "bookmaker": "Bet365",
+          "selection": "UNDER_2_5"
         },
-        "live": {
-          "observation_id": null,
-          "odd": 1.75,
-          "opposite_odd": 2.05,
-          "captured_at": "2026-09-06T22:53:57.553111+00:00",
-          "snapshot_type": "ENTRY",
-          "bookmaker_id": 8,
-          "bookmaker": "Bet365"
-        },
-        "live_state": "STALE",
-        "live_age_minutes": 5545.110164983333,
+        "live": null,
         "closing": null,
+        "first_seen_observation_id": null,
+        "pick_observation_id": null,
+        "live_observation_id": null,
+        "closing_observation_id": null,
+        "live_captured_at": null,
+        "live_state": "UNAVAILABLE",
+        "live_age_minutes": null,
         "closing_recovered": false,
+        "closing_snapshot_type": null,
         "clv_odds_pct": null,
-        "coverage": "PARTIAL"
+        "clv_status": "NOT_COMPUTABLE",
+        "coverage": "PARTIAL",
+        "timeline": [
+          {
+            "observation_id": null,
+            "odd": 1.75,
+            "opposite_odd": 2.05,
+            "captured_at": "2026-09-06T22:53:57.553111+00:00",
+            "snapshot_type": "ENTRY",
+            "bookmaker_id": 8,
+            "bookmaker": "Bet365",
+            "selection": "UNDER_2_5",
+            "marker": null
+          }
+        ]
       }
     },
     {
@@ -1100,7 +1738,17 @@
       "closing_coverage": "UNAVAILABLE",
       "lifecycle_coverage": "PARTIAL",
       "production_lifecycle": {
-        "opening": null,
+        "schema_version": 2,
+        "first_seen": {
+          "observation_id": null,
+          "odd": 2.16,
+          "opposite_odd": 1.66,
+          "captured_at": "2026-09-06T22:53:57.553111+00:00",
+          "snapshot_type": "ENTRY",
+          "bookmaker_id": 11,
+          "bookmaker": "1xBet",
+          "selection": "OVER_2_5"
+        },
         "pick": {
           "observation_id": null,
           "odd": 2.16,
@@ -1108,23 +1756,36 @@
           "captured_at": "2026-09-06T22:53:57.553111+00:00",
           "snapshot_type": "ENTRY",
           "bookmaker_id": 11,
-          "bookmaker": "1xBet"
+          "bookmaker": "1xBet",
+          "selection": "OVER_2_5"
         },
-        "live": {
-          "observation_id": null,
-          "odd": 2.16,
-          "opposite_odd": 1.66,
-          "captured_at": "2026-09-06T22:53:57.553111+00:00",
-          "snapshot_type": "ENTRY",
-          "bookmaker_id": 11,
-          "bookmaker": "1xBet"
-        },
-        "live_state": "STALE",
-        "live_age_minutes": 5545.110164983333,
+        "live": null,
         "closing": null,
+        "first_seen_observation_id": null,
+        "pick_observation_id": null,
+        "live_observation_id": null,
+        "closing_observation_id": null,
+        "live_captured_at": null,
+        "live_state": "UNAVAILABLE",
+        "live_age_minutes": null,
         "closing_recovered": false,
+        "closing_snapshot_type": null,
         "clv_odds_pct": null,
-        "coverage": "PARTIAL"
+        "clv_status": "NOT_COMPUTABLE",
+        "coverage": "PARTIAL",
+        "timeline": [
+          {
+            "observation_id": null,
+            "odd": 2.16,
+            "opposite_odd": 1.66,
+            "captured_at": "2026-09-06T22:53:57.553111+00:00",
+            "snapshot_type": "ENTRY",
+            "bookmaker_id": 11,
+            "bookmaker": "1xBet",
+            "selection": "OVER_2_5",
+            "marker": null
+          }
+        ]
       }
     },
     {
@@ -1194,7 +1855,17 @@
       "closing_coverage": "PROVEN",
       "lifecycle_coverage": "PARTIAL",
       "production_lifecycle": {
-        "opening": null,
+        "schema_version": 2,
+        "first_seen": {
+          "observation_id": null,
+          "odd": 2.2,
+          "opposite_odd": 1.65,
+          "captured_at": "2026-09-06T22:53:57.553111+00:00",
+          "snapshot_type": "ENTRY",
+          "bookmaker_id": 8,
+          "bookmaker": "Bet365",
+          "selection": "OVER_2_5"
+        },
         "pick": {
           "observation_id": null,
           "odd": 2.2,
@@ -1202,23 +1873,47 @@
           "captured_at": "2026-09-06T22:53:57.553111+00:00",
           "snapshot_type": "ENTRY",
           "bookmaker_id": 8,
-          "bookmaker": "Bet365"
+          "bookmaker": "Bet365",
+          "selection": "OVER_2_5"
         },
-        "live": {
-          "observation_id": null,
-          "odd": 2.2,
-          "opposite_odd": 1.65,
-          "captured_at": "2026-09-07T12:49:09.237612+00:00",
-          "snapshot_type": "CLOSING",
-          "bookmaker_id": 8,
-          "bookmaker": "Bet365"
-        },
-        "live_state": "STALE",
-        "live_age_minutes": 4709.9154233,
+        "live": null,
         "closing": null,
+        "first_seen_observation_id": null,
+        "pick_observation_id": null,
+        "live_observation_id": null,
+        "closing_observation_id": null,
+        "live_captured_at": null,
+        "live_state": "UNAVAILABLE",
+        "live_age_minutes": null,
         "closing_recovered": false,
+        "closing_snapshot_type": null,
         "clv_odds_pct": null,
-        "coverage": "PARTIAL"
+        "clv_status": "NOT_COMPUTABLE",
+        "coverage": "PARTIAL",
+        "timeline": [
+          {
+            "observation_id": null,
+            "odd": 2.2,
+            "opposite_odd": 1.65,
+            "captured_at": "2026-09-06T22:53:57.553111+00:00",
+            "snapshot_type": "ENTRY",
+            "bookmaker_id": 8,
+            "bookmaker": "Bet365",
+            "selection": "OVER_2_5",
+            "marker": null
+          },
+          {
+            "observation_id": null,
+            "odd": 2.2,
+            "opposite_odd": 1.65,
+            "captured_at": "2026-09-07T12:49:09.237612+00:00",
+            "snapshot_type": "CLOSING",
+            "bookmaker_id": 8,
+            "bookmaker": "Bet365",
+            "selection": "OVER_2_5",
+            "marker": null
+          }
+        ]
       }
     },
     {
@@ -1288,7 +1983,17 @@
       "closing_coverage": "PROVEN",
       "lifecycle_coverage": "PARTIAL",
       "production_lifecycle": {
-        "opening": null,
+        "schema_version": 2,
+        "first_seen": {
+          "observation_id": null,
+          "odd": 2.62,
+          "opposite_odd": 1.44,
+          "captured_at": "2026-09-05T23:51:57.388329+00:00",
+          "snapshot_type": "ENTRY",
+          "bookmaker_id": 8,
+          "bookmaker": "Bet365",
+          "selection": "UNDER_2_5"
+        },
         "pick": {
           "observation_id": null,
           "odd": 2.62,
@@ -1296,23 +2001,47 @@
           "captured_at": "2026-09-05T23:51:57.388329+00:00",
           "snapshot_type": "ENTRY",
           "bookmaker_id": 8,
-          "bookmaker": "Bet365"
+          "bookmaker": "Bet365",
+          "selection": "UNDER_2_5"
         },
-        "live": {
-          "observation_id": null,
-          "odd": 2.62,
-          "opposite_odd": 1.44,
-          "captured_at": "2026-09-06T19:41:18.277545+00:00",
-          "snapshot_type": "CLOSING",
-          "bookmaker_id": 8,
-          "bookmaker": "Bet365"
-        },
-        "live_state": "STALE",
-        "live_age_minutes": 5737.76475775,
+        "live": null,
         "closing": null,
+        "first_seen_observation_id": null,
+        "pick_observation_id": null,
+        "live_observation_id": null,
+        "closing_observation_id": null,
+        "live_captured_at": null,
+        "live_state": "UNAVAILABLE",
+        "live_age_minutes": null,
         "closing_recovered": false,
+        "closing_snapshot_type": null,
         "clv_odds_pct": null,
-        "coverage": "PARTIAL"
+        "clv_status": "NOT_COMPUTABLE",
+        "coverage": "PARTIAL",
+        "timeline": [
+          {
+            "observation_id": null,
+            "odd": 2.62,
+            "opposite_odd": 1.44,
+            "captured_at": "2026-09-05T23:51:57.388329+00:00",
+            "snapshot_type": "ENTRY",
+            "bookmaker_id": 8,
+            "bookmaker": "Bet365",
+            "selection": "UNDER_2_5",
+            "marker": null
+          },
+          {
+            "observation_id": null,
+            "odd": 2.62,
+            "opposite_odd": 1.44,
+            "captured_at": "2026-09-06T19:41:18.277545+00:00",
+            "snapshot_type": "CLOSING",
+            "bookmaker_id": 8,
+            "bookmaker": "Bet365",
+            "selection": "UNDER_2_5",
+            "marker": null
+          }
+        ]
       }
     },
     {
@@ -1382,7 +2111,17 @@
       "closing_coverage": "PROVEN",
       "lifecycle_coverage": "PARTIAL",
       "production_lifecycle": {
-        "opening": null,
+        "schema_version": 2,
+        "first_seen": {
+          "observation_id": null,
+          "odd": 2.83,
+          "opposite_odd": 1.33,
+          "captured_at": "2026-09-05T23:51:57.388329+00:00",
+          "snapshot_type": "ENTRY",
+          "bookmaker_id": 11,
+          "bookmaker": "1xBet",
+          "selection": "UNDER_2_5"
+        },
         "pick": {
           "observation_id": null,
           "odd": 2.83,
@@ -1390,23 +2129,47 @@
           "captured_at": "2026-09-05T23:51:57.388329+00:00",
           "snapshot_type": "ENTRY",
           "bookmaker_id": 11,
-          "bookmaker": "1xBet"
+          "bookmaker": "1xBet",
+          "selection": "UNDER_2_5"
         },
-        "live": {
-          "observation_id": null,
-          "odd": 2.62,
-          "opposite_odd": 1.38,
-          "captured_at": "2026-09-06T15:52:54.263127+00:00",
-          "snapshot_type": "CLOSING",
-          "bookmaker_id": 11,
-          "bookmaker": "1xBet"
-        },
-        "live_state": "STALE",
-        "live_age_minutes": 5966.16499805,
+        "live": null,
         "closing": null,
+        "first_seen_observation_id": null,
+        "pick_observation_id": null,
+        "live_observation_id": null,
+        "closing_observation_id": null,
+        "live_captured_at": null,
+        "live_state": "UNAVAILABLE",
+        "live_age_minutes": null,
         "closing_recovered": false,
+        "closing_snapshot_type": null,
         "clv_odds_pct": null,
-        "coverage": "PARTIAL"
+        "clv_status": "NOT_COMPUTABLE",
+        "coverage": "PARTIAL",
+        "timeline": [
+          {
+            "observation_id": null,
+            "odd": 2.83,
+            "opposite_odd": 1.33,
+            "captured_at": "2026-09-05T23:51:57.388329+00:00",
+            "snapshot_type": "ENTRY",
+            "bookmaker_id": 11,
+            "bookmaker": "1xBet",
+            "selection": "UNDER_2_5",
+            "marker": null
+          },
+          {
+            "observation_id": null,
+            "odd": 2.62,
+            "opposite_odd": 1.38,
+            "captured_at": "2026-09-06T15:52:54.263127+00:00",
+            "snapshot_type": "CLOSING",
+            "bookmaker_id": 11,
+            "bookmaker": "1xBet",
+            "selection": "UNDER_2_5",
+            "marker": null
+          }
+        ]
       }
     },
     {
@@ -1469,7 +2232,17 @@
       "closing_coverage": "UNAVAILABLE",
       "lifecycle_coverage": "PARTIAL",
       "production_lifecycle": {
-        "opening": null,
+        "schema_version": 2,
+        "first_seen": {
+          "observation_id": null,
+          "odd": 1.9,
+          "opposite_odd": 1.9,
+          "captured_at": "2026-09-05T23:51:57.388329+00:00",
+          "snapshot_type": "ENTRY",
+          "bookmaker_id": 8,
+          "bookmaker": "Bet365",
+          "selection": "OVER_2_5"
+        },
         "pick": {
           "observation_id": null,
           "odd": 1.9,
@@ -1477,23 +2250,36 @@
           "captured_at": "2026-09-05T23:51:57.388329+00:00",
           "snapshot_type": "ENTRY",
           "bookmaker_id": 8,
-          "bookmaker": "Bet365"
+          "bookmaker": "Bet365",
+          "selection": "OVER_2_5"
         },
-        "live": {
-          "observation_id": null,
-          "odd": 1.9,
-          "opposite_odd": 1.9,
-          "captured_at": "2026-09-05T23:51:57.388329+00:00",
-          "snapshot_type": "ENTRY",
-          "bookmaker_id": 8,
-          "bookmaker": "Bet365"
-        },
-        "live_state": "STALE",
-        "live_age_minutes": 6927.11291135,
+        "live": null,
         "closing": null,
+        "first_seen_observation_id": null,
+        "pick_observation_id": null,
+        "live_observation_id": null,
+        "closing_observation_id": null,
+        "live_captured_at": null,
+        "live_state": "UNAVAILABLE",
+        "live_age_minutes": null,
         "closing_recovered": false,
+        "closing_snapshot_type": null,
         "clv_odds_pct": null,
-        "coverage": "PARTIAL"
+        "clv_status": "NOT_COMPUTABLE",
+        "coverage": "PARTIAL",
+        "timeline": [
+          {
+            "observation_id": null,
+            "odd": 1.9,
+            "opposite_odd": 1.9,
+            "captured_at": "2026-09-05T23:51:57.388329+00:00",
+            "snapshot_type": "ENTRY",
+            "bookmaker_id": 8,
+            "bookmaker": "Bet365",
+            "selection": "OVER_2_5",
+            "marker": null
+          }
+        ]
       }
     },
     {
@@ -1563,7 +2349,17 @@
       "closing_coverage": "PROVEN",
       "lifecycle_coverage": "PARTIAL",
       "production_lifecycle": {
-        "opening": null,
+        "schema_version": 2,
+        "first_seen": {
+          "observation_id": null,
+          "odd": 3.4,
+          "opposite_odd": 1.33,
+          "captured_at": "2026-09-05T23:51:57.388329+00:00",
+          "snapshot_type": "ENTRY",
+          "bookmaker_id": 8,
+          "bookmaker": "Bet365",
+          "selection": "UNDER_2_5"
+        },
         "pick": {
           "observation_id": null,
           "odd": 3.4,
@@ -1571,23 +2367,47 @@
           "captured_at": "2026-09-05T23:51:57.388329+00:00",
           "snapshot_type": "ENTRY",
           "bookmaker_id": 8,
-          "bookmaker": "Bet365"
+          "bookmaker": "Bet365",
+          "selection": "UNDER_2_5"
         },
-        "live": {
-          "observation_id": null,
-          "odd": 3.4,
-          "opposite_odd": 1.33,
-          "captured_at": "2026-09-06T00:13:50.150351+00:00",
-          "snapshot_type": "CLOSING",
-          "bookmaker_id": 8,
-          "bookmaker": "Bet365"
-        },
-        "live_state": "STALE",
-        "live_age_minutes": 6905.233544316667,
+        "live": null,
         "closing": null,
+        "first_seen_observation_id": null,
+        "pick_observation_id": null,
+        "live_observation_id": null,
+        "closing_observation_id": null,
+        "live_captured_at": null,
+        "live_state": "UNAVAILABLE",
+        "live_age_minutes": null,
         "closing_recovered": false,
+        "closing_snapshot_type": null,
         "clv_odds_pct": null,
-        "coverage": "PARTIAL"
+        "clv_status": "NOT_COMPUTABLE",
+        "coverage": "PARTIAL",
+        "timeline": [
+          {
+            "observation_id": null,
+            "odd": 3.4,
+            "opposite_odd": 1.33,
+            "captured_at": "2026-09-05T23:51:57.388329+00:00",
+            "snapshot_type": "ENTRY",
+            "bookmaker_id": 8,
+            "bookmaker": "Bet365",
+            "selection": "UNDER_2_5",
+            "marker": null
+          },
+          {
+            "observation_id": null,
+            "odd": 3.4,
+            "opposite_odd": 1.33,
+            "captured_at": "2026-09-06T00:13:50.150351+00:00",
+            "snapshot_type": "CLOSING",
+            "bookmaker_id": 8,
+            "bookmaker": "Bet365",
+            "selection": "UNDER_2_5",
+            "marker": null
+          }
+        ]
       }
     },
     {
@@ -1656,27 +2476,45 @@
       "closing_coverage": "PROVEN",
       "lifecycle_coverage": "PARTIAL",
       "production_lifecycle": {
-        "opening": null,
-        "pick": {
-          "odd": 2.06,
-          "captured_at": "2026-09-05T08:39:09.130693+00:00",
-          "observation_id": null
-        },
-        "live": {
+        "schema_version": 2,
+        "first_seen": {
           "observation_id": null,
           "odd": 1.92,
           "opposite_odd": 1.84,
           "captured_at": "2026-09-05T18:26:45.595027+00:00",
           "snapshot_type": "CLOSING",
           "bookmaker_id": 11,
-          "bookmaker": "1xBet"
+          "bookmaker": "1xBet",
+          "selection": "UNDER_2_5"
         },
-        "live_state": "STALE",
-        "live_age_minutes": 7252.3094663833335,
+        "pick": null,
+        "live": null,
         "closing": null,
+        "first_seen_observation_id": null,
+        "pick_observation_id": null,
+        "live_observation_id": null,
+        "closing_observation_id": null,
+        "live_captured_at": null,
+        "live_state": "UNAVAILABLE",
+        "live_age_minutes": null,
         "closing_recovered": false,
+        "closing_snapshot_type": null,
         "clv_odds_pct": null,
-        "coverage": "PARTIAL"
+        "clv_status": "NOT_COMPUTABLE",
+        "coverage": "PARTIAL",
+        "timeline": [
+          {
+            "observation_id": null,
+            "odd": 1.92,
+            "opposite_odd": 1.84,
+            "captured_at": "2026-09-05T18:26:45.595027+00:00",
+            "snapshot_type": "CLOSING",
+            "bookmaker_id": 11,
+            "bookmaker": "1xBet",
+            "selection": "UNDER_2_5",
+            "marker": null
+          }
+        ]
       }
     },
     {
@@ -1745,27 +2583,45 @@
       "closing_coverage": "PROVEN",
       "lifecycle_coverage": "PARTIAL",
       "production_lifecycle": {
-        "opening": null,
-        "pick": {
-          "odd": 2.17,
-          "captured_at": "2026-09-05T08:39:09.130693+00:00",
-          "observation_id": null
-        },
-        "live": {
+        "schema_version": 2,
+        "first_seen": {
           "observation_id": null,
           "odd": 2.21,
           "opposite_odd": 1.64,
           "captured_at": "2026-09-05T16:09:11.605458+00:00",
           "snapshot_type": "CLOSING",
           "bookmaker_id": 11,
-          "bookmaker": "1xBet"
+          "bookmaker": "1xBet",
+          "selection": "UNDER_2_5"
         },
-        "live_state": "STALE",
-        "live_age_minutes": 7389.8759592,
+        "pick": null,
+        "live": null,
         "closing": null,
+        "first_seen_observation_id": null,
+        "pick_observation_id": null,
+        "live_observation_id": null,
+        "closing_observation_id": null,
+        "live_captured_at": null,
+        "live_state": "UNAVAILABLE",
+        "live_age_minutes": null,
         "closing_recovered": false,
+        "closing_snapshot_type": null,
         "clv_odds_pct": null,
-        "coverage": "PARTIAL"
+        "clv_status": "NOT_COMPUTABLE",
+        "coverage": "PARTIAL",
+        "timeline": [
+          {
+            "observation_id": null,
+            "odd": 2.21,
+            "opposite_odd": 1.64,
+            "captured_at": "2026-09-05T16:09:11.605458+00:00",
+            "snapshot_type": "CLOSING",
+            "bookmaker_id": 11,
+            "bookmaker": "1xBet",
+            "selection": "UNDER_2_5",
+            "marker": null
+          }
+        ]
       }
     },
     {
@@ -1834,27 +2690,45 @@
       "closing_coverage": "PROVEN",
       "lifecycle_coverage": "PARTIAL",
       "production_lifecycle": {
-        "opening": null,
-        "pick": {
-          "odd": 1.96,
-          "captured_at": "2026-09-05T08:39:09.130693+00:00",
-          "observation_id": null
-        },
-        "live": {
+        "schema_version": 2,
+        "first_seen": {
           "observation_id": null,
           "odd": 1.92,
           "opposite_odd": 1.9,
           "captured_at": "2026-09-05T13:05:02.442910+00:00",
           "snapshot_type": "CLOSING",
           "bookmaker_id": 11,
-          "bookmaker": "1xBet"
+          "bookmaker": "1xBet",
+          "selection": "OVER_2_5"
         },
-        "live_state": "STALE",
-        "live_age_minutes": 7574.028668333333,
+        "pick": null,
+        "live": null,
         "closing": null,
+        "first_seen_observation_id": null,
+        "pick_observation_id": null,
+        "live_observation_id": null,
+        "closing_observation_id": null,
+        "live_captured_at": null,
+        "live_state": "UNAVAILABLE",
+        "live_age_minutes": null,
         "closing_recovered": false,
+        "closing_snapshot_type": null,
         "clv_odds_pct": null,
-        "coverage": "PARTIAL"
+        "clv_status": "NOT_COMPUTABLE",
+        "coverage": "PARTIAL",
+        "timeline": [
+          {
+            "observation_id": null,
+            "odd": 1.92,
+            "opposite_odd": 1.9,
+            "captured_at": "2026-09-05T13:05:02.442910+00:00",
+            "snapshot_type": "CLOSING",
+            "bookmaker_id": 11,
+            "bookmaker": "1xBet",
+            "selection": "OVER_2_5",
+            "marker": null
+          }
+        ]
       }
     },
     {
@@ -1909,19 +2783,24 @@
       "settled_at": "2026-09-04T23:30:02.182809+00:00",
       "clv_status": "NOT_COMPUTABLE",
       "production_lifecycle": {
-        "opening": null,
-        "pick": {
-          "odd": 1.75,
-          "captured_at": "2026-09-04T20:20:34.771219+00:00",
-          "observation_id": null
-        },
+        "schema_version": 2,
+        "first_seen": null,
+        "pick": null,
         "live": null,
-        "live_state": "NO_OBSERVATION",
-        "live_age_minutes": null,
         "closing": null,
+        "first_seen_observation_id": null,
+        "pick_observation_id": null,
+        "live_observation_id": null,
+        "closing_observation_id": null,
+        "live_captured_at": null,
+        "live_state": "UNAVAILABLE",
+        "live_age_minutes": null,
         "closing_recovered": false,
+        "closing_snapshot_type": null,
         "clv_odds_pct": null,
-        "coverage": "PARTIAL"
+        "clv_status": "NOT_COMPUTABLE",
+        "coverage": "UNRECOVERABLE",
+        "timeline": []
       }
     },
     {
@@ -2080,7 +2959,17 @@
       "outcome": null,
       "cancellation_reason": "PRODUCTION_BOOKMAKER_OUTSIDE_HARD_WHITELIST",
       "production_lifecycle": {
-        "opening": null,
+        "schema_version": 2,
+        "first_seen": {
+          "observation_id": null,
+          "odd": 1.73,
+          "opposite_odd": 2.05,
+          "captured_at": "2026-09-09T22:23:24.071011+00:00",
+          "snapshot_type": "ENTRY",
+          "bookmaker_id": 3,
+          "bookmaker": "Betfair",
+          "selection": "BTTS_YES"
+        },
         "pick": {
           "observation_id": null,
           "odd": 1.73,
@@ -2088,23 +2977,36 @@
           "captured_at": "2026-09-09T22:23:24.071011+00:00",
           "snapshot_type": "ENTRY",
           "bookmaker_id": 3,
-          "bookmaker": "Betfair"
+          "bookmaker": "Betfair",
+          "selection": "BTTS_YES"
         },
-        "live": {
-          "observation_id": null,
-          "odd": 1.73,
-          "opposite_odd": 2.05,
-          "captured_at": "2026-09-09T22:23:24.071011+00:00",
-          "snapshot_type": "ENTRY",
-          "bookmaker_id": 3,
-          "bookmaker": "Betfair"
-        },
-        "live_state": "STALE",
-        "live_age_minutes": 1255.6681999833334,
+        "live": null,
         "closing": null,
+        "first_seen_observation_id": null,
+        "pick_observation_id": null,
+        "live_observation_id": null,
+        "closing_observation_id": null,
+        "live_captured_at": null,
+        "live_state": "UNAVAILABLE",
+        "live_age_minutes": null,
         "closing_recovered": false,
+        "closing_snapshot_type": null,
         "clv_odds_pct": null,
-        "coverage": "PARTIAL"
+        "clv_status": "NOT_COMPUTABLE",
+        "coverage": "PARTIAL",
+        "timeline": [
+          {
+            "observation_id": null,
+            "odd": 1.73,
+            "opposite_odd": 2.05,
+            "captured_at": "2026-09-09T22:23:24.071011+00:00",
+            "snapshot_type": "ENTRY",
+            "bookmaker_id": 3,
+            "bookmaker": "Betfair",
+            "selection": "BTTS_YES",
+            "marker": null
+          }
+        ]
       }
     }
   ],
@@ -2112,6 +3014,6 @@
     "production": 20,
     "active": 0,
     "history": 20,
-    "snapshots": 8854
+    "snapshots": 9074
   }
 }
