@@ -8,7 +8,7 @@ on:
 permissions:
   contents: write
 
-a concurrency:
+concurrency:
   group: quantbet-football-api-global
   cancel-in-progress: false
 
