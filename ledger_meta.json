@@ -1,5 +1,5 @@
 {
-  "initial_bank": 50000.0,
+  "initial_bank": 30000.0,
   "paper_mode": true,
   "model_version": "dc-value-v2.1.0",
   "github_repository": "Filip1994/h2h",
