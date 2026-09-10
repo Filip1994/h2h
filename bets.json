@@ -1301,7 +1301,7 @@
     "model_training_cutoff": "2026-09-09T22:23:24.071011+00:00",
     "model_training_identity": "8af2ad1ed431a385010b39fa3abd3d8acccd0c38866fd791b821e097ab3d8341",
     "calibration_status": "IDENTITY_UNVALIDATED",
-    "status": "PENDING",
+    "status": "CANCELLED",
     "profit": 0.0,
     "signal_source": "DAILY_BULLETIN",
     "signal_sent_at": "2026-09-10T00:23:24.071011+02:00",
@@ -1407,7 +1407,9 @@
     "pick_coverage": "PROVEN",
     "closing_coverage": "UNAVAILABLE",
     "lifecycle_coverage": "PARTIAL",
-    "clv_status": "NOT_COMPUTABLE"
+    "clv_status": "NOT_COMPUTABLE",
+    "outcome": null,
+    "cancellation_reason": "PRODUCTION_BOOKMAKER_OUTSIDE_HARD_WHITELIST"
   },
   {
     "id": "1594824_OVER_2_5",

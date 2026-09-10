@@ -1,200 +1,26 @@
 {
-  "schema_version": 1,
-  "generated_at": "2026-09-10T14:48:37.388709+00:00",
+  "schema_version": 3,
+  "generated_at": "2026-09-10T16:22:21.385425+00:00",
   "truth": "data/odds_snapshots.jsonl + bets.json",
+  "monitoring": {
+    "last_odds_scan_at": "2026-09-10T16:22:09.610054+00:00",
+    "last_snapshot_at": "2026-09-10T16:22:09.610054+00:00",
+    "scan_age_minutes": 0.19625618333333333,
+    "scan_state": "FRESH",
+    "api_requests_last_scan": 56,
+    "daily_budget_used": 1119,
+    "daily_budget_remaining": 6381,
+    "observations_last_scan": 231
+  },
   "rules": {
-    "opening": "first persisted observation for the exact Production fixture/market/bookmaker at or before Pick",
-    "live": "latest persisted observation for the exact Production fixture/market/bookmaker",
-    "closing": "latest exact-bookmaker observation 2-8 minutes before kickoff; otherwise null",
+    "opening": "first real persisted observation for exact fixture/market/bookmaker at or before Pick",
+    "live": "latest real persisted observation for exact fixture/market/bookmaker",
+    "closing": "exact T-2m to T-8m observation, with honest pre-kickoff recovery if missed",
     "clv": "Pick odd / Closing odd - 1; null when Closing is unavailable",
     "missing_data": "null; dashboard renders as —"
   },
   "initial_bank": 50000.0,
   "active": [
-    {
-      "id": "1634287_BTTS_YES",
-      "type": "DC_VALUE",
-      "mode": "PAPER",
-      "event_id": 1634287,
-      "prediction_id": "1634287_BTTS_YES_dc-value-v2.1.0",
-      "created_at": "2026-09-10T00:23:24.071011+02:00",
-      "decision_timestamp": "2026-09-10T00:23:24.071011+02:00",
-      "data_cutoff": "2026-09-09T22:23:24.071011+00:00",
-      "date": "2026-09-10",
-      "kickoff": "2026-09-10T13:40:00+00:00",
-      "sport": "Football",
-      "match": "Dubai United vs Shabab Al Ahli Dubai",
-      "home_id": 22321,
-      "away_id": 2870,
-      "league": "United-Arab-Emirates - Pro League",
-      "league_id": 301,
-      "market": "BTTS_YES",
-      "market_display": "BTTS — Yes",
-      "stake": 500.0,
-      "odd": 1.73,
-      "opening_odd": null,
-      "opposite_odd": 2.05,
-      "opening_opposite_odd": null,
-      "bookmaker_id": 3,
-      "bookmaker": "Betfair",
-      "odds_captured_at": "2026-09-09T22:23:24.071011+00:00",
-      "opening_odds_captured_at": null,
-      "implied_probability": 0.578035,
-      "market_probability_devig": 0.542328,
-      "market_overround": 0.06584,
-      "model_probability": 0.81292,
-      "calibrated_probability": 0.81292,
-      "decision_probability": 0.78292,
-      "probability_edge": 0.240592,
-      "expected_value": 0.354451,
-      "lambda_home": 1.730842,
-      "lambda_away": 4.440552,
-      "rho": 0.011406,
-      "xi": 0.0015,
-      "model_version": "dc-value-v2.1.0",
-      "model_fitted_matches": 574,
-      "model_team_count": 19,
-      "model_training_cutoff": "2026-09-09T22:23:24.071011+00:00",
-      "model_training_identity": "8af2ad1ed431a385010b39fa3abd3d8acccd0c38866fd791b821e097ab3d8341",
-      "calibration_status": "IDENTITY_UNVALIDATED",
-      "status": "PENDING",
-      "profit": 0.0,
-      "signal_source": "DAILY_BULLETIN",
-      "signal_sent_at": "2026-09-10T00:23:24.071011+02:00",
-      "decision_packet": {
-        "schema_version": 2,
-        "packet_id": "e0f393aab3c3ebca4c0ab3ba77f8cf824b57dc2af390b7150fc14386b67f1502",
-        "fixture": {
-          "fixture_id": 1634287,
-          "league_id": 301,
-          "league": "United-Arab-Emirates - Pro League",
-          "home_id": 22321,
-          "home": "Dubai United",
-          "away_id": 2870,
-          "away": "Shabab Al Ahli Dubai",
-          "kickoff": "2026-09-10T13:40:00+00:00"
-        },
-        "decision": {
-          "market": "BTTS_YES",
-          "selection": "BTTS_YES",
-          "bookmaker_id": 3,
-          "bookmaker": "Betfair",
-          "pick_odd": 1.73,
-          "pick_observed_at": "2026-09-09T22:23:24.071011+00:00",
-          "pick_observation_id": "5ff5b6380d6614c1c98d9379517619be5f4072117fefbcb12aecccf061765f6e",
-          "decision_timestamp": "2026-09-09T22:23:24.071011+00:00"
-        },
-        "model": {
-          "version": "dc-value-v2.1.0",
-          "code_sha": "3c91cded5c4bd7349bedc953bd8efca396d40eb7",
-          "training_cutoff": "2026-09-09T22:23:24.071011+00:00",
-          "training_sample": {
-            "fitted_matches": 574,
-            "team_count": 19,
-            "identity": "8af2ad1ed431a385010b39fa3abd3d8acccd0c38866fd791b821e097ab3d8341"
-          },
-          "raw_probability": 0.81291984,
-          "calibrated_probability": 0.81291984,
-          "decision_probability": 0.78291984,
-          "calibration_status": "IDENTITY_UNVALIDATED",
-          "calibration_hash": "db20ea934654f4e897da255ee1418059db0117864000186544ac1ba9abd9a328"
-        },
-        "market_inputs": {
-          "opposite_odd": 2.05,
-          "devig_probability": 0.54232804,
-          "overround": 0.06583956,
-          "expected_value": 0.35445132,
-          "probability_edge": 0.2405918,
-          "haircut": 0.03
-        },
-        "strategy": {
-          "version": "production-decision-v1",
-          "config_hash": "7fdf3494c3a3720a6774586f142ba51a2c4878612f0f13ed34c92ec37a6cb53f",
-          "bookmaker_policy_version": "all-provider-bookmakers-best-price-v1",
-          "eligibility": "PASSED",
-          "registry_version": "6d27ef1a7c19ac21ad7f4899aac611d7e9da1a84a2c7bfab6a2f9c8111173db5",
-          "registry_league_id": 301,
-          "registry_classification": {
-            "provider_league_id": 301,
-            "country": "United-Arab-Emirates",
-            "league_name": "Pro League",
-            "tier": 1,
-            "enabled": true,
-            "source": "API-Football provider league ID + project tier audit"
-          }
-        },
-        "risk": {
-          "stake": 500.0,
-          "kelly_fraction": 0.25,
-          "max_bet_stake_pct": 0.01,
-          "max_daily_risk_pct": 0.03,
-          "max_open_risk_pct": 0.05
-        },
-        "provenance": {
-          "canonical_observation_id": "5ff5b6380d6614c1c98d9379517619be5f4072117fefbcb12aecccf061765f6e",
-          "canonical_observation": {
-            "fixture_id": 1634287,
-            "market": "BTTS_YES",
-            "bookmaker_id": 3,
-            "bookmaker": "Betfair",
-            "odd": 1.73,
-            "opposite_odd": 2.05,
-            "captured_at": "2026-09-09T22:23:24.071011+00:00",
-            "snapshot_type": "ENTRY"
-          },
-          "opening": {
-            "status": "UNAVAILABLE_AT_DECISION_TIME",
-            "reason": "NO_EARLIER_OBSERVATION"
-          },
-          "closing": {
-            "status": "UNAVAILABLE_AT_DECISION_TIME",
-            "reason": "NOT_YET_OBSERVED"
-          }
-        },
-        "integrity_hash": "01b7483cc26dc2e03d30ba432b2ad40fd021af29c802e34c8bad67c47e8def51"
-      },
-      "decision_packet_id": "e0f393aab3c3ebca4c0ab3ba77f8cf824b57dc2af390b7150fc14386b67f1502",
-      "decision_packet_integrity_hash": "01b7483cc26dc2e03d30ba432b2ad40fd021af29c802e34c8bad67c47e8def51",
-      "signal_id": "1634287_BTTS_YES_dc-value-v2.1.0",
-      "entry_snapshot_id": "33fb930c1333233a611c12bde38bc2f19c65ff2f3d35157729e0ad203c215ced",
-      "opening_snapshot_id": null,
-      "opening_coverage": "UNAVAILABLE",
-      "pick_snapshot_id": "33fb930c1333233a611c12bde38bc2f19c65ff2f3d35157729e0ad203c215ced",
-      "pick_coverage": "PROVEN",
-      "closing_coverage": "UNAVAILABLE",
-      "lifecycle_coverage": "PARTIAL",
-      "clv_status": "NOT_COMPUTABLE",
-      "production_lifecycle": {
-        "opening": {
-          "observation_id": null,
-          "odd": 1.73,
-          "opposite_odd": 2.05,
-          "captured_at": "2026-09-09T22:23:24.071011+00:00",
-          "snapshot_type": "ENTRY",
-          "bookmaker_id": 3,
-          "bookmaker": "Betfair"
-        },
-        "pick": {
-          "odd": 1.73,
-          "captured_at": "2026-09-09T22:23:24.071011+00:00",
-          "observation_id": null
-        },
-        "live": {
-          "observation_id": null,
-          "odd": 1.73,
-          "opposite_odd": 2.05,
-          "captured_at": "2026-09-09T22:23:24.071011+00:00",
-          "snapshot_type": "ENTRY",
-          "bookmaker_id": 3,
-          "bookmaker": "Betfair"
-        },
-        "live_state": "STALE",
-        "closing": null,
-        "closing_rule": "T-2m_to_T-8m_exact_pre_kickoff_observation",
-        "clv_odds_pct": null,
-        "coverage": "PARTIAL"
-      }
-    },
     {
       "id": "1594824_OVER_2_5",
       "type": "DC_VALUE",
@@ -348,7 +174,8 @@
       "closing_recovery_snapshot_type": "INTERMEDIATE",
       "clv_odds_pct": 0.0,
       "production_lifecycle": {
-        "opening": {
+        "opening": null,
+        "pick": {
           "observation_id": null,
           "odd": 2.5,
           "opposite_odd": 1.5,
@@ -356,11 +183,6 @@
           "snapshot_type": "ENTRY",
           "bookmaker_id": 8,
           "bookmaker": "Bet365"
-        },
-        "pick": {
-          "odd": 2.5,
-          "captured_at": "2026-09-09T22:23:24.071011+00:00",
-          "observation_id": null
         },
         "live": {
           "observation_id": null,
@@ -372,9 +194,18 @@
           "bookmaker": "Bet365"
         },
         "live_state": "STALE",
-        "closing": null,
-        "closing_rule": "T-2m_to_T-8m_exact_pre_kickoff_observation",
-        "clv_odds_pct": null,
+        "live_age_minutes": 1078.5321791833333,
+        "closing": {
+          "observation_id": null,
+          "odd": 2.5,
+          "opposite_odd": 1.5,
+          "captured_at": "2026-09-09T22:23:49.454674+00:00",
+          "snapshot_type": "INTERMEDIATE",
+          "bookmaker_id": 8,
+          "bookmaker": "Bet365"
+        },
+        "closing_recovered": true,
+        "clv_odds_pct": 0.0,
         "coverage": "PARTIAL"
       }
     }
@@ -440,8 +271,9 @@
         },
         "live": null,
         "live_state": "NO_OBSERVATION",
+        "live_age_minutes": null,
         "closing": null,
-        "closing_rule": "T-2m_to_T-8m_exact_pre_kickoff_observation",
+        "closing_recovered": false,
         "clv_odds_pct": null,
         "coverage": "PARTIAL"
       }
@@ -528,8 +360,17 @@
           "bookmaker": "1xBet"
         },
         "live_state": "STALE",
-        "closing": null,
-        "closing_rule": "T-2m_to_T-8m_exact_pre_kickoff_observation",
+        "live_age_minutes": 7397.315708583334,
+        "closing": {
+          "observation_id": null,
+          "odd": 1.92,
+          "opposite_odd": 1.9,
+          "captured_at": "2026-09-05T13:05:02.442910+00:00",
+          "snapshot_type": "CLOSING",
+          "bookmaker_id": 11,
+          "bookmaker": "1xBet"
+        },
+        "closing_recovered": false,
         "clv_odds_pct": null,
         "coverage": "PARTIAL"
       }
@@ -616,8 +457,17 @@
           "bookmaker": "1xBet"
         },
         "live_state": "STALE",
-        "closing": null,
-        "closing_rule": "T-2m_to_T-8m_exact_pre_kickoff_observation",
+        "live_age_minutes": 7213.16299945,
+        "closing": {
+          "observation_id": null,
+          "odd": 2.21,
+          "opposite_odd": 1.64,
+          "captured_at": "2026-09-05T16:09:11.605458+00:00",
+          "snapshot_type": "CLOSING",
+          "bookmaker_id": 11,
+          "bookmaker": "1xBet"
+        },
+        "closing_recovered": false,
         "clv_odds_pct": null,
         "coverage": "PARTIAL"
       }
@@ -704,8 +554,17 @@
           "bookmaker": "1xBet"
         },
         "live_state": "STALE",
-        "closing": null,
-        "closing_rule": "T-2m_to_T-8m_exact_pre_kickoff_observation",
+        "live_age_minutes": 7075.596506633333,
+        "closing": {
+          "observation_id": null,
+          "odd": 1.92,
+          "opposite_odd": 1.84,
+          "captured_at": "2026-09-05T18:26:45.595027+00:00",
+          "snapshot_type": "CLOSING",
+          "bookmaker_id": 11,
+          "bookmaker": "1xBet"
+        },
+        "closing_recovered": false,
         "clv_odds_pct": null,
         "coverage": "PARTIAL"
       }
@@ -777,7 +636,8 @@
       "closing_coverage": "PROVEN",
       "lifecycle_coverage": "PARTIAL",
       "production_lifecycle": {
-        "opening": {
+        "opening": null,
+        "pick": {
           "observation_id": null,
           "odd": 2.62,
           "opposite_odd": 1.44,
@@ -785,11 +645,6 @@
           "snapshot_type": "ENTRY",
           "bookmaker_id": 8,
           "bookmaker": "Bet365"
-        },
-        "pick": {
-          "odd": 2.62,
-          "captured_at": "2026-09-05T23:51:57.388329+00:00",
-          "observation_id": null
         },
         "live": {
           "observation_id": null,
@@ -801,9 +656,18 @@
           "bookmaker": "Bet365"
         },
         "live_state": "STALE",
-        "closing": null,
-        "closing_rule": "T-2m_to_T-8m_exact_pre_kickoff_observation",
-        "clv_odds_pct": null,
+        "live_age_minutes": 5561.051798,
+        "closing": {
+          "observation_id": null,
+          "odd": 2.62,
+          "opposite_odd": 1.44,
+          "captured_at": "2026-09-06T19:41:18.277545+00:00",
+          "snapshot_type": "CLOSING",
+          "bookmaker_id": 8,
+          "bookmaker": "Bet365"
+        },
+        "closing_recovered": false,
+        "clv_odds_pct": 0.0,
         "coverage": "PARTIAL"
       }
     },
@@ -874,7 +738,8 @@
       "closing_coverage": "PROVEN",
       "lifecycle_coverage": "PARTIAL",
       "production_lifecycle": {
-        "opening": {
+        "opening": null,
+        "pick": {
           "observation_id": null,
           "odd": 3.4,
           "opposite_odd": 1.33,
@@ -882,11 +747,6 @@
           "snapshot_type": "ENTRY",
           "bookmaker_id": 8,
           "bookmaker": "Bet365"
-        },
-        "pick": {
-          "odd": 3.4,
-          "captured_at": "2026-09-05T23:51:57.388329+00:00",
-          "observation_id": null
         },
         "live": {
           "observation_id": null,
@@ -898,9 +758,18 @@
           "bookmaker": "Bet365"
         },
         "live_state": "STALE",
-        "closing": null,
-        "closing_rule": "T-2m_to_T-8m_exact_pre_kickoff_observation",
-        "clv_odds_pct": null,
+        "live_age_minutes": 6728.520584566667,
+        "closing": {
+          "observation_id": null,
+          "odd": 3.4,
+          "opposite_odd": 1.33,
+          "captured_at": "2026-09-06T00:13:50.150351+00:00",
+          "snapshot_type": "CLOSING",
+          "bookmaker_id": 8,
+          "bookmaker": "Bet365"
+        },
+        "closing_recovered": false,
+        "clv_odds_pct": 0.0,
         "coverage": "PARTIAL"
       }
     },
@@ -964,7 +833,8 @@
       "closing_coverage": "UNAVAILABLE",
       "lifecycle_coverage": "PARTIAL",
       "production_lifecycle": {
-        "opening": {
+        "opening": null,
+        "pick": {
           "observation_id": null,
           "odd": 1.9,
           "opposite_odd": 1.9,
@@ -972,11 +842,6 @@
           "snapshot_type": "ENTRY",
           "bookmaker_id": 8,
           "bookmaker": "Bet365"
-        },
-        "pick": {
-          "odd": 1.9,
-          "captured_at": "2026-09-05T23:51:57.388329+00:00",
-          "observation_id": null
         },
         "live": {
           "observation_id": null,
@@ -988,8 +853,9 @@
           "bookmaker": "Bet365"
         },
         "live_state": "STALE",
+        "live_age_minutes": 6750.3999516,
         "closing": null,
-        "closing_rule": "T-2m_to_T-8m_exact_pre_kickoff_observation",
+        "closing_recovered": false,
         "clv_odds_pct": null,
         "coverage": "PARTIAL"
       }
@@ -1061,7 +927,8 @@
       "closing_coverage": "PROVEN",
       "lifecycle_coverage": "PARTIAL",
       "production_lifecycle": {
-        "opening": {
+        "opening": null,
+        "pick": {
           "observation_id": null,
           "odd": 2.83,
           "opposite_odd": 1.33,
@@ -1069,11 +936,6 @@
           "snapshot_type": "ENTRY",
           "bookmaker_id": 11,
           "bookmaker": "1xBet"
-        },
-        "pick": {
-          "odd": 2.83,
-          "captured_at": "2026-09-05T23:51:57.388329+00:00",
-          "observation_id": null
         },
         "live": {
           "observation_id": null,
@@ -1085,9 +947,18 @@
           "bookmaker": "1xBet"
         },
         "live_state": "STALE",
-        "closing": null,
-        "closing_rule": "T-2m_to_T-8m_exact_pre_kickoff_observation",
-        "clv_odds_pct": null,
+        "live_age_minutes": 5789.4520383,
+        "closing": {
+          "observation_id": null,
+          "odd": 2.62,
+          "opposite_odd": 1.38,
+          "captured_at": "2026-09-06T15:52:54.263127+00:00",
+          "snapshot_type": "CLOSING",
+          "bookmaker_id": 11,
+          "bookmaker": "1xBet"
+        },
+        "closing_recovered": false,
+        "clv_odds_pct": 0.080153,
         "coverage": "PARTIAL"
       }
     },
@@ -1158,7 +1029,8 @@
       "closing_coverage": "PROVEN",
       "lifecycle_coverage": "PARTIAL",
       "production_lifecycle": {
-        "opening": {
+        "opening": null,
+        "pick": {
           "observation_id": null,
           "odd": 2.2,
           "opposite_odd": 1.65,
@@ -1166,11 +1038,6 @@
           "snapshot_type": "ENTRY",
           "bookmaker_id": 8,
           "bookmaker": "Bet365"
-        },
-        "pick": {
-          "odd": 2.2,
-          "captured_at": "2026-09-06T22:53:57.553111+00:00",
-          "observation_id": null
         },
         "live": {
           "observation_id": null,
@@ -1182,9 +1049,18 @@
           "bookmaker": "Bet365"
         },
         "live_state": "STALE",
-        "closing": null,
-        "closing_rule": "T-2m_to_T-8m_exact_pre_kickoff_observation",
-        "clv_odds_pct": null,
+        "live_age_minutes": 4533.20246355,
+        "closing": {
+          "observation_id": null,
+          "odd": 2.2,
+          "opposite_odd": 1.65,
+          "captured_at": "2026-09-07T12:49:09.237612+00:00",
+          "snapshot_type": "CLOSING",
+          "bookmaker_id": 8,
+          "bookmaker": "Bet365"
+        },
+        "closing_recovered": false,
+        "clv_odds_pct": 0.0,
         "coverage": "PARTIAL"
       }
     },
@@ -1248,7 +1124,8 @@
       "closing_coverage": "UNAVAILABLE",
       "lifecycle_coverage": "PARTIAL",
       "production_lifecycle": {
-        "opening": {
+        "opening": null,
+        "pick": {
           "observation_id": null,
           "odd": 1.75,
           "opposite_odd": 2.05,
@@ -1256,11 +1133,6 @@
           "snapshot_type": "ENTRY",
           "bookmaker_id": 8,
           "bookmaker": "Bet365"
-        },
-        "pick": {
-          "odd": 1.75,
-          "captured_at": "2026-09-06T22:53:57.553111+00:00",
-          "observation_id": null
         },
         "live": {
           "observation_id": null,
@@ -1272,8 +1144,9 @@
           "bookmaker": "Bet365"
         },
         "live_state": "STALE",
+        "live_age_minutes": 5368.397205233333,
         "closing": null,
-        "closing_rule": "T-2m_to_T-8m_exact_pre_kickoff_observation",
+        "closing_recovered": false,
         "clv_odds_pct": null,
         "coverage": "PARTIAL"
       }
@@ -1338,7 +1211,8 @@
       "closing_coverage": "UNAVAILABLE",
       "lifecycle_coverage": "PARTIAL",
       "production_lifecycle": {
-        "opening": {
+        "opening": null,
+        "pick": {
           "observation_id": null,
           "odd": 2.16,
           "opposite_odd": 1.66,
@@ -1346,11 +1220,6 @@
           "snapshot_type": "ENTRY",
           "bookmaker_id": 11,
           "bookmaker": "1xBet"
-        },
-        "pick": {
-          "odd": 2.16,
-          "captured_at": "2026-09-06T22:53:57.553111+00:00",
-          "observation_id": null
         },
         "live": {
           "observation_id": null,
@@ -1362,8 +1231,9 @@
           "bookmaker": "1xBet"
         },
         "live_state": "STALE",
+        "live_age_minutes": 5368.397205233333,
         "closing": null,
-        "closing_rule": "T-2m_to_T-8m_exact_pre_kickoff_observation",
+        "closing_recovered": false,
         "clv_odds_pct": null,
         "coverage": "PARTIAL"
       }
@@ -1437,7 +1307,8 @@
       "closing_coverage": "PROVEN",
       "lifecycle_coverage": "PARTIAL",
       "production_lifecycle": {
-        "opening": {
+        "opening": null,
+        "pick": {
           "observation_id": null,
           "odd": 2.0,
           "opposite_odd": 1.8,
@@ -1445,11 +1316,6 @@
           "snapshot_type": "ENTRY",
           "bookmaker_id": 8,
           "bookmaker": "Bet365"
-        },
-        "pick": {
-          "odd": 2.0,
-          "captured_at": "2026-09-08T00:45:18.177343+00:00",
-          "observation_id": null
         },
         "live": {
           "observation_id": null,
@@ -1461,9 +1327,18 @@
           "bookmaker": "Bet365"
         },
         "live_state": "STALE",
-        "closing": null,
-        "closing_rule": "T-2m_to_T-8m_exact_pre_kickoff_observation",
-        "clv_odds_pct": null,
+        "live_age_minutes": 2793.434907533333,
+        "closing": {
+          "observation_id": null,
+          "odd": 2.0,
+          "opposite_odd": 1.8,
+          "captured_at": "2026-09-08T17:48:55.290973+00:00",
+          "snapshot_type": "INTERMEDIATE",
+          "bookmaker_id": 8,
+          "bookmaker": "Bet365"
+        },
+        "closing_recovered": true,
+        "clv_odds_pct": 0.0,
         "coverage": "PARTIAL"
       }
     },
@@ -1536,7 +1411,8 @@
       "closing_coverage": "PROVEN",
       "lifecycle_coverage": "PARTIAL",
       "production_lifecycle": {
-        "opening": {
+        "opening": null,
+        "pick": {
           "observation_id": null,
           "odd": 2.25,
           "opposite_odd": 1.62,
@@ -1544,11 +1420,6 @@
           "snapshot_type": "ENTRY",
           "bookmaker_id": 8,
           "bookmaker": "Bet365"
-        },
-        "pick": {
-          "odd": 2.25,
-          "captured_at": "2026-09-08T00:45:18.177343+00:00",
-          "observation_id": null
         },
         "live": {
           "observation_id": null,
@@ -1560,9 +1431,18 @@
           "bookmaker": "Bet365"
         },
         "live_state": "STALE",
-        "closing": null,
-        "closing_rule": "T-2m_to_T-8m_exact_pre_kickoff_observation",
-        "clv_odds_pct": null,
+        "live_age_minutes": 2793.42955315,
+        "closing": {
+          "observation_id": null,
+          "odd": 2.05,
+          "opposite_odd": 1.75,
+          "captured_at": "2026-09-08T17:48:55.612236+00:00",
+          "snapshot_type": "INTERMEDIATE",
+          "bookmaker_id": 8,
+          "bookmaker": "Bet365"
+        },
+        "closing_recovered": true,
+        "clv_odds_pct": 0.097561,
         "coverage": "PARTIAL"
       }
     },
@@ -1635,7 +1515,8 @@
       "closing_coverage": "PROVEN",
       "lifecycle_coverage": "PARTIAL",
       "production_lifecycle": {
-        "opening": {
+        "opening": null,
+        "pick": {
           "observation_id": null,
           "odd": 1.85,
           "opposite_odd": 1.95,
@@ -1643,11 +1524,6 @@
           "snapshot_type": "ENTRY",
           "bookmaker_id": 8,
           "bookmaker": "Bet365"
-        },
-        "pick": {
-          "odd": 1.85,
-          "captured_at": "2026-09-08T00:45:18.177343+00:00",
-          "observation_id": null
         },
         "live": {
           "observation_id": null,
@@ -1659,9 +1535,18 @@
           "bookmaker": "Bet365"
         },
         "live_state": "STALE",
-        "closing": null,
-        "closing_rule": "T-2m_to_T-8m_exact_pre_kickoff_observation",
-        "clv_odds_pct": null,
+        "live_age_minutes": 3026.3280807166666,
+        "closing": {
+          "observation_id": null,
+          "odd": 1.7,
+          "opposite_odd": 2.1,
+          "captured_at": "2026-09-08T13:56:01.700582+00:00",
+          "snapshot_type": "INTERMEDIATE",
+          "bookmaker_id": 8,
+          "bookmaker": "Bet365"
+        },
+        "closing_recovered": true,
+        "clv_odds_pct": 0.088235,
         "coverage": "PARTIAL"
       }
     },
@@ -1730,7 +1615,8 @@
       "clv_status": "COMPUTABLE",
       "closing_snapshot_id": "d4eecc773026f8d70bc5ef0fc67e4eefcf47f7ee69d400ec4b345472bb60b5e8",
       "production_lifecycle": {
-        "opening": {
+        "opening": null,
+        "pick": {
           "observation_id": null,
           "odd": 2.16,
           "opposite_odd": 1.65,
@@ -1738,11 +1624,6 @@
           "snapshot_type": "ENTRY",
           "bookmaker_id": 11,
           "bookmaker": "1xBet"
-        },
-        "pick": {
-          "odd": 2.16,
-          "captured_at": "2026-09-09T05:08:08.421056+00:00",
-          "observation_id": null
         },
         "live": {
           "observation_id": null,
@@ -1754,9 +1635,18 @@
           "bookmaker": "1xBet"
         },
         "live_state": "STALE",
-        "closing": null,
-        "closing_rule": "T-2m_to_T-8m_exact_pre_kickoff_observation",
-        "clv_odds_pct": null,
+        "live_age_minutes": 1444.8192806333332,
+        "closing": {
+          "observation_id": null,
+          "odd": 2.28,
+          "opposite_odd": 1.59,
+          "captured_at": "2026-09-09T16:17:32.228587+00:00",
+          "snapshot_type": "INTERMEDIATE",
+          "bookmaker_id": 11,
+          "bookmaker": "1xBet"
+        },
+        "closing_recovered": true,
+        "clv_odds_pct": -0.052632,
         "coverage": "PARTIAL"
       }
     },
@@ -1825,7 +1715,8 @@
       "clv_status": "COMPUTABLE",
       "closing_snapshot_id": "609180b4dd933b9753a7563200193f24ddaa579b5b47275f75a3050826879591",
       "production_lifecycle": {
-        "opening": {
+        "opening": null,
+        "pick": {
           "observation_id": null,
           "odd": 3.5,
           "opposite_odd": 1.3,
@@ -1833,11 +1724,6 @@
           "snapshot_type": "ENTRY",
           "bookmaker_id": 8,
           "bookmaker": "Bet365"
-        },
-        "pick": {
-          "odd": 3.5,
-          "captured_at": "2026-09-09T05:08:08.421056+00:00",
-          "observation_id": null
         },
         "live": {
           "observation_id": null,
@@ -1849,9 +1735,18 @@
           "bookmaker": "Bet365"
         },
         "live_state": "STALE",
-        "closing": null,
-        "closing_rule": "T-2m_to_T-8m_exact_pre_kickoff_observation",
-        "clv_odds_pct": null,
+        "live_age_minutes": 1444.8133010499998,
+        "closing": {
+          "observation_id": null,
+          "odd": 3.6,
+          "opposite_odd": 1.28,
+          "captured_at": "2026-09-09T16:17:32.587362+00:00",
+          "snapshot_type": "INTERMEDIATE",
+          "bookmaker_id": 8,
+          "bookmaker": "Bet365"
+        },
+        "closing_recovered": true,
+        "clv_odds_pct": -0.027778,
         "coverage": "PARTIAL"
       }
     },
@@ -1920,7 +1815,8 @@
       "clv_status": "COMPUTABLE",
       "closing_snapshot_id": "095911b36406d46ac1e77038679e5c339b652f99ac2e4931c79cf92c0a25fcb2",
       "production_lifecycle": {
-        "opening": {
+        "opening": null,
+        "pick": {
           "observation_id": null,
           "odd": 2.25,
           "opposite_odd": 1.62,
@@ -1928,11 +1824,6 @@
           "snapshot_type": "ENTRY",
           "bookmaker_id": 8,
           "bookmaker": "Bet365"
-        },
-        "pick": {
-          "odd": 2.25,
-          "captured_at": "2026-09-09T05:08:08.421056+00:00",
-          "observation_id": null
         },
         "live": {
           "observation_id": null,
@@ -1944,9 +1835,18 @@
           "bookmaker": "Bet365"
         },
         "live_state": "STALE",
-        "closing": null,
-        "closing_rule": "T-2m_to_T-8m_exact_pre_kickoff_observation",
-        "clv_odds_pct": null,
+        "live_age_minutes": 1444.8077911166665,
+        "closing": {
+          "observation_id": null,
+          "odd": 2.35,
+          "opposite_odd": 1.57,
+          "captured_at": "2026-09-09T16:17:32.917958+00:00",
+          "snapshot_type": "INTERMEDIATE",
+          "bookmaker_id": 8,
+          "bookmaker": "Bet365"
+        },
+        "closing_recovered": true,
+        "clv_odds_pct": -0.042553,
         "coverage": "PARTIAL"
       }
     },
@@ -2106,7 +2006,8 @@
       "result": "2:0",
       "settled_at": "2026-09-10T05:13:04.170066+00:00",
       "production_lifecycle": {
-        "opening": {
+        "opening": null,
+        "pick": {
           "observation_id": null,
           "odd": 3.45,
           "opposite_odd": 1.29,
@@ -2114,11 +2015,6 @@
           "snapshot_type": "ENTRY",
           "bookmaker_id": 16,
           "bookmaker": "Unibet"
-        },
-        "pick": {
-          "odd": 3.45,
-          "captured_at": "2026-09-09T22:23:24.071011+00:00",
-          "observation_id": null
         },
         "live": {
           "observation_id": null,
@@ -2130,8 +2026,192 @@
           "bookmaker": "Unibet"
         },
         "live_state": "STALE",
+        "live_age_minutes": 1078.9552402333334,
         "closing": null,
-        "closing_rule": "T-2m_to_T-8m_exact_pre_kickoff_observation",
+        "closing_recovered": false,
+        "clv_odds_pct": null,
+        "coverage": "PARTIAL"
+      }
+    },
+    {
+      "id": "1634287_BTTS_YES",
+      "type": "DC_VALUE",
+      "mode": "PAPER",
+      "event_id": 1634287,
+      "prediction_id": "1634287_BTTS_YES_dc-value-v2.1.0",
+      "created_at": "2026-09-10T00:23:24.071011+02:00",
+      "decision_timestamp": "2026-09-10T00:23:24.071011+02:00",
+      "data_cutoff": "2026-09-09T22:23:24.071011+00:00",
+      "date": "2026-09-10",
+      "kickoff": "2026-09-10T13:40:00+00:00",
+      "sport": "Football",
+      "match": "Dubai United vs Shabab Al Ahli Dubai",
+      "home_id": 22321,
+      "away_id": 2870,
+      "league": "United-Arab-Emirates - Pro League",
+      "league_id": 301,
+      "market": "BTTS_YES",
+      "market_display": "BTTS — Yes",
+      "stake": 500.0,
+      "odd": 1.73,
+      "opening_odd": null,
+      "opposite_odd": 2.05,
+      "opening_opposite_odd": null,
+      "bookmaker_id": 3,
+      "bookmaker": "Betfair",
+      "odds_captured_at": "2026-09-09T22:23:24.071011+00:00",
+      "opening_odds_captured_at": null,
+      "implied_probability": 0.578035,
+      "market_probability_devig": 0.542328,
+      "market_overround": 0.06584,
+      "model_probability": 0.81292,
+      "calibrated_probability": 0.81292,
+      "decision_probability": 0.78292,
+      "probability_edge": 0.240592,
+      "expected_value": 0.354451,
+      "lambda_home": 1.730842,
+      "lambda_away": 4.440552,
+      "rho": 0.011406,
+      "xi": 0.0015,
+      "model_version": "dc-value-v2.1.0",
+      "model_fitted_matches": 574,
+      "model_team_count": 19,
+      "model_training_cutoff": "2026-09-09T22:23:24.071011+00:00",
+      "model_training_identity": "8af2ad1ed431a385010b39fa3abd3d8acccd0c38866fd791b821e097ab3d8341",
+      "calibration_status": "IDENTITY_UNVALIDATED",
+      "status": "CANCELLED",
+      "profit": 0.0,
+      "signal_source": "DAILY_BULLETIN",
+      "signal_sent_at": "2026-09-10T00:23:24.071011+02:00",
+      "decision_packet": {
+        "schema_version": 2,
+        "packet_id": "e0f393aab3c3ebca4c0ab3ba77f8cf824b57dc2af390b7150fc14386b67f1502",
+        "fixture": {
+          "fixture_id": 1634287,
+          "league_id": 301,
+          "league": "United-Arab-Emirates - Pro League",
+          "home_id": 22321,
+          "home": "Dubai United",
+          "away_id": 2870,
+          "away": "Shabab Al Ahli Dubai",
+          "kickoff": "2026-09-10T13:40:00+00:00"
+        },
+        "decision": {
+          "market": "BTTS_YES",
+          "selection": "BTTS_YES",
+          "bookmaker_id": 3,
+          "bookmaker": "Betfair",
+          "pick_odd": 1.73,
+          "pick_observed_at": "2026-09-09T22:23:24.071011+00:00",
+          "pick_observation_id": "5ff5b6380d6614c1c98d9379517619be5f4072117fefbcb12aecccf061765f6e",
+          "decision_timestamp": "2026-09-09T22:23:24.071011+00:00"
+        },
+        "model": {
+          "version": "dc-value-v2.1.0",
+          "code_sha": "3c91cded5c4bd7349bedc953bd8efca396d40eb7",
+          "training_cutoff": "2026-09-09T22:23:24.071011+00:00",
+          "training_sample": {
+            "fitted_matches": 574,
+            "team_count": 19,
+            "identity": "8af2ad1ed431a385010b39fa3abd3d8acccd0c38866fd791b821e097ab3d8341"
+          },
+          "raw_probability": 0.81291984,
+          "calibrated_probability": 0.81291984,
+          "decision_probability": 0.78291984,
+          "calibration_status": "IDENTITY_UNVALIDATED",
+          "calibration_hash": "db20ea934654f4e897da255ee1418059db0117864000186544ac1ba9abd9a328"
+        },
+        "market_inputs": {
+          "opposite_odd": 2.05,
+          "devig_probability": 0.54232804,
+          "overround": 0.06583956,
+          "expected_value": 0.35445132,
+          "probability_edge": 0.2405918,
+          "haircut": 0.03
+        },
+        "strategy": {
+          "version": "production-decision-v1",
+          "config_hash": "7fdf3494c3a3720a6774586f142ba51a2c4878612f0f13ed34c92ec37a6cb53f",
+          "bookmaker_policy_version": "all-provider-bookmakers-best-price-v1",
+          "eligibility": "PASSED",
+          "registry_version": "6d27ef1a7c19ac21ad7f4899aac611d7e9da1a84a2c7bfab6a2f9c8111173db5",
+          "registry_league_id": 301,
+          "registry_classification": {
+            "provider_league_id": 301,
+            "country": "United-Arab-Emirates",
+            "league_name": "Pro League",
+            "tier": 1,
+            "enabled": true,
+            "source": "API-Football provider league ID + project tier audit"
+          }
+        },
+        "risk": {
+          "stake": 500.0,
+          "kelly_fraction": 0.25,
+          "max_bet_stake_pct": 0.01,
+          "max_daily_risk_pct": 0.03,
+          "max_open_risk_pct": 0.05
+        },
+        "provenance": {
+          "canonical_observation_id": "5ff5b6380d6614c1c98d9379517619be5f4072117fefbcb12aecccf061765f6e",
+          "canonical_observation": {
+            "fixture_id": 1634287,
+            "market": "BTTS_YES",
+            "bookmaker_id": 3,
+            "bookmaker": "Betfair",
+            "odd": 1.73,
+            "opposite_odd": 2.05,
+            "captured_at": "2026-09-09T22:23:24.071011+00:00",
+            "snapshot_type": "ENTRY"
+          },
+          "opening": {
+            "status": "UNAVAILABLE_AT_DECISION_TIME",
+            "reason": "NO_EARLIER_OBSERVATION"
+          },
+          "closing": {
+            "status": "UNAVAILABLE_AT_DECISION_TIME",
+            "reason": "NOT_YET_OBSERVED"
+          }
+        },
+        "integrity_hash": "01b7483cc26dc2e03d30ba432b2ad40fd021af29c802e34c8bad67c47e8def51"
+      },
+      "decision_packet_id": "e0f393aab3c3ebca4c0ab3ba77f8cf824b57dc2af390b7150fc14386b67f1502",
+      "decision_packet_integrity_hash": "01b7483cc26dc2e03d30ba432b2ad40fd021af29c802e34c8bad67c47e8def51",
+      "signal_id": "1634287_BTTS_YES_dc-value-v2.1.0",
+      "entry_snapshot_id": "33fb930c1333233a611c12bde38bc2f19c65ff2f3d35157729e0ad203c215ced",
+      "opening_snapshot_id": null,
+      "opening_coverage": "UNAVAILABLE",
+      "pick_snapshot_id": "33fb930c1333233a611c12bde38bc2f19c65ff2f3d35157729e0ad203c215ced",
+      "pick_coverage": "PROVEN",
+      "closing_coverage": "UNAVAILABLE",
+      "lifecycle_coverage": "PARTIAL",
+      "clv_status": "NOT_COMPUTABLE",
+      "outcome": null,
+      "cancellation_reason": "PRODUCTION_BOOKMAKER_OUTSIDE_HARD_WHITELIST",
+      "production_lifecycle": {
+        "opening": null,
+        "pick": {
+          "observation_id": null,
+          "odd": 1.73,
+          "opposite_odd": 2.05,
+          "captured_at": "2026-09-09T22:23:24.071011+00:00",
+          "snapshot_type": "ENTRY",
+          "bookmaker_id": 3,
+          "bookmaker": "Betfair"
+        },
+        "live": {
+          "observation_id": null,
+          "odd": 1.73,
+          "opposite_odd": 2.05,
+          "captured_at": "2026-09-09T22:23:24.071011+00:00",
+          "snapshot_type": "ENTRY",
+          "bookmaker_id": 3,
+          "bookmaker": "Betfair"
+        },
+        "live_state": "STALE",
+        "live_age_minutes": 1078.9552402333334,
+        "closing": null,
+        "closing_recovered": false,
         "clv_odds_pct": null,
         "coverage": "PARTIAL"
       }
@@ -2139,8 +2219,8 @@
   ],
   "counts": {
     "production": 20,
-    "active": 2,
-    "history": 18,
-    "snapshots": 8189
+    "active": 1,
+    "history": 19,
+    "snapshots": 8420
   }
 }
