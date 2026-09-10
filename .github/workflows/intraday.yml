@@ -1,10 +1,7 @@
-name: QuantBet intraday strong-signal scanner
+name: QuantBet legacy intraday producer (manual only)
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "*/30 * * * *"
-      timezone: "Europe/Belgrade"
 
 permissions:
   contents: write
@@ -44,10 +41,11 @@ jobs:
           key: api-cache-${{ runner.os }}-${{ github.run_id }}
           restore-keys: api-cache-${{ runner.os }}-
       - run: pip install -r requirements.txt
-      - name: Smoke-test generation import chain
-        id: startup_smoke
-        run: python -c "import main; print('main.py import OK')"
-      - name: Generate intraday signals
+      - name: Explicitly identify legacy path
+        run: |
+          echo "This workflow is manual-only and is not a canonical Strong/Near producer."
+          echo "Canonical scheduled producer: .github/workflows/watchlist.yml"
+      - name: Generate intraday signals for controlled manual diagnostics
         id: scan
         continue-on-error: true
         run: python main.py generate
@@ -57,7 +55,7 @@ jobs:
       - name: Audit persisted decision funnel
         if: always() && steps.scan.outcome == 'success'
         run: python tools/funnel_audit.py
-      - name: Commit intraday ledger, signals, quota, health and safe raw API archives
+      - name: Commit manual diagnostic state
         if: always()
         run: |
           set -euo pipefail
@@ -73,27 +71,12 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add --ignore-errors "${files[@]}"
           if [ -d data/raw_api ]; then
-            while IFS= read -r -d '' archive; do
-              git add -- "$archive"
-            done < <(find data/raw_api -type f -size -90M -print0)
-            oversized="$(find data/raw_api -type f -size +90M -print -quit)"
-            if [ -n "$oversized" ]; then
-              echo "Skipping raw API archive(s) over 90 MiB to stay below GitHub's 100 MiB file limit: $oversized"
-            fi
+            while IFS= read -r -d '' archive; do git add -- "$archive"; done < <(find data/raw_api -type f -size -90M -print0)
           fi
-          git commit -m "Update QuantBet intraday ledger and generation health"
-          for attempt in 1 2 3; do
-            if git push; then exit 0; fi
-            if [ "$attempt" -eq 3 ]; then break; fi
-            git fetch origin main
-            if ! git rebase origin/main; then
-              git rebase --abort || true
-              echo "Ledger reconciliation conflict; intraday update failed." >&2
-              exit 1
-            fi
-          done
-          echo "Unable to push intraday update after 3 attempts" >&2
-          exit 1
-      - name: Fail when startup or signal generation fails
-        if: failure()
+          git commit -m "Update QuantBet manual intraday diagnostics"
+          git fetch origin main
+          if ! git rebase origin/main; then git rebase --abort || true; exit 1; fi
+          git push
+      - name: Fail manual diagnostic when generation fails
+        if: steps.scan.outcome == 'failure'
         run: exit 1
