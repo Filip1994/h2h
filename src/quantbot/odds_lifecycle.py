@@ -104,7 +104,7 @@ def select_closing(
         seconds = (kickoff - captured).total_seconds()
         if snapshot_type in {"T5", "CLOSING"} and window_min_seconds <= seconds <= window_max_seconds:
             t5_candidates.append(item)
-        elif snapshot_type in {"INTERMEDIATE", "T5", "CLOSING"}:
+        elif snapshot_type in {"INTERMEDIATE", "T5", "CLOSING"} and 0 < seconds <= 900:
             recovery_candidates.append(item)
     if t5_candidates:
         return t5_candidates[-1]
