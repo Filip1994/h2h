@@ -2,6 +2,8 @@ name: Production · 72h odds lifecycle
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
   schedule:
     - cron: "*/5 * * * *"
 
@@ -36,6 +38,8 @@ jobs:
           key: production-odds-api-${{ runner.os }}-${{ github.run_id }}
           restore-keys: production-odds-api-${{ runner.os }}-
       - run: pip install -r requirements.txt
+      - name: Force one fresh Production 72h scan
+        run: rm -f odds_collection_state.json
       - name: Capture due fixtures in the next 72 hours
         run: python main.py capture-odds
       - name: Build Production lifecycle view
