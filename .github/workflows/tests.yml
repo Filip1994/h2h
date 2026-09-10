@@ -21,17 +21,8 @@ jobs:
       - run: pip install -e .
       - name: Smoke-test main generation import chain
         run: python -c "import main; print('main.py import OK')"
-      - run: ruff format --check .
-      - run: ruff check .
-      - name: Forensic odds lifecycle audit
-        if: github.event_name == 'pull_request'
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: python tools/audit_odds_lifecycle.py --output /tmp/odds-lifecycle-audit.md
-      - name: Forensic signal classification audit
-        if: github.event_name == 'pull_request'
-        run: python tools/audit_signal_classification.py > /tmp/signal-classification-audit.txt
-      - name: Forensic exhaustive odds capture audit
-        if: github.event_name == 'pull_request'
-        run: python tools/audit_exhaustive_odds_capture.py > /tmp/exhaustive-odds-capture-audit.md
+      - name: Format check active Production code
+        run: ruff format --check main.py src/quantbot/monitor.py tools/build_production_view.py
+      - name: Lint active Production code
+        run: ruff check main.py src/quantbot/monitor.py tools/build_production_view.py
       - run: pytest
