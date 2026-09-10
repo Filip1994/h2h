@@ -1,0 +1,58 @@
+name: Production · 72h odds lifecycle
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/5 * * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: quantbet-football-api-global
+  cancel-in-progress: false
+
+env:
+  API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+  PAPER_MODE: ${{ vars.PAPER_MODE || 'true' }}
+  API_REQUEST_BUDGET: ${{ vars.API_REQUEST_BUDGET || '7500' }}
+  API_BUDGET_RESERVE: ${{ vars.API_BUDGET_RESERVE || '500' }}
+  TIMEZONE: Europe/Belgrade
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+      - uses: actions/cache@v4
+        with:
+          path: .cache/api
+          key: production-odds-api-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: production-odds-api-${{ runner.os }}-
+      - run: pip install -r requirements.txt
+      - name: Capture due fixtures in the next 72 hours
+        run: python main.py capture-odds
+      - name: Build Production lifecycle view
+        run: python tools/build_production_view.py
+      - name: Commit immutable Production observations
+        run: |
+          set -euo pipefail
+          files=(odds_collection_budget.json odds_collection_state.json odds_collection_metrics.json production_operations_gate.md production_dashboard.json data/odds_snapshots.jsonl data/odds_collection_coverage.jsonl data/eligibility_coverage.jsonl data/football_api_quota.json)
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add --ignore-errors "${files[@]}"
+          git add data/raw_api 2>/dev/null || true
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Capture Production odds lifecycle"
+          for attempt in 1 2 3; do
+            if git push; then exit 0; fi
+            git fetch origin main
+            git rebase origin/main || { git rebase --abort; exit 1; }
+          done
+          exit 1
