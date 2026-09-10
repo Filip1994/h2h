@@ -1,14 +1,14 @@
 {
   "schema_version": 5,
-  "generated_at": "2026-09-10T23:27:24.320909+00:00",
+  "generated_at": "2026-09-10T23:58:17.015607+00:00",
   "truth": "data/odds_snapshots.jsonl + bets.json",
   "monitoring": {
     "last_collector_run_at": "2026-09-10T23:26:45.048459+00:00",
     "last_odds_scan_at": "2026-09-10T23:26:45.048459+00:00",
     "last_snapshot_at": "2026-09-10T23:26:45.048459+00:00",
-    "collector_run_age_minutes": 0.6545408333333333,
-    "scan_age_minutes": 0.6545408333333333,
-    "scan_state": "FRESH",
+    "collector_run_age_minutes": 31.5327858,
+    "scan_age_minutes": 31.5327858,
+    "scan_state": "STALE",
     "api_requests_last_scan": 210,
     "daily_budget_used": 1454,
     "daily_budget_remaining": 6046,
