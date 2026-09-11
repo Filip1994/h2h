@@ -57,18 +57,39 @@ def load_jsonl(path: Path) -> list[dict[str, Any]]:
     return rows
 
 
+def opposite_selection(market: str, selection: str) -> str | None:
+    market_norm = str(market or "").upper()
+    selection_norm = str(selection or "").strip().upper()
+    pairs = {
+        "OVER_2_5": {"OVER_2_5": "UNDER_2_5", "OVER 2.5": "UNDER 2.5"},
+        "UNDER_2_5": {"UNDER_2_5": "OVER_2_5", "UNDER 2.5": "OVER 2.5"},
+        "BTTS_YES": {"BTTS_YES": "BTTS_NO", "YES": "NO"},
+    }
+    return pairs.get(market_norm, {}).get(selection_norm)
+
+
 def compact_observation(row: dict[str, Any] | None) -> dict[str, Any] | None:
     if not row:
         return None
+    market = str(row.get("market") or "")
+    selection = str(row.get("selection") or market)
     return {
         "observation_id": row.get("observation_id"),
+        # `odd` remains the canonical numeric field for compatibility. The
+        # explicit aliases below make it impossible to confuse the selected
+        # quote with its opposite when observations are consumed downstream.
         "odd": row.get("odd"),
+        "selection_odd": row.get("odd"),
         "opposite_odd": row.get("opposite_odd"),
+        "selected_selection": selection,
+        "opposite_selection": opposite_selection(market, selection),
         "captured_at": row.get("odds_captured_at"),
         "snapshot_type": row.get("snapshot_type"),
         "bookmaker_id": row.get("bookmaker_id"),
         "bookmaker": row.get("bookmaker"),
-        "selection": row.get("selection"),
+        "selection": selection,
+        "market": market,
+        "quote_semantics": "odd = selected_selection; opposite_odd = opposite_selection",
     }
 
 
@@ -78,11 +99,12 @@ def bulletin_pick(bet: dict[str, Any]) -> dict[str, Any] | None:
     if captured is None or bet.get("odd") is None or bet.get("opposite_odd") is None:
         return None
     decision = bet.get("decision_packet", {}).get("decision", {})
+    selection = str(bet.get("selection") or bet["market"])
     observation_id = canonical_observation_id(
         fixture_id=int(bet["event_id"]),
         market=str(bet["market"]),
         bookmaker_id=int(bet["bookmaker_id"]),
-        selection=str(bet.get("selection") or bet["market"]),
+        selection=selection,
         odd=float(bet["odd"]),
         opposite_odd=float(bet["opposite_odd"]),
     )
@@ -90,13 +112,18 @@ def bulletin_pick(bet: dict[str, Any]) -> dict[str, Any] | None:
     result = {
         "observation_id": observation_id,
         "odd": bet.get("odd"),
+        "selection_odd": bet.get("odd"),
         "opposite_odd": bet.get("opposite_odd"),
+        "selected_selection": selection,
+        "opposite_selection": opposite_selection(str(bet["market"]), selection),
         "captured_at": captured.isoformat(),
         "snapshot_type": "ENTRY",
         "bookmaker_id": bet.get("bookmaker_id"),
         "bookmaker": bet.get("bookmaker"),
-        "selection": bet.get("selection") or bet.get("market"),
+        "selection": selection,
+        "market": bet.get("market"),
         "observation_identity_version": 1,
+        "quote_semantics": "odd = selected_selection; opposite_odd = opposite_selection",
     }
     if legacy_id and legacy_id != observation_id:
         result["legacy_observation_id"] = legacy_id
@@ -230,10 +257,16 @@ def main() -> int:
     run_age = max(0.0, (now - run_at).total_seconds() / 60.0) if run_at else None
     run_state = "FRESH" if run_age is not None and run_age <= 15 and requests_this_run > 0 else "RUN_NO_API" if run_age is not None and run_age <= 15 else "STALE" if run_age is not None else "NO_RUN"
     output = {
-        "schema_version": 8,
+        "schema_version": 9,
         "generated_at": now.isoformat(),
         "truth": "data/odds_snapshots.jsonl + bets.json",
         "observation_identity": observation_identity_metadata(),
+        "observation_semantics": {
+            "odd": "odds for the selected/picked selection; canonical field",
+            "selection_odd": "explicit alias of odd for the selected/picked selection",
+            "opposite_odd": "odds for the mathematically opposite selection in the same market/bookmaker",
+            "timeline": "every persisted observation is retained; repeated identical quote states remain separate snapshot records",
+        },
         "monitoring": {
             "last_collector_run_at": run_at.isoformat() if run_at else None,
             "last_odds_scan_at": run_at.isoformat() if run_at and requests_this_run > 0 else None,
