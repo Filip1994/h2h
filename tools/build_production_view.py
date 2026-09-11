@@ -11,7 +11,7 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from quantbot.odds_lifecycle import lifecycle_contract, observations_for
+from quantbot.odds_lifecycle import clv_from_odds, lifecycle_contract, observations_for
 
 BETS = ROOT / "bets.json"
 SNAPSHOTS = ROOT / "data" / "odds_snapshots.jsonl"
@@ -68,6 +68,38 @@ def compact_observation(row: dict[str, Any] | None) -> dict[str, Any] | None:
     }
 
 
+def bulletin_pick(bet: dict[str, Any]) -> dict[str, Any] | None:
+    """The bulletin decision is the authoritative PICK observation."""
+    captured = parse_dt(bet.get("odds_captured_at") or bet.get("decision_timestamp"))
+    if captured is None or bet.get("odd") is None:
+        return None
+    return {
+        "observation_id": bet.get("decision_packet", {}).get("decision", {}).get("pick_observation_id"),
+        "odd": bet.get("odd"),
+        "opposite_odd": bet.get("opposite_odd"),
+        "captured_at": captured.isoformat(),
+        "snapshot_type": "ENTRY",
+        "bookmaker_id": bet.get("bookmaker_id"),
+        "bookmaker": bet.get("bookmaker"),
+        "selection": bet.get("selection") or bet.get("market"),
+    }
+
+
+def true_closing(observations: list[dict[str, Any]], kickoff: datetime | None, pick_at: datetime | None) -> dict[str, Any] | None:
+    """CLOSING is the last persisted odds observation before kickoff, after the pick."""
+    if kickoff is None:
+        return None
+    candidates: list[dict[str, Any]] = []
+    for row in observations:
+        captured = parse_dt(row.get("odds_captured_at"))
+        if captured is None or captured > kickoff:
+            continue
+        if pick_at is not None and captured <= pick_at:
+            continue
+        candidates.append(row)
+    return candidates[-1] if candidates else None
+
+
 def enrich(bet: dict[str, Any], now: datetime) -> dict[str, Any]:
     try:
         fixture_id = int(bet["event_id"])
@@ -90,6 +122,7 @@ def enrich(bet: dict[str, Any], now: datetime) -> dict[str, Any]:
         if fixture_id is not None and bookmaker_id is not None
         else []
     )
+
     contract = (
         lifecycle_contract(
             observations,
@@ -98,50 +131,46 @@ def enrich(bet: dict[str, Any], now: datetime) -> dict[str, Any]:
             build_at=now,
         )
         if pick_at is not None
-        else {
-            "first_seen": None,
-            "pick": None,
-            "live": None,
-            "closing": None,
-            "closing_recovered": False,
-            "clv_odds_pct": None,
-            "clv_status": "NOT_COMPUTABLE",
-            "timeline": [],
-        }
+        else {"first_seen": None, "pick": None, "live": None, "closing": None, "closing_recovered": False, "clv_odds_pct": None, "clv_status": "NOT_COMPUTABLE", "timeline": []}
+    )
+
+    # PICK is the exact odds sent in the Daily Bulletin. It must not disappear
+    # merely because the collector did not persist a duplicate ENTRY row.
+    pick = bulletin_pick(bet) or compact_observation(contract.get("pick"))
+    closing_row = true_closing(observations, kickoff, pick_at)
+    closing = compact_observation(closing_row)
+    if closing is None:
+        closing = compact_observation(contract.get("closing"))
+    clv = clv_from_odds(pick.get("odd") if pick else None, closing.get("odd") if closing else None)
+
+    active = str(bet.get("status", "PENDING")).upper() == "PENDING"
+    live = compact_observation(contract.get("live")) if active else None
+    live_at = parse_dt(live.get("captured_at")) if live else None
+    live_state = (
+        "FRESH" if active and live_at and (now - live_at).total_seconds() / 60 <= 15
+        else "STALE" if active and live
+        else "UNAVAILABLE"
     )
 
     item = dict(bet)
     item["production_lifecycle"] = {
         "schema_version": contract.get("schema_version", 2),
         "first_seen": compact_observation(contract.get("first_seen")),
-        "pick": compact_observation(contract.get("pick")),
-        "live": compact_observation(contract.get("live")) if str(bet.get("status", "PENDING")).upper() == "PENDING" else None,
-        "closing": compact_observation(contract.get("closing")),
+        "pick": pick,
+        "live": live,
+        "closing": closing,
         "first_seen_observation_id": contract.get("first_seen_observation_id"),
-        "pick_observation_id": contract.get("pick_observation_id"),
-        "live_observation_id": contract.get("live_observation_id") if str(bet.get("status", "PENDING")).upper() == "PENDING" else None,
-        "closing_observation_id": contract.get("closing_observation_id"),
-        "live_captured_at": contract.get("live_captured_at") if str(bet.get("status", "PENDING")).upper() == "PENDING" else None,
-        "live_state": (
-            "FRESH"
-            if str(bet.get("status", "PENDING")).upper() == "PENDING"
-            and contract.get("live_available")
-            and contract.get("live_captured_at")
-            and (now - parse_dt(contract["live_captured_at"])).total_seconds() / 60 <= 15
-            else "STALE"
-            if str(bet.get("status", "PENDING")).upper() == "PENDING" and contract.get("live_available")
-            else "UNAVAILABLE"
-        ),
-        "live_age_minutes": (
-            round((now - parse_dt(contract["live_captured_at"])).total_seconds() / 60.0, 3)
-            if str(bet.get("status", "PENDING")).upper() == "PENDING" and contract.get("live_captured_at") and parse_dt(contract["live_captured_at"])
-            else None
-        ),
-        "closing_recovered": bool(contract.get("closing_recovered")),
-        "closing_snapshot_type": contract.get("closing_snapshot_type"),
-        "clv_odds_pct": contract.get("clv_odds_pct"),
-        "clv_status": contract.get("clv_status", "NOT_COMPUTABLE"),
-        "coverage": contract.get("coverage"),
+        "pick_observation_id": pick.get("observation_id") if pick else None,
+        "live_observation_id": contract.get("live_observation_id") if active else None,
+        "closing_observation_id": closing.get("observation_id") if closing else None,
+        "live_captured_at": live.get("captured_at") if active and live else None,
+        "live_state": live_state,
+        "live_age_minutes": round((now - live_at).total_seconds() / 60.0, 3) if active and live_at else None,
+        "closing_recovered": bool(closing and str(closing.get("snapshot_type")) not in {"T5", "CLOSING"}),
+        "closing_snapshot_type": closing.get("snapshot_type") if closing else None,
+        "clv_odds_pct": clv,
+        "clv_status": "COMPUTABLE" if pick and closing else "NOT_COMPUTABLE",
+        "coverage": "FULLY_AUDITABLE" if contract.get("first_seen") and pick and closing else "PARTIAL",
         "timeline": contract.get("timeline", []),
     }
     return item
@@ -164,7 +193,7 @@ def main() -> int:
     run_age = max(0.0, (now - run_at).total_seconds() / 60.0) if run_at else None
     run_state = "FRESH" if run_age is not None and run_age <= 15 and requests_this_run > 0 else "RUN_NO_API" if run_age is not None and run_age <= 15 else "STALE" if run_age is not None else "NO_RUN"
     output = {
-        "schema_version": 5,
+        "schema_version": 6,
         "generated_at": now.isoformat(),
         "truth": "data/odds_snapshots.jsonl + bets.json",
         "monitoring": {
@@ -181,11 +210,10 @@ def main() -> int:
         },
         "rules": {
             "first_seen": "earliest valid persisted observation for exact fixture/market/bookmaker/selection",
-            "pick": "exact ENTRY observation at production decision timestamp; null otherwise",
-            "live": "latest valid persisted observation at build time and never after kickoff; ACTIVE/PENDING only",
-            "closing": "existing T5/CLOSING rule, with honest pre-kickoff recovery if the scheduled T5 window was missed",
+            "pick": "exact Daily Bulletin odds at the production decision timestamp",
+            "current": "latest valid persisted pre-kickoff observation at dashboard build time; ACTIVE/PENDING only",
+            "closing": "last valid persisted odds observation before kickoff, after the pick",
             "clv": "Pick odd / Closing odd - 1; null when Pick or Closing is unavailable",
-            "timeline": "all canonical observations in chronological order through the build/kickoff cutoff",
             "missing_data": "null; dashboard renders as —",
         },
         "initial_bank": meta.get("initial_bank", 50000),
