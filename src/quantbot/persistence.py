@@ -7,9 +7,10 @@ from pathlib import Path
 from typing import Any
 
 from .bookmaker_registry import bookmaker_identity
+from .observation_identity import canonical_observation_id
 from .types import OddsQuote
 
-SNAPSHOT_SCHEMA_VERSION = 2
+SNAPSHOT_SCHEMA_VERSION = 3
 SNAPSHOT_TYPES = {"OPENING", "ENTRY", "INTERMEDIATE", "T5", "CLOSING"}
 
 
@@ -21,6 +22,11 @@ def source_request_hash(endpoint: str, params: dict[str, Any]) -> str:
 
 
 def snapshot_id(record: dict[str, Any]) -> str:
+    """Immutable identity for one persisted observation record.
+
+    Unlike observation_id, this identity includes temporal/provenance fields so
+    two observations of the same quote state remain distinct immutable records.
+    """
     canonical = {
         key: record.get(key)
         for key in (
@@ -33,6 +39,7 @@ def snapshot_id(record: dict[str, Any]) -> str:
             "odds_captured_at",
             "snapshot_type",
             "source_request_hash",
+            "observation_id",
         )
     }
     return hashlib.sha256(
@@ -40,6 +47,20 @@ def snapshot_id(record: dict[str, Any]) -> str:
             canonical, ensure_ascii=True, sort_keys=True, separators=(",", ":")
         ).encode("utf-8")
     ).hexdigest()
+
+
+def _derive_observation_id(record: dict[str, Any]) -> str | None:
+    try:
+        return canonical_observation_id(
+            fixture_id=int(record["fixture_id"]),
+            market=str(record["market"]),
+            bookmaker_id=int(record["bookmaker_id"]),
+            selection=str(record.get("selection") or record["market"]),
+            odd=float(record["odd"]),
+            opposite_odd=float(record["opposite_odd"]),
+        )
+    except (KeyError, TypeError, ValueError):
+        return None
 
 
 class OddsSnapshotStore:
@@ -65,7 +86,11 @@ class OddsSnapshotStore:
         return ids
 
     def load(self) -> list[dict[str, Any]]:
-        """Load valid persisted snapshots without changing the append-only store."""
+        """Load persisted snapshots without mutating the append-only store.
+
+        Legacy schema-v2 rows are enriched in memory with the v3 observation_id;
+        the original persisted bytes remain immutable.
+        """
         if not self.path.exists():
             return []
         records: list[dict[str, Any]] = []
@@ -76,6 +101,12 @@ class OddsSnapshotStore:
                 except (TypeError, ValueError, json.JSONDecodeError):
                     continue
                 if isinstance(item, dict):
+                    if not item.get("observation_id"):
+                        derived = _derive_observation_id(item)
+                        if derived:
+                            item = dict(item)
+                            item["observation_id"] = derived
+                            item["observation_identity_version"] = 1
                     records.append(item)
         return records
 
@@ -90,6 +121,15 @@ class OddsSnapshotStore:
         item["bookmaker_logo_url"] = identity["logo_url"]
         item["bookmaker_logo_source"] = identity["logo_source"]
         item["bookmaker_logo_verified"] = identity["logo_verified"]
+        item["observation_id"] = canonical_observation_id(
+            fixture_id=int(item["fixture_id"]),
+            market=str(item["market"]),
+            bookmaker_id=int(item["bookmaker_id"]),
+            selection=str(item.get("selection") or item["market"]),
+            odd=float(item["odd"]),
+            opposite_odd=float(item["opposite_odd"]),
+        )
+        item["observation_identity_version"] = 1
         item["snapshot_id"] = snapshot_id(item)
         if item["snapshot_id"] in self._ids:
             return None
