@@ -345,8 +345,8 @@
     "model_training_cutoff": "2026-09-11T00:42:23.072968+00:00",
     "model_training_identity": "dc389510bda2246bbb7e393a0a6c740c005dcb13bb765789e58b2f8c331e2ebb",
     "calibration_status": "IDENTITY_UNVALIDATED",
-    "status": "PENDING",
-    "profit": 0.0,
+    "status": "LOSS",
+    "profit": -300.0,
     "signal_source": "DAILY_BULLETIN",
     "signal_sent_at": "2026-09-11T02:42:23.072968+02:00",
     "decision_packet": {
@@ -442,6 +442,8 @@
       "integrity_hash": "baacfefc9f64bcd9564b86e2cd35078654c5fe0df83790e9bbfc2eb1dc2bd24c"
     },
     "decision_packet_id": "f653e0241f952361100856a682b5c1cd488d06f1c2942d15d4cb26269f27c1c0",
-    "decision_packet_integrity_hash": "baacfefc9f64bcd9564b86e2cd35078654c5fe0df83790e9bbfc2eb1dc2bd24c"
+    "decision_packet_integrity_hash": "baacfefc9f64bcd9564b86e2cd35078654c5fe0df83790e9bbfc2eb1dc2bd24c",
+    "result": "2:0",
+    "settled_at": "2026-09-11T19:19:16.589220+00:00"
   }
 ]
