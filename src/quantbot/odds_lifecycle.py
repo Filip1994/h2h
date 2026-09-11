@@ -186,9 +186,18 @@ def clv_from_odds(pick_odd: Any, closing_odd: Any) -> float | None:
     return round((pick / closing) - 1.0, 6)
 
 
+def _timeline_key(item: dict[str, Any]) -> str:
+    """Use immutable record identity for timeline markers, not quote-state identity."""
+    if item.get("snapshot_id"):
+        return str(item["snapshot_id"])
+    captured = parse_capture(item.get("odds_captured_at"))
+    return captured.isoformat() if captured else json.dumps(item, sort_keys=True, separators=(",", ":"))
+
+
 def _timeline_entry(item: dict[str, Any], marker: str | None = None) -> dict[str, Any]:
     return {
         "observation_id": row_observation_id(item),
+        "snapshot_id": item.get("snapshot_id"),
         "odd": item.get("odd"),
         "opposite_odd": item.get("opposite_odd"),
         "captured_at": item.get("odds_captured_at"),
@@ -225,23 +234,15 @@ def lifecycle_contract(
     ]
     markers: dict[str, str] = {}
     if first_seen:
-        identity = row_observation_id(first_seen)
-        if identity:
-            markers[identity] = "FIRST_SEEN"
+        markers[_timeline_key(first_seen)] = "FIRST_SEEN"
     if pick:
-        identity = row_observation_id(pick)
-        if identity:
-            markers[identity] = "PICK"
+        markers[_timeline_key(pick)] = "PICK"
     if live:
-        identity = row_observation_id(live)
-        if identity:
-            markers[identity] = "LIVE"
+        markers[_timeline_key(live)] = "LIVE"
     if closing:
-        identity = row_observation_id(closing)
-        if identity:
-            markers[identity] = "CLOSE"
+        markers[_timeline_key(closing)] = "CLOSE"
     timeline = [
-        _timeline_entry(item, markers.get(str(row_observation_id(item))))
+        _timeline_entry(item, markers.get(_timeline_key(item)))
         for item in timeline_source
     ]
 
