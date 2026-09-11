@@ -151,7 +151,8 @@ def enrich(bet: dict[str, Any], now: datetime) -> dict[str, Any]:
     )
 
     pick = bulletin_pick(bet) or compact_observation(contract.get("pick"))
-    current = current_after_pick(observations, now, pick_at) if str(bet.get("status", "PENDING")).upper() == "PENDING" else None
+    current_row = current_after_pick(observations, now, pick_at) if str(bet.get("status", "PENDING")).upper() == "PENDING" else None
+    current = compact_observation(current_row)
     closing_row = true_closing(observations, kickoff, pick_at)
     closing = compact_observation(closing_row) or compact_observation(contract.get("closing"))
     clv = clv_from_odds(pick.get("odd") if pick else None, closing.get("odd") if closing else None)
