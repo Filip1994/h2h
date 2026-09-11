@@ -1,9 +1,8 @@
 name: Deploy QuantBet Production dashboard
 
 # Single authoritative Pages publisher. GitHub Pages Source is configured to GitHub Actions.
-# The scheduled reconciliation is intentional: Actions commits made with GITHUB_TOKEN
-# do not reliably create a second workflow trigger, so Pages periodically republishes
-# the current main state even when an upstream producer had a degraded run.
+# Scheduled reconciliation republishes the latest committed main state because
+# GITHUB_TOKEN commits do not create a new workflow run automatically.
 
 on:
   workflow_dispatch:
@@ -21,10 +20,12 @@ on:
     paths:
       - index.html
       - production_dashboard.json
+      - production_quote_health.json
       - bets.json
       - ledger_meta.json
       - system_health.json
       - tools/build_production_view.py
+      - tools/audit_production_targets.py
       - assets/qb-dashboard.css
       - .github/workflows/pages.yml
 
@@ -42,7 +43,9 @@ env:
 
 jobs:
   deploy:
-    if: ${{ always() }}
+    # Never publish a stale main snapshot merely because an upstream producer failed.
+    # The scheduled reconciliation still republishes the last committed canonical state.
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -57,6 +60,8 @@ jobs:
           python-version: "3.12"
       - name: Build Production view
         run: python tools/build_production_view.py
+      - name: Reapply exact Production target health
+        run: python tools/audit_production_targets.py
       - name: Build static Production site
         run: |
           set -euo pipefail
@@ -65,11 +70,13 @@ jobs:
           cp index.html _site/index.html
           cp assets/qb-dashboard.css _site/assets/qb-dashboard.css
           cp production_dashboard.json _site/production_dashboard.json
+          cp production_quote_health.json _site/production_quote_health.json
           cp bets.json _site/bets.json
           cp ledger_meta.json _site/ledger_meta.json
           [ -f system_health.json ] && cp system_health.json _site/system_health.json || true
           test -s _site/index.html
           test -s _site/production_dashboard.json
+          test -s _site/production_quote_health.json
           test -s _site/bets.json
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
