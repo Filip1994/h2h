@@ -69,12 +69,13 @@ def compact_observation(row: dict[str, Any] | None) -> dict[str, Any] | None:
 
 
 def bulletin_pick(bet: dict[str, Any]) -> dict[str, Any] | None:
-    """The bulletin decision is the authoritative PICK observation."""
+    """Daily Bulletin decision is the authoritative PICK observation."""
     captured = parse_dt(bet.get("odds_captured_at") or bet.get("decision_timestamp"))
     if captured is None or bet.get("odd") is None:
         return None
+    decision = bet.get("decision_packet", {}).get("decision", {})
     return {
-        "observation_id": bet.get("decision_packet", {}).get("decision", {}).get("pick_observation_id"),
+        "observation_id": decision.get("pick_observation_id"),
         "odd": bet.get("odd"),
         "opposite_odd": bet.get("opposite_odd"),
         "captured_at": captured.isoformat(),
@@ -86,7 +87,7 @@ def bulletin_pick(bet: dict[str, Any]) -> dict[str, Any] | None:
 
 
 def true_closing(observations: list[dict[str, Any]], kickoff: datetime | None, pick_at: datetime | None) -> dict[str, Any] | None:
-    """CLOSING is the last persisted odds observation before kickoff, after the pick."""
+    """CLOSING is the last persisted observation before kickoff, after the pick."""
     if kickoff is None:
         return None
     candidates: list[dict[str, Any]] = []
@@ -97,6 +98,21 @@ def true_closing(observations: list[dict[str, Any]], kickoff: datetime | None, p
         if pick_at is not None and captured <= pick_at:
             continue
         candidates.append(row)
+    candidates.sort(key=lambda row: parse_dt(row.get("odds_captured_at")) or datetime.min.replace(tzinfo=UTC))
+    return candidates[-1] if candidates else None
+
+
+def current_after_pick(observations: list[dict[str, Any]], now: datetime, pick_at: datetime | None) -> dict[str, Any] | None:
+    """CURRENT must be a real post-PICK persisted observation; never reuse a pre-PICK quote."""
+    if pick_at is None:
+        return None
+    candidates: list[dict[str, Any]] = []
+    for row in observations:
+        captured = parse_dt(row.get("odds_captured_at"))
+        if captured is None or captured <= pick_at or captured > now:
+            continue
+        candidates.append(row)
+    candidates.sort(key=lambda row: parse_dt(row.get("odds_captured_at")) or datetime.min.replace(tzinfo=UTC))
     return candidates[-1] if candidates else None
 
 
@@ -134,22 +150,18 @@ def enrich(bet: dict[str, Any], now: datetime) -> dict[str, Any]:
         else {"first_seen": None, "pick": None, "live": None, "closing": None, "closing_recovered": False, "clv_odds_pct": None, "clv_status": "NOT_COMPUTABLE", "timeline": []}
     )
 
-    # PICK is the exact odds sent in the Daily Bulletin. It must not disappear
-    # merely because the collector did not persist a duplicate ENTRY row.
     pick = bulletin_pick(bet) or compact_observation(contract.get("pick"))
+    current = current_after_pick(observations, now, pick_at) if str(bet.get("status", "PENDING")).upper() == "PENDING" else None
     closing_row = true_closing(observations, kickoff, pick_at)
-    closing = compact_observation(closing_row)
-    if closing is None:
-        closing = compact_observation(contract.get("closing"))
+    closing = compact_observation(closing_row) or compact_observation(contract.get("closing"))
     clv = clv_from_odds(pick.get("odd") if pick else None, closing.get("odd") if closing else None)
 
     active = str(bet.get("status", "PENDING")).upper() == "PENDING"
-    live = compact_observation(contract.get("live")) if active else None
-    live_at = parse_dt(live.get("captured_at")) if live else None
-    live_state = (
-        "FRESH" if active and live_at and (now - live_at).total_seconds() / 60 <= 15
-        else "STALE" if active and live
-        else "UNAVAILABLE"
+    current_at = parse_dt(current.get("captured_at")) if current else None
+    current_state = (
+        "FRESH" if active and current_at and (now - current_at).total_seconds() / 60 <= 15
+        else "STALE" if active and current
+        else "WAITING_FOR_POST_PICK"
     )
 
     item = dict(bet)
@@ -157,15 +169,19 @@ def enrich(bet: dict[str, Any], now: datetime) -> dict[str, Any]:
         "schema_version": contract.get("schema_version", 2),
         "first_seen": compact_observation(contract.get("first_seen")),
         "pick": pick,
-        "live": live,
+        "current": current,
+        "live": current,
         "closing": closing,
         "first_seen_observation_id": contract.get("first_seen_observation_id"),
         "pick_observation_id": pick.get("observation_id") if pick else None,
-        "live_observation_id": contract.get("live_observation_id") if active else None,
+        "current_observation_id": current.get("observation_id") if current else None,
+        "live_observation_id": current.get("observation_id") if current else None,
         "closing_observation_id": closing.get("observation_id") if closing else None,
-        "live_captured_at": live.get("captured_at") if active and live else None,
-        "live_state": live_state,
-        "live_age_minutes": round((now - live_at).total_seconds() / 60.0, 3) if active and live_at else None,
+        "current_captured_at": current.get("captured_at") if current else None,
+        "live_captured_at": current.get("captured_at") if current else None,
+        "live_state": current_state,
+        "live_age_minutes": round((now - current_at).total_seconds() / 60.0, 3) if active and current_at else None,
+        "current_age_minutes": round((now - current_at).total_seconds() / 60.0, 3) if active and current_at else None,
         "closing_recovered": bool(closing and str(closing.get("snapshot_type")) not in {"T5", "CLOSING"}),
         "closing_snapshot_type": closing.get("snapshot_type") if closing else None,
         "clv_odds_pct": clv,
@@ -193,7 +209,7 @@ def main() -> int:
     run_age = max(0.0, (now - run_at).total_seconds() / 60.0) if run_at else None
     run_state = "FRESH" if run_age is not None and run_age <= 15 and requests_this_run > 0 else "RUN_NO_API" if run_age is not None and run_age <= 15 else "STALE" if run_age is not None else "NO_RUN"
     output = {
-        "schema_version": 6,
+        "schema_version": 7,
         "generated_at": now.isoformat(),
         "truth": "data/odds_snapshots.jsonl + bets.json",
         "monitoring": {
@@ -211,7 +227,7 @@ def main() -> int:
         "rules": {
             "first_seen": "earliest valid persisted observation for exact fixture/market/bookmaker/selection",
             "pick": "exact Daily Bulletin odds at the production decision timestamp",
-            "current": "latest valid persisted pre-kickoff observation at dashboard build time; ACTIVE/PENDING only",
+            "current": "latest valid persisted observation strictly after PICK and before kickoff; ACTIVE/PENDING only",
             "closing": "last valid persisted odds observation before kickoff, after the pick",
             "clv": "Pick odd / Closing odd - 1; null when Pick or Closing is unavailable",
             "missing_data": "null; dashboard renders as —",
