@@ -2,6 +2,7 @@ from datetime import UTC, datetime
 from types import SimpleNamespace
 
 from quantbot.decision_packet import build_packet, registry_snapshot, verify_packet
+from quantbot.observation_identity import canonical_observation_id
 from quantbot.types import Market, OddsQuote
 
 
@@ -45,8 +46,16 @@ def test_decision_packet_is_self_verifying_and_registry_pinned(settings) -> None
         calibration_hash="cal-hash",
     )
     assert verify_packet(packet)
-    assert packet["schema_version"] == 2
-    assert packet["decision"]["pick_observation_id"]
+    assert packet["schema_version"] == 3
+    assert packet["decision"]["pick_observation_id"] == canonical_observation_id(
+        fixture_id=123,
+        market="OVER_2_5",
+        bookmaker_id=99,
+        selection="OVER_2_5",
+        odd=2.1,
+        opposite_odd=1.7,
+    )
+    assert packet["provenance"]["observation_identity"]["version"] == 1
     assert packet["model"]["training_sample"]["identity"] == "train-hash"
     assert packet["strategy"]["registry_version"] == registry_snapshot(39)["version"]
     assert packet["strategy"]["registry_league_id"] == 39
