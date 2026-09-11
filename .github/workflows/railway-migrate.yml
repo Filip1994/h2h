@@ -26,14 +26,12 @@ jobs:
       - uses: actions/checkout@v7
         with:
           ref: main
-
       - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
-
       - name: Install migration dependencies
-        run: python -m pip install --disable-pip-version-check "psycopg[binary]==3.2.10"
-
+        run: |
+          python -m pip install --disable-pip-version-check "psycopg[binary]==3.2.10" "awscli==1.44.27"
       - name: Validate required secrets
         shell: bash
         run: |
@@ -44,12 +42,10 @@ jobs:
           test -n "$AWS_DEFAULT_REGION"
           test -n "$S3_ENDPOINT"
           test -n "$S3_BUCKET"
-
       - name: Upload immutable raw API archive to Railway Bucket
         shell: bash
         run: |
           set -euo pipefail
-          command -v aws >/dev/null 2>&1 || { echo 'AWS CLI missing'; exit 1; }
           shopt -s nullglob
           files=(data/raw_api/*.jsonl)
           test "${#files[@]}" -gt 0
@@ -71,15 +67,10 @@ PY
               continue
             fi
             gzip -c "$src" > "/tmp/${base}.jsonl.gz"
-            aws s3 cp "/tmp/${base}.jsonl.gz" "s3://${S3_BUCKET}/${key}" \
-              --endpoint-url "$S3_ENDPOINT" \
-              --region "$AWS_DEFAULT_REGION" \
-              --metadata "sha256=${sha}" \
-              --no-progress
+            aws s3 cp "/tmp/${base}.jsonl.gz" "s3://${S3_BUCKET}/${key}" --endpoint-url "$S3_ENDPOINT" --region "$AWS_DEFAULT_REGION" --metadata "sha256=${sha}" --no-progress
             rm -f "/tmp/${base}.jsonl.gz"
             echo "Uploaded: $src -> s3://${S3_BUCKET}/${key}"
           done
-
       - name: Verify raw API archive objects
         shell: bash
         run: |
@@ -99,121 +90,62 @@ PY
             test "$existing" = "$sha"
           done
           echo 'Raw API archive verification: PASS'
-
       - name: Import structured JSON/JSONL state into Railway Postgres
         shell: bash
         run: |
           set -euo pipefail
           python - <<'PY'
-import hashlib
-import json
+import hashlib, json, os
 from pathlib import Path
-
 import psycopg
 from psycopg.types.json import Jsonb
-
-DB = __import__('os').environ['RAILWAY_DATABASE_URL']
+DB = os.environ['RAILWAY_DATABASE_URL']
 ROOT = Path('.')
-
 jsonl_files = sorted((ROOT / 'data').glob('*.jsonl'))
-json_files = [
-    ROOT / name for name in [
-        'bets.json', 'predictions.json', 'ledger_meta.json', 'api_usage.json',
-        'api_usage_history.json', 'generation_health.json',
-        'generation_health_history.json', 'odds_collection_budget.json',
-        'odds_collection_state.json', 'odds_collection_metrics.json',
-        'production_dashboard.json', 'production_operations_gate.md'
-    ] if (ROOT / name).exists()
-]
-
+json_files = [ROOT / name for name in ['bets.json','predictions.json','ledger_meta.json','api_usage.json','api_usage_history.json','generation_health.json','generation_health_history.json','odds_collection_budget.json','odds_collection_state.json','odds_collection_metrics.json','production_dashboard.json','production_operations_gate.md'] if (ROOT / name).exists()]
 with psycopg.connect(DB, sslmode='require') as conn:
     with conn.cursor() as cur:
-        cur.execute('''
-            CREATE TABLE IF NOT EXISTS quantumbet_archive_records (
-                record_id text PRIMARY KEY,
-                source_file text NOT NULL,
-                line_no bigint NOT NULL,
-                payload jsonb NOT NULL,
-                migrated_at timestamptz NOT NULL DEFAULT now()
-            )
-        ''')
-        cur.execute('''
-            CREATE TABLE IF NOT EXISTS quantumbet_archive_manifest (
-                source_file text PRIMARY KEY,
-                source_bytes bigint NOT NULL,
-                source_sha256 text NOT NULL,
-                record_count bigint NOT NULL,
-                migrated_at timestamptz NOT NULL DEFAULT now()
-            )
-        ''')
-
-    def put(source_file: str, line_no: int, payload):
+        cur.execute('CREATE TABLE IF NOT EXISTS quantumbet_archive_records (record_id text PRIMARY KEY, source_file text NOT NULL, line_no bigint NOT NULL, payload jsonb NOT NULL, migrated_at timestamptz NOT NULL DEFAULT now())')
+        cur.execute('CREATE TABLE IF NOT EXISTS quantumbet_archive_manifest (source_file text PRIMARY KEY, source_bytes bigint NOT NULL, source_sha256 text NOT NULL, record_count bigint NOT NULL, migrated_at timestamptz NOT NULL DEFAULT now())')
+    def put(source_file, line_no, payload):
         canonical = json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(',', ':'))
         rid = hashlib.sha256(f'{source_file}\0{line_no}\0{canonical}'.encode()).hexdigest()
         with conn.cursor() as cur:
-            cur.execute('''
-                INSERT INTO quantumbet_archive_records(record_id, source_file, line_no, payload)
-                VALUES (%s, %s, %s, %s)
-                ON CONFLICT (record_id) DO NOTHING
-            ''', (rid, source_file, line_no, Jsonb(payload)))
-
-    files = jsonl_files + json_files
-    for path in files:
+            cur.execute('INSERT INTO quantumbet_archive_records(record_id, source_file, line_no, payload) VALUES (%s,%s,%s,%s) ON CONFLICT (record_id) DO NOTHING', (rid, source_file, line_no, Jsonb(payload)))
+    for path in jsonl_files + json_files:
         if path.suffix == '.jsonl':
             count = 0
             with path.open('r', encoding='utf-8', errors='replace') as fh:
                 for line_no, line in enumerate(fh, 1):
                     line = line.strip()
-                    if not line:
-                        continue
-                    try:
-                        payload = json.loads(line)
-                    except json.JSONDecodeError:
-                        continue
-                    if isinstance(payload, dict):
-                        put(str(path), line_no, payload)
-                        count += 1
+                    if not line: continue
+                    try: payload = json.loads(line)
+                    except json.JSONDecodeError: continue
+                    if isinstance(payload, dict): put(str(path), line_no, payload); count += 1
         else:
             raw = path.read_text(encoding='utf-8')
             payload = json.loads(raw) if path.suffix == '.json' else {'text': raw}
             if isinstance(payload, list):
-                for idx, item in enumerate(payload, 1):
-                    put(str(path), idx, item)
+                for idx, item in enumerate(payload, 1): put(str(path), idx, item)
                 count = len(payload)
-            else:
-                put(str(path), 1, payload)
-                count = 1
+            else: put(str(path), 1, payload); count = 1
         digest = hashlib.sha256(path.read_bytes()).hexdigest()
         with conn.cursor() as cur:
-            cur.execute('''
-                INSERT INTO quantumbet_archive_manifest(source_file, source_bytes, source_sha256, record_count)
-                VALUES (%s, %s, %s, %s)
-                ON CONFLICT (source_file) DO UPDATE SET
-                    source_bytes = EXCLUDED.source_bytes,
-                    source_sha256 = EXCLUDED.source_sha256,
-                    record_count = EXCLUDED.record_count,
-                    migrated_at = now()
-            ''', (str(path), path.stat().st_size, digest, count))
+            cur.execute('INSERT INTO quantumbet_archive_manifest(source_file, source_bytes, source_sha256, record_count) VALUES (%s,%s,%s,%s) ON CONFLICT (source_file) DO UPDATE SET source_bytes=EXCLUDED.source_bytes, source_sha256=EXCLUDED.source_sha256, record_count=EXCLUDED.record_count, migrated_at=now()', (str(path), path.stat().st_size, digest, count))
         print(f'Migrated {path}: {count} records')
     conn.commit()
-
 print('Structured data migration: PASS')
 PY
-
       - name: Verify migration counts
         shell: bash
         run: |
           set -euo pipefail
           python - <<'PY'
-import os
-import psycopg
-
+import os, psycopg
 with psycopg.connect(os.environ['RAILWAY_DATABASE_URL'], sslmode='require') as conn:
     with conn.cursor() as cur:
-        cur.execute('SELECT count(*) FROM quantumbet_archive_records')
-        records = cur.fetchone()[0]
-        cur.execute('SELECT count(*) FROM quantumbet_archive_manifest')
-        manifests = cur.fetchone()[0]
+        cur.execute('SELECT count(*) FROM quantumbet_archive_records'); records = cur.fetchone()[0]
+        cur.execute('SELECT count(*) FROM quantumbet_archive_manifest'); manifests = cur.fetchone()[0]
 print(f'Postgres archive records: {records}')
 print(f'Postgres archive manifests: {manifests}')
 assert manifests > 0
