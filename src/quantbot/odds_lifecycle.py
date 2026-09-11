@@ -5,7 +5,10 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from .observation_identity import canonical_observation_id, observation_identity_metadata
+from .observation_identity import (
+    canonical_observation_id,
+    observation_identity_metadata,
+)
 
 LIFECYCLE_SCHEMA_VERSION = 3
 CANONICAL_SNAPSHOT_TYPES = {"OPENING", "ENTRY", "INTERMEDIATE", "T5", "CLOSING"}
