@@ -1,10 +1,6 @@
 name: Production · 72h odds lifecycle
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/production-odds.yml'
   workflow_dispatch:
   schedule:
     # Avoid GitHub's heavily loaded exact 5-minute/hour boundaries.
