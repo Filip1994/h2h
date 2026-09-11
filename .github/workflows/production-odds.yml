@@ -3,7 +3,8 @@ name: Production · 72h odds lifecycle
 on:
   workflow_dispatch:
   schedule:
-    - cron: "*/5 * * * *"
+    # Avoid GitHub's heavily loaded exact 5-minute/hour boundaries.
+    - cron: "2/5 * * * *"
 
 permissions:
   contents: write
@@ -12,6 +13,8 @@ concurrency:
   group: quantbet-football-api-global
   cancel-in-progress: false
 
+# The collector is designed to skip fixtures that are not due yet.
+# Keep the workflow short so a stuck run cannot starve subsequent captures.
 env:
   API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
   PAPER_MODE: ${{ vars.PAPER_MODE || 'true' }}
@@ -22,6 +25,7 @@ env:
 jobs:
   capture:
     runs-on: ubuntu-latest
+    timeout-minutes: 4
     steps:
       - uses: actions/checkout@v7
         with:
