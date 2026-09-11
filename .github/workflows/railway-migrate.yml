@@ -3,6 +3,11 @@ name: Railway · migrate production data
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/railway-migration-trigger
 
 permissions:
   contents: read
