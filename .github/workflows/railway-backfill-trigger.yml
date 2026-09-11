@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - BACKFILL_TRIGGER_NOTE.md
+      - BACKFILL_TRIGGER_NOTE_2.md
 
 permissions:
   contents: read
