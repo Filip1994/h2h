@@ -12,7 +12,7 @@ on:
       - 'tools/assert_production_odds_fresh.py'
       - 'src/quantbot/odds_lifecycle.py'
   schedule:
-    - cron: "2/5 * * * *"
+    - cron: "*/5 * * * *"
 
 permissions:
   contents: write
