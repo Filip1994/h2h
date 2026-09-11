@@ -86,9 +86,9 @@ def bulletin_pick(bet: dict[str, Any]) -> dict[str, Any] | None:
     }
 
 
-def true_closing(observations: list[dict[str, Any]], kickoff: datetime | None, pick_at: datetime | None) -> dict[str, Any] | None:
-    """CLOSING is the last persisted observation before kickoff, after the pick."""
-    if kickoff is None:
+def true_closing(observations: list[dict[str, Any]], kickoff: datetime | None, pick_at: datetime | None, now: datetime) -> dict[str, Any] | None:
+    """CLOSING is known only after kickoff: last persisted observation before kickoff, after the pick."""
+    if kickoff is None or now < kickoff:
         return None
     candidates: list[dict[str, Any]] = []
     for row in observations:
@@ -102,14 +102,16 @@ def true_closing(observations: list[dict[str, Any]], kickoff: datetime | None, p
     return candidates[-1] if candidates else None
 
 
-def current_after_pick(observations: list[dict[str, Any]], now: datetime, pick_at: datetime | None) -> dict[str, Any] | None:
-    """CURRENT must be a real post-PICK persisted observation; never reuse a pre-PICK quote."""
+def current_after_pick(observations: list[dict[str, Any]], now: datetime, pick_at: datetime | None, kickoff: datetime | None) -> dict[str, Any] | None:
+    """CURRENT is the latest real post-PICK persisted pre-kickoff observation; never reuse a pre-PICK quote or post-kickoff data."""
     if pick_at is None:
         return None
     candidates: list[dict[str, Any]] = []
     for row in observations:
         captured = parse_dt(row.get("odds_captured_at"))
         if captured is None or captured <= pick_at or captured > now:
+            continue
+        if kickoff is not None and captured >= kickoff:
             continue
         candidates.append(row)
     candidates.sort(key=lambda row: parse_dt(row.get("odds_captured_at")) or datetime.min.replace(tzinfo=UTC))
@@ -151,10 +153,10 @@ def enrich(bet: dict[str, Any], now: datetime) -> dict[str, Any]:
     )
 
     pick = bulletin_pick(bet) or compact_observation(contract.get("pick"))
-    current_row = current_after_pick(observations, now, pick_at) if str(bet.get("status", "PENDING")).upper() == "PENDING" else None
+    current_row = current_after_pick(observations, now, pick_at, kickoff) if str(bet.get("status", "PENDING")).upper() == "PENDING" else None
     current = compact_observation(current_row)
-    closing_row = true_closing(observations, kickoff, pick_at)
-    closing = compact_observation(closing_row) or compact_observation(contract.get("closing"))
+    closing_row = true_closing(observations, kickoff, pick_at, now)
+    closing = compact_observation(closing_row)
     clv = clv_from_odds(pick.get("odd") if pick else None, closing.get("odd") if closing else None)
 
     active = str(bet.get("status", "PENDING")).upper() == "PENDING"
@@ -229,7 +231,7 @@ def main() -> int:
             "first_seen": "earliest valid persisted observation for exact fixture/market/bookmaker/selection",
             "pick": "exact Daily Bulletin odds at the production decision timestamp",
             "current": "latest valid persisted observation strictly after PICK and before kickoff; ACTIVE/PENDING only",
-            "closing": "last valid persisted odds observation before kickoff, after the pick",
+            "closing": "last valid persisted odds observation before kickoff, after the pick; available only after kickoff",
             "clv": "Pick odd / Closing odd - 1; null when Pick or Closing is unavailable",
             "missing_data": "null; dashboard renders as —",
         },
