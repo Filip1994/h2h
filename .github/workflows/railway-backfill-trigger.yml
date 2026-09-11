@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - .github/workflows/railway-backfill-trigger.yml
+      - railway_backfill_trigger.txt
 
 permissions:
   contents: read
@@ -21,25 +21,13 @@ jobs:
       S3_BUCKET: ${{ secrets.RAILWAY_S3_BUCKET }}
     steps:
       - uses: actions/checkout@v7
-        with:
-          ref: main
-
-      - name: Validate required secrets
-        shell: bash
+      - name: Validate secrets
         run: |
           set -euo pipefail
-          test -n "$RAILWAY_DATABASE_URL"
-          test -n "$AWS_ACCESS_KEY_ID"
-          test -n "$AWS_SECRET_ACCESS_KEY"
-          test -n "$AWS_DEFAULT_REGION"
-          test -n "$S3_ENDPOINT"
-          test -n "$S3_BUCKET"
-
+          test -n "$RAILWAY_DATABASE_URL"; test -n "$AWS_ACCESS_KEY_ID"; test -n "$AWS_SECRET_ACCESS_KEY"; test -n "$AWS_DEFAULT_REGION"; test -n "$S3_ENDPOINT"; test -n "$S3_BUCKET"
       - name: Install AWS CLI
-        run: |
-          python -m pip install --disable-pip-version-check awscli
-
-      - name: Backfill raw API archives to Railway Bucket
+        run: python -m pip install --disable-pip-version-check awscli
+      - name: Backfill and verify raw API archives
         shell: bash
         run: |
           set -euo pipefail
@@ -47,86 +35,20 @@ jobs:
           files=(data/raw_api/*.jsonl)
           test "${#files[@]}" -gt 0
           for src in "${files[@]}"; do
-            base="$(basename "$src" .jsonl)"
-            key="quantumbet/raw-api/${base}.jsonl.gz"
-            sha="$(sha256sum "$src" | awk '{print $1}')"
+            base="$(basename "$src" .jsonl)"; key="quantumbet/raw-api/${base}.jsonl.gz"; sha="$(sha256sum "$src" | awk '{print $1}')"
             if aws s3api head-object --bucket "$S3_BUCKET" --key "$key" --endpoint-url "$S3_ENDPOINT" --region "$AWS_DEFAULT_REGION" >/tmp/head.json 2>/dev/null; then
-              existing="$(python - <<'PY'
-import json
-print(json.load(open('/tmp/head.json')).get('Metadata', {}).get('sha256', ''))
-PY
-)"
-              test "$existing" = "$sha" || { echo "Immutable object exists with different checksum: $key"; exit 1; }
-              echo "Already migrated: $src"
-              continue
+              existing="$(python -c "import json; print(json.load(open('/tmp/head.json')).get('Metadata',{}).get('sha256',''))")"
+              test "$existing" = "$sha" || { echo "Checksum mismatch: $key"; exit 1; }; echo "Already migrated: $src"; continue
             fi
             gzip -c "$src" > "/tmp/${base}.jsonl.gz"
-            aws s3 cp "/tmp/${base}.jsonl.gz" "s3://${S3_BUCKET}/${key}" \
-              --endpoint-url "$S3_ENDPOINT" \
-              --region "$AWS_DEFAULT_REGION" \
-              --metadata "sha256=${sha}" \
-              --no-progress
+            aws s3 cp "/tmp/${base}.jsonl.gz" "s3://${S3_BUCKET}/${key}" --endpoint-url "$S3_ENDPOINT" --region "$AWS_DEFAULT_REGION" --metadata "sha256=${sha}" --no-progress
             rm -f "/tmp/${base}.jsonl.gz"
-            echo "Uploaded: $src -> $key"
           done
-
-      - name: Verify raw API archive objects
-        shell: bash
-        run: |
-          set -euo pipefail
-          shopt -s nullglob
-          for src in data/raw_api/*.jsonl; do
-            base="$(basename "$src" .jsonl)"
-            key="quantumbet/raw-api/${base}.jsonl.gz"
-            sha="$(sha256sum "$src" | awk '{print $1}')"
+          for src in "${files[@]}"; do
+            base="$(basename "$src" .jsonl)"; key="quantumbet/raw-api/${base}.jsonl.gz"; sha="$(sha256sum "$src" | awk '{print $1}')"
             aws s3api head-object --bucket "$S3_BUCKET" --key "$key" --endpoint-url "$S3_ENDPOINT" --region "$AWS_DEFAULT_REGION" >/tmp/head.json
-            existing="$(python - <<'PY'
-import json
-print(json.load(open('/tmp/head.json')).get('Metadata', {}).get('sha256', ''))
-PY
-)"
+            existing="$(python -c "import json; print(json.load(open('/tmp/head.json')).get('Metadata',{}).get('sha256',''))")"
             test "$existing" = "$sha"
+            echo "PASS $src -> $key"
           done
-          echo 'Historical raw API backfill verification: PASS'
-
-      - name: Import archive manifest into Railway Postgres
-        shell: bash
-        run: |
-          set -euo pipefail
-          python -m pip install --disable-pip-version-check "psycopg[binary]==3.2.10"
-          python - <<'PY'
-import hashlib, json, os
-from pathlib import Path
-import psycopg
-from psycopg.types.json import Jsonb
-
-with psycopg.connect(os.environ['RAILWAY_DATABASE_URL'], sslmode='require') as conn:
-    with conn.cursor() as cur:
-        cur.execute('''CREATE TABLE IF NOT EXISTS quantumbet_archive_manifest (
-            source_file text PRIMARY KEY,
-            source_bytes bigint NOT NULL,
-            source_sha256 text NOT NULL,
-            record_count bigint NOT NULL,
-            migrated_at timestamptz NOT NULL DEFAULT now())''')
-    for path in sorted((Path('.') / 'data' / 'raw_api').glob('*.jsonl')):
-        count = 0
-        with path.open('r', encoding='utf-8', errors='replace') as fh:
-            for line in fh:
-                if line.strip():
-                    try:
-                        if isinstance(json.loads(line), dict): count += 1
-                    except json.JSONDecodeError:
-                        pass
-        digest = hashlib.sha256(path.read_bytes()).hexdigest()
-        with conn.cursor() as cur:
-            cur.execute('''INSERT INTO quantumbet_archive_manifest
-                (source_file, source_bytes, source_sha256, record_count)
-                VALUES (%s,%s,%s,%s)
-                ON CONFLICT (source_file) DO UPDATE SET
-                source_bytes=EXCLUDED.source_bytes,
-                source_sha256=EXCLUDED.source_sha256,
-                record_count=EXCLUDED.record_count,
-                migrated_at=now()''', (str(path), path.stat().st_size, digest, count))
-    conn.commit()
-print('Historical backfill manifest: PASS')
-PY
+          echo 'Historical raw API backfill: PASS'
