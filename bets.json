@@ -139,14 +139,19 @@
     "closing_odd": 2.25,
     "closing_opposite_odd": 1.62,
     "closing_market_probability_devig": 0.418605,
-    "closing_odds_captured_at": "2026-09-11T17:40:18.059457+00:00",
+    "closing_odds_captured_at": "2026-09-11T17:41:03.217499+00:00",
     "closing_5m_odd": 2.25,
     "closing_5m_opposite_odd": 1.62,
     "closing_5m_market_probability_devig": 0.418605,
     "closing_5m_odds_captured_at": "2026-09-11T17:40:18.059457+00:00",
-    "closing_snapshot_id": "fa9651aff6cf4df456212c9430bf75a3e08c57f0f2d6e917ed1036e32bb203a2",
+    "closing_snapshot_id": "fb1cc4fb30891068f28da962a521ad7abc7d279ba7bf70531e3f95d4568953b7",
     "closing_capture_target": "T-15m",
-    "closing_capture_window": "T-10m_to_T-20m"
+    "closing_capture_window": "T-10m_to_T-20m",
+    "closing_t15_odd": 2.25,
+    "closing_t15_opposite_odd": 1.62,
+    "closing_t15_market_probability_devig": 0.418605,
+    "closing_t15_odds_captured_at": "2026-09-11T17:41:03.217499+00:00",
+    "closing_t15_snapshot_id": "fb1cc4fb30891068f28da962a521ad7abc7d279ba7bf70531e3f95d4568953b7"
   },
   {
     "id": "1561392_OVER_2_5",

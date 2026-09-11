@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-09-11T17:40:18.899211+00:00",
+  "generated_at": "2026-09-11T17:41:04.321010+00:00",
   "sla_minutes": 10.0,
   "overall": "FRESH",
   "counts": {
@@ -21,8 +21,8 @@
       "bookmaker": "Bet365",
       "pick_odd": 2.62,
       "latest_odd": 2.25,
-      "latest_captured_at": "2026-09-11T17:40:18.059457+00:00",
-      "age_minutes": 0.014,
+      "latest_captured_at": "2026-09-11T17:41:03.217499+00:00",
+      "age_minutes": 0.018,
       "status": "FRESH",
       "reason": null,
       "observation_id": "9c76b4ba27f91e15e91bbaa89ed15d6de0d09063590b8d80142d194ace9ead4a"
