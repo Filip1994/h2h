@@ -12,7 +12,8 @@ on:
       - 'tools/assert_production_odds_fresh.py'
       - 'src/quantbot/odds_lifecycle.py'
   schedule:
-    - cron: "*/5 * * * *"
+    # Avoid minute 00, which GitHub documents as a high-load period.
+    - cron: "3/5 * * * *"
 
 permissions:
   contents: write
@@ -137,6 +138,22 @@ jobs:
           test -s _site/production_dashboard.json
           test -s _site/production_quote_health.json
           test -s _site/bets.json
+          # The dashboard already polls JSON, but a hard-reload watchdog prevents
+          # stale browser/CDN document state from surviving a long-running tab.
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('_site/index.html')
+          s = p.read_text(encoding='utf-8')
+          marker = '</body>'
+          inject = '''<script>
+          setInterval(() => location.reload(), 60000);
+          document.addEventListener('visibilitychange', () => { if (!document.hidden) location.reload(); });
+          window.addEventListener('focus', () => location.reload());
+          </script>'''
+          if marker not in s:
+              raise SystemExit('dashboard body marker missing')
+          p.write_text(s.replace(marker, inject + marker, 1), encoding='utf-8')
+          PY
       - name: Configure GitHub Pages
         if: steps.commit_state.outputs.changed == 'true'
         uses: actions/configure-pages@v5
