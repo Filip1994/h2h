@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-import hashlib
 import json
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-LIFECYCLE_SCHEMA_VERSION = 2
+from .observation_identity import canonical_observation_id, observation_identity_metadata
+
+LIFECYCLE_SCHEMA_VERSION = 3
 CANONICAL_SNAPSHOT_TYPES = {"OPENING", "ENTRY", "INTERMEDIATE", "T5", "CLOSING"}
 
 
@@ -21,6 +22,33 @@ def parse_capture(value: Any) -> datetime | None:
 
 def _norm_selection(value: Any) -> str:
     return str(value or "").strip()
+
+
+def row_observation_id(item: dict[str, Any]) -> str | None:
+    """Return stored observation_id, or derive the v1 quote-state identity for legacy rows."""
+    if item.get("observation_id"):
+        return str(item["observation_id"])
+    try:
+        return canonical_observation_id(
+            fixture_id=int(item["fixture_id"]),
+            market=str(item["market"]),
+            bookmaker_id=int(item["bookmaker_id"]),
+            selection=_norm_selection(item.get("selection") or item["market"]),
+            odd=float(item["odd"]),
+            opposite_odd=float(item["opposite_odd"]),
+        )
+    except (KeyError, TypeError, ValueError):
+        return None
+
+
+def _with_identity(item: dict[str, Any]) -> dict[str, Any]:
+    identity = row_observation_id(item)
+    if not identity or item.get("observation_id") == identity:
+        return item
+    enriched = dict(item)
+    enriched["observation_id"] = identity
+    enriched["observation_identity_version"] = 1
+    return enriched
 
 
 def lifecycle_key(
@@ -40,7 +68,7 @@ def _load(path: Path) -> list[dict[str, Any]]:
             except json.JSONDecodeError:
                 continue
             if isinstance(item, dict):
-                rows.append(item)
+                rows.append(_with_identity(item))
     return rows
 
 
@@ -160,7 +188,7 @@ def clv_from_odds(pick_odd: Any, closing_odd: Any) -> float | None:
 
 def _timeline_entry(item: dict[str, Any], marker: str | None = None) -> dict[str, Any]:
     return {
-        "observation_id": item.get("observation_id"),
+        "observation_id": row_observation_id(item),
         "odd": item.get("odd"),
         "opposite_odd": item.get("opposite_odd"),
         "captured_at": item.get("odds_captured_at"),
@@ -196,16 +224,24 @@ def lifecycle_contract(
         and (kickoff is None or captured <= kickoff)
     ]
     markers: dict[str, str] = {}
-    if first_seen and first_seen.get("observation_id"):
-        markers[str(first_seen["observation_id"])] = "FIRST_SEEN"
-    if pick and pick.get("observation_id"):
-        markers[str(pick["observation_id"])] = "PICK"
-    if live and live.get("observation_id"):
-        markers[str(live["observation_id"])] = "LIVE"
-    if closing and closing.get("observation_id"):
-        markers[str(closing["observation_id"])] = "CLOSE"
+    if first_seen:
+        identity = row_observation_id(first_seen)
+        if identity:
+            markers[identity] = "FIRST_SEEN"
+    if pick:
+        identity = row_observation_id(pick)
+        if identity:
+            markers[identity] = "PICK"
+    if live:
+        identity = row_observation_id(live)
+        if identity:
+            markers[identity] = "LIVE"
+    if closing:
+        identity = row_observation_id(closing)
+        if identity:
+            markers[identity] = "CLOSE"
     timeline = [
-        _timeline_entry(item, markers.get(str(item.get("observation_id"))))
+        _timeline_entry(item, markers.get(str(row_observation_id(item))))
         for item in timeline_source
     ]
 
@@ -215,6 +251,7 @@ def lifecycle_contract(
     close_reason = None if closing else ("NO_VALID_PRE_KICKOFF_CLOSE" if kickoff else "KICKOFF_UNAVAILABLE")
     return {
         "schema_version": LIFECYCLE_SCHEMA_VERSION,
+        "observation_identity": observation_identity_metadata(),
         "first_seen": first_seen,
         "pick": pick,
         "live": live,
@@ -223,10 +260,10 @@ def lifecycle_contract(
         "pick_available": pick is not None,
         "live_available": live is not None,
         "closing_available": closing is not None,
-        "first_seen_observation_id": first_seen.get("observation_id") if first_seen else None,
-        "pick_observation_id": pick.get("observation_id") if pick else None,
-        "live_observation_id": live.get("observation_id") if live else None,
-        "closing_observation_id": closing.get("observation_id") if closing else None,
+        "first_seen_observation_id": row_observation_id(first_seen) if first_seen else None,
+        "pick_observation_id": row_observation_id(pick) if pick else None,
+        "live_observation_id": row_observation_id(live) if live else None,
+        "closing_observation_id": row_observation_id(closing) if closing else None,
         "live_captured_at": live.get("odds_captured_at") if live else None,
         "closing_recovered": closing_recovered,
         "closing_snapshot_type": closing.get("snapshot_type") if closing else None,
@@ -264,11 +301,18 @@ def canonical_observation(
         raise ValueError(f"Unsupported canonical snapshot type: {snapshot_type}")
     captured_iso = captured_at.astimezone(UTC).isoformat()
     selection_norm = _norm_selection(selection or market)
-    identity = "|".join((str(int(fixture_id)), str(market), str(int(bookmaker_id)), selection_norm, captured_iso, f"{float(odd):.4f}", f"{float(opposite_odd):.4f}", snapshot_type))
-    observation_id = hashlib.sha256(identity.encode("utf-8")).hexdigest()
+    observation_id = canonical_observation_id(
+        fixture_id=fixture_id,
+        market=market,
+        bookmaker_id=bookmaker_id,
+        selection=selection_norm,
+        odd=odd,
+        opposite_odd=opposite_odd,
+    )
     return {
         "schema_version": LIFECYCLE_SCHEMA_VERSION,
         "observation_id": observation_id,
+        "observation_identity_version": 1,
         "fixture_id": int(fixture_id),
         "market": str(market),
         "bookmaker_id": int(bookmaker_id),
