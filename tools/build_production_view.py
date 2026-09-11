@@ -11,7 +11,10 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from quantbot.observation_identity import canonical_observation_id, observation_identity_metadata
+from quantbot.observation_identity import (
+    canonical_observation_id,
+    observation_identity_metadata,
+)
 from quantbot.odds_lifecycle import clv_from_odds, lifecycle_contract, observations_for
 
 BETS = ROOT / "bets.json"
