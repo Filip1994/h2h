@@ -1,18 +1,18 @@
 {
   "schema_version": 5,
-  "generated_at": "2026-09-11T00:45:49.992051+00:00",
+  "generated_at": "2026-09-11T01:24:49.391668+00:00",
   "truth": "data/odds_snapshots.jsonl + bets.json",
   "monitoring": {
-    "last_collector_run_at": "2026-09-10T23:26:45.048459+00:00",
-    "last_odds_scan_at": "2026-09-10T23:26:45.048459+00:00",
-    "last_snapshot_at": "2026-09-10T23:26:45.048459+00:00",
-    "collector_run_age_minutes": 79.0823932,
-    "scan_age_minutes": 79.0823932,
-    "scan_state": "STALE",
-    "api_requests_last_scan": 210,
-    "daily_budget_used": 1454,
-    "daily_budget_remaining": 6046,
-    "observations_last_scan": 1115
+    "last_collector_run_at": "2026-09-11T01:24:39.574126+00:00",
+    "last_odds_scan_at": "2026-09-11T01:24:39.574126+00:00",
+    "last_snapshot_at": "2026-09-11T01:24:39.574126+00:00",
+    "collector_run_age_minutes": 0.16362569999999999,
+    "scan_age_minutes": 0.16362569999999999,
+    "scan_state": "FRESH",
+    "api_requests_last_scan": 22,
+    "daily_budget_used": 22,
+    "daily_budget_remaining": 7478,
+    "observations_last_scan": 85
   },
   "rules": {
     "first_seen": "earliest valid persisted observation for exact fixture/market/bookmaker/selection",
@@ -44,7 +44,7 @@
       "league_id": 374,
       "market": "UNDER_2_5",
       "market_display": "Under 2.5",
-      "stake": 300.0,
+      "stake": 107.69,
       "odd": 2.62,
       "opening_odd": null,
       "opposite_odd": 1.44,
@@ -126,12 +126,12 @@
           "config_hash": "a3098f1aea654b5716f3d41f9b4f34276778c597e3ff1767a0a5e1fa4654d2d0",
           "bookmaker_policy_version": "all-provider-bookmakers-best-price-v1",
           "eligibility": "PASSED",
-          "registry_version": "6d27ef1a7c19ac21ad7f4899aac611d7e9da1a84a2c7bfab6a2f9c8111173db5",
+          "registry_version": "6d27ef1a7c19ac21ad7f4899aac611d7e9da1a84a2c7bfab6a2f9c8111173db9",
           "registry_league_id": 374,
           "registry_classification": null
         },
         "risk": {
-          "stake": 300.0,
+          "stake": 107.69,
           "kelly_fraction": 0.25,
           "max_bet_stake_pct": 0.01,
           "max_daily_risk_pct": 0.03,
@@ -192,7 +192,7 @@
         "closing_observation_id": null,
         "live_captured_at": "2026-09-10T23:26:45.048459+00:00",
         "live_state": "STALE",
-        "live_age_minutes": 79.082,
+        "live_age_minutes": 118.072,
         "closing_recovered": false,
         "closing_snapshot_type": null,
         "clv_odds_pct": null,
@@ -212,469 +212,13 @@
           }
         ]
       }
-    },
-    {
-      "id": "1561392_OVER_2_5",
-      "type": "DC_VALUE",
-      "mode": "PAPER",
-      "event_id": 1561392,
-      "prediction_id": "1561392_OVER_2_5_dc-value-v2.1.0",
-      "created_at": "2026-09-11T02:42:23.072968+02:00",
-      "decision_timestamp": "2026-09-11T02:42:23.072968+02:00",
-      "data_cutoff": "2026-09-11T00:42:23.072968+00:00",
-      "date": "2026-09-11",
-      "kickoff": "2026-09-11T15:00:00+00:00",
-      "sport": "Football",
-      "match": "Krylia Sovetov vs Rodina Moskva",
-      "home_id": 1079,
-      "away_id": 6822,
-      "league": "Russia - Premier League",
-      "league_id": 235,
-      "market": "OVER_2_5",
-      "market_display": "Over 2.5",
-      "stake": 300.0,
-      "odd": 1.81,
-      "opening_odd": null,
-      "opposite_odd": 2.16,
-      "opening_opposite_odd": null,
-      "bookmaker_id": 11,
-      "bookmaker": "1xBet",
-      "odds_captured_at": "2026-09-11T00:42:23.072968+00:00",
-      "opening_odds_captured_at": null,
-      "implied_probability": 0.552486,
-      "market_probability_devig": 0.544081,
-      "market_overround": 0.015449,
-      "model_probability": 0.787587,
-      "calibrated_probability": 0.787587,
-      "decision_probability": 0.757587,
-      "probability_edge": 0.213506,
-      "expected_value": 0.371232,
-      "lambda_home": 2.785255,
-      "lambda_away": 1.398617,
-      "rho": -0.104935,
-      "xi": 0.0015,
-      "model_version": "dc-value-v2.1.0",
-      "model_fitted_matches": 788,
-      "model_team_count": 22,
-      "model_training_cutoff": "2026-09-11T00:42:23.072968+00:00",
-      "model_training_identity": "71dd32d64424aba5d69668469c1bf34c33fda809d56ad26cb3f990b4186515f9",
-      "calibration_status": "IDENTITY_UNVALIDATED",
-      "status": "PENDING",
-      "profit": 0.0,
-      "signal_source": "DAILY_BULLETIN",
-      "signal_sent_at": "2026-09-11T02:42:23.072968+02:00",
-      "decision_packet": {
-        "schema_version": 2,
-        "packet_id": "bb8242bf101086a021d2231a5f49a77f9c6c47715b4361e7c48ffec36bf9b072",
-        "fixture": {
-          "fixture_id": 1561392,
-          "league_id": 235,
-          "league": "Russia - Premier League",
-          "home_id": 1079,
-          "home": "Krylia Sovetov",
-          "away_id": 6822,
-          "away": "Rodina Moskva",
-          "kickoff": "2026-09-11T15:00:00+00:00"
-        },
-        "decision": {
-          "market": "OVER_2_5",
-          "selection": "OVER_2_5",
-          "bookmaker_id": 11,
-          "bookmaker": "1xBet",
-          "pick_odd": 1.81,
-          "pick_observed_at": "2026-09-11T00:42:23.072968+00:00",
-          "pick_observation_id": "699331c22636ba1fb78a7887aaf3eff21907aa32fc68a58f6d1b869fa6a753f7",
-          "decision_timestamp": "2026-09-11T00:42:23.072968+00:00"
-        },
-        "model": {
-          "version": "dc-value-v2.1.0",
-          "code_sha": "28f8ded1ad9ac4e1a66d945586d60f6698d4be59",
-          "training_cutoff": "2026-09-11T00:42:23.072968+00:00",
-          "training_sample": {
-            "fitted_matches": 788,
-            "team_count": 22,
-            "identity": "71dd32d64424aba5d69668469c1bf34c33fda809d56ad26cb3f990b4186515f9"
-          },
-          "raw_probability": 0.78758655,
-          "calibrated_probability": 0.78758655,
-          "decision_probability": 0.75758655,
-          "calibration_status": "IDENTITY_UNVALIDATED",
-          "calibration_hash": "db20ea934654f4e897da255ee1418059db0117864000186544ac1ba9abd9a328"
-        },
-        "market_inputs": {
-          "opposite_odd": 2.16,
-          "devig_probability": 0.5440806,
-          "overround": 0.01544915,
-          "expected_value": 0.37123165,
-          "probability_edge": 0.21350594,
-          "haircut": 0.03
-        },
-        "strategy": {
-          "version": "production-decision-v1",
-          "config_hash": "a3098f1aea654b5716f3d41f9b4f34276778c597e3ff1767a0a5e1fa4654d2d0",
-          "bookmaker_policy_version": "all-provider-bookmakers-best-price-v1",
-          "eligibility": "PASSED",
-          "registry_version": "6d27ef1a7c19ac21ad7f4899aac611d7e9da1a84a2c7bfab6a2f9c8111173db5",
-          "registry_league_id": 235,
-          "registry_classification": {
-            "provider_league_id": 235,
-            "country": "Russia",
-            "league_name": "Premier League",
-            "tier": 1,
-            "enabled": true,
-            "source": "API-Football provider league ID + project tier audit"
-          }
-        },
-        "risk": {
-          "stake": 300.0,
-          "kelly_fraction": 0.25,
-          "max_bet_stake_pct": 0.01,
-          "max_daily_risk_pct": 0.03,
-          "max_open_risk_pct": 0.05
-        },
-        "provenance": {
-          "canonical_observation_id": "699331c22636ba1fb78a7887aaf3eff21907aa32fc68a58f6d1b869fa6a753f7",
-          "canonical_observation": {
-            "fixture_id": 1561392,
-            "market": "OVER_2_5",
-            "bookmaker_id": 11,
-            "bookmaker": "1xBet",
-            "odd": 1.81,
-            "opposite_odd": 2.16,
-            "captured_at": "2026-09-11T00:42:23.072968+00:00",
-            "snapshot_type": "ENTRY"
-          },
-          "opening": {
-            "status": "UNAVAILABLE_AT_DECISION_TIME",
-            "reason": "NO_EARLIER_OBSERVATION"
-          },
-          "closing": {
-            "status": "UNAVAILABLE_AT_DECISION_TIME",
-            "reason": "NOT_YET_OBSERVED"
-          }
-        },
-        "integrity_hash": "bf1212f7bcc43b710c2b85593deefc7b1361b289fa152a1b72f959830d9884ae"
-      },
-      "decision_packet_id": "bb8242bf101086a021d2231a5f49a77f9c6c47715b4361e7c48ffec36bf9b072",
-      "decision_packet_integrity_hash": "bf1212f7bcc43b710c2b85593deefc7b1361b289fa152a1b72f959830d9884ae",
-      "production_lifecycle": {
-        "schema_version": 2,
-        "first_seen": {
-          "observation_id": null,
-          "odd": 1.84,
-          "opposite_odd": 2.12,
-          "captured_at": "2026-09-10T01:02:32.584809+00:00",
-          "snapshot_type": "OPENING",
-          "bookmaker_id": 11,
-          "bookmaker": "1xBet",
-          "selection": "OVER_2_5"
-        },
-        "pick": null,
-        "live": {
-          "observation_id": null,
-          "odd": 1.84,
-          "opposite_odd": 2.12,
-          "captured_at": "2026-09-10T23:26:45.048459+00:00",
-          "snapshot_type": "INTERMEDIATE",
-          "bookmaker_id": 11,
-          "bookmaker": "1xBet",
-          "selection": "OVER_2_5"
-        },
-        "closing": null,
-        "first_seen_observation_id": null,
-        "pick_observation_id": null,
-        "live_observation_id": null,
-        "closing_observation_id": null,
-        "live_captured_at": "2026-09-10T23:26:45.048459+00:00",
-        "live_state": "STALE",
-        "live_age_minutes": 79.082,
-        "closing_recovered": false,
-        "closing_snapshot_type": null,
-        "clv_odds_pct": null,
-        "clv_status": "NOT_COMPUTABLE",
-        "coverage": "PARTIAL",
-        "timeline": [
-          {
-            "observation_id": null,
-            "odd": 1.84,
-            "opposite_odd": 2.12,
-            "captured_at": "2026-09-10T01:02:32.584809+00:00",
-            "snapshot_type": "OPENING",
-            "bookmaker_id": 11,
-            "bookmaker": "1xBet",
-            "selection": "OVER_2_5",
-            "marker": null
-          },
-          {
-            "observation_id": null,
-            "odd": 1.84,
-            "opposite_odd": 2.12,
-            "captured_at": "2026-09-10T14:43:08.073810+00:00",
-            "snapshot_type": "INTERMEDIATE",
-            "bookmaker_id": 11,
-            "bookmaker": "1xBet",
-            "selection": "OVER_2_5",
-            "marker": null
-          },
-          {
-            "observation_id": null,
-            "odd": 1.84,
-            "opposite_odd": 2.12,
-            "captured_at": "2026-09-10T14:47:02.762573+00:00",
-            "snapshot_type": "INTERMEDIATE",
-            "bookmaker_id": 11,
-            "bookmaker": "1xBet",
-            "selection": "OVER_2_5",
-            "marker": null
-          },
-          {
-            "observation_id": null,
-            "odd": 1.84,
-            "opposite_odd": 2.12,
-            "captured_at": "2026-09-10T23:26:45.048459+00:00",
-            "snapshot_type": "INTERMEDIATE",
-            "bookmaker_id": 11,
-            "bookmaker": "1xBet",
-            "selection": "OVER_2_5",
-            "marker": null
-          }
-        ]
-      }
-    },
-    {
-      "id": "1549016_BTTS_YES",
-      "type": "DC_VALUE",
-      "mode": "PAPER",
-      "event_id": 1549016,
-      "prediction_id": "1549016_BTTS_YES_dc-value-v2.1.0",
-      "created_at": "2026-09-11T02:42:23.072968+02:00",
-      "decision_timestamp": "2026-09-11T02:42:23.072968+02:00",
-      "data_cutoff": "2026-09-11T00:42:23.072968+00:00",
-      "date": "2026-09-11",
-      "kickoff": "2026-09-11T17:00:00+00:00",
-      "sport": "Football",
-      "match": "FC Copenhagen vs AC Horsens",
-      "home_id": 400,
-      "away_id": 404,
-      "league": "Denmark - Superliga",
-      "league_id": 119,
-      "market": "BTTS_YES",
-      "market_display": "BTTS — Yes",
-      "stake": 300.0,
-      "odd": 1.95,
-      "opening_odd": null,
-      "opposite_odd": 1.8,
-      "opening_opposite_odd": null,
-      "bookmaker_id": 8,
-      "bookmaker": "Bet365",
-      "odds_captured_at": "2026-09-11T00:42:23.072968+00:00",
-      "opening_odds_captured_at": null,
-      "implied_probability": 0.512821,
-      "market_probability_devig": 0.48,
-      "market_overround": 0.068376,
-      "model_probability": 0.726657,
-      "calibrated_probability": 0.726657,
-      "decision_probability": 0.696657,
-      "probability_edge": 0.216657,
-      "expected_value": 0.358481,
-      "lambda_home": 2.599724,
-      "lambda_away": 1.514981,
-      "rho": -0.068989,
-      "xi": 0.0015,
-      "model_version": "dc-value-v2.1.0",
-      "model_fitted_matches": 620,
-      "model_team_count": 16,
-      "model_training_cutoff": "2026-09-11T00:42:23.072968+00:00",
-      "model_training_identity": "dc389510bda2246bbb7e393a0a6c740c005dcb13bb765789e58b2f8c331e2ebb",
-      "calibration_status": "IDENTITY_UNVALIDATED",
-      "status": "PENDING",
-      "profit": 0.0,
-      "signal_source": "DAILY_BULLETIN",
-      "signal_sent_at": "2026-09-11T02:42:23.072968+02:00",
-      "decision_packet": {
-        "schema_version": 2,
-        "packet_id": "f653e0241f952361100856a682b5c1cd488d06f1c2942d15d4cb26269f27c1c0",
-        "fixture": {
-          "fixture_id": 1549016,
-          "league_id": 119,
-          "league": "Denmark - Superliga",
-          "home_id": 400,
-          "home": "FC Copenhagen",
-          "away_id": 404,
-          "away": "AC Horsens",
-          "kickoff": "2026-09-11T17:00:00+00:00"
-        },
-        "decision": {
-          "market": "BTTS_YES",
-          "selection": "BTTS_YES",
-          "bookmaker_id": 8,
-          "bookmaker": "Bet365",
-          "pick_odd": 1.95,
-          "pick_observed_at": "2026-09-11T00:42:23.072968+00:00",
-          "pick_observation_id": "cea2af431069de6460cf40ecc557a86e7bc6886f5bac51ecd3cf9778c2ce571e",
-          "decision_timestamp": "2026-09-11T00:42:23.072968+00:00"
-        },
-        "model": {
-          "version": "dc-value-v2.1.0",
-          "code_sha": "28f8ded1ad9ac4e1a66d945586d60f6698d4be59",
-          "training_cutoff": "2026-09-11T00:42:23.072968+00:00",
-          "training_sample": {
-            "fitted_matches": 620,
-            "team_count": 16,
-            "identity": "dc389510bda2246bbb7e393a0a6c740c005dcb13bb765789e58b2f8c331e2ebb"
-          },
-          "raw_probability": 0.72665682,
-          "calibrated_probability": 0.72665682,
-          "decision_probability": 0.69665682,
-          "calibration_status": "IDENTITY_UNVALIDATED",
-          "calibration_hash": "db20ea934654f4e897da255ee1418059db0117864000186544ac1ba9abd9a328"
-        },
-        "market_inputs": {
-          "opposite_odd": 1.8,
-          "devig_probability": 0.48,
-          "overround": 0.06837607,
-          "expected_value": 0.35848081,
-          "probability_edge": 0.21665682,
-          "haircut": 0.03
-        },
-        "strategy": {
-          "version": "production-decision-v1",
-          "config_hash": "a3098f1aea654b5716f3d41f9b4f34276778c597e3ff1767a0a5e1fa4654d2d0",
-          "bookmaker_policy_version": "all-provider-bookmakers-best-price-v1",
-          "eligibility": "PASSED",
-          "registry_version": "6d27ef1a7c19ac21ad7f4899aac611d7e9da1a84a2c7bfab6a2f9c8111173db5",
-          "registry_league_id": 119,
-          "registry_classification": {
-            "provider_league_id": 119,
-            "country": "Denmark",
-            "league_name": "Superliga",
-            "tier": 1,
-            "enabled": true,
-            "source": "API-Football provider league ID + project tier audit"
-          }
-        },
-        "risk": {
-          "stake": 300.0,
-          "kelly_fraction": 0.25,
-          "max_bet_stake_pct": 0.01,
-          "max_daily_risk_pct": 0.03,
-          "max_open_risk_pct": 0.05
-        },
-        "provenance": {
-          "canonical_observation_id": "cea2af431069de6460cf40ecc557a86e7bc6886f5bac51ecd3cf9778c2ce571e",
-          "canonical_observation": {
-            "fixture_id": 1549016,
-            "market": "BTTS_YES",
-            "bookmaker_id": 8,
-            "bookmaker": "Bet365",
-            "odd": 1.95,
-            "opposite_odd": 1.8,
-            "captured_at": "2026-09-11T00:42:23.072968+00:00",
-            "snapshot_type": "ENTRY"
-          },
-          "opening": {
-            "status": "UNAVAILABLE_AT_DECISION_TIME",
-            "reason": "NO_EARLIER_OBSERVATION"
-          },
-          "closing": {
-            "status": "UNAVAILABLE_AT_DECISION_TIME",
-            "reason": "NOT_YET_OBSERVED"
-          }
-        },
-        "integrity_hash": "baacfefc9f64bcd9564b86e2cd35078654c5fe0df83790e9bbfc2eb1dc2bd24c"
-      },
-      "decision_packet_id": "f653e0241f952361100856a682b5c1cd488d06f1c2942d15d4cb26269f27c1c0",
-      "decision_packet_integrity_hash": "baacfefc9f64bcd9564b86e2cd35078654c5fe0df83790e9bbfc2eb1dc2bd24c",
-      "production_lifecycle": {
-        "schema_version": 2,
-        "first_seen": {
-          "observation_id": null,
-          "odd": 1.95,
-          "opposite_odd": 1.8,
-          "captured_at": "2026-09-10T01:02:32.584809+00:00",
-          "snapshot_type": "OPENING",
-          "bookmaker_id": 8,
-          "bookmaker": "Bet365",
-          "selection": "BTTS_YES"
-        },
-        "pick": null,
-        "live": {
-          "observation_id": null,
-          "odd": 1.95,
-          "opposite_odd": 1.8,
-          "captured_at": "2026-09-10T23:26:45.048459+00:00",
-          "snapshot_type": "INTERMEDIATE",
-          "bookmaker_id": 8,
-          "bookmaker": "Bet365",
-          "selection": "BTTS_YES"
-        },
-        "closing": null,
-        "first_seen_observation_id": null,
-        "pick_observation_id": null,
-        "live_observation_id": null,
-        "closing_observation_id": null,
-        "live_captured_at": "2026-09-10T23:26:45.048459+00:00",
-        "live_state": "STALE",
-        "live_age_minutes": 79.082,
-        "closing_recovered": false,
-        "closing_snapshot_type": null,
-        "clv_odds_pct": null,
-        "clv_status": "NOT_COMPUTABLE",
-        "coverage": "PARTIAL",
-        "timeline": [
-          {
-            "observation_id": null,
-            "odd": 1.95,
-            "opposite_odd": 1.8,
-            "captured_at": "2026-09-10T01:02:32.584809+00:00",
-            "snapshot_type": "OPENING",
-            "bookmaker_id": 8,
-            "bookmaker": "Bet365",
-            "selection": "BTTS_YES",
-            "marker": null
-          },
-          {
-            "observation_id": null,
-            "odd": 1.95,
-            "opposite_odd": 1.8,
-            "captured_at": "2026-09-10T14:43:08.073810+00:00",
-            "snapshot_type": "INTERMEDIATE",
-            "bookmaker_id": 8,
-            "bookmaker": "Bet365",
-            "selection": "BTTS_YES",
-            "marker": null
-          },
-          {
-            "observation_id": null,
-            "odd": 1.95,
-            "opposite_odd": 1.8,
-            "captured_at": "2026-09-10T14:47:02.762573+00:00",
-            "snapshot_type": "INTERMEDIATE",
-            "bookmaker_id": 8,
-            "bookmaker": "Bet365",
-            "selection": "BTTS_YES",
-            "marker": null
-          },
-          {
-            "observation_id": null,
-            "odd": 1.95,
-            "opposite_odd": 1.8,
-            "captured_at": "2026-09-10T23:26:45.048459+00:00",
-            "snapshot_type": "INTERMEDIATE",
-            "bookmaker_id": 8,
-            "bookmaker": "Bet365",
-            "selection": "BTTS_YES",
-            "marker": null
-          }
-        ]
-      }
     }
   ],
   "history": [],
   "counts": {
-    "production": 3,
-    "active": 3,
+    "production": 1,
+    "active": 1,
     "history": 0,
-    "snapshots": 10189
+    "snapshots": 10274
   }
 }
