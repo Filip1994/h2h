@@ -1,6 +1,10 @@
 name: Production · 72h odds lifecycle
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/production-odds.yml'
   workflow_dispatch:
   schedule:
     # Avoid GitHub's heavily loaded exact 5-minute/hour boundaries.
@@ -13,8 +17,6 @@ concurrency:
   group: quantbet-football-api-global
   cancel-in-progress: false
 
-# The collector is designed to skip fixtures that are not due yet.
-# Keep the workflow short so a stuck run cannot starve subsequent captures.
 env:
   API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
   PAPER_MODE: ${{ vars.PAPER_MODE || 'true' }}
