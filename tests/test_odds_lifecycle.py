@@ -112,12 +112,14 @@ def test_live_uses_build_time_cutoff():
     assert live["odd"] == 2.0
 
 
-def test_closing_is_only_t5_window_and_pre_kickoff():
+def test_closing_is_only_t15_window_and_pre_kickoff():
     kickoff = datetime(2026, 9, 9, 12, tzinfo=UTC)
     rows = [
-        observation(kickoff - timedelta(minutes=9), 1.9, "INTERMEDIATE"),
-        observation(kickoff - timedelta(minutes=5), 2.0, "T5"),
-        observation(kickoff + timedelta(minutes=1), 2.2, "CLOSING"),
+        observation(kickoff - timedelta(minutes=20), 1.9, "INTERMEDIATE"),
+        observation(kickoff - timedelta(minutes=15), 2.0, "CLOSING"),
+        observation(kickoff - timedelta(minutes=10), 2.1, "INTERMEDIATE"),
+        observation(kickoff - timedelta(minutes=5), 2.2, "T5"),
+        observation(kickoff + timedelta(minutes=1), 2.3, "CLOSING"),
     ]
     assert select_closing(rows, kickoff)["odd"] == 2.0
 
@@ -134,7 +136,7 @@ def test_contract_exposes_four_stage_lifecycle_and_timeline():
         observation(base + timedelta(minutes=10), 1.9, "OPENING"),
         observation(base + timedelta(minutes=40), 2.1, "ENTRY"),
         observation(base + timedelta(minutes=70), 2.0, "INTERMEDIATE"),
-        observation(kickoff - timedelta(minutes=5), 1.95, "T5"),
+        observation(kickoff - timedelta(minutes=15), 1.95, "CLOSING"),
     ]
     contract = lifecycle_contract(
         rows,
@@ -151,7 +153,7 @@ def test_contract_exposes_four_stage_lifecycle_and_timeline():
         x["captured_at"] for x in contract["timeline"]
     )
     markers = {x["marker"] for x in contract["timeline"] if x["marker"]}
-    assert {"FIRST_SEEN", "PICK", "CLOSE"}.issubset(markers)
+    assert {"FIRST_SEEN", "PICK", "CLOSE_T15"}.issubset(markers)
     assert contract["live_observation_id"] == contract["closing_observation_id"]
 
 
@@ -183,9 +185,9 @@ def test_canonical_observation_identity_includes_selection_but_not_time_or_lifec
     assert first["observation_id"] != under["observation_id"]
 
 
-def test_canonical_observation_is_json_safe_and_schema_is_v3():
+def test_canonical_observation_is_json_safe_and_schema_is_v4():
     row = observation(datetime(2026, 9, 9, 10, tzinfo=UTC), 2.0)
     json.dumps(row)
-    assert row["schema_version"] == 3
+    assert row["schema_version"] == 4
     assert row["observation_identity_version"] == 1
     assert row["selection"] == "OVER_2_5"
