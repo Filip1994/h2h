@@ -8,6 +8,7 @@ on:
     paths:
       - '.github/workflows/production-closing.yml'
       - 'tools/capture_production_closing.py'
+      - 'tools/apply_t15_closing_view.py'
       - 'src/quantbot/odds_lifecycle.py'
 
 permissions:
@@ -41,6 +42,8 @@ jobs:
         run: python tools/capture_production_closing.py
       - name: Rebuild Production lifecycle view
         run: python tools/build_production_view.py
+      - name: Materialize T-15 closing policy
+        run: python tools/apply_t15_closing_view.py
       - name: Commit T-15 closing observations
         run: |
           set -euo pipefail
