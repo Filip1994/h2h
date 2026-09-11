@@ -1,6 +1,6 @@
 {
   "schema_version": 9,
-  "generated_at": "2026-09-11T18:54:02.897116+00:00",
+  "generated_at": "2026-09-11T19:12:02.385080+00:00",
   "truth": "data/odds_snapshots.jsonl + bets.json",
   "observation_identity": {
     "version": 1,
@@ -30,19 +30,19 @@
     "timeline": "every persisted observation is retained; repeated identical quote states remain separate snapshot records"
   },
   "monitoring": {
-    "last_collector_run_at": "2026-09-11T18:54:00.285621+00:00",
-    "last_odds_scan_at": null,
-    "last_snapshot_at": "2026-09-11T18:52:23.439836+00:00",
-    "collector_run_age_minutes": 0.02779303333333333,
-    "scan_age_minutes": null,
-    "scan_state": "RUN_NO_API",
-    "api_requests_last_scan": 0,
-    "daily_budget_used": 1213,
-    "daily_budget_remaining": 6287,
-    "observations_last_scan": 0,
+    "last_collector_run_at": "2026-09-11T19:11:57.764788+00:00",
+    "last_odds_scan_at": "2026-09-11T19:11:57.764788+00:00",
+    "last_snapshot_at": "2026-09-11T19:11:57.764788+00:00",
+    "collector_run_age_minutes": 0.060556016666666664,
+    "scan_age_minutes": 0.060556016666666664,
+    "scan_state": "FRESH",
+    "api_requests_last_scan": 8,
+    "daily_budget_used": 1221,
+    "daily_budget_remaining": 6279,
+    "observations_last_scan": 23,
     "production_quote_health": {
       "schema_version": 1,
-      "generated_at": "2026-09-11T18:54:02.897116+00:00",
+      "generated_at": "2026-09-11T19:12:02.385080+00:00",
       "sla_minutes": 10.0,
       "overall": "NO_ACTIVE_TARGETS",
       "counts": {
@@ -325,8 +325,8 @@
         "current_captured_at": "2026-09-11T17:41:03.217499+00:00",
         "live_captured_at": "2026-09-11T17:41:03.217499+00:00",
         "live_state": "STALE",
-        "live_age_minutes": 72.979,
-        "current_age_minutes": 72.979,
+        "live_age_minutes": 90.97,
+        "current_age_minutes": 90.97,
         "closing_recovered": false,
         "closing_snapshot_type": "CLOSING",
         "clv_odds_pct": 0.164444,
@@ -757,8 +757,8 @@
         "current_captured_at": "2026-09-11T16:37:41.640925+00:00",
         "live_captured_at": "2026-09-11T16:37:41.640925+00:00",
         "live_state": "STALE",
-        "live_age_minutes": 136.339,
-        "current_age_minutes": 136.339,
+        "live_age_minutes": 154.329,
+        "current_age_minutes": 154.329,
         "closing_recovered": true,
         "closing_snapshot_type": null,
         "clv_odds_pct": null,
@@ -1207,7 +1207,7 @@
     "production": 3,
     "active": 2,
     "history": 1,
-    "snapshots": 16357
+    "snapshots": 16380
   },
   "closing_policy": {
     "definition": "nearest exact-bookmaker observation to T-15m",
