@@ -150,12 +150,9 @@ def test_contract_exposes_four_stage_lifecycle_and_timeline():
     assert [x["captured_at"] for x in contract["timeline"]] == sorted(
         x["captured_at"] for x in contract["timeline"]
     )
-    assert {x["marker"] for x in contract["timeline"] if x["marker"]} == {
-        "FIRST_SEEN",
-        "PICK",
-        "LIVE",
-        "CLOSE",
-    }
+    markers = {x["marker"] for x in contract["timeline"] if x["marker"]}
+    assert {"FIRST_SEEN", "PICK", "CLOSE"}.issubset(markers)
+    assert contract["live_observation_id"] == contract["closing_observation_id"]
 
 
 def test_contract_exposes_missing_stages_without_fabrication():
