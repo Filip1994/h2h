@@ -13,7 +13,6 @@ on:
 permissions:
   contents: write
 
-auto_cancel: false
 concurrency:
   group: quantbet-football-odds-collector
   cancel-in-progress: false
