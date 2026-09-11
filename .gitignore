@@ -6,3 +6,4 @@ __pycache__/
 .cache/api/*.json
 report_preview.html
 report_subject.txt
+data/raw_api/*.jsonl
