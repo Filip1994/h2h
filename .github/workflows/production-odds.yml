@@ -16,6 +16,8 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 env:
   API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
@@ -32,6 +34,8 @@ jobs:
   capture:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    environment:
+      name: github-pages
     steps:
       - uses: actions/checkout@v7
         with:
@@ -82,28 +86,67 @@ jobs:
             echo 'No raw API archive produced by this run'
             exit 0
           fi
+          day="$(date -u +%F)"
+          run_id="${GITHUB_RUN_ID}"
           base="$(basename "$src" .jsonl)"
-          gzip -c "$src" > "/tmp/${base}.jsonl.gz"
+          gzip -c "$src" > "/tmp/${base}-${run_id}.jsonl.gz"
           sha="$(sha256sum "$src" | awk '{print $1}')"
-          aws s3 cp "/tmp/${base}.jsonl.gz" "s3://${S3_BUCKET}/quantumbet/raw-api/live/${base}.jsonl.gz" \
+          aws s3 cp "/tmp/${base}-${run_id}.jsonl.gz" "s3://${S3_BUCKET}/quantumbet/raw-api/runs/${day}/${run_id}.jsonl.gz" \
             --endpoint-url "$S3_ENDPOINT" \
             --region "$AWS_DEFAULT_REGION" \
             --metadata "sha256=${sha}" \
             --no-progress
-          rm -f "/tmp/${base}.jsonl.gz"
-          echo 'Raw API archive upload: PASS'
+          rm -f "/tmp/${base}-${run_id}.jsonl.gz"
+          echo "Raw API archive upload: PASS run=${run_id} sha256=${sha}"
       - name: Commit immutable Production observations
+        id: commit_state
         run: |
           set -euo pipefail
           files=(bets.json odds_collection_budget.json odds_collection_state.json odds_collection_metrics.json production_operations_gate.md production_dashboard.json production_quote_health.json data/odds_snapshots.jsonl data/odds_collection_coverage.jsonl data/eligibility_coverage.jsonl data/football_api_quota.json)
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add --ignore-errors "${files[@]}"
-          if git diff --cached --quiet; then exit 0; fi
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           git commit -m "Capture Production odds lifecycle"
           for attempt in 1 2 3; do
-            if git push; then exit 0; fi
+            if git push; then
+              echo "changed=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
             git fetch origin main
             git rebase origin/main || { git rebase --abort; exit 1; }
           done
           exit 1
+      - name: Build static Production site
+        if: steps.commit_state.outputs.changed == 'true'
+        run: |
+          set -euo pipefail
+          rm -rf _site
+          mkdir -p _site/assets
+          cp index.html _site/index.html
+          cp assets/qb-dashboard.css _site/assets/qb-dashboard.css
+          cp production_dashboard.json _site/production_dashboard.json
+          cp production_quote_health.json _site/production_quote_health.json
+          cp bets.json _site/bets.json
+          cp ledger_meta.json _site/ledger_meta.json
+          [ -f system_health.json ] && cp system_health.json _site/system_health.json || true
+          test -s _site/index.html
+          test -s _site/production_dashboard.json
+          test -s _site/production_quote_health.json
+          test -s _site/bets.json
+      - name: Configure GitHub Pages
+        if: steps.commit_state.outputs.changed == 'true'
+        uses: actions/configure-pages@v5
+      - name: Upload Production Pages artifact
+        if: steps.commit_state.outputs.changed == 'true'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+          retention-days: 1
+      - name: Deploy Production dashboard
+        if: steps.commit_state.outputs.changed == 'true'
+        id: deployment
+        uses: actions/deploy-pages@v4
