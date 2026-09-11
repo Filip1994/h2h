@@ -103,7 +103,7 @@ jobs:
         id: commit_state
         run: |
           set -euo pipefail
-          files=(bets.json odds_collection_budget.json odds_collection_state.json odds_collection_metrics.json production_operations_gate.md production_dashboard.json production_quote_health.json data/odds_snapshots.jsonl data/odds_collection_coverage.jsonl data/eligibility_coverage.jsonl data/football_api_quota.json)
+          files=(bets.json odds_collection_budget.json odds_collection_state.json odds_collection_metrics.json production_dashboard.json production_quote_health.json data/odds_snapshots.jsonl data/odds_collection_coverage.jsonl data/eligibility_coverage.jsonl data/football_api_quota.json)
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add --ignore-errors "${files[@]}"
@@ -138,8 +138,7 @@ jobs:
           test -s _site/production_dashboard.json
           test -s _site/production_quote_health.json
           test -s _site/bets.json
-          # The dashboard already polls JSON, but a hard-reload watchdog prevents
-          # stale browser/CDN document state from surviving a long-running tab.
+          # Prevent a long-running tab from retaining stale document state.
           python - <<'PY'
           from pathlib import Path
           p = Path('_site/index.html')
