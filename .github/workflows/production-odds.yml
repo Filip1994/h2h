@@ -7,8 +7,10 @@ on:
       - '.github/workflows/production-odds.yml'
       - 'tools/force_production_due.py'
       - 'tools/audit_production_targets.py'
+      - 'tools/capture_production_closing.py'
       - 'tools/apply_t15_closing_view.py'
       - 'tools/assert_production_odds_fresh.py'
+      - 'src/quantbot/odds_lifecycle.py'
   schedule:
     - cron: "2/5 * * * *"
 
@@ -50,6 +52,8 @@ jobs:
         run: python tools/force_production_due.py
       - name: Capture due fixtures in the next 72 hours
         run: python main.py capture-odds
+      - name: Capture exact Production bookmaker quote at T-15
+        run: python tools/capture_production_closing.py
       - name: Build Production lifecycle view
         run: python tools/build_production_view.py
       - name: Audit exact Production target quotes
