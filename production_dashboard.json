@@ -1,6 +1,6 @@
 {
   "schema_version": 9,
-  "generated_at": "2026-09-11T21:23:09.422930+00:00",
+  "generated_at": "2026-09-11T21:34:30.999715+00:00",
   "truth": "data/odds_snapshots.jsonl + bets.json",
   "observation_identity": {
     "version": 1,
@@ -30,19 +30,19 @@
     "timeline": "every persisted observation is retained; repeated identical quote states remain separate snapshot records"
   },
   "monitoring": {
-    "last_collector_run_at": "2026-09-11T21:22:13.079003+00:00",
-    "last_odds_scan_at": "2026-09-11T21:22:13.079003+00:00",
+    "last_collector_run_at": "2026-09-11T21:34:27.127694+00:00",
+    "last_odds_scan_at": "2026-09-11T21:34:27.127694+00:00",
     "last_snapshot_at": "2026-09-11T21:22:13.079003+00:00",
-    "collector_run_age_minutes": 0.92183885,
-    "scan_age_minutes": 0.92183885,
+    "collector_run_age_minutes": 0.047459216666666665,
+    "scan_age_minutes": 0.047459216666666665,
     "scan_state": "FRESH",
-    "api_requests_last_scan": 216,
-    "daily_budget_used": 1437,
-    "daily_budget_remaining": 6063,
-    "observations_last_scan": 1124,
+    "api_requests_last_scan": 4,
+    "daily_budget_used": 1441,
+    "daily_budget_remaining": 6059,
+    "observations_last_scan": 0,
     "production_quote_health": {
       "schema_version": 1,
-      "generated_at": "2026-09-11T21:23:09.422930+00:00",
+      "generated_at": "2026-09-11T21:34:30.999715+00:00",
       "sla_minutes": 10.0,
       "overall": "NO_ACTIVE_TARGETS",
       "counts": {
@@ -325,8 +325,8 @@
         "current_captured_at": "2026-09-11T17:41:03.217499+00:00",
         "live_captured_at": "2026-09-11T17:41:03.217499+00:00",
         "live_state": "STALE",
-        "live_age_minutes": 222.086,
-        "current_age_minutes": 222.086,
+        "live_age_minutes": 233.446,
+        "current_age_minutes": 233.446,
         "closing_recovered": false,
         "closing_snapshot_type": "CLOSING",
         "clv_odds_pct": 0.164444,
