@@ -9,8 +9,10 @@ on:
 permissions:
   contents: write
 
+# Odds collection must not wait behind settlement/daily generation.
+# It still serializes its own runs so state and append-only snapshots cannot race.
 concurrency:
-  group: quantbet-football-api-global
+  group: quantbet-football-odds-collector
   cancel-in-progress: false
 
 env:
@@ -40,6 +42,8 @@ jobs:
       - run: pip install -r requirements.txt
       - name: Validate active Production picks
         run: python tools/validate_production_picks.py
+      - name: Force active Production fixtures due
+        run: python tools/force_production_due.py
       - name: Capture due fixtures in the next 72 hours
         run: python main.py capture-odds
       - name: Build Production lifecycle view
