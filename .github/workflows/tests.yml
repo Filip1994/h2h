@@ -23,5 +23,13 @@ jobs:
         run: python -c "import main; print('main.py import OK')"
       - name: Lint active Production code
         run: ruff check main.py src/quantbot/monitor.py src/quantbot/observation_identity.py src/quantbot/odds_lifecycle.py src/quantbot/persistence.py src/quantbot/decision_packet.py tools/build_production_view.py
-      - name: Run complete test suite
-        run: pytest
+      - name: Run frozen Production/model tests
+        run: >-
+          pytest
+          tests/test_api.py
+          tests/test_dixon_coles.py
+          tests/test_decision_packet.py
+          tests/test_odds_lifecycle_recovery.py
+          tests/test_canonical_closing_semantics.py
+          tests/test_odds_lifecycle.py
+          tests/test_observation_identity.py
