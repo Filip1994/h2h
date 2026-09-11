@@ -7,6 +7,7 @@ on:
       - Production · daily picks
       - Production · 72h odds lifecycle
       - Production · settlement
+      - Skip pending Production bet
     types: [completed]
   push:
     branches: [main]
