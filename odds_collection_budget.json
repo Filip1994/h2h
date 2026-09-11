@@ -4,7 +4,7 @@
   "request_budget": 7500,
   "reserve": 0,
   "working_budget": 7500,
-  "requests_used": 1441,
-  "last_run_at": "2026-09-11T21:34:27.127694+00:00",
-  "last_run_requests": 4
+  "requests_used": 1630,
+  "last_run_at": "2026-09-11T23:22:32.609682+00:00",
+  "last_run_requests": 189
 }
