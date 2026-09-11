@@ -135,7 +135,18 @@
       "integrity_hash": "6e8db46458f7ea5d2f8254758fed948044d6e2bf56b90c1d4983614a0ff1b30c"
     },
     "decision_packet_id": "bdd1f2d1e0d708e17287b92bc9783f9c24cf305564a3f8214bfe9a894f7e9ba9",
-    "decision_packet_integrity_hash": "6e8db46458f7ea5d2f8254758fed948044d6e2bf56b90c1d4983614a0ff1b30c"
+    "decision_packet_integrity_hash": "6e8db46458f7ea5d2f8254758fed948044d6e2bf56b90c1d4983614a0ff1b30c",
+    "closing_odd": 2.25,
+    "closing_opposite_odd": 1.62,
+    "closing_market_probability_devig": 0.418605,
+    "closing_odds_captured_at": "2026-09-11T17:40:18.059457+00:00",
+    "closing_5m_odd": 2.25,
+    "closing_5m_opposite_odd": 1.62,
+    "closing_5m_market_probability_devig": 0.418605,
+    "closing_5m_odds_captured_at": "2026-09-11T17:40:18.059457+00:00",
+    "closing_snapshot_id": "fa9651aff6cf4df456212c9430bf75a3e08c57f0f2d6e917ed1036e32bb203a2",
+    "closing_capture_target": "T-15m",
+    "closing_capture_window": "T-10m_to_T-20m"
   },
   {
     "id": "1561392_OVER_2_5",
