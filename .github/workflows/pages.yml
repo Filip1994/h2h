@@ -1,5 +1,7 @@
 name: Deploy QuantBet Production dashboard
 
+# Single authoritative Pages publisher. GitHub Pages Source is configured to GitHub Actions.
+
 on:
   workflow_dispatch:
   workflow_run:
