@@ -3,7 +3,8 @@ name: Production · settlement
 on:
   workflow_dispatch:
   schedule:
-    - cron: "*/15 * * * *"
+    # Keep settlement away from exact hour/quarter boundaries used by other jobs.
+    - cron: "1/15 * * * *"
 
 permissions:
   contents: write
@@ -22,6 +23,7 @@ env:
 jobs:
   settle:
     runs-on: ubuntu-latest
+    timeout-minutes: 4
     steps:
       - uses: actions/checkout@v7
         with:
