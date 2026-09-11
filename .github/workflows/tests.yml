@@ -11,13 +11,6 @@ jobs:
       actions: read
       contents: read
     runs-on: ubuntu-latest
-    env:
-      RAILWAY_DATABASE_URL: ${{ secrets.RAILWAY_DATABASE_URL }}
-      AWS_ACCESS_KEY_ID: ${{ secrets.RAILWAY_S3_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.RAILWAY_S3_SECRET_ACCESS_KEY }}
-      AWS_DEFAULT_REGION: ${{ secrets.RAILWAY_S3_REGION }}
-      S3_ENDPOINT: ${{ secrets.RAILWAY_S3_ENDPOINT }}
-      S3_BUCKET: ${{ secrets.RAILWAY_S3_BUCKET }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
@@ -38,68 +31,3 @@ jobs:
           tests/test_decision_packet.py
           tests/test_odds_lifecycle_recovery.py
           tests/test_canonical_closing_semantics.py
-      - name: Controlled Railway migration
-        if: contains(github.event.head_commit.message, '[railway-backfill]') && github.event_name == 'push'
-        shell: bash
-        run: |
-          set -euo pipefail
-          test -n "$RAILWAY_DATABASE_URL"; test -n "$AWS_ACCESS_KEY_ID"; test -n "$AWS_SECRET_ACCESS_KEY"; test -n "$AWS_DEFAULT_REGION"; test -n "$S3_ENDPOINT"; test -n "$S3_BUCKET"
-          python -m pip install --disable-pip-version-check 'psycopg[binary]==3.2.10' 'awscli==1.44.27'
-          shopt -s nullglob
-          files=(data/raw_api/*.jsonl); test "${#files[@]}" -gt 0
-          for src in "${files[@]}"; do
-            base="$(basename "$src" .jsonl)"; key="quantumbet/raw-api/${base}.jsonl.gz"; sha="$(sha256sum "$src" | awk '{print $1}')"
-            if aws s3api head-object --bucket "$S3_BUCKET" --key "$key" --endpoint-url "$S3_ENDPOINT" --region "$AWS_DEFAULT_REGION" >/tmp/head.json 2>/dev/null; then
-              existing="$(python -c "import json; print(json.load(open('/tmp/head.json')).get('Metadata',{}).get('sha256',''))")"; test "$existing" = "$sha"; echo "Already migrated: $src"; continue
-            fi
-            gzip -c "$src" > "/tmp/${base}.jsonl.gz"
-            aws s3 cp "/tmp/${base}.jsonl.gz" "s3://${S3_BUCKET}/${key}" --endpoint-url "$S3_ENDPOINT" --region "$AWS_DEFAULT_REGION" --metadata "sha256=${sha}" --no-progress
-            rm -f "/tmp/${base}.jsonl.gz"
-          done
-          for src in "${files[@]}"; do
-            base="$(basename "$src" .jsonl)"; key="quantumbet/raw-api/${base}.jsonl.gz"; sha="$(sha256sum "$src" | awk '{print $1}')"
-            aws s3api head-object --bucket "$S3_BUCKET" --key "$key" --endpoint-url "$S3_ENDPOINT" --region "$AWS_DEFAULT_REGION" >/tmp/head.json
-            existing="$(python -c "import json; print(json.load(open('/tmp/head.json')).get('Metadata',{}).get('sha256',''))")"; test "$existing" = "$sha"
-          done
-          echo 'Raw API archive verification: PASS'
-          python - <<'PY'
-import hashlib,json,os
-from pathlib import Path
-import psycopg
-from psycopg.types.json import Jsonb
-root=Path('.')
-jsonl=sorted((root/'data').glob('*.jsonl'))
-jsons=[root/n for n in ['bets.json','predictions.json','ledger_meta.json','api_usage.json','api_usage_history.json','generation_health.json','generation_health_history.json','odds_collection_budget.json','odds_collection_state.json','odds_collection_metrics.json','production_dashboard.json','production_operations_gate.md'] if (root/n).exists()]
-with psycopg.connect(os.environ['RAILWAY_DATABASE_URL'],sslmode='require') as c:
- with c.cursor() as x:
-  x.execute('CREATE TABLE IF NOT EXISTS quantumbet_archive_records (record_id text PRIMARY KEY, source_file text NOT NULL, line_no bigint NOT NULL, payload jsonb NOT NULL, migrated_at timestamptz NOT NULL DEFAULT now())')
-  x.execute('CREATE TABLE IF NOT EXISTS quantumbet_archive_manifest (source_file text PRIMARY KEY, source_bytes bigint NOT NULL, source_sha256 text NOT NULL, record_count bigint NOT NULL, migrated_at timestamptz NOT NULL DEFAULT now())')
- def put(f,n,p):
-  rid=hashlib.sha256(f'{f}\0{n}\0{json.dumps(p,ensure_ascii=False,sort_keys=True,separators=(",",":"))}'.encode()).hexdigest()
-  with c.cursor() as x:x.execute('INSERT INTO quantumbet_archive_records(record_id,source_file,line_no,payload) VALUES(%s,%s,%s,%s) ON CONFLICT(record_id) DO NOTHING',(rid,f,n,Jsonb(p)))
- for p in jsonl+jsons:
-  count=0
-  if p.suffix=='.jsonl':
-   for n,line in enumerate(p.open(encoding='utf-8',errors='replace'),1):
-    try:q=json.loads(line)
-    except json.JSONDecodeError:continue
-    if isinstance(q,dict):put(str(p),n,q);count+=1
-  else:
-   q=json.loads(p.read_text(encoding='utf-8')) if p.suffix=='.json' else {'text':p.read_text(encoding='utf-8')}
-   if isinstance(q,list):
-    for n,item in enumerate(q,1):put(str(p),n,item)
-    count=len(q)
-   else:put(str(p),1,q);count=1
-  with c.cursor() as x:x.execute('INSERT INTO quantumbet_archive_manifest(source_file,source_bytes,source_sha256,record_count) VALUES(%s,%s,%s,%s) ON CONFLICT(source_file) DO UPDATE SET source_bytes=EXCLUDED.source_bytes,source_sha256=EXCLUDED.source_sha256,record_count=EXCLUDED.record_count,migrated_at=now()',(str(p),p.stat().st_size,hashlib.sha256(p.read_bytes()).hexdigest(),count))
- c.commit()
-print('Structured data migration: PASS')
-PY
-          python - <<'PY'
-import os,psycopg
-with psycopg.connect(os.environ['RAILWAY_DATABASE_URL'],sslmode='require') as c:
- with c.cursor() as x:
-  x.execute('select count(*) from quantumbet_archive_records');r=x.fetchone()[0]
-  x.execute('select count(*) from quantumbet_archive_manifest');m=x.fetchone()[0]
-print(f'Postgres archive records: {r}'); print(f'Postgres archive manifests: {m}'); assert m>0
-print('Postgres migration verification: PASS')
-PY
