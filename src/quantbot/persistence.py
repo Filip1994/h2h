@@ -26,6 +26,9 @@ def snapshot_id(record: dict[str, Any]) -> str:
 
     Unlike observation_id, this identity includes temporal/provenance fields so
     two observations of the same quote state remain distinct immutable records.
+    The v2 field set is retained for backward compatibility; observation_id is
+    deterministic from the other identity fields and therefore need not be
+    duplicated inside snapshot_id.
     """
     canonical = {
         key: record.get(key)
@@ -39,7 +42,6 @@ def snapshot_id(record: dict[str, Any]) -> str:
             "odds_captured_at",
             "snapshot_type",
             "source_request_hash",
-            "observation_id",
         )
     }
     return hashlib.sha256(
@@ -86,11 +88,7 @@ class OddsSnapshotStore:
         return ids
 
     def load(self) -> list[dict[str, Any]]:
-        """Load persisted snapshots without mutating the append-only store.
-
-        Legacy schema-v2 rows are enriched in memory with the v3 observation_id;
-        the original persisted bytes remain immutable.
-        """
+        """Load snapshots; derive v3 identity for legacy rows without rewriting them."""
         if not self.path.exists():
             return []
         records: list[dict[str, Any]] = []
