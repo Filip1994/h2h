@@ -6,7 +6,6 @@ permissions:
   contents: read
 jobs:
   migrate:
-    if: contains(github.event.head_commit.message, '[railway-backfill]')
     runs-on: ubuntu-latest
     env:
       RAILWAY_DATABASE_URL: ${{ secrets.RAILWAY_DATABASE_URL }}
