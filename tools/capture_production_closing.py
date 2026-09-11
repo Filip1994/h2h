@@ -86,13 +86,14 @@ def main() -> int:
             bet["closing_opposite_odd"] = round(quote.opposite_odd, 4)
             bet["closing_market_probability_devig"] = round(quote.devig_probability, 6)
             bet["closing_odds_captured_at"] = now.isoformat()
-            bet["closing_5m_odd"] = round(quote.odd, 4)
-            bet["closing_5m_opposite_odd"] = round(quote.opposite_odd, 4)
-            bet["closing_5m_market_probability_devig"] = round(quote.devig_probability, 6)
-            bet["closing_5m_odds_captured_at"] = now.isoformat()
             bet["closing_snapshot_id"] = snapshot_id
             bet["closing_capture_target"] = "T-15m"
             bet["closing_capture_window"] = "T-10m_to_T-20m"
+            bet["closing_t15_odd"] = round(quote.odd, 4)
+            bet["closing_t15_opposite_odd"] = round(quote.opposite_odd, 4)
+            bet["closing_t15_market_probability_devig"] = round(quote.devig_probability, 6)
+            bet["closing_t15_odds_captured_at"] = now.isoformat()
+            bet["closing_t15_snapshot_id"] = snapshot_id
             captured += 1
             print(
                 f"T15_CAPTURED fixture={fixture_id} bookmaker={bookmaker_id} "
