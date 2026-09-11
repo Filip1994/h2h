@@ -5,7 +5,10 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from .observation_identity import canonical_observation_id, observation_identity_metadata
+from .observation_identity import (
+    canonical_observation_id,
+    observation_identity_metadata,
+)
 
 LIFECYCLE_SCHEMA_VERSION = 4
 CANONICAL_SNAPSHOT_TYPES = {"OPENING", "ENTRY", "INTERMEDIATE", "T15", "CLOSING", "T5"}
@@ -109,20 +112,12 @@ def select_pick(observations: list[dict[str, Any]], pick_at: datetime) -> dict[s
 def select_live(observations: list[dict[str, Any]], *, build_at: datetime, kickoff: datetime | None) -> dict[str, Any] | None:
     build_at = build_at.astimezone(UTC)
     cutoff = min(build_at, kickoff.astimezone(UTC)) if kickoff else build_at
-    candidates = [
-        item for item in observations
-        if (captured := parse_capture(item.get("odds_captured_at"))) is not None and captured <= cutoff
-    ]
+    candidates = [item for item in observations if (captured := parse_capture(item.get("odds_captured_at"))) is not None and captured <= cutoff]
     return candidates[-1] if candidates else None
 
 
 def select_closing(observations: list[dict[str, Any]], kickoff: datetime, *, pick_at: datetime | None = None, window_min_seconds: int = CLOSING_MIN_SECONDS, window_max_seconds: int = CLOSING_MAX_SECONDS) -> dict[str, Any] | None:
-    """Select the nearest persisted exact-bookmaker quote to T-15m.
-
-    The operational collector runs every five minutes, so the canonical
-    closing window is 10-20 minutes pre-kickoff. We prefer the observation
-    closest to exactly 15 minutes rather than silently using T-5.
-    """
+    """Select the nearest persisted exact-bookmaker quote to T-15m."""
     kickoff = kickoff.astimezone(UTC)
     pick_at = pick_at.astimezone(UTC) if pick_at else None
     candidates: list[tuple[float, datetime, dict[str, Any]]] = []
@@ -181,12 +176,7 @@ def lifecycle_contract(observations: list[dict[str, Any]], *, pick_at: datetime,
     pick = select_pick(observations, pick_at)
     live = select_live(observations, build_at=build_at, kickoff=kickoff) if kickoff else select_live(observations, build_at=build_at, kickoff=None)
     closing = select_closing(observations, kickoff, pick_at=pick_at) if kickoff else None
-    timeline_source = [
-        item for item in observations
-        if (captured := parse_capture(item.get("odds_captured_at"))) is not None
-        and captured <= build_at
-        and (kickoff is None or captured <= kickoff)
-    ]
+    timeline_source = [item for item in observations if (captured := parse_capture(item.get("odds_captured_at"))) is not None and captured <= build_at and (kickoff is None or captured <= kickoff)]
     markers: dict[str, str] = {}
     if first_seen:
         markers[_timeline_key(first_seen)] = "FIRST_SEEN"
