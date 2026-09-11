@@ -1,9 +1,14 @@
 name: Deploy QuantBet Production dashboard
 
 # Single authoritative Pages publisher. GitHub Pages Source is configured to GitHub Actions.
+# The scheduled reconciliation is intentional: Actions commits made with GITHUB_TOKEN
+# do not reliably create a second workflow trigger, so Pages periodically republishes
+# the current main state even when an upstream producer had a degraded run.
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "*/15 * * * *"
   workflow_run:
     workflows:
       - Production · daily picks
@@ -32,6 +37,9 @@ concurrency:
   group: github-pages
   cancel-in-progress: true
 
+env:
+  PYTHONUNBUFFERED: "1"
+
 jobs:
   deploy:
     if: ${{ always() }}
@@ -44,6 +52,9 @@ jobs:
         with:
           ref: main
           fetch-depth: 1
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
       - name: Build Production view
         run: python tools/build_production_view.py
       - name: Build static Production site
