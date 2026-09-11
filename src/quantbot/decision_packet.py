@@ -7,8 +7,12 @@ from datetime import UTC, datetime
 from typing import Any
 
 from .league_registry import REGISTRY, classification_for
+from .observation_identity import (
+    canonical_observation_id,
+    observation_identity_metadata,
+)
 
-PACKET_SCHEMA_VERSION = 2
+PACKET_SCHEMA_VERSION = 3
 STRATEGY_VERSION = "production-decision-v1"
 BOOKMAKER_POLICY_VERSION = "all-provider-bookmakers-best-price-v1"
 
@@ -76,17 +80,27 @@ def build_packet(
     quote = candidate.quote
     decision_at = decision_timestamp.astimezone(UTC).isoformat()
     code_sha = os.getenv("GITHUB_SHA") or "LOCAL_UNPINNED"
+    selection = candidate.market.value
+    observation_id = canonical_observation_id(
+        fixture_id=candidate.fixture_id,
+        market=candidate.market.value,
+        bookmaker_id=quote.bookmaker_id,
+        selection=selection,
+        odd=quote.odd,
+        opposite_odd=quote.opposite_odd,
+    )
     observation_payload = {
         "fixture_id": candidate.fixture_id,
         "market": candidate.market.value,
         "bookmaker_id": quote.bookmaker_id,
         "bookmaker": quote.bookmaker_name,
-        "odd": round(quote.odd, 6),
-        "opposite_odd": round(quote.opposite_odd, 6),
+        "selection": selection,
+        "odd": round(quote.odd, 4),
+        "opposite_odd": round(quote.opposite_odd, 4),
         "captured_at": quote.captured_at.astimezone(UTC).isoformat(),
         "snapshot_type": "ENTRY",
+        "observation_identity_version": 1,
     }
-    observation_id = _hash(observation_payload)
     registry = registry_snapshot(candidate.league_id)
     packet = {
         "schema_version": PACKET_SCHEMA_VERSION,
@@ -112,7 +126,7 @@ def build_packet(
         },
         "decision": {
             "market": candidate.market.value,
-            "selection": candidate.market.value,
+            "selection": selection,
             "bookmaker_id": quote.bookmaker_id,
             "bookmaker": quote.bookmaker_name,
             "pick_odd": round(quote.odd, 6),
@@ -163,6 +177,7 @@ def build_packet(
         },
         "provenance": {
             "canonical_observation_id": observation_id,
+            "observation_identity": observation_identity_metadata(),
             "canonical_observation": observation_payload,
             "opening": {
                 "status": "UNAVAILABLE_AT_DECISION_TIME",

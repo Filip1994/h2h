@@ -150,12 +150,9 @@ def test_contract_exposes_four_stage_lifecycle_and_timeline():
     assert [x["captured_at"] for x in contract["timeline"]] == sorted(
         x["captured_at"] for x in contract["timeline"]
     )
-    assert {x["marker"] for x in contract["timeline"] if x["marker"]} == {
-        "FIRST_SEEN",
-        "PICK",
-        "LIVE",
-        "CLOSE",
-    }
+    markers = {x["marker"] for x in contract["timeline"] if x["marker"]}
+    assert {"FIRST_SEEN", "PICK", "CLOSE"}.issubset(markers)
+    assert contract["live_observation_id"] == contract["closing_observation_id"]
 
 
 def test_contract_exposes_missing_stages_without_fabrication():
@@ -174,15 +171,21 @@ def test_contract_exposes_missing_stages_without_fabrication():
     assert contract["pick_unavailable_reason"] == "NO_EXACT_ENTRY_OBSERVATION"
 
 
-def test_canonical_observation_identity_includes_selection():
+def test_canonical_observation_identity_includes_selection_but_not_time_or_lifecycle():
     at = datetime(2026, 9, 9, 10, tzinfo=UTC)
-    over = observation(at, 2.0, selection="OVER_2_5")
+    later = at + timedelta(hours=3)
+    first = observation(at, 2.0, "OPENING", selection="OVER_2_5")
+    same_state_later = observation(later, 2.0, "CLOSING", selection="OVER_2_5")
+    changed_price = observation(later, 2.1, "INTERMEDIATE", selection="OVER_2_5")
     under = observation(at, 2.0, market="UNDER_2_5", selection="UNDER_2_5")
-    assert over["observation_id"] != under["observation_id"]
+    assert first["observation_id"] == same_state_later["observation_id"]
+    assert first["observation_id"] != changed_price["observation_id"]
+    assert first["observation_id"] != under["observation_id"]
 
 
-def test_canonical_observation_is_json_safe_and_schema_is_v2():
+def test_canonical_observation_is_json_safe_and_schema_is_v3():
     row = observation(datetime(2026, 9, 9, 10, tzinfo=UTC), 2.0)
     json.dumps(row)
-    assert row["schema_version"] == 2
+    assert row["schema_version"] == 3
+    assert row["observation_identity_version"] == 1
     assert row["selection"] == "OVER_2_5"

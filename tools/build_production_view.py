@@ -11,6 +11,10 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
+from quantbot.observation_identity import (
+    canonical_observation_id,
+    observation_identity_metadata,
+)
 from quantbot.odds_lifecycle import clv_from_odds, lifecycle_contract, observations_for
 
 BETS = ROOT / "bets.json"
@@ -69,13 +73,22 @@ def compact_observation(row: dict[str, Any] | None) -> dict[str, Any] | None:
 
 
 def bulletin_pick(bet: dict[str, Any]) -> dict[str, Any] | None:
-    """Daily Bulletin decision is the authoritative PICK observation."""
+    """Daily Bulletin decision is the authoritative PICK quote state."""
     captured = parse_dt(bet.get("odds_captured_at") or bet.get("decision_timestamp"))
-    if captured is None or bet.get("odd") is None:
+    if captured is None or bet.get("odd") is None or bet.get("opposite_odd") is None:
         return None
     decision = bet.get("decision_packet", {}).get("decision", {})
-    return {
-        "observation_id": decision.get("pick_observation_id"),
+    observation_id = canonical_observation_id(
+        fixture_id=int(bet["event_id"]),
+        market=str(bet["market"]),
+        bookmaker_id=int(bet["bookmaker_id"]),
+        selection=str(bet.get("selection") or bet["market"]),
+        odd=float(bet["odd"]),
+        opposite_odd=float(bet["opposite_odd"]),
+    )
+    legacy_id = decision.get("pick_observation_id")
+    result = {
+        "observation_id": observation_id,
         "odd": bet.get("odd"),
         "opposite_odd": bet.get("opposite_odd"),
         "captured_at": captured.isoformat(),
@@ -83,7 +96,11 @@ def bulletin_pick(bet: dict[str, Any]) -> dict[str, Any] | None:
         "bookmaker_id": bet.get("bookmaker_id"),
         "bookmaker": bet.get("bookmaker"),
         "selection": bet.get("selection") or bet.get("market"),
+        "observation_identity_version": 1,
     }
+    if legacy_id and legacy_id != observation_id:
+        result["legacy_observation_id"] = legacy_id
+    return result
 
 
 def true_closing(observations: list[dict[str, Any]], kickoff: datetime | None, pick_at: datetime | None, now: datetime) -> dict[str, Any] | None:
@@ -169,7 +186,8 @@ def enrich(bet: dict[str, Any], now: datetime) -> dict[str, Any]:
 
     item = dict(bet)
     item["production_lifecycle"] = {
-        "schema_version": contract.get("schema_version", 2),
+        "schema_version": contract.get("schema_version", 3),
+        "observation_identity": observation_identity_metadata(),
         "first_seen": compact_observation(contract.get("first_seen")),
         "pick": pick,
         "current": current,
@@ -212,9 +230,10 @@ def main() -> int:
     run_age = max(0.0, (now - run_at).total_seconds() / 60.0) if run_at else None
     run_state = "FRESH" if run_age is not None and run_age <= 15 and requests_this_run > 0 else "RUN_NO_API" if run_age is not None and run_age <= 15 else "STALE" if run_age is not None else "NO_RUN"
     output = {
-        "schema_version": 7,
+        "schema_version": 8,
         "generated_at": now.isoformat(),
         "truth": "data/odds_snapshots.jsonl + bets.json",
+        "observation_identity": observation_identity_metadata(),
         "monitoring": {
             "last_collector_run_at": run_at.isoformat() if run_at else None,
             "last_odds_scan_at": run_at.isoformat() if run_at and requests_this_run > 0 else None,
