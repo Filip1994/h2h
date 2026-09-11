@@ -1,11 +1,11 @@
 {
-  "request_count": 264,
+  "request_count": 497,
   "request_budget": 7500,
   "working_budget": 7000,
   "reserve": 500,
-  "remaining_working": 6736,
+  "remaining_working": 6503,
   "cache_hits": 0,
-  "cache_misses": 264,
+  "cache_misses": 497,
   "cache_hit_rate": 0.0,
   "rate_limit_events": 0,
   "retry_events": 0,
@@ -14,29 +14,31 @@
   "api_error_events": 0,
   "network_error_events": 0,
   "endpoint_requests": {
-    "fixtures": 185,
-    "odds": 79
+    "fixtures": 277,
+    "odds": 220
   },
   "endpoint_cache_hits": {},
   "global_quota": {
     "date": "2026-09-11",
     "daily_capacity": 7500,
     "safety_reserve": 500,
-    "consumed": 286,
+    "consumed": 2039,
     "reserved": 0,
-    "remaining_unallocated": 7214,
+    "remaining_unallocated": 5461,
     "consumed_by_workflow": {
-      "Production · 72h odds lifecycle": 22,
-      "Production · daily picks": 264
+      "Production · 72h odds lifecycle": 1441,
+      "Production · daily picks": 497,
+      "Production · settlement": 101
     },
     "reserved_by_workflow": {
       "Production · 72h odds lifecycle": 0,
-      "Production · daily picks": 0
+      "Production · daily picks": 0,
+      "Production · settlement": 0
     },
     "quota_pressure_state": "HEALTHY",
-    "request_count": 286
+    "request_count": 2039
   },
-  "timestamp": "2026-09-11T01:39:12.690566+00:00",
-  "date": "2026-09-11",
-  "new_bets": 0
+  "timestamp": "2026-09-11T23:12:39.549219+00:00",
+  "date": "2026-09-12",
+  "new_bets": 4
 }

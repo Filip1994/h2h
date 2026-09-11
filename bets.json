@@ -447,5 +447,670 @@
     "decision_packet_integrity_hash": "baacfefc9f64bcd9564b86e2cd35078654c5fe0df83790e9bbfc2eb1dc2bd24c",
     "result": "2:0",
     "settled_at": "2026-09-11T19:19:16.589220+00:00"
+  },
+  {
+    "id": "1557399_UNDER_2_5",
+    "type": "DC_VALUE",
+    "mode": "PAPER",
+    "event_id": 1557399,
+    "prediction_id": "1557399_UNDER_2_5_dc-value-v2.1.0",
+    "created_at": "2026-09-12T01:12:39.549219+02:00",
+    "decision_timestamp": "2026-09-12T01:12:39.549219+02:00",
+    "data_cutoff": "2026-09-11T23:12:39.549219+00:00",
+    "date": "2026-09-12",
+    "kickoff": "2026-09-12T14:00:00+00:00",
+    "sport": "Football",
+    "match": "Chelsea vs Hull City",
+    "home_id": 49,
+    "away_id": 64,
+    "league": "England - Premier League",
+    "league_id": 39,
+    "market": "UNDER_2_5",
+    "market_display": "Under 2.5",
+    "stake": 250.0,
+    "odd": 3.0,
+    "opening_odd": null,
+    "opposite_odd": 1.4,
+    "opening_opposite_odd": null,
+    "bookmaker_id": 8,
+    "bookmaker": "Bet365",
+    "odds_captured_at": "2026-09-11T23:12:39.549219+00:00",
+    "opening_odds_captured_at": null,
+    "implied_probability": 0.333333,
+    "market_probability_devig": 0.318182,
+    "market_overround": 0.047619,
+    "model_probability": 0.921692,
+    "calibrated_probability": 0.921692,
+    "decision_probability": 0.891692,
+    "probability_edge": 0.57351,
+    "expected_value": 1.675076,
+    "lambda_home": 0.090447,
+    "lambda_away": 0.898656,
+    "rho": -0.100785,
+    "xi": 0.0015,
+    "model_version": "dc-value-v2.1.0",
+    "model_fitted_matches": 1170,
+    "model_team_count": 27,
+    "model_training_cutoff": "2026-09-11T23:12:39.549219+00:00",
+    "model_training_identity": "7e5e92099f97bb73fbd8af7f7155e72364d1db660ce6a3486991147ad28243f4",
+    "calibration_status": "IDENTITY_UNVALIDATED",
+    "status": "PENDING",
+    "profit": 0.0,
+    "signal_source": "DAILY_BULLETIN",
+    "signal_sent_at": "2026-09-12T01:12:39.549219+02:00",
+    "decision_packet": {
+      "schema_version": 3,
+      "packet_id": "0b424c5debce5275e4ec30b4a93949bfb7d81d97ad10814b49b38a3b1c156f03",
+      "fixture": {
+        "fixture_id": 1557399,
+        "league_id": 39,
+        "league": "England - Premier League",
+        "home_id": 49,
+        "home": "Chelsea",
+        "away_id": 64,
+        "away": "Hull City",
+        "kickoff": "2026-09-12T14:00:00+00:00"
+      },
+      "decision": {
+        "market": "UNDER_2_5",
+        "selection": "UNDER_2_5",
+        "bookmaker_id": 8,
+        "bookmaker": "Bet365",
+        "pick_odd": 3.0,
+        "pick_observed_at": "2026-09-11T23:12:39.549219+00:00",
+        "pick_observation_id": "6adcf4debda7b43503202948bdeea25972ec7ae2c71815a2b515f3bdcba67621",
+        "decision_timestamp": "2026-09-11T23:12:39.549219+00:00"
+      },
+      "model": {
+        "version": "dc-value-v2.1.0",
+        "code_sha": "1383f57c0f8262592848a71c40e6f77357025bdc",
+        "training_cutoff": "2026-09-11T23:12:39.549219+00:00",
+        "training_sample": {
+          "fitted_matches": 1170,
+          "team_count": 27,
+          "identity": "7e5e92099f97bb73fbd8af7f7155e72364d1db660ce6a3486991147ad28243f4"
+        },
+        "raw_probability": 0.92169208,
+        "calibrated_probability": 0.92169208,
+        "decision_probability": 0.89169208,
+        "calibration_status": "IDENTITY_UNVALIDATED",
+        "calibration_hash": "db20ea934654f4e897da255ee1418059db0117864000186544ac1ba9abd9a328"
+      },
+      "market_inputs": {
+        "opposite_odd": 1.4,
+        "devig_probability": 0.31818182,
+        "overround": 0.04761905,
+        "expected_value": 1.67507625,
+        "probability_edge": 0.57351027,
+        "haircut": 0.03
+      },
+      "strategy": {
+        "version": "production-decision-v1",
+        "config_hash": "a3098f1aea654b5716f3d41f9b4f34276778c597e3ff1767a0a5e1fa4654d2d0",
+        "bookmaker_policy_version": "all-provider-bookmakers-best-price-v1",
+        "eligibility": "PASSED",
+        "registry_version": "6d27ef1a7c19ac21ad7f4899aac611d7e9da1a84a2c7bfab6a2f9c8111173db5",
+        "registry_league_id": 39,
+        "registry_classification": {
+          "provider_league_id": 39,
+          "country": "England",
+          "league_name": "Premier League",
+          "tier": 1,
+          "enabled": true,
+          "source": "API-Football provider league ID + project tier audit"
+        }
+      },
+      "risk": {
+        "stake": 250.0,
+        "kelly_fraction": 0.25,
+        "max_bet_stake_pct": 0.01,
+        "max_daily_risk_pct": 0.03,
+        "max_open_risk_pct": 0.05
+      },
+      "provenance": {
+        "canonical_observation_id": "6adcf4debda7b43503202948bdeea25972ec7ae2c71815a2b515f3bdcba67621",
+        "observation_identity": {
+          "version": 1,
+          "semantics": "QUOTE_STATE_V1",
+          "fields": [
+            "fixture_id",
+            "market",
+            "bookmaker_id",
+            "selection",
+            "odd",
+            "opposite_odd"
+          ],
+          "excluded_fields": [
+            "captured_at",
+            "snapshot_type",
+            "source_request_hash",
+            "source_endpoint",
+            "prediction_id",
+            "signal_id",
+            "bet_id"
+          ]
+        },
+        "canonical_observation": {
+          "fixture_id": 1557399,
+          "market": "UNDER_2_5",
+          "bookmaker_id": 8,
+          "bookmaker": "Bet365",
+          "selection": "UNDER_2_5",
+          "odd": 3.0,
+          "opposite_odd": 1.4,
+          "captured_at": "2026-09-11T23:12:39.549219+00:00",
+          "snapshot_type": "ENTRY",
+          "observation_identity_version": 1
+        },
+        "opening": {
+          "status": "UNAVAILABLE_AT_DECISION_TIME",
+          "reason": "NO_EARLIER_OBSERVATION"
+        },
+        "closing": {
+          "status": "UNAVAILABLE_AT_DECISION_TIME",
+          "reason": "NOT_YET_OBSERVED"
+        }
+      },
+      "integrity_hash": "fa4df5d4ac14fd03123455718670dd1e5b22c13c0937fa17c88d8b110a4d6b93"
+    },
+    "decision_packet_id": "0b424c5debce5275e4ec30b4a93949bfb7d81d97ad10814b49b38a3b1c156f03",
+    "decision_packet_integrity_hash": "fa4df5d4ac14fd03123455718670dd1e5b22c13c0937fa17c88d8b110a4d6b93"
+  },
+  {
+    "id": "1558630_UNDER_2_5",
+    "type": "DC_VALUE",
+    "mode": "PAPER",
+    "event_id": 1558630,
+    "prediction_id": "1558630_UNDER_2_5_dc-value-v2.1.0",
+    "created_at": "2026-09-12T01:12:39.549219+02:00",
+    "decision_timestamp": "2026-09-12T01:12:39.549219+02:00",
+    "data_cutoff": "2026-09-11T23:12:39.549219+00:00",
+    "date": "2026-09-12",
+    "kickoff": "2026-09-12T18:45:00+00:00",
+    "sport": "Football",
+    "match": "Union St. Gilloise vs Lommel United",
+    "home_id": 1393,
+    "away_id": 259,
+    "league": "Belgium - Jupiler Pro League",
+    "league_id": 144,
+    "market": "UNDER_2_5",
+    "market_display": "Under 2.5",
+    "stake": 250.0,
+    "odd": 2.7,
+    "opening_odd": null,
+    "opposite_odd": 1.44,
+    "opening_opposite_odd": null,
+    "bookmaker_id": 8,
+    "bookmaker": "Bet365",
+    "odds_captured_at": "2026-09-11T23:12:39.549219+00:00",
+    "opening_odds_captured_at": null,
+    "implied_probability": 0.37037,
+    "market_probability_devig": 0.347826,
+    "market_overround": 0.064815,
+    "model_probability": 0.731269,
+    "calibrated_probability": 0.731269,
+    "decision_probability": 0.701269,
+    "probability_edge": 0.353443,
+    "expected_value": 0.893426,
+    "lambda_home": 1.17382,
+    "lambda_away": 0.623761,
+    "rho": -0.058941,
+    "xi": 0.0015,
+    "model_version": "dc-value-v2.1.0",
+    "model_fitted_matches": 994,
+    "model_team_count": 24,
+    "model_training_cutoff": "2026-09-11T23:12:39.549219+00:00",
+    "model_training_identity": "e5a3301f7f2769aba213de0e316b693d6edcf24d02cc3558a0ab9d7b8b084cfd",
+    "calibration_status": "IDENTITY_UNVALIDATED",
+    "status": "PENDING",
+    "profit": 0.0,
+    "signal_source": "DAILY_BULLETIN",
+    "signal_sent_at": "2026-09-12T01:12:39.549219+02:00",
+    "decision_packet": {
+      "schema_version": 3,
+      "packet_id": "4dab03e1e3496b68765361ba1d45fa2a5826321c9535326f789297528fad3f91",
+      "fixture": {
+        "fixture_id": 1558630,
+        "league_id": 144,
+        "league": "Belgium - Jupiler Pro League",
+        "home_id": 1393,
+        "home": "Union St. Gilloise",
+        "away_id": 259,
+        "away": "Lommel United",
+        "kickoff": "2026-09-12T18:45:00+00:00"
+      },
+      "decision": {
+        "market": "UNDER_2_5",
+        "selection": "UNDER_2_5",
+        "bookmaker_id": 8,
+        "bookmaker": "Bet365",
+        "pick_odd": 2.7,
+        "pick_observed_at": "2026-09-11T23:12:39.549219+00:00",
+        "pick_observation_id": "74e968bd7255eeed1ff23969cb215633402afa3fa2df71e922f6e585ec35b73e",
+        "decision_timestamp": "2026-09-11T23:12:39.549219+00:00"
+      },
+      "model": {
+        "version": "dc-value-v2.1.0",
+        "code_sha": "1383f57c0f8262592848a71c40e6f77357025bdc",
+        "training_cutoff": "2026-09-11T23:12:39.549219+00:00",
+        "training_sample": {
+          "fitted_matches": 994,
+          "team_count": 24,
+          "identity": "e5a3301f7f2769aba213de0e316b693d6edcf24d02cc3558a0ab9d7b8b084cfd"
+        },
+        "raw_probability": 0.73126887,
+        "calibrated_probability": 0.73126887,
+        "decision_probability": 0.70126887,
+        "calibration_status": "IDENTITY_UNVALIDATED",
+        "calibration_hash": "db20ea934654f4e897da255ee1418059db0117864000186544ac1ba9abd9a328"
+      },
+      "market_inputs": {
+        "opposite_odd": 1.44,
+        "devig_probability": 0.34782609,
+        "overround": 0.06481481,
+        "expected_value": 0.89342596,
+        "probability_edge": 0.35344279,
+        "haircut": 0.03
+      },
+      "strategy": {
+        "version": "production-decision-v1",
+        "config_hash": "a3098f1aea654b5716f3d41f9b4f34276778c597e3ff1767a0a5e1fa4654d2d0",
+        "bookmaker_policy_version": "all-provider-bookmakers-best-price-v1",
+        "eligibility": "PASSED",
+        "registry_version": "6d27ef1a7c19ac21ad7f4899aac611d7e9da1a84a2c7bfab6a2f9c8111173db5",
+        "registry_league_id": 144,
+        "registry_classification": {
+          "provider_league_id": 144,
+          "country": "Belgium",
+          "league_name": "Jupiler Pro League",
+          "tier": 1,
+          "enabled": true,
+          "source": "API-Football provider league ID + project tier audit"
+        }
+      },
+      "risk": {
+        "stake": 250.0,
+        "kelly_fraction": 0.25,
+        "max_bet_stake_pct": 0.01,
+        "max_daily_risk_pct": 0.03,
+        "max_open_risk_pct": 0.05
+      },
+      "provenance": {
+        "canonical_observation_id": "74e968bd7255eeed1ff23969cb215633402afa3fa2df71e922f6e585ec35b73e",
+        "observation_identity": {
+          "version": 1,
+          "semantics": "QUOTE_STATE_V1",
+          "fields": [
+            "fixture_id",
+            "market",
+            "bookmaker_id",
+            "selection",
+            "odd",
+            "opposite_odd"
+          ],
+          "excluded_fields": [
+            "captured_at",
+            "snapshot_type",
+            "source_request_hash",
+            "source_endpoint",
+            "prediction_id",
+            "signal_id",
+            "bet_id"
+          ]
+        },
+        "canonical_observation": {
+          "fixture_id": 1558630,
+          "market": "UNDER_2_5",
+          "bookmaker_id": 8,
+          "bookmaker": "Bet365",
+          "selection": "UNDER_2_5",
+          "odd": 2.7,
+          "opposite_odd": 1.44,
+          "captured_at": "2026-09-11T23:12:39.549219+00:00",
+          "snapshot_type": "ENTRY",
+          "observation_identity_version": 1
+        },
+        "opening": {
+          "status": "UNAVAILABLE_AT_DECISION_TIME",
+          "reason": "NO_EARLIER_OBSERVATION"
+        },
+        "closing": {
+          "status": "UNAVAILABLE_AT_DECISION_TIME",
+          "reason": "NOT_YET_OBSERVED"
+        }
+      },
+      "integrity_hash": "7e05411a9e2b5e5dd9b082a576985121a76b64022eba74a25802f73ce7bf311d"
+    },
+    "decision_packet_id": "4dab03e1e3496b68765361ba1d45fa2a5826321c9535326f789297528fad3f91",
+    "decision_packet_integrity_hash": "7e05411a9e2b5e5dd9b082a576985121a76b64022eba74a25802f73ce7bf311d"
+  },
+  {
+    "id": "1590003_UNDER_2_5",
+    "type": "DC_VALUE",
+    "mode": "PAPER",
+    "event_id": 1590003,
+    "prediction_id": "1590003_UNDER_2_5_dc-value-v2.1.0",
+    "created_at": "2026-09-12T01:12:39.549219+02:00",
+    "decision_timestamp": "2026-09-12T01:12:39.549219+02:00",
+    "data_cutoff": "2026-09-11T23:12:39.549219+00:00",
+    "date": "2026-09-12",
+    "kickoff": "2026-09-12T14:55:00+00:00",
+    "sport": "Football",
+    "match": "Emirates Club vs Al Bataeh",
+    "home_id": 2868,
+    "away_id": 9136,
+    "league": "United-Arab-Emirates - Division 1",
+    "league_id": 303,
+    "market": "UNDER_2_5",
+    "market_display": "Under 2.5",
+    "stake": 250.0,
+    "odd": 2.05,
+    "opening_odd": null,
+    "opposite_odd": 1.75,
+    "opening_opposite_odd": null,
+    "bookmaker_id": 8,
+    "bookmaker": "Bet365",
+    "odds_captured_at": "2026-09-11T23:12:39.549219+00:00",
+    "opening_odds_captured_at": null,
+    "implied_probability": 0.487805,
+    "market_probability_devig": 0.460526,
+    "market_overround": 0.059233,
+    "model_probability": 0.875181,
+    "calibrated_probability": 0.875181,
+    "decision_probability": 0.845181,
+    "probability_edge": 0.384655,
+    "expected_value": 0.732621,
+    "lambda_home": 0.672182,
+    "lambda_away": 0.547546,
+    "rho": -0.015082,
+    "xi": 0.0015,
+    "model_version": "dc-value-v2.1.0",
+    "model_fitted_matches": 685,
+    "model_team_count": 25,
+    "model_training_cutoff": "2026-09-11T23:12:39.549219+00:00",
+    "model_training_identity": "475ccf7506f6a714246a39fc592abdea96ab0425eabc1db58cf0d29b8d1da28e",
+    "calibration_status": "IDENTITY_UNVALIDATED",
+    "status": "PENDING",
+    "profit": 0.0,
+    "signal_source": "DAILY_BULLETIN",
+    "signal_sent_at": "2026-09-12T01:12:39.549219+02:00",
+    "decision_packet": {
+      "schema_version": 3,
+      "packet_id": "8669fedc6fedc8ed1a6e6d015cacde1d946e995eddf5680bb93586b99ecfaa3a",
+      "fixture": {
+        "fixture_id": 1590003,
+        "league_id": 303,
+        "league": "United-Arab-Emirates - Division 1",
+        "home_id": 2868,
+        "home": "Emirates Club",
+        "away_id": 9136,
+        "away": "Al Bataeh",
+        "kickoff": "2026-09-12T14:55:00+00:00"
+      },
+      "decision": {
+        "market": "UNDER_2_5",
+        "selection": "UNDER_2_5",
+        "bookmaker_id": 8,
+        "bookmaker": "Bet365",
+        "pick_odd": 2.05,
+        "pick_observed_at": "2026-09-11T23:12:39.549219+00:00",
+        "pick_observation_id": "78fcbd26a38960dccae3c5afcc5602946dacc2e4e952fcef4f913564d3129583",
+        "decision_timestamp": "2026-09-11T23:12:39.549219+00:00"
+      },
+      "model": {
+        "version": "dc-value-v2.1.0",
+        "code_sha": "1383f57c0f8262592848a71c40e6f77357025bdc",
+        "training_cutoff": "2026-09-11T23:12:39.549219+00:00",
+        "training_sample": {
+          "fitted_matches": 685,
+          "team_count": 25,
+          "identity": "475ccf7506f6a714246a39fc592abdea96ab0425eabc1db58cf0d29b8d1da28e"
+        },
+        "raw_probability": 0.87518092,
+        "calibrated_probability": 0.87518092,
+        "decision_probability": 0.84518092,
+        "calibration_status": "IDENTITY_UNVALIDATED",
+        "calibration_hash": "db20ea934654f4e897da255ee1418059db0117864000186544ac1ba9abd9a328"
+      },
+      "market_inputs": {
+        "opposite_odd": 1.75,
+        "devig_probability": 0.46052632,
+        "overround": 0.05923345,
+        "expected_value": 0.73262089,
+        "probability_edge": 0.38465461,
+        "haircut": 0.03
+      },
+      "strategy": {
+        "version": "production-decision-v1",
+        "config_hash": "a3098f1aea654b5716f3d41f9b4f34276778c597e3ff1767a0a5e1fa4654d2d0",
+        "bookmaker_policy_version": "all-provider-bookmakers-best-price-v1",
+        "eligibility": "PASSED",
+        "registry_version": "6d27ef1a7c19ac21ad7f4899aac611d7e9da1a84a2c7bfab6a2f9c8111173db5",
+        "registry_league_id": 303,
+        "registry_classification": null
+      },
+      "risk": {
+        "stake": 250.0,
+        "kelly_fraction": 0.25,
+        "max_bet_stake_pct": 0.01,
+        "max_daily_risk_pct": 0.03,
+        "max_open_risk_pct": 0.05
+      },
+      "provenance": {
+        "canonical_observation_id": "78fcbd26a38960dccae3c5afcc5602946dacc2e4e952fcef4f913564d3129583",
+        "observation_identity": {
+          "version": 1,
+          "semantics": "QUOTE_STATE_V1",
+          "fields": [
+            "fixture_id",
+            "market",
+            "bookmaker_id",
+            "selection",
+            "odd",
+            "opposite_odd"
+          ],
+          "excluded_fields": [
+            "captured_at",
+            "snapshot_type",
+            "source_request_hash",
+            "source_endpoint",
+            "prediction_id",
+            "signal_id",
+            "bet_id"
+          ]
+        },
+        "canonical_observation": {
+          "fixture_id": 1590003,
+          "market": "UNDER_2_5",
+          "bookmaker_id": 8,
+          "bookmaker": "Bet365",
+          "selection": "UNDER_2_5",
+          "odd": 2.05,
+          "opposite_odd": 1.75,
+          "captured_at": "2026-09-11T23:12:39.549219+00:00",
+          "snapshot_type": "ENTRY",
+          "observation_identity_version": 1
+        },
+        "opening": {
+          "status": "UNAVAILABLE_AT_DECISION_TIME",
+          "reason": "NO_EARLIER_OBSERVATION"
+        },
+        "closing": {
+          "status": "UNAVAILABLE_AT_DECISION_TIME",
+          "reason": "NOT_YET_OBSERVED"
+        }
+      },
+      "integrity_hash": "f612081600de6b912921c8a67f3adf9dc28f1b2e118bef2a3ec0ab87819f02a6"
+    },
+    "decision_packet_id": "8669fedc6fedc8ed1a6e6d015cacde1d946e995eddf5680bb93586b99ecfaa3a",
+    "decision_packet_integrity_hash": "f612081600de6b912921c8a67f3adf9dc28f1b2e118bef2a3ec0ab87819f02a6"
+  },
+  {
+    "id": "1570379_UNDER_2_5",
+    "type": "DC_VALUE",
+    "mode": "PAPER",
+    "event_id": 1570379,
+    "prediction_id": "1570379_UNDER_2_5_dc-value-v2.1.0",
+    "created_at": "2026-09-12T01:12:39.549219+02:00",
+    "decision_timestamp": "2026-09-12T01:12:39.549219+02:00",
+    "data_cutoff": "2026-09-11T23:12:39.549219+00:00",
+    "date": "2026-09-12",
+    "kickoff": "2026-09-12T19:00:00+00:00",
+    "sport": "Football",
+    "match": "Real Madrid vs Rayo Vallecano",
+    "home_id": 541,
+    "away_id": 728,
+    "league": "Spain - La Liga",
+    "league_id": 140,
+    "market": "UNDER_2_5",
+    "market_display": "Under 2.5",
+    "stake": 100.0,
+    "odd": 3.75,
+    "opening_odd": null,
+    "opposite_odd": 1.28,
+    "opening_opposite_odd": null,
+    "bookmaker_id": 8,
+    "bookmaker": "Bet365",
+    "odds_captured_at": "2026-09-11T23:12:39.549219+00:00",
+    "opening_odds_captured_at": null,
+    "implied_probability": 0.266667,
+    "market_probability_devig": 0.254473,
+    "market_overround": 0.047917,
+    "model_probability": 0.459925,
+    "calibrated_probability": 0.459925,
+    "decision_probability": 0.429925,
+    "probability_edge": 0.175452,
+    "expected_value": 0.612219,
+    "lambda_home": 2.204109,
+    "lambda_away": 0.636137,
+    "rho": -0.001784,
+    "xi": 0.0015,
+    "model_version": "dc-value-v2.1.0",
+    "model_fitted_matches": 1182,
+    "model_team_count": 29,
+    "model_training_cutoff": "2026-09-11T23:12:39.549219+00:00",
+    "model_training_identity": "2b2331c493bcd74849ace7e6c806dc9bcf7a233016ea6f0937eb79584f489b44",
+    "calibration_status": "IDENTITY_UNVALIDATED",
+    "status": "PENDING",
+    "profit": 0.0,
+    "signal_source": "DAILY_BULLETIN",
+    "signal_sent_at": "2026-09-12T01:12:39.549219+02:00",
+    "decision_packet": {
+      "schema_version": 3,
+      "packet_id": "32a4dedad5029b0943dee7a883c8b190add8032fa9b627a782f90fc4e3230317",
+      "fixture": {
+        "fixture_id": 1570379,
+        "league_id": 140,
+        "league": "Spain - La Liga",
+        "home_id": 541,
+        "home": "Real Madrid",
+        "away_id": 728,
+        "away": "Rayo Vallecano",
+        "kickoff": "2026-09-12T19:00:00+00:00"
+      },
+      "decision": {
+        "market": "UNDER_2_5",
+        "selection": "UNDER_2_5",
+        "bookmaker_id": 8,
+        "bookmaker": "Bet365",
+        "pick_odd": 3.75,
+        "pick_observed_at": "2026-09-11T23:12:39.549219+00:00",
+        "pick_observation_id": "c5d38a2935587174d9e13a5ce550679380f7da969ac5fa4f71d0935c96e1596e",
+        "decision_timestamp": "2026-09-11T23:12:39.549219+00:00"
+      },
+      "model": {
+        "version": "dc-value-v2.1.0",
+        "code_sha": "1383f57c0f8262592848a71c40e6f77357025bdc",
+        "training_cutoff": "2026-09-11T23:12:39.549219+00:00",
+        "training_sample": {
+          "fitted_matches": 1182,
+          "team_count": 29,
+          "identity": "2b2331c493bcd74849ace7e6c806dc9bcf7a233016ea6f0937eb79584f489b44"
+        },
+        "raw_probability": 0.459925,
+        "calibrated_probability": 0.459925,
+        "decision_probability": 0.429925,
+        "calibration_status": "IDENTITY_UNVALIDATED",
+        "calibration_hash": "db20ea934654f4e897da255ee1418059db0117864000186544ac1ba9abd9a328"
+      },
+      "market_inputs": {
+        "opposite_odd": 1.28,
+        "devig_probability": 0.25447316,
+        "overround": 0.04791667,
+        "expected_value": 0.61221876,
+        "probability_edge": 0.17545184,
+        "haircut": 0.03
+      },
+      "strategy": {
+        "version": "production-decision-v1",
+        "config_hash": "a3098f1aea654b5716f3d41f9b4f34276778c597e3ff1767a0a5e1fa4654d2d0",
+        "bookmaker_policy_version": "all-provider-bookmakers-best-price-v1",
+        "eligibility": "PASSED",
+        "registry_version": "6d27ef1a7c19ac21ad7f4899aac611d7e9da1a84a2c7bfab6a2f9c8111173db5",
+        "registry_league_id": 140,
+        "registry_classification": {
+          "provider_league_id": 140,
+          "country": "Spain",
+          "league_name": "La Liga",
+          "tier": 1,
+          "enabled": true,
+          "source": "API-Football provider league ID + project tier audit"
+        }
+      },
+      "risk": {
+        "stake": 100.0,
+        "kelly_fraction": 0.25,
+        "max_bet_stake_pct": 0.01,
+        "max_daily_risk_pct": 0.03,
+        "max_open_risk_pct": 0.05
+      },
+      "provenance": {
+        "canonical_observation_id": "c5d38a2935587174d9e13a5ce550679380f7da969ac5fa4f71d0935c96e1596e",
+        "observation_identity": {
+          "version": 1,
+          "semantics": "QUOTE_STATE_V1",
+          "fields": [
+            "fixture_id",
+            "market",
+            "bookmaker_id",
+            "selection",
+            "odd",
+            "opposite_odd"
+          ],
+          "excluded_fields": [
+            "captured_at",
+            "snapshot_type",
+            "source_request_hash",
+            "source_endpoint",
+            "prediction_id",
+            "signal_id",
+            "bet_id"
+          ]
+        },
+        "canonical_observation": {
+          "fixture_id": 1570379,
+          "market": "UNDER_2_5",
+          "bookmaker_id": 8,
+          "bookmaker": "Bet365",
+          "selection": "UNDER_2_5",
+          "odd": 3.75,
+          "opposite_odd": 1.28,
+          "captured_at": "2026-09-11T23:12:39.549219+00:00",
+          "snapshot_type": "ENTRY",
+          "observation_identity_version": 1
+        },
+        "opening": {
+          "status": "UNAVAILABLE_AT_DECISION_TIME",
+          "reason": "NO_EARLIER_OBSERVATION"
+        },
+        "closing": {
+          "status": "UNAVAILABLE_AT_DECISION_TIME",
+          "reason": "NOT_YET_OBSERVED"
+        }
+      },
+      "integrity_hash": "b5b5d4fa5b2b888ff4ea19dfb9651ac11cb936a21f18a8938f4ae737d7b660ac"
+    },
+    "decision_packet_id": "32a4dedad5029b0943dee7a883c8b190add8032fa9b627a782f90fc4e3230317",
+    "decision_packet_integrity_hash": "b5b5d4fa5b2b888ff4ea19dfb9651ac11cb936a21f18a8938f4ae737d7b660ac"
   }
 ]
