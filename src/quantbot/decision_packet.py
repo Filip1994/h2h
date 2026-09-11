@@ -7,7 +7,10 @@ from datetime import UTC, datetime
 from typing import Any
 
 from .league_registry import REGISTRY, classification_for
-from .observation_identity import canonical_observation_id, observation_identity_metadata
+from .observation_identity import (
+    canonical_observation_id,
+    observation_identity_metadata,
+)
 
 PACKET_SCHEMA_VERSION = 3
 STRATEGY_VERSION = "production-decision-v1"
