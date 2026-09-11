@@ -2,15 +2,16 @@ name: Production · 72h odds lifecycle
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/production-odds.yml'
+      - 'tools/force_production_due.py'
   schedule:
-    # Avoid GitHub's heavily loaded exact 5-minute/hour boundaries.
     - cron: "2/5 * * * *"
 
 permissions:
   contents: write
 
-# Odds collection must not wait behind settlement/daily generation.
-# It still serializes its own runs so state and append-only snapshots cannot race.
 concurrency:
   group: quantbet-football-odds-collector
   cancel-in-progress: false
