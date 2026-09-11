@@ -1,6 +1,6 @@
 {
   "schema_version": 9,
-  "generated_at": "2026-09-11T21:34:30.999715+00:00",
+  "generated_at": "2026-09-11T21:50:32.898966+00:00",
   "truth": "data/odds_snapshots.jsonl + bets.json",
   "observation_identity": {
     "version": 1,
@@ -33,27 +33,13 @@
     "last_collector_run_at": "2026-09-11T21:34:27.127694+00:00",
     "last_odds_scan_at": "2026-09-11T21:34:27.127694+00:00",
     "last_snapshot_at": "2026-09-11T21:22:13.079003+00:00",
-    "collector_run_age_minutes": 0.047459216666666665,
-    "scan_age_minutes": 0.047459216666666665,
-    "scan_state": "FRESH",
+    "collector_run_age_minutes": 16.096187866666664,
+    "scan_age_minutes": 16.096187866666664,
+    "scan_state": "STALE",
     "api_requests_last_scan": 4,
     "daily_budget_used": 1441,
     "daily_budget_remaining": 6059,
-    "observations_last_scan": 0,
-    "production_quote_health": {
-      "schema_version": 1,
-      "generated_at": "2026-09-11T21:34:30.999715+00:00",
-      "sla_minutes": 10.0,
-      "overall": "NO_ACTIVE_TARGETS",
-      "counts": {
-        "active": 0,
-        "fresh": 0,
-        "stale": 0,
-        "missing": 0
-      },
-      "targets": [],
-      "semantics": "Target health is exact fixture + bookmaker + market + selection. Missing/stale target data is degraded state, never fabricated data and never a reason to discard unrelated collector observations."
-    }
+    "observations_last_scan": 0
   },
   "rules": {
     "first_seen": "earliest valid persisted observation for exact fixture/market/bookmaker/selection",
@@ -64,7 +50,8 @@
     "missing_data": "null; dashboard renders as —"
   },
   "initial_bank": 30000.0,
-  "active": [
+  "active": [],
+  "history": [
     {
       "id": "1558934_UNDER_2_5",
       "type": "DC_VALUE",
@@ -111,8 +98,8 @@
       "model_training_cutoff": "2026-09-11T00:42:23.072968+00:00",
       "model_training_identity": "6d44d239294e04915f081b446af71e68a88d6b94b240576cd09fe8601c80bbc3",
       "calibration_status": "IDENTITY_UNVALIDATED",
-      "status": "PENDING",
-      "profit": 0.0,
+      "status": "LOSS",
+      "profit": -107.69,
       "signal_source": "DAILY_BULLETIN",
       "signal_sent_at": "2026-09-11T02:42:23.072968+02:00",
       "decision_packet": {
@@ -218,6 +205,8 @@
       "closing_t15_market_probability_devig": 0.418605,
       "closing_t15_odds_captured_at": "2026-09-11T17:41:03.217499+00:00",
       "closing_t15_snapshot_id": "fb1cc4fb30891068f28da962a521ad7abc7d279ba7bf70531e3f95d4568953b7",
+      "result": "5:1",
+      "settled_at": "2026-09-11T21:50:18.635586+00:00",
       "production_lifecycle": {
         "schema_version": 4,
         "observation_identity": {
@@ -273,42 +262,15 @@
           "quote_semantics": "odd = selected_selection; opposite_odd = opposite_selection",
           "legacy_observation_id": "e24560ea33d32d6507055db80fa6cc91b604b4f2736101d7c232c534d40eb5c0"
         },
-        "current": {
-          "observation_id": "9c76b4ba27f91e15e91bbaa89ed15d6de0d09063590b8d80142d194ace9ead4a",
-          "odd": 2.25,
-          "selection_odd": 2.25,
-          "opposite_odd": 1.62,
-          "selected_selection": "UNDER_2_5",
-          "opposite_selection": "OVER_2_5",
-          "captured_at": "2026-09-11T17:41:03.217499+00:00",
-          "snapshot_type": "CLOSING",
-          "bookmaker_id": 8,
-          "bookmaker": "Bet365",
-          "selection": "UNDER_2_5",
-          "market": "UNDER_2_5",
-          "quote_semantics": "odd = selected_selection; opposite_odd = opposite_selection"
-        },
-        "live": {
-          "observation_id": "9c76b4ba27f91e15e91bbaa89ed15d6de0d09063590b8d80142d194ace9ead4a",
-          "odd": 2.25,
-          "selection_odd": 2.25,
-          "opposite_odd": 1.62,
-          "selected_selection": "UNDER_2_5",
-          "opposite_selection": "OVER_2_5",
-          "captured_at": "2026-09-11T17:41:03.217499+00:00",
-          "snapshot_type": "CLOSING",
-          "bookmaker_id": 8,
-          "bookmaker": "Bet365",
-          "selection": "UNDER_2_5",
-          "market": "UNDER_2_5",
-          "quote_semantics": "odd = selected_selection; opposite_odd = opposite_selection"
-        },
+        "current": null,
+        "live": null,
         "closing": {
           "observation_id": "9c76b4ba27f91e15e91bbaa89ed15d6de0d09063590b8d80142d194ace9ead4a",
           "odd": 2.25,
           "selection_odd": 2.25,
           "opposite_odd": 1.62,
           "selected_selection": "UNDER_2_5",
+          "opposite_selection": "OVER_2_5",
           "captured_at": "2026-09-11T17:41:03.217499+00:00",
           "snapshot_type": "CLOSING",
           "bookmaker_id": 8,
@@ -319,14 +281,14 @@
         },
         "first_seen_observation_id": "412f4d4d28caf0e6c4c19bc3985a0cadabe8e4da3ebd6c958a4fc3d7fe57023a",
         "pick_observation_id": "412f4d4d28caf0e6c4c19bc3985a0cadabe8e4da3ebd6c958a4fc3d7fe57023a",
-        "current_observation_id": "9c76b4ba27f91e15e91bbaa89ed15d6de0d09063590b8d80142d194ace9ead4a",
-        "live_observation_id": "9c76b4ba27f91e15e91bbaa89ed15d6de0d09063590b8d80142d194ace9ead4a",
+        "current_observation_id": null,
+        "live_observation_id": null,
         "closing_observation_id": "9c76b4ba27f91e15e91bbaa89ed15d6de0d09063590b8d80142d194ace9ead4a",
-        "current_captured_at": "2026-09-11T17:41:03.217499+00:00",
-        "live_captured_at": "2026-09-11T17:41:03.217499+00:00",
-        "live_state": "STALE",
-        "live_age_minutes": 233.446,
-        "current_age_minutes": 233.446,
+        "current_captured_at": null,
+        "live_captured_at": null,
+        "live_state": "WAITING_FOR_POST_PICK",
+        "live_age_minutes": null,
+        "current_age_minutes": null,
         "closing_recovered": false,
         "closing_snapshot_type": "CLOSING",
         "clv_odds_pct": 0.164444,
@@ -513,14 +475,9 @@
             "selection": "UNDER_2_5",
             "marker": "CLOSE_T15"
           }
-        ],
-        "closing_captured_at": "2026-09-11T17:41:03.217499+00:00",
-        "closing_target": "T-15m (10-20m capture window)",
-        "closing_unavailable_reason": null
+        ]
       }
-    }
-  ],
-  "history": [
+    },
     {
       "id": "1549016_BTTS_YES",
       "type": "DC_VALUE",
@@ -724,22 +681,36 @@
         },
         "current": null,
         "live": null,
-        "closing": null,
+        "closing": {
+          "observation_id": "54bdbe7f62e87601caddd1c61c116007ce84dbb3d654a84756a8a8c7a2625e37",
+          "odd": 1.95,
+          "selection_odd": 1.95,
+          "opposite_odd": 1.8,
+          "selected_selection": "BTTS_YES",
+          "opposite_selection": "BTTS_NO",
+          "captured_at": "2026-09-11T16:37:41.640925+00:00",
+          "snapshot_type": "INTERMEDIATE",
+          "bookmaker_id": 8,
+          "bookmaker": "Bet365",
+          "selection": "BTTS_YES",
+          "market": "BTTS_YES",
+          "quote_semantics": "odd = selected_selection; opposite_odd = opposite_selection"
+        },
         "first_seen_observation_id": "54bdbe7f62e87601caddd1c61c116007ce84dbb3d654a84756a8a8c7a2625e37",
         "pick_observation_id": "54bdbe7f62e87601caddd1c61c116007ce84dbb3d654a84756a8a8c7a2625e37",
         "current_observation_id": null,
         "live_observation_id": null,
-        "closing_observation_id": null,
+        "closing_observation_id": "54bdbe7f62e87601caddd1c61c116007ce84dbb3d654a84756a8a8c7a2625e37",
         "current_captured_at": null,
         "live_captured_at": null,
         "live_state": "WAITING_FOR_POST_PICK",
         "live_age_minutes": null,
         "current_age_minutes": null,
         "closing_recovered": true,
-        "closing_snapshot_type": null,
-        "clv_odds_pct": null,
-        "clv_status": "NOT_COMPUTABLE",
-        "coverage": "PARTIAL",
+        "closing_snapshot_type": "INTERMEDIATE",
+        "clv_odds_pct": 0.0,
+        "clv_status": "COMPUTABLE",
+        "coverage": "FULLY_AUDITABLE",
         "timeline": [
           {
             "observation_id": "54bdbe7f62e87601caddd1c61c116007ce84dbb3d654a84756a8a8c7a2625e37",
@@ -861,10 +832,7 @@
             "selection": "BTTS_YES",
             "marker": "LIVE"
           }
-        ],
-        "closing_captured_at": null,
-        "closing_target": "T-15m (10-20m capture window)",
-        "closing_unavailable_reason": "NO_VALID_T15_CLOSE"
+        ]
       }
     },
     {
@@ -1069,22 +1037,36 @@
         },
         "current": null,
         "live": null,
-        "closing": null,
+        "closing": {
+          "observation_id": "9069ba76bf5f767ea909a862a429260d3dd55a37a2bdade1a8840d6230b69037",
+          "odd": 1.73,
+          "selection_odd": 1.73,
+          "opposite_odd": 2.29,
+          "selected_selection": "OVER_2_5",
+          "opposite_selection": "UNDER_2_5",
+          "captured_at": "2026-09-11T10:15:46.192527+00:00",
+          "snapshot_type": "INTERMEDIATE",
+          "bookmaker_id": 11,
+          "bookmaker": "1xBet",
+          "selection": "OVER_2_5",
+          "market": "OVER_2_5",
+          "quote_semantics": "odd = selected_selection; opposite_odd = opposite_selection"
+        },
         "first_seen_observation_id": "b7f4f473989c56f412882835534833c777e05389a8bc4d13857120f0fce6d835",
         "pick_observation_id": "a9044b2321828d44441b6194fe2679a2ed6bea387a16bbba956ad42ccce62444",
         "current_observation_id": null,
         "live_observation_id": null,
-        "closing_observation_id": null,
+        "closing_observation_id": "9069ba76bf5f767ea909a862a429260d3dd55a37a2bdade1a8840d6230b69037",
         "current_captured_at": null,
         "live_captured_at": null,
         "live_state": "WAITING_FOR_POST_PICK",
         "live_age_minutes": null,
         "current_age_minutes": null,
         "closing_recovered": true,
-        "closing_snapshot_type": null,
-        "clv_odds_pct": null,
-        "clv_status": "NOT_COMPUTABLE",
-        "coverage": "PARTIAL",
+        "closing_snapshot_type": "INTERMEDIATE",
+        "clv_odds_pct": 0.046243,
+        "clv_status": "COMPUTABLE",
+        "coverage": "FULLY_AUDITABLE",
         "timeline": [
           {
             "observation_id": "b7f4f473989c56f412882835534833c777e05389a8bc4d13857120f0fce6d835",
@@ -1170,22 +1152,14 @@
             "selection": "OVER_2_5",
             "marker": "LIVE"
           }
-        ],
-        "closing_captured_at": null,
-        "closing_target": "T-15m (10-20m capture window)",
-        "closing_unavailable_reason": "NO_VALID_T15_CLOSE"
+        ]
       }
     }
   ],
   "counts": {
     "production": 3,
-    "active": 1,
-    "history": 2,
+    "active": 0,
+    "history": 3,
     "snapshots": 17504
-  },
-  "closing_policy": {
-    "definition": "nearest exact-bookmaker observation to T-15m",
-    "capture_window": "T-10m to T-20m",
-    "fallback": "none"
   }
 }
