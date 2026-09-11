@@ -7,6 +7,7 @@ on:
       - '.github/workflows/production-odds.yml'
       - 'tools/force_production_due.py'
       - 'tools/audit_production_targets.py'
+      - 'tools/apply_t15_closing_view.py'
       - 'tools/assert_production_odds_fresh.py'
   schedule:
     - cron: "2/5 * * * *"
@@ -53,6 +54,8 @@ jobs:
         run: python tools/build_production_view.py
       - name: Audit exact Production target quotes
         run: python tools/audit_production_targets.py
+      - name: Materialize T-15 closing policy
+        run: python tools/apply_t15_closing_view.py
       - name: Audit Production odds freshness (non-blocking)
         run: python tools/assert_production_odds_fresh.py
       - name: Archive raw API evidence to Railway Bucket
