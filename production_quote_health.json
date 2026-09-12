@@ -1,49 +1,14 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-09-12T18:25:31.943905+00:00",
+  "generated_at": "2026-09-12T19:29:04.165275+00:00",
   "sla_minutes": 10.0,
-  "overall": "FRESH",
+  "overall": "NO_ACTIVE_TARGETS",
   "counts": {
-    "active": 2,
-    "fresh": 2,
+    "active": 0,
+    "fresh": 0,
     "stale": 0,
     "missing": 0
   },
-  "targets": [
-    {
-      "bet_id": "1558630_UNDER_2_5",
-      "fixture_id": 1558630,
-      "match": "Union St. Gilloise vs Lommel United",
-      "kickoff": "2026-09-12T18:45:00+00:00",
-      "market": "UNDER_2_5",
-      "selection": "UNDER_2_5",
-      "bookmaker_id": 8,
-      "bookmaker": "Bet365",
-      "pick_odd": 2.7,
-      "latest_odd": 2.88,
-      "latest_captured_at": "2026-09-12T18:25:29.052353+00:00",
-      "age_minutes": 0.048,
-      "status": "FRESH",
-      "reason": null,
-      "observation_id": "ac14478c79d8176a77c49205e1020d20eb0b5dbd38c34f97de7ed23ceb93c861"
-    },
-    {
-      "bet_id": "1570379_UNDER_2_5",
-      "fixture_id": 1570379,
-      "match": "Real Madrid vs Rayo Vallecano",
-      "kickoff": "2026-09-12T19:00:00+00:00",
-      "market": "UNDER_2_5",
-      "selection": "UNDER_2_5",
-      "bookmaker_id": 8,
-      "bookmaker": "Bet365",
-      "pick_odd": 3.75,
-      "latest_odd": 3.75,
-      "latest_captured_at": "2026-09-12T18:24:17.256221+00:00",
-      "age_minutes": 1.245,
-      "status": "FRESH",
-      "reason": null,
-      "observation_id": "c5d38a2935587174d9e13a5ce550679380f7da969ac5fa4f71d0935c96e1596e"
-    }
-  ],
+  "targets": [],
   "semantics": "Target health is exact fixture + bookmaker + market + selection. Missing/stale target data is degraded state, never fabricated data and never a reason to discard unrelated collector observations."
 }
