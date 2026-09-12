@@ -494,8 +494,8 @@
     "model_training_cutoff": "2026-09-11T23:12:39.549219+00:00",
     "model_training_identity": "7e5e92099f97bb73fbd8af7f7155e72364d1db660ce6a3486991147ad28243f4",
     "calibration_status": "IDENTITY_UNVALIDATED",
-    "status": "PENDING",
-    "profit": 0.0,
+    "status": "LOSS",
+    "profit": -250.0,
     "signal_source": "DAILY_BULLETIN",
     "signal_sent_at": "2026-09-12T01:12:39.549219+02:00",
     "decision_packet": {
@@ -614,7 +614,9 @@
       "integrity_hash": "fa4df5d4ac14fd03123455718670dd1e5b22c13c0937fa17c88d8b110a4d6b93"
     },
     "decision_packet_id": "0b424c5debce5275e4ec30b4a93949bfb7d81d97ad10814b49b38a3b1c156f03",
-    "decision_packet_integrity_hash": "fa4df5d4ac14fd03123455718670dd1e5b22c13c0937fa17c88d8b110a4d6b93"
+    "decision_packet_integrity_hash": "fa4df5d4ac14fd03123455718670dd1e5b22c13c0937fa17c88d8b110a4d6b93",
+    "result": "2:2",
+    "settled_at": "2026-09-12T17:50:19.499768+00:00"
   },
   {
     "id": "1558630_UNDER_2_5",
@@ -830,8 +832,8 @@
     "model_training_cutoff": "2026-09-11T23:12:39.549219+00:00",
     "model_training_identity": "475ccf7506f6a714246a39fc592abdea96ab0425eabc1db58cf0d29b8d1da28e",
     "calibration_status": "IDENTITY_UNVALIDATED",
-    "status": "PENDING",
-    "profit": 0.0,
+    "status": "WIN",
+    "profit": 262.5,
     "signal_source": "DAILY_BULLETIN",
     "signal_sent_at": "2026-09-12T01:12:39.549219+02:00",
     "decision_packet": {
@@ -943,7 +945,9 @@
       "integrity_hash": "f612081600de6b912921c8a67f3adf9dc28f1b2e118bef2a3ec0ab87819f02a6"
     },
     "decision_packet_id": "8669fedc6fedc8ed1a6e6d015cacde1d946e995eddf5680bb93586b99ecfaa3a",
-    "decision_packet_integrity_hash": "f612081600de6b912921c8a67f3adf9dc28f1b2e118bef2a3ec0ab87819f02a6"
+    "decision_packet_integrity_hash": "f612081600de6b912921c8a67f3adf9dc28f1b2e118bef2a3ec0ab87819f02a6",
+    "result": "0:1",
+    "settled_at": "2026-09-12T17:50:19.499768+00:00"
   },
   {
     "id": "1570379_UNDER_2_5",
