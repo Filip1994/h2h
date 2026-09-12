@@ -784,7 +784,20 @@
       "integrity_hash": "7e05411a9e2b5e5dd9b082a576985121a76b64022eba74a25802f73ce7bf311d"
     },
     "decision_packet_id": "4dab03e1e3496b68765361ba1d45fa2a5826321c9535326f789297528fad3f91",
-    "decision_packet_integrity_hash": "7e05411a9e2b5e5dd9b082a576985121a76b64022eba74a25802f73ce7bf311d"
+    "decision_packet_integrity_hash": "7e05411a9e2b5e5dd9b082a576985121a76b64022eba74a25802f73ce7bf311d",
+    "closing_odd": 2.88,
+    "closing_opposite_odd": 1.4,
+    "closing_market_probability_devig": 0.327103,
+    "closing_odds_captured_at": "2026-09-12T18:25:29.052353+00:00",
+    "closing_snapshot_id": "d0b46cfac5a835b67e36acdffeb145c63d5b82ead4337fe0900593ff1fef78bc",
+    "closing_capture_target": "T-15m",
+    "closing_capture_window": "T-10m_to_T-20m",
+    "closing_t15_odd": 2.88,
+    "closing_t15_opposite_odd": 1.4,
+    "closing_t15_market_probability_devig": 0.327103,
+    "closing_t15_odds_captured_at": "2026-09-12T18:25:29.052353+00:00",
+    "closing_t15_snapshot_id": "d0b46cfac5a835b67e36acdffeb145c63d5b82ead4337fe0900593ff1fef78bc",
+    "closing_capture_quality": "T15_PRIMARY"
   },
   {
     "id": "1590003_UNDER_2_5",
