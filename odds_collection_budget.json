@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "date": "2026-09-11",
+  "date": "2026-09-12",
   "request_budget": 7500,
   "reserve": 0,
   "working_budget": 7500,
-  "requests_used": 1646,
-  "last_run_at": "2026-09-11T23:31:32.405995+00:00",
-  "last_run_requests": 16
+  "requests_used": 237,
+  "last_run_at": "2026-09-12T01:15:32.785804+00:00",
+  "last_run_requests": 237
 }
