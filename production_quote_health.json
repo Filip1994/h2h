@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-09-12T16:14:51.684818+00:00",
+  "generated_at": "2026-09-12T17:17:08.860548+00:00",
   "sla_minutes": 10.0,
   "overall": "FRESH",
   "counts": {
@@ -20,12 +20,12 @@
       "bookmaker_id": 8,
       "bookmaker": "Bet365",
       "pick_odd": 2.7,
-      "latest_odd": 2.7,
-      "latest_captured_at": "2026-09-12T16:14:22.485759+00:00",
-      "age_minutes": 0.487,
+      "latest_odd": 2.88,
+      "latest_captured_at": "2026-09-12T17:16:32.197311+00:00",
+      "age_minutes": 0.611,
       "status": "FRESH",
       "reason": null,
-      "observation_id": "74e968bd7255eeed1ff23969cb215633402afa3fa2df71e922f6e585ec35b73e"
+      "observation_id": "ac14478c79d8176a77c49205e1020d20eb0b5dbd38c34f97de7ed23ceb93c861"
     },
     {
       "bet_id": "1570379_UNDER_2_5",
@@ -38,8 +38,8 @@
       "bookmaker": "Bet365",
       "pick_odd": 3.75,
       "latest_odd": 3.75,
-      "latest_captured_at": "2026-09-12T16:14:22.485759+00:00",
-      "age_minutes": 0.487,
+      "latest_captured_at": "2026-09-12T17:16:32.197311+00:00",
+      "age_minutes": 0.611,
       "status": "FRESH",
       "reason": null,
       "observation_id": "c5d38a2935587174d9e13a5ce550679380f7da969ac5fa4f71d0935c96e1596e"
