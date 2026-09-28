@@ -25,6 +25,9 @@ _TEAM_SUFFIX_PATTERNS = (
     re.compile(r"(?:^|[\s._()/-])b\)?$", re.IGNORECASE),
 )
 
+HARD_COUNTRY_BLACKLIST = frozenset({"serbia"})
+
+
 ELIGIBILITY_REASONS = frozenset(
     {
         "ELIGIBLE",
