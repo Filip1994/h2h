@@ -86,7 +86,7 @@ def eligibility_decision(
     normalized_country = normalize_text(country)
     normalized_league = normalize_text(league_name)
 
-    if normalized_country in {normalize_text(item) for item in excluded_countries}:
+    effective_excluded_countries = HARD_COUNTRY_BLACKLIST | {\n        normalize_text(item) for item in excluded_countries\n    }\n    if normalized_country in effective_excluded_countries:
         decision = EligibilityDecision(
             False,
             "INELIGIBLE_COUNTRY",
