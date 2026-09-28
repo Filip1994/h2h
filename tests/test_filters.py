@@ -97,3 +97,4 @@ def test_optional_country_exclusion_is_exact() -> None:
     assert not is_allowed_match(
         "Brazilian State", "Serie A", "Flamengo", "Bahia", ("brazil",)
     )
+\n\ndef test_serbia_is_hard_blacklisted_from_quantbet_universe() -> None:\n    decision = eligibility_decision(\n        "Serbia", 286, "Super Liga", "Crvena zvezda", "Partizan"\n    )\n    assert not decision.eligible\n    assert decision.reason == "INELIGIBLE_COUNTRY"\n    assert not is_allowed_match(\n        "SERBIA", "Super Liga", "Crvena zvezda", "Partizan", league_id=286\n    )\n
